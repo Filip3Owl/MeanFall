@@ -35,6 +35,7 @@ export class WorldScene extends Phaser.Scene {
         this._iKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
         this._cKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
         this._qKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+        this._bKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this._f5Key     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
 
         QuestSystem.init(this._playerData);
@@ -116,6 +117,11 @@ export class WorldScene extends Phaser.Scene {
         // Q = Quest log
         if (Phaser.Input.Keyboard.JustDown(this._qKey)) {
             this.scene.launch('Quest');
+            this._paused = true;
+        }
+        // B = Book library
+        if (Phaser.Input.Keyboard.JustDown(this._bKey)) {
+            this.scene.launch('Book');
             this._paused = true;
         }
         // F5 = Save

@@ -30,9 +30,11 @@ The world is divided into six regions, each focused on a different statistical t
 - **Six elements** — Fire, Earth, Water, Ice, Shadow, Normal — with a damage multiplier matrix that produces super-effective and resisted matchups in combat.
 - **Five rarity tiers** — Common, Uncommon, Rare, Epic, Legendary — each with its own color, value multiplier, and stat scaling.
 - **Quest system** — seven quests across the world map, accepted automatically when you talk to quest-giving NPCs and tracked in a dedicated journal accessible with `Q`.
+- **Book / Codex system** — 14 in-world tomes drop from monsters and teach a specific statistics concept across multiple pages. Books carry an importance tier (Comum, Importante, Muito Importante, Essencial, Proibido) that determines first-read XP and one-time stat bonus. Library accessible with `B`.
 - **Merchant NPCs and shops** — three merchants in different regions sell tier-appropriate gear and consumables, and buy any item back at 50% of its base value.
-- **Loot system** — every monster guarantees at least one drop, plus rolls on a multi-tier loot table tied to its region and difficulty. Loot includes consumables, weapons, armor, and accessories with elemental affinities.
+- **Loot system** — every monster guarantees at least one drop, plus rolls on a multi-tier loot table tied to its region and difficulty. Loot includes consumables, weapons, armor, accessories with elemental affinities, and rare books.
 - **Monster respawn** — defeated monsters automatically respawn after 90 seconds in their original location, enabling sustained farming and quest progression.
+- **67 questions with RPG context** — every statistics problem is framed inside the world (alchemist potions, dragon hoards, dungeon loot, party recruitment, magic casts) so the math is anchored to a setting.
 - **Critical hits and dodges** — Agility scales dodge chance and critical strike chance; criticals deal +60% damage and trigger pink damage numbers.
 - **Damage feedback** — floating damage numbers, screen flashes on hit, super-effective and resisted call-outs in the combat log.
 - **Polished UI** — refreshed theme with Beta tag, color-coded keywords (damage, heal, loot, level, XP, rarity, dialog), card-style panels, gradient bars with shine, and a footer crediting the developer.
@@ -41,7 +43,7 @@ The world is divided into six regions, each focused on a different statistical t
 
 ## Features
 
-- **58 curated statistics questions** across six topics, balanced across easy, medium, and hard difficulty tiers.
+- **67 curated statistics questions** across six topics, balanced across easy, medium, and hard difficulty tiers, every one framed in the RPG world.
 - **Three question types**: multiple choice, true/false, and free-form numeric input with configurable tolerance.
 - **Turn-based combat** with damage scaling driven by player attributes, weapon element vs monster element matchup, rarity bonuses, critical hits, and streak bonuses.
 - **Adaptive question selection** that biases 60% of draws toward previously missed questions to reinforce weak concepts.
@@ -81,7 +83,8 @@ The world is divided into six regions, each focused on a different statistical t
     │   ├── monsters.js         12 elemental creatures
     │   ├── items.js            27 items across 5 rarities, 6 elements
     │   ├── quests.js           7 quests with progression chain
-    │   └── shops.js            3 merchant catalogs
+    │   ├── shops.js            3 merchant catalogs
+    │   └── books.js            14 in-world tomes with importance tiers
     ├── systems/
     │   ├── CombatSystem.js     Damage formulas with elemental matchup,
     │   │                       crit, equip / unequip, inventory ops
@@ -90,7 +93,8 @@ The world is divided into six regions, each focused on a different statistical t
     │   ├── SaveSystem.js       LocalStorage save slots
     │   ├── MapManager.js       Tile rendering, collision, minimap
     │   ├── QuestSystem.js      Quest log, progress tracking, rewards
-    │   └── ShopSystem.js       Buy / sell, price calculation
+    │   ├── ShopSystem.js       Buy / sell, price calculation
+    │   └── BookSystem.js       Book drops, library, first-read rewards
     ├── scenes/
     │   ├── BootScene.js        Texture generation
     │   ├── MainMenuScene.js    Menu with Beta badge and credits
@@ -102,7 +106,8 @@ The world is divided into six regions, each focused on a different statistical t
     │   ├── InventoryScene.js   Item list, equip / unequip, comparison
     │   ├── CharacterScene.js   Vitals, attributes, equipment, mastery
     │   ├── ShopScene.js        Merchant UI with Buy / Sell tabs
-    │   └── QuestScene.js       Quest journal with progress bars
+    │   ├── QuestScene.js       Quest journal with progress bars
+    │   └── BookScene.js        Library + multi-page reader UI
     ├── entities/
     │   ├── Player.js           Sprite, grid movement
     │   ├── Monster.js          Sprite, patrol AI, mini health bar
@@ -159,6 +164,7 @@ Then open `http://localhost:3001` in any modern browser.
 | I              | Open inventory                  |
 | C              | Open character sheet            |
 | Q              | Open quest journal              |
+| B              | Open book library / codex       |
 | F5             | Save game                       |
 | ESC            | Close any modal                 |
 
@@ -206,6 +212,22 @@ Stat points are awarded every three levels, with permanent HP bonuses for vitali
 | Rare       | Blue    | ×4.0             | ×1.8          |
 | Epic       | Purple  | ×8.0             | ×2.5          |
 | Legendary  | Orange  | ×16.0            | ×3.5          |
+
+---
+
+## Book Importance Tiers
+
+Books drop from monsters and grant a one-time XP reward plus a permanent stat bonus on first read.
+
+| Importance       | Color   | First-read XP | Bonus on first read           |
+|------------------|---------|---------------|-------------------------------|
+| Comum            | Gray    | +30           | —                             |
+| Importante       | Green   | +60           | +1 INT                        |
+| Muito Importante | Blue    | +120          | +2 INT                        |
+| Essencial        | Purple  | +240          | +3 INT, +5 max Foco           |
+| Proibido         | Orange  | +500          | +5 INT, +10 max Foco          |
+
+The current codex contains 14 books split across the six elements: data type catalogs (Normal), central tendency treatises (Earth), spread crystals (Ice), probability fundamentals (Fire), distribution scriptures (Water), and inference grimoires (Shadow). The forbidden tome is dropped only by the final boss at very low chance.
 
 ---
 

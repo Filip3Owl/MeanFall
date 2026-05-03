@@ -69,6 +69,10 @@ export class UIScene extends Phaser.Scene {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Quest'); }
         });
+        document.getElementById('btn-books')?.addEventListener('click', () => {
+            const ws = this.scene.get('World');
+            if (ws) { ws.pauseForOverlay(); ws.scene.launch('Book'); }
+        });
         document.getElementById('btn-save')?.addEventListener('click', () => {
             const player = this.registry.get('player');
             if (player) {

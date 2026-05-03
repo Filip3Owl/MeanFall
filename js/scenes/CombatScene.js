@@ -1,7 +1,9 @@
 import { CombatSystem }                from '../systems/CombatSystem.js';
 import { QuestionEngine }                from '../systems/QuestionEngine.js';
 import { awardXP }                       from '../systems/XPSystem.js';
+import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
+import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
 import { ELEMENTS }                      from '../constants.js';
 import EventBus                          from '../utils/EventBus.js';
 
@@ -480,6 +482,7 @@ export class CombatScene extends Phaser.Scene {
         let xpGained = 0;
         const lootNames = [];
         let lootIds = [];
+        let bookIds = [];
 
         if (outcome === 'win') {
             xpGained = awardXP(this._player, this._monsterDef.xpReward);
@@ -491,13 +494,21 @@ export class CombatScene extends Phaser.Scene {
                 const name = ITEMS[itemId]?.name;
                 if (name) lootNames.push(name);
             }
+
+            bookIds = BookSystem.rollBookDrops(this._monsterDef.id);
+            for (const bookId of bookIds) {
+                BookSystem.addBook(this._player, bookId);
+                const b = BOOKS[bookId];
+                if (b) lootNames.push(`Livro: ${b.title}`);
+            }
+
             EventBus.emit('player-stats-changed', { player: this._player });
         }
 
         this.registry.set('player', this._player);
 
-        if (outcome === 'win' && lootIds.length > 0) {
-            this._showVictoryPopup(xpGained, this._monsterDef.goldReward || 0, lootIds, () => {
+        if (outcome === 'win' && (lootIds.length > 0 || bookIds.length > 0)) {
+            this._showVictoryPopup(xpGained, this._monsterDef.goldReward || 0, lootIds, bookIds, () => {
                 this._finishCombat(outcome, xpGained, lootNames);
             });
         } else {
@@ -516,11 +527,12 @@ export class CombatScene extends Phaser.Scene {
         });
     }
 
-    _showVictoryPopup(xp, gold, lootIds, onContinue) {
+    _showVictoryPopup(xp, gold, lootIds, bookIds, onContinue) {
         const W = 544, H = 480;
-        const overlay = this.add.rectangle(0, 0, W, H, 0x000000, 0.85).setOrigin(0, 0).setDepth(100);
+        const totalRows = Math.min(lootIds.length + bookIds.length, 7);
+        this.add.rectangle(0, 0, W, H, 0x000000, 0.85).setOrigin(0, 0).setDepth(100);
 
-        const panelW = 360, panelH = 60 + Math.min(lootIds.length, 6) * 22 + 80;
+        const panelW = 380, panelH = 80 + totalRows * 22 + 60;
         const px2 = (W - panelW) / 2;
         const py2 = (H - panelH) / 2;
 
@@ -539,19 +551,36 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '10px', color: '#888888', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(102);
 
-        lootIds.slice(0, 6).forEach((itemId, i) => {
-            const item    = ITEMS[itemId];
+        let rowIdx = 0;
+        lootIds.slice(0, 7 - bookIds.length).forEach((itemId) => {
+            const item = ITEMS[itemId];
             if (!item) return;
-            const color   = RARITY_COLORS[item.rarity] || '#cccccc';
-            const yLine   = py2 + 78 + i * 22;
+            const color = RARITY_COLORS[item.rarity] || '#cccccc';
+            const yLine = py2 + 78 + rowIdx * 22;
             this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0).setDepth(102);
             this.add.text(px2 + 28, yLine + 9, item.name, {
                 fontSize: '11px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5).setDepth(102);
-            const tag = (item.rarity || 'common').toUpperCase();
-            this.add.text(px2 + panelW - 28, yLine + 9, tag, {
+            this.add.text(px2 + panelW - 28, yLine + 9, (item.rarity || 'common').toUpperCase(), {
                 fontSize: '9px', color: '#666666', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5).setDepth(102);
+            rowIdx++;
+        });
+
+        // Book drops with importance badges
+        bookIds.slice(0, 7 - rowIdx).forEach((bookId) => {
+            const book = BOOKS[bookId];
+            if (!book) return;
+            const imp = BOOK_IMPORTANCE[book.importance] || BOOK_IMPORTANCE.normal;
+            const yLine = py2 + 78 + rowIdx * 22;
+            this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x1a1108, 1).setOrigin(0, 0).setDepth(102);
+            this.add.text(px2 + 28, yLine + 9, `[Livro] ${book.title}`, {
+                fontSize: '11px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0, 0.5).setDepth(102);
+            this.add.text(px2 + panelW - 28, yLine + 9, imp.name.toUpperCase(), {
+                fontSize: '9px', color: imp.hex, fontFamily: 'Courier New',
+            }).setOrigin(1, 0.5).setDepth(102);
+            rowIdx++;
         });
 
         const btnY = py2 + panelH - 36;
