@@ -1,4 +1,4 @@
-import { TILE_SIZE } from '../constants.js';
+import { TILE_SIZE, ELEMENTS } from '../constants.js';
 import { MONSTERS } from '../data/monsters.js';
 
 export class Monster {
@@ -26,8 +26,23 @@ export class Monster {
         this._originX = instanceData.x;
         this._originY = instanceData.y;
 
+        // Name label above HP bar
+        const elem = ELEMENTS[def.element] || ELEMENTS.normal;
+        const elemHex = '#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0');
+        this._nameLabel = scene.add.text(0, 0, `${def.name} Lv.${def.level}`, {
+            fontSize: '8px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            backgroundColor: '#000000bb', padding: { x: 2, y: 1 },
+        }).setOrigin(0.5, 1).setDepth(6);
+
         // HP bar (mini)
         this._hpBar = scene.add.graphics().setDepth(5);
+        this._refreshLabels();
+    }
+
+    _refreshLabels() {
+        const cx = this.tileX * TILE_SIZE + TILE_SIZE / 2;
+        const top = this.tileY * TILE_SIZE - 8;
+        if (this._nameLabel) this._nameLabel.setPosition(cx, top);
         this._drawHpBar();
     }
 
@@ -55,15 +70,13 @@ export class Monster {
         const nx   = this.tileX + dir.x;
         const ny   = this.tileY + dir.y;
 
-        // Stay near origin (3 tiles radius)
         if (Math.abs(nx - this._originX) > 3 || Math.abs(ny - this._originY) > 3) return;
         if (!mapManager.isWalkable(nx, ny)) return;
 
         this.tileX = nx;
         this.tileY = ny;
         this.sprite.setPosition(nx * TILE_SIZE + TILE_SIZE / 2, ny * TILE_SIZE + TILE_SIZE / 2);
-        this._hpBar.setPosition(0, 0);
-        this._drawHpBar();
+        this._refreshLabels();
     }
 
     takeDamage(amount) {
@@ -72,12 +85,11 @@ export class Monster {
         return this.hp <= 0;
     }
 
-    isAt(col, row) {
-        return this.tileX === col && this.tileY === row;
-    }
+    isAt(col, row) { return this.tileX === col && this.tileY === row; }
 
     destroy() {
         this.sprite.destroy();
         this._hpBar.destroy();
+        this._nameLabel?.destroy();
     }
 }

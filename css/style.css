@@ -294,6 +294,29 @@ body {
 }
 .action-btn:active { transform: translateY(0); }
 
+.alert-dot {
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.2s;
+}
+.action-btn.alert .alert-dot {
+    background: #ff3366;
+    box-shadow: 0 0 6px #ff3366, 0 0 10px rgba(255, 51, 102, 0.6);
+    animation: pulse 1.2s ease-in-out infinite;
+}
+.action-btn.alert {
+    border-color: #ff3366;
+    color: #ffaaaa;
+}
+@keyframes pulse {
+    0%   { transform: scale(1);   opacity: 1; }
+    50%  { transform: scale(1.4); opacity: 0.6; }
+    100% { transform: scale(1);   opacity: 1; }
+}
+
 .kbd {
     display: inline-block;
     min-width: 22px;
@@ -349,6 +372,13 @@ body {
 .chat-msg.dialog     { color: var(--dialog); font-style: italic; }
 .chat-msg.heal       { color: var(--heal); }
 .chat-msg.crit       { color: var(--crit); font-weight: bold; }
+
+.chat-time {
+    color: #555a68;
+    font-size: 9px;
+    margin-right: 2px;
+    font-variant-numeric: tabular-nums;
+}
 
 /* ─── FOOTER ──────────────────────────────────────────────────────────── */
 #game-footer {

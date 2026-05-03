@@ -10,7 +10,7 @@ export class Player {
         this.sprite = scene.add.image(px, py, 'sprite_player').setDepth(5);
 
         this._moveCooldown = 0;
-        this._moveDelay    = 180; // ms between moves
+        this._moveDelay    = 180;
         this._facing = 'down';
     }
 
@@ -24,7 +24,6 @@ export class Player {
         if (cursors.up.isDown    || wasd.up.isDown)    dy = -1;
         if (cursors.down.isDown  || wasd.down.isDown)  dy =  1;
 
-        // Only move one axis at a time
         if (dx !== 0 && dy !== 0) dy = 0;
         if (dx === 0 && dy === 0) return null;
 
@@ -51,20 +50,17 @@ export class Player {
         );
     }
 
-    takeDamage(amount) {
-        this.hp = Math.max(0, this.hp - amount);
+    refreshTexture() {
+        if (this.sprite) this.sprite.setTexture('sprite_player');
     }
 
-    heal(amount) {
-        this.hp = Math.min(this.maxHp, this.hp + amount);
-    }
+    takeDamage(amount) { this.hp = Math.max(0, this.hp - amount); }
+    heal(amount)       { this.hp = Math.min(this.maxHp, this.hp + amount); }
 
     toData() {
         const { scene, sprite, _moveCooldown, _moveDelay, _facing, ...data } = this;
         return data;
     }
 
-    destroy() {
-        this.sprite.destroy();
-    }
+    destroy() { this.sprite.destroy(); }
 }

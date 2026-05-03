@@ -4,7 +4,7 @@ import { xpToNext, masteryPercent } from '../systems/XPSystem.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { spendStatPoint } from '../systems/XPSystem.js';
 
-const MAX_MESSAGES = 50;
+const MAX_MESSAGES = 80;
 
 export class UIScene extends Phaser.Scene {
     constructor() { super({ key: 'UI', active: false }); }
@@ -36,7 +36,14 @@ export class UIScene extends Phaser.Scene {
             headerArea: document.getElementById('header-area'),
             masterList: document.getElementById('mastery-list'),
             chatMsgs:   document.getElementById('chat-messages'),
+            chatLog:    document.getElementById('chat-log'),
             minimap:    document.getElementById('minimap-canvas'),
+            btnInv:     document.getElementById('btn-inventory'),
+            btnChar:    document.getElementById('btn-character'),
+            btnQuest:   document.getElementById('btn-quests'),
+            btnBook:    document.getElementById('btn-books'),
+            btnSkill:   document.getElementById('btn-skill'),
+            btnSave:    document.getElementById('btn-save'),
         };
     }
 
@@ -54,26 +61,40 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('player-level-up',      ({ player }) => {
             if (player.availableStatPoints > 0) this._showStatPointPopup(player);
         });
+
+        // Action button alerts
+        EventBus.on('item-alert',  () => this._setAlert('btnInv', true));
+        EventBus.on('skill-alert', () => this._setAlert('btnSkill', true));
+        EventBus.on('quest-complete', () => this._setAlert('btnQuest', true));
     }
 
     _bindButtons() {
-        document.getElementById('btn-inventory')?.addEventListener('click', () => {
+        this._els.btnInv?.addEventListener('click', () => {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Inventory'); }
+            this._setAlert('btnInv', false);
+            const player = this.registry.get('player');
+            if (player) player.pendingItemAlert = false;
         });
-        document.getElementById('btn-character')?.addEventListener('click', () => {
+        this._els.btnChar?.addEventListener('click', () => {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Character'); }
         });
-        document.getElementById('btn-quests')?.addEventListener('click', () => {
+        this._els.btnQuest?.addEventListener('click', () => {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Quest'); }
+            this._setAlert('btnQuest', false);
         });
-        document.getElementById('btn-books')?.addEventListener('click', () => {
+        this._els.btnBook?.addEventListener('click', () => {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Book'); }
         });
-        document.getElementById('btn-save')?.addEventListener('click', () => {
+        this._els.btnSkill?.addEventListener('click', () => {
+            const ws = this.scene.get('World');
+            if (ws) { ws.pauseForOverlay(); ws.scene.launch('Skill'); }
+            this._setAlert('btnSkill', false);
+        });
+        this._els.btnSave?.addEventListener('click', () => {
             const player = this.registry.get('player');
             if (player) {
                 SaveSystem.autoSave(player);
@@ -82,15 +103,33 @@ export class UIScene extends Phaser.Scene {
         });
     }
 
+    _setAlert(btnKey, on) {
+        const btn = this._els[btnKey];
+        if (!btn) return;
+        if (on) btn.classList.add('alert');
+        else    btn.classList.remove('alert');
+    }
+
     addMsg(text, type = '') {
-        const el = document.getElementById('chat-messages');
+        const el = this._els.chatMsgs || document.getElementById('chat-messages');
         if (!el) return;
         const div = document.createElement('div');
         div.className = `chat-msg ${type}`;
-        // Highlight numeric values and keywords in-line
-        div.innerHTML = highlightKeywords(text);
+
+        // Timestamp prefix (mm:ss)
+        const now = new Date();
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const tsSpan = `<span class="chat-time">[${mm}:${ss}]</span> `;
+
+        div.innerHTML = tsSpan + highlightKeywords(text);
         el.appendChild(div);
+
         while (el.children.length > MAX_MESSAGES) el.removeChild(el.firstChild);
+
+        // Auto-scroll
+        const log = this._els.chatLog || document.getElementById('chat-log');
+        if (log) log.scrollTop = log.scrollHeight;
         el.scrollTop = el.scrollHeight;
     }
 
@@ -104,13 +143,15 @@ export class UIScene extends Phaser.Scene {
         const e = this._els;
         if (e.charName) e.charName.textContent = player.name || 'Aventureiro';
         if (e.level) e.level.textContent = player.level;
+        // Restore alert states from player flags
+        this._setAlert('btnInv', !!player.pendingItemAlert);
     }
 
     _updateVitals(player) {
         player = player || this.registry.get('player');
         if (!player) return;
         const e = this._els;
-        setBar(e.hpBar,    e.hpText,    player.hp,    player.maxHp);
+        setBar(e.hpBar, e.hpText, player.hp, player.maxHp);
         setBar(e.focusBar, e.focusText, player.focus, player.maxFocus);
         if (e.level) e.level.textContent = player.level;
     }
@@ -215,17 +256,17 @@ function escapeHtml(s) {
     }[c]));
 }
 
-// Wrap key gameplay terms with semantic spans for color theming.
 function highlightKeywords(text) {
     let s = escapeHtml(text);
     s = s.replace(/(\+\d+\s*XP)/gi,                   '<span style="color:#ffaa22;font-weight:bold">$1</span>');
     s = s.replace(/([+−-]\d+\s*HP)/gi,                '<span style="color:#ff5555;font-weight:bold">$1</span>');
     s = s.replace(/(\d+\s*ouro)/gi,                   '<span style="color:#ffd700;font-weight:bold">$1</span>');
-    s = s.replace(/\b(NÍVEL\s*\d+|nv\.?\s*\d+)\b/gi,  '<span style="color:#ffaa44;font-weight:bold">$1</span>');
+    s = s.replace(/\b(NÍVEL\s*\d+|nv\.?\s*\d+|NIVEL\s*ACIMA)\b/gi, '<span style="color:#ffaa44;font-weight:bold">$1</span>');
     s = s.replace(/\b(CRÍTICO|SUPER\s*EFICAZ)\b/gi,   '<span style="color:#ff88cc;font-weight:bold">$1</span>');
-    s = s.replace(/\b(LOOT|ITENS?\s*OBTIDOS?)\b/gi,   '<span style="color:#ffd700;font-weight:bold">$1</span>');
+    s = s.replace(/\b(LOOT|ITENS?\s*OBTIDOS?|Loot:)\b/gi, '<span style="color:#ffd700;font-weight:bold">$1</span>');
     s = s.replace(/\b(DANO|dano)\b/g,                 '<span style="color:#ff5555">$1</span>');
-    s = s.replace(/\b(cura|HEAL)\b/gi,                '<span style="color:#55ff88">$1</span>');
-    s = s.replace(/\b(Lendário|Épico|Raro|Incomum)\b/gi, '<span style="color:#bb88ff;font-weight:bold">$1</span>');
+    s = s.replace(/\b(cura|HEAL|curou)\b/gi,          '<span style="color:#55ff88">$1</span>');
+    s = s.replace(/\b(Lendário|Épico|Raro|Incomum|Proibido|Essencial|Muito Importante|Importante)\b/gi, '<span style="color:#bb88ff;font-weight:bold">$1</span>');
+    s = s.replace(/\b(missão|Missão)\b/g,             '<span style="color:#88ccff;font-weight:bold">$1</span>');
     return s;
 }

@@ -4,7 +4,7 @@ import { awardXP }                       from '../systems/XPSystem.js';
 import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
-import { ELEMENTS }                      from '../constants.js';
+import { ELEMENTS, FLEE_XP_PENALTY }     from '../constants.js';
 import EventBus                          from '../utils/EventBus.js';
 
 export class CombatScene extends Phaser.Scene {
@@ -165,8 +165,8 @@ export class CombatScene extends Phaser.Scene {
         }
 
         // Numeric input
-        this._numPrt = this.add.text(14, 296, 'Resposta numérica:', {
-            fontSize: '11px', color: '#aaaaaa', fontFamily: 'Courier New',
+        this._numPrt = this.add.text(14, 296, '>> DIGITE A RESPOSTA NO TECLADO E PRESSIONE ENTER:', {
+            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0).setVisible(false);
         this._numDisp = this.add.text(14, 314, '', {
             fontSize: '18px', color: '#ffffff', fontFamily: 'Courier New',
@@ -298,7 +298,13 @@ export class CombatScene extends Phaser.Scene {
     _showNumericInput(startY) {
         this._numPrt.setY(startY).setVisible(true);
         this._numDisp.setY(startY + 18).setText('').setVisible(true);
-        this._numCursor.setY(startY + 18).setX(14).setVisible(true);
+        // Animated cursor for clear "type here" hint
+        this._numCursor.setY(startY + 18).setX(14).setVisible(true).setAlpha(1);
+        if (!this._cursorTween) {
+            this._cursorTween = this.tweens.add({
+                targets: this._numCursor, alpha: 0.2, duration: 500, yoyo: true, repeat: -1,
+            });
+        }
         this._numOkBg.setY(startY + 48).setVisible(true);
         this._numOkTx.setY(startY + 61).setVisible(true);
     }
@@ -473,6 +479,13 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _flee() {
+        // Confirm flee with penalty warning
+        const lost = Math.floor((this._player.xp || 0) * FLEE_XP_PENALTY);
+        const ok = window.confirm(`Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual (−${lost} XP). Continuar?`);
+        if (!ok) { this._answerLock = false; return; }
+        this._player.xp = Math.max(0, (this._player.xp || 0) - lost);
+        EventBus.emit('player-xp-change', { player: this._player });
+        EventBus.emit('chat', { msg: `Você fugiu e perdeu ${lost} XP.`, type: 'error' });
         this._endCombat('flee');
     }
 

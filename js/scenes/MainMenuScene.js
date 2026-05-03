@@ -79,11 +79,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     _newGame() {
-        const name = window.prompt('Nome do seu personagem:', 'Aventureiro') || 'Aventureiro';
-        const data = { ...JSON.parse(JSON.stringify(PLAYER_DEFAULTS)), name };
-        this.registry.set('player', data);
-        this.scene.start('World');
-        this.scene.launch('UI');
+        this.scene.start('Intro');
     }
 
     _loadGame(saves) {

@@ -11,30 +11,53 @@ export function generateTextures(scene) {
     const g = scene.make.graphics({ x: 0, y: 0, add: false });
 
     // ─── TILES ──────────────────────────────────────────────────────────────
+    // Grass — layered greens with grass blades
     tile(g, g => {
-        g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x2d6035, 0.6);
-        g.fillRect(4, 10, 6, 3); g.fillRect(18, 5, 4, 6); g.fillRect(10, 22, 5, 4);
-        g.fillStyle(0x4a9d54, 0.4);
-        g.fillRect(8, 2, 3, 5); g.fillRect(22, 18, 4, 4);
+        g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
+        // Grass blades (lighter)
+        g.fillStyle(0x5aab64);
+        g.fillRect(3, 8, 1, 4); g.fillRect(7, 14, 1, 5); g.fillRect(13, 6, 1, 4);
+        g.fillRect(19, 12, 1, 5); g.fillRect(24, 8, 1, 4); g.fillRect(28, 18, 1, 4);
+        // Tiny flowers
+        g.fillStyle(0xffee44); g.fillRect(10, 10, 2, 2); g.fillRect(22, 22, 2, 2);
+        // Darker patches
+        g.fillStyle(0x265c2c, 0.5);
+        g.fillRect(5, 20, 6, 3); g.fillRect(20, 4, 5, 3);
     });
     g.generateTexture('tile_grass', S, S);
 
+    // Stone path — more detailed brick pattern
     tile(g, g => {
-        g.fillStyle(COLORS.STONE); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x666666);
-        g.fillRect(0, 15, S, 2); g.fillRect(16, 0, 2, 15); g.fillRect(8, 17, 2, 15);
-        g.fillStyle(0xaaaaaa, 0.3);
-        g.fillRect(2, 2, 12, 11); g.fillRect(18, 2, 12, 11);
+        g.fillStyle(0x6b6b75); g.fillRect(0, 0, S, S);
+        // Cobblestone bricks
+        g.fillStyle(0x7d7d8a);
+        g.fillRect(1, 1, 14, 7);  g.fillRect(17, 1, 14, 7);
+        g.fillRect(1, 16, 6, 7);  g.fillRect(9, 16, 14, 7); g.fillRect(25, 16, 6, 7);
+        g.fillRect(1, 24, 14, 7); g.fillRect(17, 24, 14, 7);
+        // Highlights
+        g.fillStyle(0x9999a6, 0.5);
+        g.fillRect(2, 2, 12, 1); g.fillRect(18, 2, 12, 1);
+        g.fillRect(2, 17, 4, 1); g.fillRect(10, 17, 12, 1); g.fillRect(26, 17, 4, 1);
+        // Cracks
+        g.fillStyle(0x44444c, 0.6);
+        g.fillRect(0, 8, S, 1); g.fillRect(0, 23, S, 1);
+        g.fillRect(15, 0, 1, 8); g.fillRect(7, 16, 1, 8); g.fillRect(23, 16, 1, 8);
     });
     g.generateTexture('tile_stone', S, S);
 
+    // Water — animated-looking with ripples and depth
     tile(g, g => {
-        g.fillStyle(COLORS.WATER); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x2a7fc8, 0.5);
-        g.fillRect(2, 6, 28, 4); g.fillRect(4, 18, 24, 4);
-        g.fillStyle(0xaaddff, 0.2);
-        g.fillRect(6, 8, 8, 2); g.fillRect(18, 20, 6, 2);
+        g.fillStyle(0x12477f); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x1a5fa8); g.fillRect(0, 2, S, S - 4);
+        g.fillStyle(0x2a7fc8); g.fillRect(0, 6, S, S - 12);
+        // Ripples
+        g.fillStyle(0x88c5f0, 0.7);
+        g.fillRect(3, 8, 8, 1); g.fillRect(15, 6, 6, 1); g.fillRect(22, 12, 7, 1);
+        g.fillRect(2, 18, 7, 1); g.fillRect(13, 20, 8, 1); g.fillRect(24, 24, 5, 1);
+        // Sparkles
+        g.fillStyle(0xeeffff, 0.85);
+        g.fillRect(7, 9, 2, 1); g.fillRect(20, 13, 1, 1); g.fillRect(11, 21, 2, 1);
     });
     g.generateTexture('tile_water', S, S);
 
@@ -49,11 +72,24 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_wall', S, S);
 
+    // Tree — more detailed canopy + trunk shadow
     tile(g, g => {
-        g.fillStyle(COLORS.TREE_TRUNK); g.fillRect(12, 20, 8, 12);
-        g.fillStyle(COLORS.TREE_TOP); g.fillRect(4, 8, 24, 16);
-        g.fillRect(8, 2, 16, 8); g.fillRect(10, 22, 12, 6);
-        g.fillStyle(0x3d8b3d, 0.5); g.fillRect(6, 10, 6, 8); g.fillRect(20, 6, 6, 10);
+        // Grass background
+        g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
+        // Trunk shadow on ground
+        g.fillStyle(0x1a3d20, 0.4); g.fillRect(8, 24, 16, 6);
+        // Trunk
+        g.fillStyle(0x4a2d18); g.fillRect(13, 18, 6, 12);
+        g.fillStyle(0x5c3a1e); g.fillRect(14, 18, 4, 12);
+        g.fillStyle(0x6b4520, 0.6); g.fillRect(15, 19, 1, 10);
+        // Canopy — layered
+        g.fillStyle(0x1f4a22); g.fillRect(3, 5, 26, 16);
+        g.fillStyle(0x2d6a2d); g.fillRect(5, 4, 22, 16);
+        g.fillStyle(0x3d8b3d); g.fillRect(7, 6, 18, 12);
+        g.fillStyle(0x4ea84e, 0.7); g.fillRect(9, 7, 6, 5); g.fillRect(18, 9, 6, 4);
+        // Highlights
+        g.fillStyle(0x6cc66c, 0.5); g.fillRect(10, 8, 3, 2); g.fillRect(20, 10, 3, 2);
     });
     g.generateTexture('tile_tree', S, S);
 
@@ -129,18 +165,8 @@ export function generateTextures(scene) {
     g.generateTexture('tile_cave', S, S);
 
     // ─── SPRITES ────────────────────────────────────────────────────────────
-    // Player (24×32)
-    g.clear();
-    g.fillStyle(0xf4c27f); g.fillRect(8, 0, 12, 11);     // head
-    g.fillStyle(0x222288); g.fillRect(6, 11, 16, 12);    // body
-    g.fillStyle(0x1a1a66); g.fillRect(6, 23, 7, 9);      // left leg
-    g.fillRect(13, 23, 7, 9);                              // right leg
-    g.fillStyle(0x8b5e3c); g.fillRect(2, 13, 5, 8);      // left arm
-    g.fillRect(21, 13, 5, 8);                              // right arm
-    g.fillStyle(0x0d0d44); g.fillRect(10, 3, 3, 3);      // left eye
-    g.fillRect(15, 3, 3, 3);                               // right eye
-    g.fillStyle(0xffd700); g.fillRect(9, 8, 10, 2);      // mouth/belt
-    g.generateTexture('sprite_player', 24, 32);
+    // Default player sprite (24×32) — overridden later by buildPlayerSprite()
+    buildPlayerSprite(scene, { gender: 'male', skin: 'light', hair: 'brown', robe: 'blue' });
 
     // Elemental monster sprites
     drawAirSprite   (g, 22, 24, 'sprite_air_wisp',         0xaaccff, 'small');
@@ -452,6 +478,93 @@ function drawShadowSprite(g, w, h, key, color, variant) {
         px(g, 0xffd700, 1, h * 0.4, 5, 3);
     }
     g.generateTexture(key, w, h);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Customizable player sprite. Regenerates 'sprite_player' from a config.
+// gender: 'male' | 'female' (changes silhouette)
+// skin/hair/robe: ids from data/appearance.js
+// ─────────────────────────────────────────────────────────────────────────
+export function buildPlayerSprite(scene, appearance) {
+    const SKIN_MAP = { pale:0xf5d8a8, light:0xe8b886, medium:0xc89060, tan:0x9c6840, dark:0x6b4222 };
+    const HAIR_MAP = { black:0x1a1a1a, brown:0x6b3a1a, blond:0xddbb44, red:0xc04020, white:0xeeeeee, silver:0xaaccdd, green:0x44aa66, purple:0x8855cc };
+    const ROBE_MAP = { blue:0x223388, green:0x2a6644, red:0x882222, purple:0x553388, gold:0xaa7711, black:0x222233, white:0xddddee, cyan:0x22aacc };
+
+    const skin = SKIN_MAP[appearance?.skin] ?? SKIN_MAP.light;
+    const hair = HAIR_MAP[appearance?.hair] ?? HAIR_MAP.brown;
+    const robe = ROBE_MAP[appearance?.robe] ?? ROBE_MAP.blue;
+    const robeDark = darkerColor(robe, 0.55);
+    const isFemale = appearance?.gender === 'female';
+
+    const g = scene.make.graphics({ x: 0, y: 0, add: false });
+    if (scene.textures.exists('sprite_player')) scene.textures.remove('sprite_player');
+
+    // Hair (back layer for female, just on top for male)
+    if (isFemale) {
+        g.fillStyle(hair); g.fillRect(6, 0, 16, 14);     // long hair flowing past head
+    }
+    // Head
+    g.fillStyle(skin); g.fillRect(8, 1, 12, 10);
+    // Hair (front - bangs)
+    g.fillStyle(hair);
+    if (isFemale) {
+        g.fillRect(7, 0, 14, 4);
+        g.fillRect(6, 2, 3, 5);
+        g.fillRect(19, 2, 3, 5);
+    } else {
+        g.fillRect(8, 0, 12, 4);
+        g.fillRect(7, 1, 1, 3);
+        g.fillRect(20, 1, 1, 3);
+    }
+    // Eyes
+    g.fillStyle(0x111111); g.fillRect(10, 5, 2, 2); g.fillRect(16, 5, 2, 2);
+    // Mouth
+    g.fillStyle(0x882222); g.fillRect(12, 9, 4, 1);
+
+    // Body (robe) — slightly hourglass for female
+    g.fillStyle(robeDark);
+    if (isFemale) {
+        g.fillRect(7, 11, 14, 3);  // shoulders
+        g.fillRect(8, 14, 12, 4);  // waist
+        g.fillRect(6, 18, 16, 5);  // skirt flare
+    } else {
+        g.fillRect(6, 11, 16, 12);
+    }
+    g.fillStyle(robe);
+    if (isFemale) {
+        g.fillRect(8, 12, 12, 2);
+        g.fillRect(9, 14, 10, 3);
+        g.fillRect(7, 18, 14, 4);
+    } else {
+        g.fillRect(7, 12, 14, 10);
+    }
+    // Belt
+    g.fillStyle(0xffd700); g.fillRect(7, 17, 14, 1);
+    // Legs
+    g.fillStyle(robeDark);
+    g.fillRect(8, 23, 6, 9);
+    g.fillRect(15, 23, 6, 9);
+    // Boots
+    g.fillStyle(0x442211);
+    g.fillRect(7, 30, 7, 2);
+    g.fillRect(15, 30, 7, 2);
+    // Arms
+    g.fillStyle(skin);
+    g.fillRect(3, 14, 3, 7);
+    g.fillRect(22, 14, 3, 7);
+    g.fillStyle(robe);
+    g.fillRect(2, 12, 5, 4);
+    g.fillRect(21, 12, 5, 4);
+
+    g.generateTexture('sprite_player', 28, 32);
+    g.destroy();
+}
+
+function darkerColor(c, factor) {
+    const r = Math.floor(((c >> 16) & 0xff) * factor);
+    const g = Math.floor(((c >> 8)  & 0xff) * factor);
+    const b = Math.floor((c & 0xff) * factor);
+    return (r << 16) | (g << 8) | b;
 }
 
 export const TILE_TEXTURE_MAP = {

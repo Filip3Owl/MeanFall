@@ -118,6 +118,13 @@ export const PLAYER_DEFAULTS = {
     openedChests: {},
     availableStatPoints: 0,
     playTime: 0,
+    appearance: { gender: 'male', skin: 'light', hair: 'brown', robe: 'blue' },
+    skills: [],         // chosen skill ids
+    seenTutorials: {},  // tutorialId -> true
+    questLog: {},
+    questStats: { kills: {}, killsByArea: {}, killsByElement: {} },
+    bookLibrary: {},
+    pendingItemAlert: false, // set when new item drops; cleared on inventory open
 };
 
 export const XP_TABLE = Array.from({ length: 50 }, (_, i) =>
@@ -179,6 +186,14 @@ export const RARITIES = {
 
 // Respawn timing for monsters once defeated (ms).
 export const RESPAWN_TIME = 90_000; // 90 seconds
+
+// Out-of-combat passive regeneration (every 3000ms, exploring world).
+export const REGEN_INTERVAL_MS = 3000;
+export const REGEN_HP_PER_TICK    = 1;
+export const REGEN_FOCUS_PER_TICK = 2;
+
+// Penalty for fleeing combat (fraction of current XP lost).
+export const FLEE_XP_PENALTY = 0.20;
 
 // UI semantic colors for highlighting keywords inside chat / text.
 export const UI_COLORS = {
