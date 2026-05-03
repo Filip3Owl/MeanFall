@@ -156,7 +156,7 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 26, 32, 'sprite_shadow_specter',   0x6633aa, 'wraith');
     drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
 
-    // NPC (24×32)
+    // NPC quest-giver (gold robe)
     g.clear();
     g.fillStyle(0xf4c27f); g.fillRect(8, 0, 12, 11);
     g.fillStyle(0xd4af37); g.fillRect(6, 11, 16, 12);    // gold robe
@@ -165,6 +165,17 @@ export function generateTextures(scene) {
     g.fillStyle(0x000000); g.fillRect(10, 3, 3, 3); g.fillRect(15, 3, 3, 3);
     g.fillStyle(0xffffff); g.fillRect(9, 8, 10, 2);
     g.generateTexture('sprite_npc', 24, 32);
+
+    // NPC merchant (green apron, different colors)
+    g.clear();
+    g.fillStyle(0xf4c27f); g.fillRect(8, 0, 12, 11);
+    g.fillStyle(0x44aa66); g.fillRect(6, 11, 16, 12);    // green apron
+    g.fillStyle(0x226633); g.fillRect(6, 23, 7, 9); g.fillRect(13, 23, 7, 9);
+    g.fillStyle(0x8b5e3c); g.fillRect(2, 13, 4, 8); g.fillRect(22, 13, 4, 8);
+    g.fillStyle(0x000000); g.fillRect(10, 3, 3, 3); g.fillRect(15, 3, 3, 3);
+    g.fillStyle(0xffffff); g.fillRect(9, 8, 10, 2);
+    g.fillStyle(0xffaa00); g.fillRect(11, 14, 6, 3);     // gold coin chest accent
+    g.generateTexture('sprite_npc_shop', 24, 32);
 
     // Items
     g.clear(); g.fillStyle(0xff4444); g.fillRect(4, 2, 10, 18); g.fillStyle(0xff8888); g.fillRect(6, 4, 6, 8);
@@ -177,42 +188,53 @@ export function generateTextures(scene) {
     g.destroy();
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Elemental sprite generators. Use ONLY fillStyle + fillRect for maximum
+// reliability with Phaser's generateTexture pipeline. Coordinates are
+// rounded to integers to avoid sub-pixel rendering artifacts.
+// ─────────────────────────────────────────────────────────────────────────
+
 function shade(color, factor) {
-    const r = Math.floor(((color >> 16) & 0xff) * factor);
-    const g = Math.floor(((color >> 8)  & 0xff) * factor);
-    const b = Math.floor((color & 0xff) * factor);
-    return (Math.min(255, r) << 16) | (Math.min(255, g) << 8) | Math.min(255, b);
+    const r = Math.min(255, Math.max(0, Math.floor(((color >> 16) & 0xff) * factor)));
+    const g = Math.min(255, Math.max(0, Math.floor(((color >> 8)  & 0xff) * factor)));
+    const b = Math.min(255, Math.max(0, Math.floor((color & 0xff) * factor)));
+    return (r << 16) | (g << 8) | b;
 }
 
-function drawAura(g, w, h, color, intensity = 0.25) {
-    g.fillStyle(color, intensity);
-    g.fillCircle(w / 2, h / 2, Math.max(w, h) / 2 + 2);
-    g.fillStyle(color, intensity * 0.5);
-    g.fillCircle(w / 2, h / 2, Math.max(w, h) / 2 + 5);
+function px(g, color, x, y, w, h) {
+    g.fillStyle(color, 1);
+    g.fillRect(Math.floor(x), Math.floor(y), Math.max(1, Math.floor(w)), Math.max(1, Math.floor(h)));
 }
 
 // AIR — ethereal wisp / winged sylph
 function drawAirSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, color, 0.3);
-    const dark = shade(color, 0.6);
+    const dark = shade(color, 0.65);
+    const light = shade(color, 1.4);
     if (variant === 'small') {
-        g.fillStyle(color, 0.9);
-        g.fillCircle(w / 2, h / 2, w / 2 - 2);
-        g.fillStyle(0xffffff, 0.8);
-        g.fillCircle(w / 2 - 3, h / 2 - 2, 2);
-        g.fillStyle(0x000000); g.fillCircle(w / 2 - 2, h / 2, 1);
-        g.fillCircle(w / 2 + 4, h / 2, 1);
+        // wisp: rounded body
+        px(g, dark,  w / 2 - 8, 4,    16, h - 8);
+        px(g, color, w / 2 - 7, 5,    14, h - 10);
+        px(g, light, w / 2 - 5, 7,    10, 4);
+        px(g, 0x000000, w / 2 - 4, h / 2 - 1, 2, 2);
+        px(g, 0x000000, w / 2 + 2, h / 2 - 1, 2, 2);
+        px(g, light, w / 2 - 1, h / 2 + 4, 2, 1);
+        // small floating particles
+        px(g, light, 2, h / 2, 2, 2);
+        px(g, light, w - 4, h / 2, 2, 2);
     } else {
-        // tall sylph: head, robe, wings
-        g.fillStyle(color, 0.85);
-        g.fillRect(w / 2 - 4, 2, 8, 8);                       // head
-        g.fillTriangle(w / 2 - 6, 8, w / 2 + 6, 8, w / 2, h - 2); // robe
-        g.fillStyle(0xffffff, 0.6);
-        g.fillTriangle(0, 8, w / 2 - 5, 12, w / 2 - 5, 18);     // left wing
-        g.fillTriangle(w, 8, w / 2 + 5, 12, w / 2 + 5, 18);     // right wing
-        g.fillStyle(0x000000); g.fillRect(w / 2 - 2, 5, 1, 1); g.fillRect(w / 2 + 1, 5, 1, 1);
-        g.fillStyle(dark); g.fillRect(w / 2 - 1, 7, 2, 1);
+        // sylph: head + robe + wings
+        px(g, dark,  w / 2 - 5, 1, 10, 9);
+        px(g, color, w / 2 - 4, 2, 8, 7);
+        px(g, 0x000000, w / 2 - 3, 4, 2, 2);
+        px(g, 0x000000, w / 2 + 1, 4, 2, 2);
+        // robe
+        px(g, dark,  w / 2 - 6, 10, 12, h - 12);
+        px(g, color, w / 2 - 5, 11, 10, h - 14);
+        px(g, light, w / 2 - 1, 13, 2, h - 18);
+        // wings
+        px(g, light, 0, 9, 6, 6);
+        px(g, light, w - 6, 9, 6, 6);
     }
     g.generateTexture(key, w, h);
 }
@@ -220,26 +242,33 @@ function drawAirSprite(g, w, h, key, color, variant) {
 // EARTH — golem / dryad
 function drawEarthSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, color, 0.18);
     const dark  = shade(color, 0.55);
-    const light = shade(color, 1.4);
+    const light = shade(color, 1.35);
     if (variant === 'block') {
-        // golem: blocky body
-        g.fillStyle(dark);  g.fillRect(0, h * 0.18, w, h * 0.82);
-        g.fillStyle(color); g.fillRect(2, h * 0.22, w - 4, h * 0.74);
-        g.fillStyle(light, 0.5); g.fillRect(4, h * 0.25, w - 8, 4);
-        g.fillStyle(0x442200); g.fillRect(4, h * 0.32, w - 8, 2);
+        // golem: blocky armor
+        px(g, dark,  0, 4, w, h - 4);
+        px(g, color, 2, 6, w - 4, h - 8);
+        px(g, light, 4, 7, w - 8, 3);
+        px(g, dark,  4, 12, w - 8, 2);
         // crystal eyes
-        g.fillStyle(0x66ddff); g.fillRect(w * 0.28, h * 0.42, 3, 3); g.fillRect(w * 0.58, h * 0.42, 3, 3);
-        g.fillStyle(dark); g.fillRect(w * 0.2, h * 0.8, w * 0.25, h * 0.2);
-        g.fillRect(w * 0.55, h * 0.8, w * 0.25, h * 0.2);
+        px(g, 0x66ddff, w / 2 - 6, 14, 3, 3);
+        px(g, 0x66ddff, w / 2 + 3, 14, 3, 3);
+        // mouth slit
+        px(g, dark, w / 2 - 4, 20, 8, 2);
+        // legs
+        px(g, dark, 4, h - 4, 6, 4);
+        px(g, dark, w - 10, h - 4, 6, 4);
     } else {
-        // dryad: tree-like with leaves
-        g.fillStyle(0x5c3a1e); g.fillRect(w / 2 - 3, h * 0.5, 6, h * 0.5);  // trunk
-        g.fillStyle(color);    g.fillCircle(w / 2, h * 0.32, w * 0.4);     // foliage
-        g.fillStyle(light, 0.5); g.fillCircle(w / 2 - 4, h * 0.25, w * 0.18);
-        g.fillStyle(0x000000); g.fillRect(w / 2 - 3, h * 0.32, 2, 2); g.fillRect(w / 2 + 1, h * 0.32, 2, 2);
-        g.fillStyle(0xffaa00); g.fillRect(w / 2 - 1, h * 0.42, 2, 1);
+        // dryad: trunk + foliage
+        px(g, 0x5c3a1e, w / 2 - 3, h * 0.55, 6, h * 0.45);
+        px(g, dark,    1, 1, w - 2, h * 0.55);
+        px(g, color,   2, 2, w - 4, h * 0.5);
+        px(g, light,   4, 3, w - 8, 4);
+        px(g, light,   3, 8, 4, 4);
+        px(g, light,   w - 7, 9, 4, 4);
+        px(g, 0x000000, w / 2 - 4, h * 0.3, 2, 2);
+        px(g, 0x000000, w / 2 + 2, h * 0.3, 2, 2);
+        px(g, 0xffaa44, w / 2 - 1, h * 0.42, 2, 1);
     }
     g.generateTexture(key, w, h);
 }
@@ -247,30 +276,27 @@ function drawEarthSprite(g, w, h, key, color, variant) {
 // LIGHT — spark / prism
 function drawLightSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, 0xffffaa, 0.4);
+    const dark = shade(color, 0.5);
     if (variant === 'small') {
-        // radiant spark with rays
-        g.fillStyle(0xffffff, 0.9); g.fillCircle(w / 2, h / 2, w * 0.2);
-        g.fillStyle(color, 0.85);
-        for (let i = 0; i < 8; i++) {
-            const a = (i / 8) * Math.PI * 2;
-            const x1 = w / 2 + Math.cos(a) * w * 0.2;
-            const y1 = h / 2 + Math.sin(a) * h * 0.2;
-            const x2 = w / 2 + Math.cos(a) * w * 0.45;
-            const y2 = h / 2 + Math.sin(a) * h * 0.45;
-            g.lineStyle(2, color, 0.9); g.lineBetween(x1, y1, x2, y2);
-        }
-        g.fillStyle(0xffaa00); g.fillCircle(w / 2, h / 2, 2);
+        // diamond-shaped spark
+        const cx = w / 2, cy = h / 2;
+        // outer rays as cross
+        px(g, color, cx - 1, 1, 2, h - 2);
+        px(g, color, 1, cy - 1, w - 2, 2);
+        px(g, dark, cx - 2, cy - 2, 4, 4);
+        px(g, color, cx - 4, cy - 4, 8, 8);
+        px(g, 0xffffff, cx - 2, cy - 2, 4, 4);
+        px(g, 0xffaa00, cx - 1, cy - 1, 2, 2);
     } else {
-        // prism: faceted crystal body
-        g.fillStyle(color, 0.9);
-        g.fillTriangle(w / 2, 0, 2, h - 2, w - 2, h - 2);
-        g.fillStyle(0xffffff, 0.5);
-        g.fillTriangle(w / 2, 4, w / 2 - 4, h * 0.6, w / 2 + 4, h * 0.6);
-        g.fillStyle(shade(color, 0.6));
-        g.lineStyle(1, shade(color, 0.4));
-        g.strokeTriangle(w / 2, 0, 2, h - 2, w - 2, h - 2);
-        g.fillStyle(0xff8800); g.fillRect(w / 2 - 2, h * 0.5, 1, 1); g.fillRect(w / 2 + 1, h * 0.5, 1, 1);
+        // prism: triangular crystal (built from rectangles)
+        const cx = w / 2;
+        for (let row = 0; row < h; row++) {
+            const halfWidth = Math.floor((row / h) * (w / 2 - 1));
+            const c = row < 4 ? 0xffffff : (row % 4 === 0 ? dark : color);
+            px(g, c, cx - halfWidth, row, halfWidth * 2 + 1, 1);
+        }
+        px(g, 0xffffff, cx - 2, h * 0.3, 4, 3);
+        px(g, 0xff8800, cx - 1, h * 0.55, 2, 2);
     }
     g.generateTexture(key, w, h);
 }
@@ -278,26 +304,49 @@ function drawLightSprite(g, w, h, key, color, variant) {
 // FIRE — phoenix / salamander
 function drawFireSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, 0xff8800, 0.3);
-    const dark = shade(color, 0.6);
+    const dark = shade(color, 0.55);
+    const light = shade(color, 1.3);
     if (variant === 'bird') {
-        // phoenix
-        g.fillStyle(color); g.fillRect(w / 2 - 4, h * 0.35, 8, h * 0.45);  // body
-        g.fillStyle(0xffaa00); g.fillTriangle(w / 2, h * 0.1, w / 2 - 3, h * 0.4, w / 2 + 3, h * 0.4); // head crest
-        g.fillStyle(color, 0.8);
-        g.fillTriangle(0, h * 0.5, w / 2 - 4, h * 0.4, w / 2 - 4, h * 0.7); // left wing
-        g.fillTriangle(w, h * 0.5, w / 2 + 4, h * 0.4, w / 2 + 4, h * 0.7); // right wing
-        g.fillStyle(0xffff00); g.fillTriangle(w / 2, h, w / 2 - 3, h * 0.8, w / 2 + 3, h * 0.8); // tail flame
-        g.fillStyle(0x000000); g.fillRect(w / 2 - 2, h * 0.25, 1, 1); g.fillRect(w / 2 + 1, h * 0.25, 1, 1);
-        g.fillStyle(0xffaa00); g.fillRect(w / 2, h * 0.3, 2, 1); // beak
+        // phoenix: triangular body + wing flares
+        const cx = w / 2;
+        // body
+        px(g, dark,  cx - 5, 6, 10, h - 10);
+        px(g, color, cx - 4, 7, 8, h - 12);
+        // crest
+        px(g, 0xffaa00, cx - 1, 1, 2, 5);
+        px(g, 0xffff00, cx, 0, 1, 4);
+        // wings
+        px(g, color, 0, h * 0.35, 6, 8);
+        px(g, color, w - 6, h * 0.35, 6, 8);
+        px(g, light, 1, h * 0.4, 4, 5);
+        px(g, light, w - 5, h * 0.4, 4, 5);
+        // tail flames
+        px(g, 0xffaa00, cx - 3, h - 4, 6, 4);
+        px(g, 0xffff00, cx - 1, h - 2, 2, 2);
+        // eyes + beak
+        px(g, 0xffffff, cx - 3, 9, 2, 2);
+        px(g, 0xffffff, cx + 1, 9, 2, 2);
+        px(g, 0x000000, cx - 2, 10, 1, 1);
+        px(g, 0x000000, cx + 2, 10, 1, 1);
+        px(g, 0xffaa00, cx, 12, 2, 1);
     } else {
-        // salamander: low lizard body
-        g.fillStyle(color); g.fillRect(2, h * 0.4, w - 4, h * 0.45);     // body
-        g.fillStyle(color); g.fillRect(w - 8, h * 0.25, 6, h * 0.2);     // head
-        g.fillStyle(dark);  g.fillRect(0, h * 0.55, 4, 3);  g.fillRect(w - 4, h * 0.55, 4, 3); // legs
-        g.fillStyle(0xffaa00, 0.7);
-        g.fillRect(w * 0.2, h * 0.32, 3, 4); g.fillRect(w * 0.4, h * 0.3, 3, 5); g.fillRect(w * 0.6, h * 0.32, 3, 4); // back flames
-        g.fillStyle(0xffff00); g.fillRect(w - 4, h * 0.3, 1, 1); // eye
+        // salamander: low body + back flames
+        // body
+        px(g, dark,  2, h * 0.45, w - 4, h * 0.5);
+        px(g, color, 3, h * 0.48, w - 6, h * 0.42);
+        // head
+        px(g, dark,  w - 9, h * 0.3, 8, h * 0.25);
+        px(g, color, w - 8, h * 0.32, 6, h * 0.2);
+        // back flames
+        px(g, 0xffaa00, 4,         h * 0.32, 3, 5);
+        px(g, 0xffff00, 9,         h * 0.28, 3, 6);
+        px(g, 0xffaa00, 14,        h * 0.32, 3, 5);
+        // legs
+        px(g, dark, 1, h - 3, 4, 3);
+        px(g, dark, w - 5, h - 3, 4, 3);
+        // eye
+        px(g, 0xffff00, w - 5, h * 0.36, 2, 2);
+        px(g, 0x000000, w - 4, h * 0.37, 1, 1);
     }
     g.generateTexture(key, w, h);
 }
@@ -305,34 +354,48 @@ function drawFireSprite(g, w, h, key, color, variant) {
 // WATER — serpent / leviathan
 function drawWaterSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, 0x88ccff, 0.25);
-    const light = shade(color, 1.5);
     const dark  = shade(color, 0.5);
+    const light = shade(color, 1.5);
     if (variant === 'wave') {
-        // serpent: undulating body
-        g.fillStyle(color);
-        g.fillCircle(w * 0.15, h * 0.4, h * 0.3);
-        g.fillCircle(w * 0.35, h * 0.6, h * 0.3);
-        g.fillCircle(w * 0.55, h * 0.4, h * 0.3);
-        g.fillCircle(w * 0.78, h * 0.55, h * 0.35);
-        g.fillStyle(light, 0.5);
-        g.fillCircle(w * 0.78, h * 0.5, h * 0.18); // head highlight
-        g.fillStyle(0xffffff); g.fillRect(w * 0.85, h * 0.45, 2, 2);
-        g.fillStyle(0x000000); g.fillRect(w * 0.86, h * 0.46, 1, 1);
+        // serpent: 4 body segments arranged in wave
+        const segments = [
+            { x: 1,        y: h * 0.3 },
+            { x: w * 0.25, y: h * 0.55 },
+            { x: w * 0.5,  y: h * 0.3 },
+            { x: w * 0.75, y: h * 0.55 },
+        ];
+        for (const s of segments) {
+            px(g, dark,  s.x,     s.y,     6, 6);
+            px(g, color, s.x + 1, s.y + 1, 4, 4);
+        }
+        // head (last segment, larger)
+        const hx = w - 9, hy = h * 0.35;
+        px(g, dark,  hx,     hy,     8, 8);
+        px(g, color, hx + 1, hy + 1, 6, 6);
+        px(g, light, hx + 2, hy + 2, 4, 2);
+        // eye
+        px(g, 0xffffff, hx + 5, hy + 3, 2, 2);
+        px(g, 0x000000, hx + 6, hy + 4, 1, 1);
     } else {
-        // leviathan: armored beast
-        g.fillStyle(dark); g.fillRect(2, h * 0.3, w - 4, h * 0.6);
-        g.fillStyle(color); g.fillRect(4, h * 0.32, w - 8, h * 0.55);
-        // armor plates
-        g.fillStyle(light, 0.4);
-        for (let i = 0; i < 4; i++) g.fillRect(6 + i * 6, h * 0.35, 4, 4);
+        // leviathan: armored bulky body
+        px(g, dark,  1, 5, w - 2, h - 7);
+        px(g, color, 3, 7, w - 6, h - 11);
+        // armor plates (alternating)
+        for (let i = 0; i < 3; i++) {
+            px(g, light, 5 + i * 7, 9, 4, 4);
+        }
         // horns
-        g.fillStyle(dark);
-        g.fillTriangle(w * 0.2, h * 0.3, w * 0.15, h * 0.1, w * 0.25, h * 0.25);
-        g.fillTriangle(w * 0.8, h * 0.3, w * 0.85, h * 0.1, w * 0.75, h * 0.25);
+        px(g, dark, w * 0.2, 1, 3, 5);
+        px(g, dark, w * 0.7, 1, 3, 5);
         // eyes
-        g.fillStyle(0x88ddff); g.fillRect(w * 0.3, h * 0.45, 3, 3); g.fillRect(w * 0.6, h * 0.45, 3, 3);
-        g.fillStyle(0x000000); g.fillRect(w * 0.31, h * 0.46, 1, 1); g.fillRect(w * 0.61, h * 0.46, 1, 1);
+        px(g, 0x88ddff, w * 0.3, h * 0.4, 3, 3);
+        px(g, 0x88ddff, w * 0.6, h * 0.4, 3, 3);
+        px(g, 0x000000, w * 0.31, h * 0.41, 1, 1);
+        px(g, 0x000000, w * 0.61, h * 0.41, 1, 1);
+        // teeth
+        px(g, 0xffffff, w * 0.4, h - 4, 1, 2);
+        px(g, 0xffffff, w * 0.5, h - 4, 1, 2);
+        px(g, 0xffffff, w * 0.6, h - 4, 1, 2);
     }
     g.generateTexture(key, w, h);
 }
@@ -340,32 +403,53 @@ function drawWaterSprite(g, w, h, key, color, variant) {
 // SHADOW — specter / lich
 function drawShadowSprite(g, w, h, key, color, variant) {
     g.clear();
-    drawAura(g, w, h, 0x220033, 0.5);
-    drawAura(g, w, h, color, 0.2);
-    const accent = shade(color, 1.6);
+    const dark   = shade(color, 0.4);
+    const accent = shade(color, 1.7);
     if (variant === 'wraith') {
-        // floating wraith with hood
-        g.fillStyle(color, 0.85);
-        g.fillRect(w * 0.2, 2, w * 0.6, h * 0.3);                 // hood top
-        g.fillTriangle(w * 0.15, h * 0.25, w * 0.85, h * 0.25, w / 2, h - 2); // robe
-        g.fillStyle(0x000000);
-        g.fillRect(w * 0.3, h * 0.15, w * 0.4, h * 0.18);          // hood interior shadow
-        g.fillStyle(accent);
-        g.fillRect(w * 0.36, h * 0.22, 3, 3); g.fillRect(w * 0.55, h * 0.22, 3, 3); // glowing eyes
-        g.fillStyle(0xaa66ff, 0.4); g.fillRect(w * 0.3, h * 0.7, w * 0.4, 2); // ethereal trail
+        // wraith: hooded shape
+        const cx = w / 2;
+        // hood top
+        px(g, dark,  cx - 6, 1, 12, 4);
+        px(g, color, cx - 5, 2, 10, 3);
+        // hood front
+        px(g, dark,  cx - 7, 5, 14, 9);
+        // void inside hood
+        px(g, 0x000000, cx - 4, 7, 8, 5);
+        // glowing eyes
+        px(g, accent, cx - 3, 8, 2, 2);
+        px(g, accent, cx + 1, 8, 2, 2);
+        // robe (trapezoid built from rows)
+        for (let row = 0; row < h - 14; row++) {
+            const widening = Math.floor(row * 0.4);
+            const c = row % 3 === 0 ? dark : color;
+            px(g, c, cx - 6 - widening, 14 + row, 12 + widening * 2, 1);
+        }
+        // ethereal trail at bottom
+        px(g, accent, cx - 2, h - 2, 4, 1);
     } else {
-        // lich: bony figure with crown
-        g.fillStyle(color);
-        g.fillRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);          // robe body
-        g.fillStyle(0xddccaa); g.fillRect(w * 0.32, h * 0.05, w * 0.36, h * 0.22); // skull
-        g.fillStyle(0x000000); g.fillRect(w * 0.36, h * 0.12, 4, 4); g.fillRect(w * 0.56, h * 0.12, 4, 4); // eye sockets
-        g.fillStyle(0x66ff66); g.fillRect(w * 0.37, h * 0.13, 2, 2); g.fillRect(w * 0.57, h * 0.13, 2, 2); // green flames in sockets
-        g.fillStyle(0xffd700);
+        // lich: skull + crown + robe
+        const cx = w / 2;
         // crown spikes
-        g.fillTriangle(w * 0.32, h * 0.05, w * 0.36, 0,  w * 0.4, h * 0.05);
-        g.fillTriangle(w * 0.46, h * 0.05, w * 0.5,  0,  w * 0.54, h * 0.05);
-        g.fillTriangle(w * 0.6,  h * 0.05, w * 0.64, 0,  w * 0.68, h * 0.05);
-        g.fillStyle(accent, 0.6); g.fillRect(w * 0.4, h * 0.45, w * 0.2, 4); // chest gem
+        px(g, 0xffd700, cx - 5, 0, 2, 3);
+        px(g, 0xffd700, cx - 1, 0, 2, 4);
+        px(g, 0xffd700, cx + 3, 0, 2, 3);
+        // skull
+        px(g, 0xddccaa, cx - 5, 3, 10, 8);
+        px(g, 0x000000, cx - 4, 5, 3, 3);
+        px(g, 0x000000, cx + 1, 5, 3, 3);
+        px(g, 0x66ff66, cx - 3, 6, 1, 1);
+        px(g, 0x66ff66, cx + 2, 6, 1, 1);
+        // jaw
+        px(g, 0x000000, cx - 2, 9, 4, 1);
+        // robe body
+        px(g, dark,  cx - 6, 11, 12, h - 12);
+        px(g, color, cx - 5, 12, 10, h - 14);
+        // chest gem
+        px(g, accent, cx - 2, h * 0.5, 4, 3);
+        px(g, 0xffffff, cx - 1, h * 0.5 + 1, 2, 1);
+        // arms/staff hint
+        px(g, dark, 2, h * 0.45, 3, h * 0.3);
+        px(g, 0xffd700, 1, h * 0.4, 5, 3);
     }
     g.generateTexture(key, w, h);
 }

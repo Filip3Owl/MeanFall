@@ -65,6 +65,10 @@ export class UIScene extends Phaser.Scene {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Character'); }
         });
+        document.getElementById('btn-quests')?.addEventListener('click', () => {
+            const ws = this.scene.get('World');
+            if (ws) { ws.pauseForOverlay(); ws.scene.launch('Quest'); }
+        });
         document.getElementById('btn-save')?.addEventListener('click', () => {
             const player = this.registry.get('player');
             if (player) {
@@ -79,9 +83,9 @@ export class UIScene extends Phaser.Scene {
         if (!el) return;
         const div = document.createElement('div');
         div.className = `chat-msg ${type}`;
-        div.textContent = text;
+        // Highlight numeric values and keywords in-line
+        div.innerHTML = highlightKeywords(text);
         el.appendChild(div);
-        // Limit messages
         while (el.children.length > MAX_MESSAGES) el.removeChild(el.firstChild);
         el.scrollTop = el.scrollHeight;
     }
@@ -199,4 +203,25 @@ function setBar(barEl, textEl, cur, max) {
     const pct = max > 0 ? Math.max(0, Math.min(100, (cur / max) * 100)) : 0;
     barEl.style.width = pct + '%';
     textEl.textContent = `${Math.floor(cur)}/${Math.floor(max)}`;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+}
+
+// Wrap key gameplay terms with semantic spans for color theming.
+function highlightKeywords(text) {
+    let s = escapeHtml(text);
+    s = s.replace(/(\+\d+\s*XP)/gi,                   '<span style="color:#ffaa22;font-weight:bold">$1</span>');
+    s = s.replace(/([+−-]\d+\s*HP)/gi,                '<span style="color:#ff5555;font-weight:bold">$1</span>');
+    s = s.replace(/(\d+\s*ouro)/gi,                   '<span style="color:#ffd700;font-weight:bold">$1</span>');
+    s = s.replace(/\b(NÍVEL\s*\d+|nv\.?\s*\d+)\b/gi,  '<span style="color:#ffaa44;font-weight:bold">$1</span>');
+    s = s.replace(/\b(CRÍTICO|SUPER\s*EFICAZ)\b/gi,   '<span style="color:#ff88cc;font-weight:bold">$1</span>');
+    s = s.replace(/\b(LOOT|ITENS?\s*OBTIDOS?)\b/gi,   '<span style="color:#ffd700;font-weight:bold">$1</span>');
+    s = s.replace(/\b(DANO|dano)\b/g,                 '<span style="color:#ff5555">$1</span>');
+    s = s.replace(/\b(cura|HEAL)\b/gi,                '<span style="color:#55ff88">$1</span>');
+    s = s.replace(/\b(Lendário|Épico|Raro|Incomum)\b/gi, '<span style="color:#bb88ff;font-weight:bold">$1</span>');
+    return s;
 }

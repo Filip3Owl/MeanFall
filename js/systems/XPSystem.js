@@ -14,7 +14,11 @@ export function awardXP(player, baseXP) {
     }
 
     EventBus.emit('player-xp-change', { player, earned });
-    if (leveled) EventBus.emit('player-level-up', { player });
+    if (leveled) {
+        EventBus.emit('player-level-up', { player });
+        EventBus.emit('player-stats-changed', { player });
+        EventBus.emit('player-hp-change', { player });
+    }
     return earned;
 }
 

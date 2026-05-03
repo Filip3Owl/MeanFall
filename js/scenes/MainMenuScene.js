@@ -1,5 +1,5 @@
 import { SaveSystem } from '../systems/SaveSystem.js';
-import { PLAYER_DEFAULTS } from '../constants.js';
+import { PLAYER_DEFAULTS, VERSION } from '../constants.js';
 
 export class MainMenuScene extends Phaser.Scene {
     constructor() { super('MainMenu'); }
@@ -20,17 +20,24 @@ export class MainMenuScene extends Phaser.Scene {
         }
 
         // Title
-        this.add.text(W / 2, 80, 'StatQuest RPG', {
-            fontSize: '36px', color: '#ffd700', fontFamily: 'Courier New',
-            stroke: '#000000', strokeThickness: 4,
+        this.add.text(W / 2, 70, 'MeanFall', {
+            fontSize: '42px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 5,
         }).setOrigin(0.5).setDepth(2);
 
-        this.add.text(W / 2, 125, 'Aprenda Estatística Jogando', {
-            fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+        // Beta badge next to title
+        const betaBadge = this.add.rectangle(W / 2 + 110, 60, 56, 22, 0xcc1144, 1).setDepth(3);
+        betaBadge.setStrokeStyle(1, 0xff4477);
+        this.add.text(W / 2 + 110, 60, 'BETA', {
+            fontSize: '12px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5).setDepth(4);
+
+        this.add.text(W / 2, 110, 'Aprenda Estatística através da aventura', {
+            fontSize: '13px', color: '#d4af37', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(0.5).setDepth(2);
 
         // Divider
-        this.add.rectangle(W / 2, 150, 300, 2, 0xd4af37, 0.5).setDepth(2);
+        this.add.rectangle(W / 2, 138, 320, 2, 0xd4af37, 0.5).setDepth(2);
 
         // Buttons
         this._makeButton(W / 2, 200, 'Novo Jogo', () => this._newGame());
@@ -46,9 +53,13 @@ export class MainMenuScene extends Phaser.Scene {
         const px = this.add.image(W / 2, 380, 'sprite_player').setDepth(2).setScale(2);
         this.tweens.add({ targets: px, y: 370, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-        // Version
-        this.add.text(W - 8, H - 8, 'v1.0', {
-            fontSize: '10px', color: '#444', fontFamily: 'Courier New',
+        // Version + credits
+        this.add.text(8, H - 8, `v${VERSION.number} ${VERSION.label}`, {
+            fontSize: '10px', color: '#666', fontFamily: 'Courier New',
+        }).setOrigin(0, 1).setDepth(2);
+
+        this.add.text(W - 8, H - 8, `Developed by ${VERSION.author}`, {
+            fontSize: '10px', color: '#888', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(1, 1).setDepth(2);
 
         this._helpVisible = false;

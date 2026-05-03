@@ -32,8 +32,9 @@ export const MAP_DATA = {
             { monsterId: 'air_sylph', instanceId: 'v_m5', x: 8, y: 12 },
         ],
         npcs: [
-            { npcId: 'elder', x: 5, y: 4, dialog: ['Bem-vindo, aventureiro!', 'Este mundo é feito de DADOS.', 'Dados podem ser categóricos ou numéricos.', 'Categóricos: cor, nome, tipo.', 'Numéricos: altura, peso, temperatura.', 'Derrote os Goblins para aprender mais!'] },
-            { npcId: 'scholar', x: 12, y: 4, dialog: ['Sou o estudioso local.', 'Dados DISCRETOS são contáveis: 1, 2, 3...', 'Dados CONTÍNUOS são mensuráveis: 1,5 kg, 1,57 kg...', 'O portal ao sul leva aos Prados das Medidas!', 'Precisas de 60% de maestria ou nível 3.'] },
+            { npcId: 'elder',   role: 'quest',    x: 5, y: 4,  dialog: ['Bem-vindo, aventureiro!', 'Este mundo é feito de DADOS.', 'Tenho uma missão para você.'] },
+            { npcId: 'scholar', role: 'quest',    x: 12, y: 4, dialog: ['Sou o estudioso local.', 'Dados DISCRETOS são contáveis.', 'Dados CONTÍNUOS são mensuráveis.', 'Posso ensinar mais — converse comigo.'] },
+            { npcId: 'merchant', role: 'shop',    x: 8, y: 6,  dialog: ['Mercador da Vila ao seu serviço!', 'Aperte ESPAÇO para abrir a loja.'] },
         ],
     },
 
@@ -67,7 +68,8 @@ export const MAP_DATA = {
             { monsterId: 'earth_dryad', instanceId: 'me_m5', x: 8, y: 12 },
         ],
         npcs: [
-            { npcId: 'sage', x: 8, y: 7, dialog: ['Sou o Sábio dos Prados.', 'A MÉDIA soma todos os valores e divide pela quantidade.', 'A MEDIANA é o valor central quando ordenados.', 'A MODA é o valor mais frequente.', 'Quando há outliers, prefira a mediana!'] },
+            { npcId: 'sage',  role: 'quest', x: 8, y: 7, dialog: ['Sou o Sábio dos Prados.', 'A MÉDIA soma valores e divide pela quantidade.', 'A MEDIANA é o valor central.', 'A MODA é o mais frequente.'] },
+            { npcId: 'smith', role: 'shop',  x: 4, y: 7, dialog: ['Sou o Ferreiro dos Prados.', 'Tenho armas e armaduras melhores.'] },
         ],
     },
 
@@ -101,7 +103,7 @@ export const MAP_DATA = {
             { monsterId: 'light_prism', instanceId: 'fo_m5', x: 8, y: 6 },
         ],
         npcs: [
-            { npcId: 'hermit', x: 8, y: 7, dialog: ['Sou o eremita da floresta.', 'A AMPLITUDE é max - min.', 'A VARIÂNCIA mede o espalhamento médio ao quadrado.', 'O DESVIO PADRÃO é a raiz da variância.', 'Variância amostral usa n-1 no denominador!'] },
+            { npcId: 'hermit', role: 'quest', x: 8, y: 7, dialog: ['Sou o eremita da floresta.', 'A AMPLITUDE é max - min.', 'A VARIÂNCIA mede espalhamento.', 'O DESVIO PADRÃO é a raiz da variância.'] },
         ],
     },
 
@@ -135,7 +137,8 @@ export const MAP_DATA = {
             { monsterId: 'fire_salamander', instanceId: 'pl_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'oracle', x: 8, y: 7, dialog: ['Sou o Oráculo das Planícies.', 'Probabilidade = casos favoráveis / casos totais.', 'P(A∪B) = P(A) + P(B) - P(A∩B)', 'Eventos independentes: P(A∩B) = P(A)×P(B)', 'Probabilidade condicional: P(A|B) = P(A∩B)/P(B)'] },
+            { npcId: 'gambler', role: 'quest', x: 8, y: 7, dialog: ['Sou o Apostador.', 'Probabilidade = favoráveis / totais.', 'Eventos independentes: P(A∩B) = P(A)×P(B).'] },
+            { npcId: 'trader', role: 'shop',  x: 4, y: 7, dialog: ['Comerciante errante das Planícies.', 'Itens raros à venda!'] },
         ],
     },
 
@@ -169,7 +172,7 @@ export const MAP_DATA = {
             { monsterId: 'water_serpent', instanceId: 'mo_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'prophet', x: 8, y: 7, dialog: ['Sou o Profeta das Montanhas.', 'A distribuição normal é simétrica: média=mediana=moda.', 'Regra 68-95-99,7: desvios padrões cobrem a curva.', 'z-score = (X - μ) / σ padroniza qualquer valor.', 'Z=0 significa que o valor está na média.'] },
+            { npcId: 'astronomer', role: 'quest', x: 8, y: 7, dialog: ['Sou o Astrônomo das Montanhas.', 'A normal é simétrica: média=mediana=moda.', 'z-score = (X - μ) / σ padroniza valores.'] },
         ],
     },
 
@@ -201,7 +204,7 @@ export const MAP_DATA = {
             { monsterId: 'shadow_specter', instanceId: 'du_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'archmage', x: 8, y: 7, dialog: ['Sou o Arquimago do Calabouço.', 'H₀ (hipótese nula): assume que não há efeito.', 'H₁ (alternativa): há efeito ou diferença.', 'Se p-valor < α → rejeita H₀.', 'Erro Tipo I: rejeitar H₀ verdadeira (falso positivo).', 'Erro Tipo II: aceitar H₀ falsa (falso negativo).'] },
+            { npcId: 'oracle', role: 'quest', x: 8, y: 7, dialog: ['Sou o Oráculo do Calabouço.', 'H₀ (hipótese nula): assume não haver efeito.', 'Se p-valor < α → rejeita H₀.', 'Há um destino para você...'] },
         ],
     },
 };

@@ -1,9 +1,9 @@
-import { CombatSystem }          from '../systems/CombatSystem.js';
-import { QuestionEngine }         from '../systems/QuestionEngine.js';
-import { awardXP }                from '../systems/XPSystem.js';
-import { ITEMS, DROP_TABLES }     from '../data/items.js';
-import { ELEMENTS }               from '../constants.js';
-import EventBus                   from '../utils/EventBus.js';
+import { CombatSystem }                from '../systems/CombatSystem.js';
+import { QuestionEngine }                from '../systems/QuestionEngine.js';
+import { awardXP }                       from '../systems/XPSystem.js';
+import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
+import { ELEMENTS }                      from '../constants.js';
+import EventBus                          from '../utils/EventBus.js';
 
 export class CombatScene extends Phaser.Scene {
     constructor() { super('Combat'); }
@@ -60,55 +60,70 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _buildMonsterPanel() {
-        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.air;
+        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal || ELEMENTS.air;
 
         // Panel background tinted with element color
         const bgDark = elem.dark || 0x1a0000;
         this.add.rectangle(8, 28, 196, 130, bgDark, 1).setOrigin(0, 0);
         this.add.rectangle(8, 28, 196, 130, elem.color, 0).setOrigin(0, 0)
             .setStrokeStyle(1, elem.color, 0.5);
+        // Flash overlay (used for damage flashes)
+        this._monsterFlashRect = this.add.rectangle(8, 28, 196, 130, 0xff0000, 0).setOrigin(0, 0);
 
         // Sprite with elemental glow
+        this._monsterPanelCenter = { x: 60, y: 88 };
         const texKey = `sprite_${this._monsterDef.id}`;
         if (this.textures.exists(texKey)) {
             const aura = this.add.circle(60, 88, 32, elem.color, 0.18);
             this.tweens.add({ targets: aura, alpha: 0.35, scale: 1.1, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            this.add.image(60, 88, texKey).setScale(2.5);
+            this._monsterSprite = this.add.image(60, 88, texKey).setScale(2.5);
         }
 
         this.add.text(112, 36, this._monsterDef.name, {
             fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', wordWrap: { width: 86 },
         }).setOrigin(0, 0);
         this.add.text(112, 54, `Nv. ${this._monsterDef.level}`, {
-            fontSize: '10px', color: '#888888', fontFamily: 'Courier New',
+            fontSize: '10px', color: '#ffaa44', fontFamily: 'Courier New',
         }).setOrigin(0, 0);
 
         // Element badge
         const badgeColorHex = '#' + elem.color.toString(16).padStart(6, '0');
         this.add.text(112, 68, `[${elem.symbol}] ${elem.name}`, {
-            fontSize: '9px', color: badgeColorHex, fontFamily: 'Courier New',
+            fontSize: '10px', color: badgeColorHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0);
 
+        // HP label
+        this.add.text(112, 86, 'HP', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._mHpGfx = this.add.graphics();
-        this._mHpTxt = this.add.text(112, 102, '', { fontSize: '9px', color: '#ff6666', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._mHpTxt = this.add.text(135, 86, '', { fontSize: '10px', color: '#ff8888', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
         this._updateMonsterBar();
     }
 
     _buildPlayerPanel() {
-        this.add.rectangle(340, 28, 196, 130, 0x001a00, 1).setOrigin(0, 0);
+        this.add.rectangle(340, 28, 196, 130, 0x001a0a, 1).setOrigin(0, 0);
+        this.add.rectangle(340, 28, 196, 130, 0x44cc44, 0).setOrigin(0, 0).setStrokeStyle(1, 0x44cc44, 0.4);
+        this._playerFlashRect   = this.add.rectangle(340, 28, 196, 130, 0xff0000, 0).setOrigin(0, 0);
+        this._playerPanelCenter = { x: 510, y: 90 };
 
         const p = this._player;
+        if (this.textures.exists('sprite_player')) {
+            this.add.image(490, 90, 'sprite_player').setScale(1.4);
+        }
+
         this.add.text(346, 36, p.name || 'Aventureiro', {
-            fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New',
+            fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0);
         this.add.text(346, 52, `Nv. ${p.level}`, {
-            fontSize: '10px', color: '#666666', fontFamily: 'Courier New',
+            fontSize: '10px', color: '#ffaa44', fontFamily: 'Courier New',
         }).setOrigin(0, 0);
 
+        this.add.text(346, 70, 'HP',   { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this.add.text(346, 96, 'FOCO', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+
         this._pVitalsGfx = this.add.graphics();
-        this._pHpTxt     = this.add.text(346, 86, '', { fontSize: '9px', color: '#ff6666', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._pFocusTxt  = this.add.text(346, 110, '', { fontSize: '9px', color: '#6688ff', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._streakTxt  = this.add.text(528, 36, '', { fontSize: '10px', color: '#ffaa00', fontFamily: 'Courier New' }).setOrigin(1, 0);
+        this._pHpTxt     = this.add.text(380, 70,  '', { fontSize: '10px', color: '#ff8888', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._pFocusTxt  = this.add.text(380, 96,  '', { fontSize: '10px', color: '#88aaff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._streakTxt  = this.add.text(530, 38,  '', { fontSize: '11px', color: '#ffaa44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
         this._updatePlayerBars();
     }
 
@@ -324,19 +339,28 @@ export class CombatScene extends Phaser.Scene {
             mastery.correct++;
             mastery.wrongIds = mastery.wrongIds.filter(id => id !== q.id);
 
-            const dmg = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, this._streak);
-            this._monsterHp = Math.max(0, this._monsterHp - dmg);
-            this._updateMonsterBar();
+            // Resolve weapon element from equipped item (live lookup)
+            const weaponId = this._player.equipment?.rightHand || this._player.equipment?.leftHand;
+            this._player._weaponElement = (weaponId && ITEMS[weaponId]?.element) || 'normal';
 
-            const msg = dmg > 0 ? `Correto! Dano causado: ${dmg}` : 'Correto! Bloqueado pela defesa do monstro.';
-            this._showFeedback(msg, '#00cc44');
+            const result = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, this._streak);
+            this._monsterHp = Math.max(0, this._monsterHp - result.damage);
+            this._updateMonsterBar();
+            this._spawnDamageNumber(this._monsterPanelCenter, result.damage, result.isCrit ? '#ff88cc' : '#ff5555', result.isCrit);
+            this._flashTarget('monster', result.advantage === 'super' ? 0xffaa00 : 0xff3333);
+
+            let msg = `Correto! Dano: ${result.damage}`;
+            if (result.isCrit)              msg += ' [CRÍTICO!]';
+            if (result.advantage === 'super') msg += ' [SUPER EFICAZ!]';
+            if (result.advantage === 'weak')  msg += ' [Pouco eficaz...]';
+            this._showFeedback(msg, result.isCrit ? '#ff88cc' : '#55ff88');
             if (btnBg) btnBg.setFillStyle(0x003300);
             if (this._streak > 1) this._streakTxt.setText(`${this._streak}× STREAK!`);
 
             if (q.explanation) this._explTxt.setText(`Explicação: ${q.explanation}`);
 
             if (this._monsterHp <= 0) {
-                this.time.delayedCall(1600, () => this._endCombat('win'));
+                this.time.delayedCall(1500, () => this._endCombat('win'));
                 return;
             }
         } else {
@@ -344,24 +368,54 @@ export class CombatScene extends Phaser.Scene {
             this._streakTxt.setText('');
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
 
-            const dmg = CombatSystem.calcMonsterDamage(this._monsterDef, this._player);
-            this._player.hp = Math.max(0, this._player.hp - dmg);
+            const result = CombatSystem.calcMonsterDamage(this._monsterDef, this._player);
+            this._player.hp = Math.max(0, this._player.hp - result.damage);
             this._updatePlayerBars();
             EventBus.emit('player-hp-change', { player: this._player });
 
-            const msg = dmg === 0 ? 'Errado! Você desviou o ataque!' : `Errado! Você recebeu ${dmg} de dano.`;
-            this._showFeedback(msg, '#ff2222');
+            if (result.dodged) {
+                this._showFeedback('Errado! Mas você ESQUIVOU o ataque!', '#88ccff');
+                this._spawnDamageNumber(this._playerPanelCenter, 'ESQUIVA', '#88ccff', false);
+            } else {
+                this._showFeedback(`Errado! Dano recebido: ${result.damage}`, '#ff5555');
+                this._spawnDamageNumber(this._playerPanelCenter, result.damage, '#ff5555', false);
+                this._flashTarget('player', 0xff3333);
+            }
             if (btnBg) btnBg.setFillStyle(0x330000);
 
             if (q.explanation) this._explTxt.setText(`Explicação: ${q.explanation}`);
 
             if (this._player.hp <= 0) {
-                this.time.delayedCall(1600, () => this._endCombat('loss'));
+                this.time.delayedCall(1500, () => this._endCombat('loss'));
                 return;
             }
         }
 
         this.time.delayedCall(1900, () => this._nextQuestion());
+    }
+
+    _spawnDamageNumber(center, value, color, big) {
+        if (!center) return;
+        const txt = this.add.text(center.x, center.y - 10, String(value), {
+            fontSize: big ? '22px' : '16px', color, fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 3,
+        }).setOrigin(0.5, 0.5).setDepth(50);
+        this.tweens.add({
+            targets: txt, y: center.y - 40, alpha: 0,
+            duration: 1100, ease: 'Cubic.Out',
+            onComplete: () => txt.destroy(),
+        });
+    }
+
+    _flashTarget(who, color) {
+        const target = who === 'monster' ? this._monsterFlashRect : this._playerFlashRect;
+        if (!target) return;
+        target.setFillStyle(color, 0.5);
+        this.tweens.add({
+            targets: target, alpha: 0,
+            duration: 280, ease: 'Quad.Out',
+            onComplete: () => target.setAlpha(1).setFillStyle(color, 0),
+        });
     }
 
     _showFeedback(msg, color) {
@@ -374,23 +428,27 @@ export class CombatScene extends Phaser.Scene {
         const pct = Math.max(0, this._monsterHp / this._monsterDef.maxHp);
         const g   = this._mHpGfx;
         g.clear();
-        g.fillStyle(0x330000); g.fillRect(112, 86, 68, 8);
-        g.fillStyle(0xff3333); g.fillRect(112, 86, Math.max(0, Math.floor(68 * pct)), 8);
+        g.fillStyle(0x220000); g.fillRect(112, 96, 86, 10);
+        g.fillStyle(0xff3333); g.fillRect(112, 96, Math.max(0, Math.floor(86 * pct)), 10);
+        g.fillStyle(0xff8888, 0.4); g.fillRect(112, 96, Math.max(0, Math.floor(86 * pct)), 3);
         this._mHpTxt.setText(`${this._monsterHp}/${this._monsterDef.maxHp}`);
     }
 
     _updatePlayerBars() {
         const p    = this._player;
-        const hPct = p.hp / p.maxHp;
-        const fPct = p.focus / p.maxFocus;
+        const hPct = Math.max(0, p.hp / p.maxHp);
+        const fPct = Math.max(0, p.focus / p.maxFocus);
         const g    = this._pVitalsGfx;
         g.clear();
-        // HP bar
-        g.fillStyle(0x330000); g.fillRect(346, 70, 100, 8);
-        g.fillStyle(0xff3333); g.fillRect(346, 70, Math.floor(100 * hPct), 8);
+        // HP bar (with gradient effect using two layers)
+        g.fillStyle(0x220000); g.fillRect(346, 84, 130, 10);
+        g.fillStyle(0xff3333); g.fillRect(346, 84, Math.floor(130 * hPct), 10);
+        g.fillStyle(0xff8888, 0.4); g.fillRect(346, 84, Math.floor(130 * hPct), 3);
         // Focus bar
-        g.fillStyle(0x000a33); g.fillRect(346, 94, 100, 8);
-        g.fillStyle(0x3355ff); g.fillRect(346, 94, Math.floor(100 * fPct), 8);
+        g.fillStyle(0x000a22); g.fillRect(346, 110, 130, 10);
+        g.fillStyle(0x3355ff); g.fillRect(346, 110, Math.floor(130 * fPct), 10);
+        g.fillStyle(0x88aaff, 0.4); g.fillRect(346, 110, Math.floor(130 * fPct), 3);
+
         this._pHpTxt.setText(`${p.hp}/${p.maxHp}`);
         this._pFocusTxt.setText(`${p.focus}/${p.maxFocus}`);
     }
@@ -421,12 +479,13 @@ export class CombatScene extends Phaser.Scene {
     _endCombat(outcome) {
         let xpGained = 0;
         const lootNames = [];
+        let lootIds = [];
 
         if (outcome === 'win') {
             xpGained = awardXP(this._player, this._monsterDef.xpReward);
             this._player.gold = (this._player.gold || 0) + (this._monsterDef.goldReward || 0);
 
-            const lootIds = CombatSystem.rollDrops(this._monsterDef.id, DROP_TABLES);
+            lootIds = CombatSystem.rollDrops(this._monsterDef.id, DROP_TABLES);
             for (const itemId of lootIds) {
                 CombatSystem.addToInventory(this._player, itemId);
                 const name = ITEMS[itemId]?.name;
@@ -436,8 +495,18 @@ export class CombatScene extends Phaser.Scene {
         }
 
         this.registry.set('player', this._player);
-        this.scene.stop('Combat');
 
+        if (outcome === 'win' && lootIds.length > 0) {
+            this._showVictoryPopup(xpGained, this._monsterDef.goldReward || 0, lootIds, () => {
+                this._finishCombat(outcome, xpGained, lootNames);
+            });
+        } else {
+            this._finishCombat(outcome, xpGained, lootNames);
+        }
+    }
+
+    _finishCombat(outcome, xpGained, lootNames) {
+        this.scene.stop('Combat');
         EventBus.emit('combat-end', {
             outcome,
             instanceId: this._instanceId,
@@ -445,6 +514,58 @@ export class CombatScene extends Phaser.Scene {
             loot: lootNames,
             playerData: this._player,
         });
+    }
+
+    _showVictoryPopup(xp, gold, lootIds, onContinue) {
+        const W = 544, H = 480;
+        const overlay = this.add.rectangle(0, 0, W, H, 0x000000, 0.85).setOrigin(0, 0).setDepth(100);
+
+        const panelW = 360, panelH = 60 + Math.min(lootIds.length, 6) * 22 + 80;
+        const px2 = (W - panelW) / 2;
+        const py2 = (H - panelH) / 2;
+
+        this.add.rectangle(px2, py2, panelW, panelH, 0x0d0a03, 1).setOrigin(0, 0).setDepth(101);
+        this.add.rectangle(px2, py2, panelW, panelH, 0xffd700, 0).setOrigin(0, 0).setStrokeStyle(2, 0xffd700).setDepth(101);
+
+        this.add.text(W / 2, py2 + 12, 'VITÓRIA!', {
+            fontSize: '18px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0).setDepth(102);
+
+        this.add.text(W / 2, py2 + 38, `+${xp} XP    +${gold} Ouro`, {
+            fontSize: '12px', color: '#ffaa44', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0).setDepth(102);
+
+        this.add.text(W / 2, py2 + 60, 'ITENS OBTIDOS:', {
+            fontSize: '10px', color: '#888888', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0).setDepth(102);
+
+        lootIds.slice(0, 6).forEach((itemId, i) => {
+            const item    = ITEMS[itemId];
+            if (!item) return;
+            const color   = RARITY_COLORS[item.rarity] || '#cccccc';
+            const yLine   = py2 + 78 + i * 22;
+            this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0).setDepth(102);
+            this.add.text(px2 + 28, yLine + 9, item.name, {
+                fontSize: '11px', color, fontFamily: 'Courier New',
+            }).setOrigin(0, 0.5).setDepth(102);
+            const tag = (item.rarity || 'common').toUpperCase();
+            this.add.text(px2 + panelW - 28, yLine + 9, tag, {
+                fontSize: '9px', color: '#666666', fontFamily: 'Courier New',
+            }).setOrigin(1, 0.5).setDepth(102);
+        });
+
+        const btnY = py2 + panelH - 36;
+        const btnBg = this.add.rectangle(W / 2 - 60, btnY, 120, 28, 0x1a3a1a, 1).setOrigin(0, 0).setDepth(102)
+            .setInteractive()
+            .on('pointerover', () => btnBg.setFillStyle(0x2a5a2a))
+            .on('pointerout',  () => btnBg.setFillStyle(0x1a3a1a))
+            .on('pointerdown', () => onContinue());
+        this.add.text(W / 2, btnY + 14, 'CONTINUAR', {
+            fontSize: '12px', color: '#88ff88', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0.5).setDepth(102);
+
+        // Auto-continue after 6s as fallback
+        this.time.delayedCall(6000, () => onContinue());
     }
 
     shutdown() {

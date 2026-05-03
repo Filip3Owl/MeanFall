@@ -1,29 +1,67 @@
+import { ELEMENT_MATRIX, RARITIES } from '../constants.js';
+
 export const CombatSystem = {
 
+    // ── Damage calculation ────────────────────────────────────────────────────
+
+    /**
+     * Player damage with elemental matchup, weapon element, and rarity scaling.
+     * Returns: { damage, multiplier, isCrit, advantage: 'super'|'weak'|'neutral' }
+     */
     calcPlayerDamage(player, monster, streak = 0) {
-        const base   = 10 + (player.level * 1.5);
+        const base       = 10 + (player.level * 1.5);
         const intBonus   = player.intelligence * 0.5;
         const strBonus   = player.strength * 0.3;
         const streakBonus = Math.min(streak * 2, 20);
-        const raw = Math.floor(base + intBonus + strBonus + streakBonus);
-        return Math.max(1, raw - (monster.defense || 0));
+        let raw          = Math.floor(base + intBonus + strBonus + streakBonus);
+
+        // Weapon element vs monster element
+        const weaponElem = this._weaponElement(player);
+        const matchup    = (ELEMENT_MATRIX[weaponElem] || {})[monster.element] ?? 1;
+        raw = Math.floor(raw * matchup);
+
+        // Crit (5% + 1% per agility, capped 30%)
+        const critChance = Math.min(0.05 + player.agility * 0.01, 0.3);
+        const isCrit = Math.random() < critChance;
+        if (isCrit) raw = Math.floor(raw * 1.6);
+
+        const damage = Math.max(1, raw - (monster.defense || 0));
+        const advantage = matchup > 1.1 ? 'super' : matchup < 0.9 ? 'weak' : 'neutral';
+        return { damage, multiplier: matchup, isCrit, advantage, weaponElement: weaponElem };
     },
 
     calcMonsterDamage(monster, player) {
         const agiRed = Math.floor(player.agility * 0.3);
-        // Dodge chance: agility / 100
-        if (Math.random() < player.agility * 0.01) return 0;
-        return Math.max(1, (monster.attackDamage || 10) - agiRed);
+        if (Math.random() < player.agility * 0.01) return { damage: 0, dodged: true };
+        const dmg = Math.max(1, (monster.attackDamage || 10) - agiRed);
+        return { damage: dmg, dodged: false };
     },
+
+    _weaponElement(player) {
+        const eq = player.equipment || {};
+        for (const slot of ['rightHand', 'leftHand', 'amulet', 'ring', 'head', 'chest']) {
+            const id = eq[slot];
+            if (!id) continue;
+            // late-import safety: items table referenced at call site, fallback to 'normal'
+        }
+        // weapon element resolution happens at call sites where ITEMS is imported.
+        // For static system here, just return 'normal' baseline.
+        return player._weaponElement || 'normal';
+    },
+
+    // ── Loot ──────────────────────────────────────────────────────────────────
 
     rollDrops(monsterId, dropTables) {
         const table = dropTables[monsterId] || [];
         return table
-            .filter(entry => Math.random() < entry.chance)
+            .filter(entry => entry.guaranteed || Math.random() < (entry.chance ?? 0))
             .map(entry => entry.itemId);
     },
 
+    // ── Inventory ─────────────────────────────────────────────────────────────
+
     addToInventory(player, itemId) {
+        if (!player.inventory) player.inventory = [];
         if (player.inventory.length >= 32) return false;
         const existing = player.inventory.find(i => i.itemId === itemId);
         if (existing) {
@@ -40,7 +78,7 @@ export const CombatSystem = {
         const item = ITEMS[itemId];
         if (!item || item.type !== 'consumable') return false;
 
-        const e = item.effect;
+        const e = item.effect || {};
         if (e.hp)    player.hp    = Math.min(player.maxHp,    player.hp    + e.hp);
         if (e.focus) player.focus = Math.min(player.maxFocus, player.focus + e.focus);
 
@@ -49,21 +87,58 @@ export const CombatSystem = {
         return true;
     },
 
+    // ── Equipment ─────────────────────────────────────────────────────────────
+
     equipItem(player, itemId, ITEMS) {
         const item = ITEMS[itemId];
         if (!item || item.type !== 'equipment') return false;
         const slot = item.slot;
+        if (!slot) return false;
 
-        // Remove old bonuses
-        const old = player.equipment[slot];
-        if (old) {
-            const oldItem = ITEMS[old];
+        // Remove old bonuses + return old item to inventory
+        const oldId = player.equipment[slot];
+        if (oldId) {
+            const oldItem = ITEMS[oldId];
             if (oldItem?.bonuses) applyBonuses(player, oldItem.bonuses, -1);
+            this.addToInventory(player, oldId);
+        }
+
+        // Take from inventory
+        const invSlot = (player.inventory || []).find(s => s.itemId === itemId);
+        if (invSlot) {
+            invSlot.qty--;
+            if (invSlot.qty <= 0) player.inventory = player.inventory.filter(s => s.itemId !== itemId);
         }
 
         player.equipment[slot] = itemId;
         if (item.bonuses) applyBonuses(player, item.bonuses, 1);
+
+        // Cache weapon element for quick combat lookup
+        if (slot === 'rightHand' || slot === 'leftHand') {
+            player._weaponElement = item.element || 'normal';
+        }
+        // Cap vitals
+        player.hp    = Math.min(player.hp,    player.maxHp);
+        player.focus = Math.min(player.focus, player.maxFocus);
         return true;
+    },
+
+    unequipItem(player, slot, ITEMS) {
+        const itemId = player.equipment[slot];
+        if (!itemId) return false;
+        const item = ITEMS[itemId];
+        if (item?.bonuses) applyBonuses(player, item.bonuses, -1);
+        player.equipment[slot] = null;
+        if (slot === 'rightHand' || slot === 'leftHand') player._weaponElement = 'normal';
+        player.hp    = Math.min(player.hp,    player.maxHp);
+        player.focus = Math.min(player.focus, player.maxFocus);
+        this.addToInventory(player, itemId);
+        return true;
+    },
+
+    refreshWeaponElement(player, ITEMS) {
+        const id = player.equipment?.rightHand || player.equipment?.leftHand;
+        player._weaponElement = (id && ITEMS[id]?.element) || 'normal';
     },
 };
 

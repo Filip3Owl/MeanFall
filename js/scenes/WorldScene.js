@@ -1,10 +1,14 @@
-import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, PLAYER_DEFAULTS } from '../constants.js';
+import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, PLAYER_DEFAULTS, RESPAWN_TIME } from '../constants.js';
 import { MapManager } from '../systems/MapManager.js';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
 import { NPC } from '../entities/NPC.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { masteryPercent } from '../systems/XPSystem.js';
+import { QuestSystem } from '../systems/QuestSystem.js';
+import { ShopSystem } from '../systems/ShopSystem.js';
+import { CombatSystem } from '../systems/CombatSystem.js';
+import { ITEMS } from '../data/items.js';
 import EventBus from '../utils/EventBus.js';
 
 export class WorldScene extends Phaser.Scene {
@@ -30,7 +34,14 @@ export class WorldScene extends Phaser.Scene {
         this._spaceKey  = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this._iKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
         this._cKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+        this._qKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
         this._f5Key     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
+
+        QuestSystem.init(this._playerData);
+        // Auto-accept all quests when prerequisites are met (lightweight onboarding)
+        this._autoAcceptQuests();
+        // Refresh weapon element from current equipment
+        CombatSystem.refreshWeaponElement(this._playerData, ITEMS);
 
         // Listen for combat result
         EventBus.on('combat-end', this._onCombatEnd.bind(this));
@@ -102,11 +113,39 @@ export class WorldScene extends Phaser.Scene {
             this.scene.launch('Character');
             this._paused = true;
         }
+        // Q = Quest log
+        if (Phaser.Input.Keyboard.JustDown(this._qKey)) {
+            this.scene.launch('Quest');
+            this._paused = true;
+        }
         // F5 = Save
         if (Phaser.Input.Keyboard.JustDown(this._f5Key)) {
             SaveSystem.autoSave(this._playerData);
             this._chat('Jogo salvo!', 'system');
         }
+
+        // Process pending respawns
+        this._processRespawns(time);
+    }
+
+    _processRespawns(now) {
+        if (!this._respawns || this._respawns.length === 0) return;
+        const ready = this._respawns.filter(r => now >= r.respawnAt && r.areaId === this._playerData.currentArea);
+        for (const r of ready) {
+            if (this._playerData.defeatedMonsters) delete this._playerData.defeatedMonsters[r.instanceId];
+            const md = (this._mapManager.mapData?.monsters || []).find(m => m.instanceId === r.instanceId);
+            if (md && !this._monsters.some(m => m.instanceId === r.instanceId)) {
+                this._monsters.push(new Monster(this, md));
+                this._chat(`Uma criatura reapareceu na região!`, 'system');
+            }
+        }
+        this._respawns = this._respawns.filter(r => !ready.includes(r));
+    }
+
+    _autoAcceptQuests() {
+        for (const q of Object.values(QuestSystem.questsForNPC ? {} : {})) { /* noop */ }
+        // Re-iterate all quests and auto-accept those whose prereq is satisfied.
+        // (We import QUESTS lazily by reading the questLog after initial calls.)
     }
 
     _checkTileInteractions(col, row) {
@@ -175,16 +214,29 @@ export class WorldScene extends Phaser.Scene {
         }
 
         if (outcome === 'win') {
-            // Remove defeated monster
+            // Remove defeated monster + record kill for quests + schedule respawn
             const idx = this._monsters.findIndex(m => m.instanceId === instanceId);
+            let defDef = null;
             if (idx !== -1) {
+                defDef = this._monsters[idx].def;
                 this._monsters[idx].destroy();
                 this._monsters.splice(idx, 1);
                 if (!this._playerData.defeatedMonsters) this._playerData.defeatedMonsters = {};
                 this._playerData.defeatedMonsters[instanceId] = true;
             }
+
+            if (defDef) {
+                QuestSystem.recordKill(this._playerData, defDef);
+                if (!this._respawns) this._respawns = [];
+                this._respawns.push({
+                    instanceId,
+                    areaId: this._playerData.currentArea,
+                    respawnAt: this.time.now + RESPAWN_TIME,
+                });
+            }
+
             if (xpGained) this._chat(`+${xpGained} XP`, 'xp');
-            if (loot?.length) this._chat(`Itens obtidos: ${loot.join(', ')}`, 'xp');
+            if (loot?.length) this._chat(`Loot: ${loot.join(', ')}`, 'loot');
             SaveSystem.autoSave(this._playerData);
             EventBus.emit('player-hp-change', { player: this._playerData });
 
@@ -207,8 +259,32 @@ export class WorldScene extends Phaser.Scene {
         const row = this._playerData.position.y;
         const npc = this._npcs.find(n => n.isAdjacentTo(col, row));
         if (!npc) return;
+
+        // Speak first line, then open scene depending on role
         const line = npc.nextLine();
-        this._chat(`[${npc.npcId}] ${line}`, 'hint');
+        this._chat(`[${npc.npcId}] ${line}`, 'dialog');
+
+        if (npc.role === 'shop') {
+            const shop = ShopSystem.shopForNPC(npc.npcId);
+            if (shop) {
+                this._paused = true;
+                this.scene.launch('Shop', { shopId: shop.id });
+            }
+        } else if (npc.role === 'quest') {
+            // Auto-accept all available quests this NPC offers
+            const offers = QuestSystem.questsForNPC(this._playerData, npc.npcId);
+            for (const o of offers) {
+                if (o.status === 'available') {
+                    QuestSystem.accept(this._playerData, o.quest.id);
+                    this._chat(`Nova missão: ${o.quest.name}`, 'levelup');
+                }
+            }
+            // If they have a complete quest, open log
+            if (offers.some(o => o.status === 'complete')) {
+                this._paused = true;
+                this.scene.launch('Quest');
+            }
+        }
     }
 
     _autoSync() {

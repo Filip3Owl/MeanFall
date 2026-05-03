@@ -124,20 +124,75 @@ export const XP_TABLE = Array.from({ length: 50 }, (_, i) =>
     Math.floor(100 * Math.pow(i + 1, 1.5))
 );
 
+export const VERSION = {
+    label: 'BETA',
+    number: '0.9.0',
+    author: 'Filipe Rangel',
+};
+
+// Six elements. Each maps to a stats topic AND participates in a damage matrix.
+// `air` = generic/Normal-equivalent (no advantage/disadvantage by default).
 export const ELEMENTS = {
-    air:    { id: 'air',    name: 'Ar',     symbol: '~',  color: 0xaaccff, accent: 0xeef6ff, dark: 0x6688aa, topic: 'data_types',       topicLabel: 'Tipos de Dados' },
-    earth:  { id: 'earth',  name: 'Terra',  symbol: '#',  color: 0x886633, accent: 0xc69b5b, dark: 0x4a3820, topic: 'mean_median_mode', topicLabel: 'Tendência Central' },
-    light:  { id: 'light',  name: 'Luz',    symbol: '*',  color: 0xffdd44, accent: 0xffffaa, dark: 0xaa8800, topic: 'spread',           topicLabel: 'Dispersão' },
-    fire:   { id: 'fire',   name: 'Fogo',   symbol: '^',  color: 0xff4422, accent: 0xff9966, dark: 0x882211, topic: 'probability',      topicLabel: 'Probabilidade' },
-    water:  { id: 'water',  name: 'Água',   symbol: '=',  color: 0x3388ff, accent: 0x88ccff, dark: 0x114488, topic: 'distributions',    topicLabel: 'Distribuições' },
-    shadow: { id: 'shadow', name: 'Trevas', symbol: '%',  color: 0x6633aa, accent: 0xaa66dd, dark: 0x331155, topic: 'inference',        topicLabel: 'Inferência' },
+    fire:   { id: 'fire',   name: 'Fogo',   symbol: 'F', color: 0xff4422, accent: 0xff9966, dark: 0x882211, topic: 'probability',      topicLabel: 'Probabilidade' },
+    earth:  { id: 'earth',  name: 'Terra',  symbol: 'T', color: 0x886633, accent: 0xc69b5b, dark: 0x4a3820, topic: 'mean_median_mode', topicLabel: 'Tendência Central' },
+    water:  { id: 'water',  name: 'Água',   symbol: 'A', color: 0x3388ff, accent: 0x88ccff, dark: 0x114488, topic: 'distributions',    topicLabel: 'Distribuições' },
+    ice:    { id: 'ice',    name: 'Gelo',   symbol: 'G', color: 0x88ddee, accent: 0xccf2ff, dark: 0x336677, topic: 'spread',           topicLabel: 'Dispersão' },
+    shadow: { id: 'shadow', name: 'Trevas', symbol: 'S', color: 0x6633aa, accent: 0xaa66dd, dark: 0x331155, topic: 'inference',        topicLabel: 'Inferência' },
+    normal: { id: 'normal', name: 'Normal', symbol: 'N', color: 0xaaccff, accent: 0xeef6ff, dark: 0x6688aa, topic: 'data_types',       topicLabel: 'Tipos de Dados' },
+};
+
+// Backwards-compat: existing 'air' (originally categorical) becomes 'normal'.
+// Existing 'light' (spread) becomes 'ice'.
+export const ELEMENT_ALIASES = {
+    air:   'normal',
+    light: 'ice',
 };
 
 export const TOPIC_TO_ELEMENT = {
-    data_types:        'air',
+    data_types:        'normal',
     mean_median_mode:  'earth',
-    spread:            'light',
+    spread:            'ice',
     probability:       'fire',
     distributions:     'water',
     inference:         'shadow',
+};
+
+// Damage multiplier matrix: ELEMENT_MATRIX[attacker][defender] = multiplier.
+// 1.5 = strong against, 0.75 = weak against, 1.0 = neutral.
+export const ELEMENT_MATRIX = {
+    fire:   { fire: 1.0, earth: 1.5, water: 0.75, ice:    1.5, shadow: 1.0,  normal: 1.0 },
+    earth:  { fire: 0.75, earth: 1.0, water: 1.5,  ice:    1.0, shadow: 1.5,  normal: 1.0 },
+    water:  { fire: 1.5, earth: 0.75, water: 1.0, ice:    0.75, shadow: 1.0, normal: 1.0 },
+    ice:    { fire: 0.75, earth: 1.0, water: 1.5,  ice:    1.0, shadow: 0.75, normal: 1.0 },
+    shadow: { fire: 1.0, earth: 0.75, water: 1.0, ice:    1.5, shadow: 1.0,  normal: 1.5 },
+    normal: { fire: 1.0, earth: 1.0, water: 1.0,  ice:    1.0, shadow: 0.75, normal: 1.0 },
+};
+
+// Rarity tiers — visual + economic + power scaling.
+export const RARITIES = {
+    common:    { id: 'common',    name: 'Comum',     color: 0xaaaaaa, hex: '#aaaaaa', valueMult: 1.0,  statMult: 1.0  },
+    uncommon:  { id: 'uncommon',  name: 'Incomum',   color: 0x44cc44, hex: '#44cc44', valueMult: 2.0,  statMult: 1.4  },
+    rare:      { id: 'rare',      name: 'Raro',      color: 0x4488ff, hex: '#4488ff', valueMult: 4.0,  statMult: 1.8  },
+    epic:      { id: 'epic',      name: 'Épico',     color: 0xbb44ff, hex: '#bb44ff', valueMult: 8.0,  statMult: 2.5  },
+    legendary: { id: 'legendary', name: 'Lendário',  color: 0xffaa22, hex: '#ffaa22', valueMult: 16.0, statMult: 3.5  },
+};
+
+// Respawn timing for monsters once defeated (ms).
+export const RESPAWN_TIME = 90_000; // 90 seconds
+
+// UI semantic colors for highlighting keywords inside chat / text.
+export const UI_COLORS = {
+    damage:    '#ff5555',
+    heal:      '#55ff88',
+    loot:      '#ffd700',
+    level:     '#ffaa44',
+    xp:        '#ffaa00',
+    gold:      '#ffcc44',
+    rarity:    '#bb88ff',
+    streak:    '#ffaa44',
+    crit:      '#ff88cc',
+    hint:      '#88ccff',
+    accent:    '#d4af37',
+    muted:     '#7a7065',
+    dialog:    '#aaccee',
 };

@@ -8,7 +8,7 @@ export const MONSTERS = {
     air_wisp: {
         id: 'air_wisp',
         name: 'Wisp Tipológico',
-        element: 'air',
+        element: 'normal',
         area: 'village',
         level: 1,
         maxHp: 3,
@@ -28,7 +28,7 @@ export const MONSTERS = {
     air_sylph: {
         id: 'air_sylph',
         name: 'Sílfide Ordinal',
-        element: 'air',
+        element: 'normal',
         area: 'village',
         level: 2,
         maxHp: 5,
@@ -90,7 +90,7 @@ export const MONSTERS = {
     light_spark: {
         id: 'light_spark',
         name: 'Faísca da Variância',
-        element: 'light',
+        element: 'ice',
         area: 'forest',
         level: 5,
         maxHp: 6,
@@ -110,7 +110,7 @@ export const MONSTERS = {
     light_prism: {
         id: 'light_prism',
         name: 'Prisma do Desvio',
-        element: 'light',
+        element: 'ice',
         area: 'forest',
         level: 7,
         maxHp: 8,

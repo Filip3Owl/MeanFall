@@ -13,13 +13,15 @@ import { UIScene }        from './scenes/UIScene.js';
 import { CombatScene }    from './scenes/CombatScene.js';
 import { InventoryScene } from './scenes/InventoryScene.js';
 import { CharacterScene } from './scenes/CharacterScene.js';
+import { ShopScene }      from './scenes/ShopScene.js';
+import { QuestScene }     from './scenes/QuestScene.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './constants.js';
 
 const config = {
     type: Phaser.AUTO,
     parent: 'game-container',
     backgroundColor: '#000000',
-    scene: [BootScene, MainMenuScene, WorldScene, UIScene, CombatScene, InventoryScene, CharacterScene],
+    scene: [BootScene, MainMenuScene, WorldScene, UIScene, CombatScene, InventoryScene, CharacterScene, ShopScene, QuestScene],
     scale: {
         mode: Phaser.Scale.NONE,
         width: GAME_WIDTH,
