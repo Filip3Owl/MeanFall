@@ -48,6 +48,7 @@ export class MainMenuScene extends Phaser.Scene {
         }
 
         this._makeButton(W / 2, 300, 'Como Jogar', () => this._showHelp());
+        this._makeButton(W / 2, 350, 'Resetar Saves', () => this._resetSaves());
 
         // Player preview animation
         const px = this.add.image(W / 2, 380, 'sprite_player').setDepth(2).setScale(2);
@@ -80,6 +81,18 @@ export class MainMenuScene extends Phaser.Scene {
 
     _newGame() {
         this.scene.start('Intro');
+    }
+
+    _resetSaves() {
+        if (window.confirm('Apagar TODOS os saves? Necessário para jogar a nova versão Beta com criação de personagem.')) {
+            try {
+                localStorage.removeItem('statquest_save_v1');
+                localStorage.removeItem('meanfall_save_v1');
+                Object.keys(localStorage).filter(k => k.includes('save')).forEach(k => localStorage.removeItem(k));
+            } catch (e) { /* ignore */ }
+            window.alert('Saves apagados. A página será recarregada.');
+            window.location.reload();
+        }
     }
 
     _loadGame(saves) {
