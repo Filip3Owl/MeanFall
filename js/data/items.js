@@ -88,16 +88,16 @@ export const ITEMS = {
 
 // Tabela de drops por monstro
 export const DROP_TABLES = {
-    data_goblin:       [{ itemId: 'health_potion', chance: 0.3 }, { itemId: 'data_scroll', chance: 0.4 }],
-    data_shaman:       [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'focus_potion', chance: 0.3 }],
-    mean_troll:        [{ itemId: 'health_potion', chance: 0.35 }, { itemId: 'wooden_sword', chance: 0.1 }],
-    median_imp:        [{ itemId: 'focus_potion', chance: 0.4 }, { itemId: 'data_scroll', chance: 0.3 }],
-    spread_wolf:       [{ itemId: 'health_potion', chance: 0.3 }, { itemId: 'leather_armor', chance: 0.08 }],
-    deviation_dragon:  [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'mage_hat', chance: 0.12 }],
-    prob_specter:      [{ itemId: 'focus_potion', chance: 0.35 }, { itemId: 'data_scroll', chance: 0.25 }],
-    chance_golem:      [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'stats_amulet', chance: 0.1 }],
-    normal_lich:       [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'focus_potion', chance: 0.3 }],
-    zscore_sentinel:   [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'boots_agility', chance: 0.1 }],
-    hypothesis_demon:  [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'focus_potion', chance: 0.4 }],
-    pvalue_wraith:     [{ itemId: 'health_potion', chance: 0.6 }, { itemId: 'stats_amulet', chance: 0.15 }],
+    air_wisp:       [{ itemId: 'health_potion', chance: 0.3 }, { itemId: 'data_scroll', chance: 0.4 }],
+    air_sylph:       [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'focus_potion', chance: 0.3 }],
+    earth_golem:        [{ itemId: 'health_potion', chance: 0.35 }, { itemId: 'wooden_sword', chance: 0.1 }],
+    earth_dryad:        [{ itemId: 'focus_potion', chance: 0.4 }, { itemId: 'data_scroll', chance: 0.3 }],
+    light_spark:       [{ itemId: 'health_potion', chance: 0.3 }, { itemId: 'leather_armor', chance: 0.08 }],
+    light_prism:  [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'mage_hat', chance: 0.12 }],
+    fire_phoenix:      [{ itemId: 'focus_potion', chance: 0.35 }, { itemId: 'data_scroll', chance: 0.25 }],
+    fire_salamander:      [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'stats_amulet', chance: 0.1 }],
+    water_serpent:       [{ itemId: 'health_potion', chance: 0.4 }, { itemId: 'focus_potion', chance: 0.3 }],
+    water_leviathan:   [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'boots_agility', chance: 0.1 }],
+    shadow_specter:  [{ itemId: 'health_potion', chance: 0.5 }, { itemId: 'focus_potion', chance: 0.4 }],
+    shadow_lich:     [{ itemId: 'health_potion', chance: 0.6 }, { itemId: 'stats_amulet', chance: 0.15 }],
 };

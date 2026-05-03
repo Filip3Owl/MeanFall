@@ -1,4 +1,5 @@
 import { QUESTIONS } from '../data/questions.js';
+import { ELEMENTS, TOPIC_TO_ELEMENT } from '../constants.js';
 
 export const QuestionEngine = {
 
@@ -14,6 +15,18 @@ export const QuestionEngine = {
         }
 
         return this._pickFrom(pool, mastery);
+    },
+
+    // Element-driven selection: routes by elemental affinity to the right topic.
+    getQuestionByElement(element, allowedDifficulties, mastery, recentIds = []) {
+        const elem  = ELEMENTS[element];
+        const topic = elem?.topic;
+        if (!topic) return null;
+        return this.getQuestion(topic, allowedDifficulties, mastery, recentIds);
+    },
+
+    elementOfTopic(topic) {
+        return TOPIC_TO_ELEMENT[topic] || null;
     },
 
     _pickFrom(pool, mastery) {

@@ -123,3 +123,21 @@ export const PLAYER_DEFAULTS = {
 export const XP_TABLE = Array.from({ length: 50 }, (_, i) =>
     Math.floor(100 * Math.pow(i + 1, 1.5))
 );
+
+export const ELEMENTS = {
+    air:    { id: 'air',    name: 'Ar',     symbol: '~',  color: 0xaaccff, accent: 0xeef6ff, dark: 0x6688aa, topic: 'data_types',       topicLabel: 'Tipos de Dados' },
+    earth:  { id: 'earth',  name: 'Terra',  symbol: '#',  color: 0x886633, accent: 0xc69b5b, dark: 0x4a3820, topic: 'mean_median_mode', topicLabel: 'Tendência Central' },
+    light:  { id: 'light',  name: 'Luz',    symbol: '*',  color: 0xffdd44, accent: 0xffffaa, dark: 0xaa8800, topic: 'spread',           topicLabel: 'Dispersão' },
+    fire:   { id: 'fire',   name: 'Fogo',   symbol: '^',  color: 0xff4422, accent: 0xff9966, dark: 0x882211, topic: 'probability',      topicLabel: 'Probabilidade' },
+    water:  { id: 'water',  name: 'Água',   symbol: '=',  color: 0x3388ff, accent: 0x88ccff, dark: 0x114488, topic: 'distributions',    topicLabel: 'Distribuições' },
+    shadow: { id: 'shadow', name: 'Trevas', symbol: '%',  color: 0x6633aa, accent: 0xaa66dd, dark: 0x331155, topic: 'inference',        topicLabel: 'Inferência' },
+};
+
+export const TOPIC_TO_ELEMENT = {
+    data_types:        'air',
+    mean_median_mode:  'earth',
+    spread:            'light',
+    probability:       'fire',
+    distributions:     'water',
+    inference:         'shadow',
+};

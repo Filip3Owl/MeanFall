@@ -142,19 +142,19 @@ export function generateTextures(scene) {
     g.fillStyle(0xffd700); g.fillRect(9, 8, 10, 2);      // mouth/belt
     g.generateTexture('sprite_player', 24, 32);
 
-    // Generic monster drawer helper
-    drawMonsterSprite(g, 0x44aa44, 22, 26, 'sprite_data_goblin', true);
-    drawMonsterSprite(g, 0x228822, 24, 28, 'sprite_data_shaman', true);
-    drawMonsterSprite(g, 0x885522, 28, 28, 'sprite_mean_troll', false);
-    drawMonsterSprite(g, 0xcc4422, 20, 24, 'sprite_median_imp', true);
-    drawMonsterSprite(g, 0x556677, 26, 20, 'sprite_spread_wolf', false);
-    drawMonsterSprite(g, 0x334455, 30, 26, 'sprite_deviation_dragon', false);
-    drawMonsterSprite(g, 0xaaaa22, 22, 28, 'sprite_prob_specter', true);
-    drawMonsterSprite(g, 0x887722, 30, 30, 'sprite_chance_golem', false);
-    drawMonsterSprite(g, 0x7755aa, 24, 30, 'sprite_normal_lich', true);
-    drawMonsterSprite(g, 0x553377, 28, 30, 'sprite_zscore_sentinel', false);
-    drawMonsterSprite(g, 0xaa2222, 28, 32, 'sprite_hypothesis_demon', true);
-    drawMonsterSprite(g, 0x661111, 26, 30, 'sprite_pvalue_wraith', true);
+    // Elemental monster sprites
+    drawAirSprite   (g, 22, 24, 'sprite_air_wisp',         0xaaccff, 'small');
+    drawAirSprite   (g, 26, 30, 'sprite_air_sylph',        0xddeeff, 'tall');
+    drawEarthSprite (g, 30, 30, 'sprite_earth_golem',      0x886633, 'block');
+    drawEarthSprite (g, 24, 30, 'sprite_earth_dryad',      0x44773a, 'tree');
+    drawLightSprite (g, 22, 22, 'sprite_light_spark',      0xffee88, 'small');
+    drawLightSprite (g, 28, 30, 'sprite_light_prism',      0xffffcc, 'crystal');
+    drawFireSprite  (g, 26, 28, 'sprite_fire_phoenix',     0xff6622, 'bird');
+    drawFireSprite  (g, 30, 24, 'sprite_fire_salamander',  0xcc2200, 'lizard');
+    drawWaterSprite (g, 30, 22, 'sprite_water_serpent',    0x3388ff, 'wave');
+    drawWaterSprite (g, 32, 30, 'sprite_water_leviathan',  0x114488, 'beast');
+    drawShadowSprite(g, 26, 32, 'sprite_shadow_specter',   0x6633aa, 'wraith');
+    drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
 
     // NPC (24×32)
     g.clear();
@@ -177,24 +177,195 @@ export function generateTextures(scene) {
     g.destroy();
 }
 
-function drawMonsterSprite(g, color, w, h, key, hasEyes) {
+function shade(color, factor) {
+    const r = Math.floor(((color >> 16) & 0xff) * factor);
+    const g = Math.floor(((color >> 8)  & 0xff) * factor);
+    const b = Math.floor((color & 0xff) * factor);
+    return (Math.min(255, r) << 16) | (Math.min(255, g) << 8) | Math.min(255, b);
+}
+
+function drawAura(g, w, h, color, intensity = 0.25) {
+    g.fillStyle(color, intensity);
+    g.fillCircle(w / 2, h / 2, Math.max(w, h) / 2 + 2);
+    g.fillStyle(color, intensity * 0.5);
+    g.fillCircle(w / 2, h / 2, Math.max(w, h) / 2 + 5);
+}
+
+// AIR — ethereal wisp / winged sylph
+function drawAirSprite(g, w, h, key, color, variant) {
     g.clear();
-    const r = Math.floor(((color >> 16) & 0xff) * 0.7);
-    const gr = Math.floor(((color >> 8) & 0xff) * 0.7);
-    const b = Math.floor((color & 0xff) * 0.7);
-    const darkColor = (r << 16) | (gr << 8) | b;
+    drawAura(g, w, h, color, 0.3);
+    const dark = shade(color, 0.6);
+    if (variant === 'small') {
+        g.fillStyle(color, 0.9);
+        g.fillCircle(w / 2, h / 2, w / 2 - 2);
+        g.fillStyle(0xffffff, 0.8);
+        g.fillCircle(w / 2 - 3, h / 2 - 2, 2);
+        g.fillStyle(0x000000); g.fillCircle(w / 2 - 2, h / 2, 1);
+        g.fillCircle(w / 2 + 4, h / 2, 1);
+    } else {
+        // tall sylph: head, robe, wings
+        g.fillStyle(color, 0.85);
+        g.fillRect(w / 2 - 4, 2, 8, 8);                       // head
+        g.fillTriangle(w / 2 - 6, 8, w / 2 + 6, 8, w / 2, h - 2); // robe
+        g.fillStyle(0xffffff, 0.6);
+        g.fillTriangle(0, 8, w / 2 - 5, 12, w / 2 - 5, 18);     // left wing
+        g.fillTriangle(w, 8, w / 2 + 5, 12, w / 2 + 5, 18);     // right wing
+        g.fillStyle(0x000000); g.fillRect(w / 2 - 2, 5, 1, 1); g.fillRect(w / 2 + 1, 5, 1, 1);
+        g.fillStyle(dark); g.fillRect(w / 2 - 1, 7, 2, 1);
+    }
+    g.generateTexture(key, w, h);
+}
 
-    g.fillStyle(color); g.fillRect(2, h * 0.3, w - 4, h * 0.5);  // body
-    g.fillStyle(color); g.fillRect(3, 0, w - 6, h * 0.35);        // head
-    g.fillStyle(darkColor); g.fillRect(0, h * 0.35, 4, h * 0.3);  // left arm
-    g.fillRect(w - 4, h * 0.35, 4, h * 0.3);                       // right arm
-    g.fillRect(4, h * 0.78, (w - 8) / 2 - 1, h * 0.22);          // left leg
-    g.fillRect(w / 2 + 1, h * 0.78, (w - 8) / 2 - 1, h * 0.22); // right leg
+// EARTH — golem / dryad
+function drawEarthSprite(g, w, h, key, color, variant) {
+    g.clear();
+    drawAura(g, w, h, color, 0.18);
+    const dark  = shade(color, 0.55);
+    const light = shade(color, 1.4);
+    if (variant === 'block') {
+        // golem: blocky body
+        g.fillStyle(dark);  g.fillRect(0, h * 0.18, w, h * 0.82);
+        g.fillStyle(color); g.fillRect(2, h * 0.22, w - 4, h * 0.74);
+        g.fillStyle(light, 0.5); g.fillRect(4, h * 0.25, w - 8, 4);
+        g.fillStyle(0x442200); g.fillRect(4, h * 0.32, w - 8, 2);
+        // crystal eyes
+        g.fillStyle(0x66ddff); g.fillRect(w * 0.28, h * 0.42, 3, 3); g.fillRect(w * 0.58, h * 0.42, 3, 3);
+        g.fillStyle(dark); g.fillRect(w * 0.2, h * 0.8, w * 0.25, h * 0.2);
+        g.fillRect(w * 0.55, h * 0.8, w * 0.25, h * 0.2);
+    } else {
+        // dryad: tree-like with leaves
+        g.fillStyle(0x5c3a1e); g.fillRect(w / 2 - 3, h * 0.5, 6, h * 0.5);  // trunk
+        g.fillStyle(color);    g.fillCircle(w / 2, h * 0.32, w * 0.4);     // foliage
+        g.fillStyle(light, 0.5); g.fillCircle(w / 2 - 4, h * 0.25, w * 0.18);
+        g.fillStyle(0x000000); g.fillRect(w / 2 - 3, h * 0.32, 2, 2); g.fillRect(w / 2 + 1, h * 0.32, 2, 2);
+        g.fillStyle(0xffaa00); g.fillRect(w / 2 - 1, h * 0.42, 2, 1);
+    }
+    g.generateTexture(key, w, h);
+}
 
-    if (hasEyes) {
-        g.fillStyle(0xff2222);
-        g.fillRect(Math.floor(w * 0.28), Math.floor(h * 0.08), 3, 3);
-        g.fillRect(Math.floor(w * 0.58), Math.floor(h * 0.08), 3, 3);
+// LIGHT — spark / prism
+function drawLightSprite(g, w, h, key, color, variant) {
+    g.clear();
+    drawAura(g, w, h, 0xffffaa, 0.4);
+    if (variant === 'small') {
+        // radiant spark with rays
+        g.fillStyle(0xffffff, 0.9); g.fillCircle(w / 2, h / 2, w * 0.2);
+        g.fillStyle(color, 0.85);
+        for (let i = 0; i < 8; i++) {
+            const a = (i / 8) * Math.PI * 2;
+            const x1 = w / 2 + Math.cos(a) * w * 0.2;
+            const y1 = h / 2 + Math.sin(a) * h * 0.2;
+            const x2 = w / 2 + Math.cos(a) * w * 0.45;
+            const y2 = h / 2 + Math.sin(a) * h * 0.45;
+            g.lineStyle(2, color, 0.9); g.lineBetween(x1, y1, x2, y2);
+        }
+        g.fillStyle(0xffaa00); g.fillCircle(w / 2, h / 2, 2);
+    } else {
+        // prism: faceted crystal body
+        g.fillStyle(color, 0.9);
+        g.fillTriangle(w / 2, 0, 2, h - 2, w - 2, h - 2);
+        g.fillStyle(0xffffff, 0.5);
+        g.fillTriangle(w / 2, 4, w / 2 - 4, h * 0.6, w / 2 + 4, h * 0.6);
+        g.fillStyle(shade(color, 0.6));
+        g.lineStyle(1, shade(color, 0.4));
+        g.strokeTriangle(w / 2, 0, 2, h - 2, w - 2, h - 2);
+        g.fillStyle(0xff8800); g.fillRect(w / 2 - 2, h * 0.5, 1, 1); g.fillRect(w / 2 + 1, h * 0.5, 1, 1);
+    }
+    g.generateTexture(key, w, h);
+}
+
+// FIRE — phoenix / salamander
+function drawFireSprite(g, w, h, key, color, variant) {
+    g.clear();
+    drawAura(g, w, h, 0xff8800, 0.3);
+    const dark = shade(color, 0.6);
+    if (variant === 'bird') {
+        // phoenix
+        g.fillStyle(color); g.fillRect(w / 2 - 4, h * 0.35, 8, h * 0.45);  // body
+        g.fillStyle(0xffaa00); g.fillTriangle(w / 2, h * 0.1, w / 2 - 3, h * 0.4, w / 2 + 3, h * 0.4); // head crest
+        g.fillStyle(color, 0.8);
+        g.fillTriangle(0, h * 0.5, w / 2 - 4, h * 0.4, w / 2 - 4, h * 0.7); // left wing
+        g.fillTriangle(w, h * 0.5, w / 2 + 4, h * 0.4, w / 2 + 4, h * 0.7); // right wing
+        g.fillStyle(0xffff00); g.fillTriangle(w / 2, h, w / 2 - 3, h * 0.8, w / 2 + 3, h * 0.8); // tail flame
+        g.fillStyle(0x000000); g.fillRect(w / 2 - 2, h * 0.25, 1, 1); g.fillRect(w / 2 + 1, h * 0.25, 1, 1);
+        g.fillStyle(0xffaa00); g.fillRect(w / 2, h * 0.3, 2, 1); // beak
+    } else {
+        // salamander: low lizard body
+        g.fillStyle(color); g.fillRect(2, h * 0.4, w - 4, h * 0.45);     // body
+        g.fillStyle(color); g.fillRect(w - 8, h * 0.25, 6, h * 0.2);     // head
+        g.fillStyle(dark);  g.fillRect(0, h * 0.55, 4, 3);  g.fillRect(w - 4, h * 0.55, 4, 3); // legs
+        g.fillStyle(0xffaa00, 0.7);
+        g.fillRect(w * 0.2, h * 0.32, 3, 4); g.fillRect(w * 0.4, h * 0.3, 3, 5); g.fillRect(w * 0.6, h * 0.32, 3, 4); // back flames
+        g.fillStyle(0xffff00); g.fillRect(w - 4, h * 0.3, 1, 1); // eye
+    }
+    g.generateTexture(key, w, h);
+}
+
+// WATER — serpent / leviathan
+function drawWaterSprite(g, w, h, key, color, variant) {
+    g.clear();
+    drawAura(g, w, h, 0x88ccff, 0.25);
+    const light = shade(color, 1.5);
+    const dark  = shade(color, 0.5);
+    if (variant === 'wave') {
+        // serpent: undulating body
+        g.fillStyle(color);
+        g.fillCircle(w * 0.15, h * 0.4, h * 0.3);
+        g.fillCircle(w * 0.35, h * 0.6, h * 0.3);
+        g.fillCircle(w * 0.55, h * 0.4, h * 0.3);
+        g.fillCircle(w * 0.78, h * 0.55, h * 0.35);
+        g.fillStyle(light, 0.5);
+        g.fillCircle(w * 0.78, h * 0.5, h * 0.18); // head highlight
+        g.fillStyle(0xffffff); g.fillRect(w * 0.85, h * 0.45, 2, 2);
+        g.fillStyle(0x000000); g.fillRect(w * 0.86, h * 0.46, 1, 1);
+    } else {
+        // leviathan: armored beast
+        g.fillStyle(dark); g.fillRect(2, h * 0.3, w - 4, h * 0.6);
+        g.fillStyle(color); g.fillRect(4, h * 0.32, w - 8, h * 0.55);
+        // armor plates
+        g.fillStyle(light, 0.4);
+        for (let i = 0; i < 4; i++) g.fillRect(6 + i * 6, h * 0.35, 4, 4);
+        // horns
+        g.fillStyle(dark);
+        g.fillTriangle(w * 0.2, h * 0.3, w * 0.15, h * 0.1, w * 0.25, h * 0.25);
+        g.fillTriangle(w * 0.8, h * 0.3, w * 0.85, h * 0.1, w * 0.75, h * 0.25);
+        // eyes
+        g.fillStyle(0x88ddff); g.fillRect(w * 0.3, h * 0.45, 3, 3); g.fillRect(w * 0.6, h * 0.45, 3, 3);
+        g.fillStyle(0x000000); g.fillRect(w * 0.31, h * 0.46, 1, 1); g.fillRect(w * 0.61, h * 0.46, 1, 1);
+    }
+    g.generateTexture(key, w, h);
+}
+
+// SHADOW — specter / lich
+function drawShadowSprite(g, w, h, key, color, variant) {
+    g.clear();
+    drawAura(g, w, h, 0x220033, 0.5);
+    drawAura(g, w, h, color, 0.2);
+    const accent = shade(color, 1.6);
+    if (variant === 'wraith') {
+        // floating wraith with hood
+        g.fillStyle(color, 0.85);
+        g.fillRect(w * 0.2, 2, w * 0.6, h * 0.3);                 // hood top
+        g.fillTriangle(w * 0.15, h * 0.25, w * 0.85, h * 0.25, w / 2, h - 2); // robe
+        g.fillStyle(0x000000);
+        g.fillRect(w * 0.3, h * 0.15, w * 0.4, h * 0.18);          // hood interior shadow
+        g.fillStyle(accent);
+        g.fillRect(w * 0.36, h * 0.22, 3, 3); g.fillRect(w * 0.55, h * 0.22, 3, 3); // glowing eyes
+        g.fillStyle(0xaa66ff, 0.4); g.fillRect(w * 0.3, h * 0.7, w * 0.4, 2); // ethereal trail
+    } else {
+        // lich: bony figure with crown
+        g.fillStyle(color);
+        g.fillRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);          // robe body
+        g.fillStyle(0xddccaa); g.fillRect(w * 0.32, h * 0.05, w * 0.36, h * 0.22); // skull
+        g.fillStyle(0x000000); g.fillRect(w * 0.36, h * 0.12, 4, 4); g.fillRect(w * 0.56, h * 0.12, 4, 4); // eye sockets
+        g.fillStyle(0x66ff66); g.fillRect(w * 0.37, h * 0.13, 2, 2); g.fillRect(w * 0.57, h * 0.13, 2, 2); // green flames in sockets
+        g.fillStyle(0xffd700);
+        // crown spikes
+        g.fillTriangle(w * 0.32, h * 0.05, w * 0.36, 0,  w * 0.4, h * 0.05);
+        g.fillTriangle(w * 0.46, h * 0.05, w * 0.5,  0,  w * 0.54, h * 0.05);
+        g.fillTriangle(w * 0.6,  h * 0.05, w * 0.64, 0,  w * 0.68, h * 0.05);
+        g.fillStyle(accent, 0.6); g.fillRect(w * 0.4, h * 0.45, w * 0.2, 4); // chest gem
     }
     g.generateTexture(key, w, h);
 }

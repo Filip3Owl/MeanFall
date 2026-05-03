@@ -2,6 +2,7 @@ import { CombatSystem }          from '../systems/CombatSystem.js';
 import { QuestionEngine }         from '../systems/QuestionEngine.js';
 import { awardXP }                from '../systems/XPSystem.js';
 import { ITEMS, DROP_TABLES }     from '../data/items.js';
+import { ELEMENTS }               from '../constants.js';
 import EventBus                   from '../utils/EventBus.js';
 
 export class CombatScene extends Phaser.Scene {
@@ -32,10 +33,13 @@ export class CombatScene extends Phaser.Scene {
         // Dark overlay over WorldScene
         this.add.rectangle(0, 0, W, 480, 0x050201, 0.94).setOrigin(0, 0);
 
-        // Header
-        this.add.rectangle(0, 0, W, 28, 0x120800, 1).setOrigin(0, 0);
-        this.add.text(W / 2, 14, '⚔  COMBATE', {
-            fontSize: '13px', color: '#ffd700', fontFamily: 'Courier New',
+        // Header tinted with element color
+        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.air;
+        this.add.rectangle(0, 0, W, 28, elem.dark, 1).setOrigin(0, 0);
+        this.add.rectangle(0, 26, W, 2, elem.color, 1).setOrigin(0, 0);
+        const elemHex = '#' + elem.color.toString(16).padStart(6, '0');
+        this.add.text(W / 2, 14, `[${elem.symbol}] COMBATE — ${elem.topicLabel.toUpperCase()}`, {
+            fontSize: '12px', color: elemHex, fontFamily: 'Courier New',
         }).setOrigin(0.5, 0.5);
 
         this._buildMonsterPanel();
@@ -56,22 +60,37 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _buildMonsterPanel() {
-        this.add.rectangle(8, 28, 196, 130, 0x1a0000, 1).setOrigin(0, 0);
+        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.air;
 
+        // Panel background tinted with element color
+        const bgDark = elem.dark || 0x1a0000;
+        this.add.rectangle(8, 28, 196, 130, bgDark, 1).setOrigin(0, 0);
+        this.add.rectangle(8, 28, 196, 130, elem.color, 0).setOrigin(0, 0)
+            .setStrokeStyle(1, elem.color, 0.5);
+
+        // Sprite with elemental glow
         const texKey = `sprite_${this._monsterDef.id}`;
         if (this.textures.exists(texKey)) {
+            const aura = this.add.circle(60, 88, 32, elem.color, 0.18);
+            this.tweens.add({ targets: aura, alpha: 0.35, scale: 1.1, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
             this.add.image(60, 88, texKey).setScale(2.5);
         }
 
         this.add.text(112, 36, this._monsterDef.name, {
-            fontSize: '11px', color: '#ff8888', fontFamily: 'Courier New', wordWrap: { width: 86 },
+            fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', wordWrap: { width: 86 },
         }).setOrigin(0, 0);
         this.add.text(112, 54, `Nv. ${this._monsterDef.level}`, {
-            fontSize: '10px', color: '#666666', fontFamily: 'Courier New',
+            fontSize: '10px', color: '#888888', fontFamily: 'Courier New',
+        }).setOrigin(0, 0);
+
+        // Element badge
+        const badgeColorHex = '#' + elem.color.toString(16).padStart(6, '0');
+        this.add.text(112, 68, `[${elem.symbol}] ${elem.name}`, {
+            fontSize: '9px', color: badgeColorHex, fontFamily: 'Courier New',
         }).setOrigin(0, 0);
 
         this._mHpGfx = this.add.graphics();
-        this._mHpTxt = this.add.text(112, 86, '', { fontSize: '9px', color: '#ff6666', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._mHpTxt = this.add.text(112, 102, '', { fontSize: '9px', color: '#ff6666', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._updateMonsterBar();
     }
 
@@ -355,8 +374,8 @@ export class CombatScene extends Phaser.Scene {
         const pct = Math.max(0, this._monsterHp / this._monsterDef.maxHp);
         const g   = this._mHpGfx;
         g.clear();
-        g.fillStyle(0x330000); g.fillRect(112, 70, 68, 8);
-        g.fillStyle(0xff3333); g.fillRect(112, 70, Math.max(0, Math.floor(68 * pct)), 8);
+        g.fillStyle(0x330000); g.fillRect(112, 86, 68, 8);
+        g.fillStyle(0xff3333); g.fillRect(112, 86, Math.max(0, Math.floor(68 * pct)), 8);
         this._mHpTxt.setText(`${this._monsterHp}/${this._monsterDef.maxHp}`);
     }
 
