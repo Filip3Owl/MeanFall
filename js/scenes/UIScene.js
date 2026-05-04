@@ -117,11 +117,13 @@ export class UIScene extends Phaser.Scene {
         const div = document.createElement('div');
         div.className = `chat-msg ${type}`;
 
-        // Timestamp prefix (mm:ss)
-        const now = new Date();
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-        const tsSpan = `<span class="chat-time">[${mm}:${ss}]</span> `;
+        // Timestamp in São Paulo (Brasília) timezone — HH:MM:SS
+        const tsStr = new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false,
+        }).format(new Date());
+        const tsSpan = `<span class="chat-time">[${tsStr}]</span> `;
 
         // Apply both layers: explicit {{tag:value}} tokens and keyword auto-highlight
         const inner = highlightKeywords(richToHtml(String(text)));

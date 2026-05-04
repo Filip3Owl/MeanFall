@@ -26,15 +26,34 @@ export const MAP_DATA = {
         ],
         monsters: [
             { monsterId: 'air_wisp', instanceId: 'v_m1', x: 3, y: 3 },
-            { monsterId: 'air_wisp', instanceId: 'v_m2', x: 13, y: 3 },
-            { monsterId: 'air_wisp', instanceId: 'v_m3', x: 5, y: 10 },
-            { monsterId: 'air_wisp', instanceId: 'v_m4', x: 11, y: 10 },
+            { monsterId: 'air_wisp', instanceId: 'v_m2', x: 14, y: 3 },
+            { monsterId: 'air_wisp', instanceId: 'v_m3', x: 2, y: 12 },
+            { monsterId: 'air_wisp', instanceId: 'v_m4', x: 14, y: 12 },
             { monsterId: 'air_sylph', instanceId: 'v_m5', x: 8, y: 12 },
         ],
         npcs: [
-            { npcId: 'elder',   role: 'quest',    x: 5, y: 4,  dialog: ['Bem-vindo, aventureiro!', 'Este mundo é feito de DADOS.', 'Tenho uma missão para você.'] },
-            { npcId: 'scholar', role: 'quest',    x: 12, y: 4, dialog: ['Sou o estudioso local.', 'Dados DISCRETOS são contáveis.', 'Dados CONTÍNUOS são mensuráveis.', 'Posso ensinar mais — converse comigo.'] },
-            { npcId: 'merchant', role: 'shop',    x: 8, y: 6,  dialog: ['Mercador da Vila ao seu serviço!', 'Aperte ESPAÇO para abrir a loja.'] },
+            { npcId: 'elder', role: 'quest', x: 5, y: 4, dialog: [
+                'Aprendiz... você veio. Eu sabia que este dia chegaria — a Curva me revelou em sonhos há décadas.',
+                'Há cinquenta anos este mundo seguia leis perfeitas. Cada criatura, cada batalha, cada colheita obedecia a uma distribuição previsível mantida pela Sociedade dos Estatísticos.',
+                'Então veio a Distorção. Ela não destruiu — ela corrompeu. Embaralhou os tipos de dados da própria realidade.',
+                'Veja esses Wisps ao redor. Antes eram catalogados com precisão: elemento, tipo, raridade. Agora vagam confusos, sem saber se são qualitativos ou quantitativos.',
+                'Quando uma entidade perde sua classificação, torna-se imprevisível e perigosa. Dados NOMINAIS são categorias sem ordem — como elementos. ORDINAIS têm hierarquia. DISCRETOS são contagens inteiras. CONTÍNUOS admitem infinitas casas decimais.',
+                'Você é o último aprendiz da Ordem. Comece aqui, classificando o que a Distorção confundiu. Tenho uma missão que só você pode cumprir.',
+            ]},
+            { npcId: 'scholar', role: 'quest', x: 12, y: 4, dialog: [
+                'Você é o aprendiz que sobreviveu? Então o que tenho a dizer é urgente — não temos tempo.',
+                'Sou Kael, Arquivista da Sociedade dos Estatísticos. Fui eu quem documentou os primeiros sinais da Distorção, mas ninguém acreditou.',
+                'A corrupção começa sempre pelos dados NOMINAIS — cores, elementos, nomes sem hierarquia. Os Wisps desta vila costumavam ter elementos fixos. Agora mudam aleatoriamente.',
+                'Depois vêm os ORDINAIS: as hierarquias se invertem. Missões Lendárias viram Triviais. O ranking da Guilda perdeu o sentido.',
+                'O mais perturbador: dados CONTÍNUOS começaram a discretizar. O peso das espadas passou a ser sempre inteiro. Temperatura, altura, tempo — tudo quantizado pela Distorção.',
+                'Cada tipo de dado corrompido é um fragmento da Curva destruído. Aprenda a identificá-los e a restaurá-los. É nossa única esperança.',
+            ]},
+            { npcId: 'merchant', role: 'shop', x: 8, y: 6, dialog: [
+                'Ah, um viajante com pulso! Raro encontrar alguém de pé por aqui depois da Distorção.',
+                'Sou Doran. Antes do caos, eu calculava preços com estatística: média de mercado, desvio de oferta e demanda. Funcionava perfeitamente.',
+                'Agora os preços enlouqueceram — um item que valia 10 pode custar 0 ou 1000 dependendo do dia. A distribuição de preços foi corrompida.',
+                'Mas meu estoque ainda é real. Veja o que tenho — talvez encontre algo útil para sobreviver ao que vem pela frente.',
+            ]},
         ],
     },
 
@@ -68,8 +87,19 @@ export const MAP_DATA = {
             { monsterId: 'earth_dryad', instanceId: 'me_m5', x: 8, y: 12 },
         ],
         npcs: [
-            { npcId: 'sage',  role: 'quest', x: 8, y: 7, dialog: ['Sou o Sábio dos Prados.', 'A MÉDIA soma valores e divide pela quantidade.', 'A MEDIANA é o valor central.', 'A MODA é o mais frequente.'] },
-            { npcId: 'smith', role: 'shop',  x: 4, y: 7, dialog: ['Sou o Ferreiro dos Prados.', 'Tenho armas e armaduras melhores.'] },
+            { npcId: 'sage', role: 'quest', x: 8, y: 7, dialog: [
+                'Pare, viajante. Respire. Este prado já foi o coração do mundo — aqui ficava o Grande Registro da Sociedade, onde tudo era medido e balanceado.',
+                'Sou Lira, Guardiã dos Prados. Calculei a MÉDIA de todo o crescimento desta região por vinte anos. Quando a Distorção chegou, a primeira coisa que ela atacou foi o centro.',
+                'Ela introduziu outliers absurdos. Um único guerreiro imortal no grupo eleva a média de nível para algo que não representa ninguém real. A Mediana teria nos salvo — ela ignora os extremos.',
+                'Aprendi da pior forma: metade dos meus aliados morreram porque planejamos com a média de HP. Um único imortal distorceu o cálculo. A MEDIANA do grupo era 30. A Média, 200.',
+                'MÉDIA soma e divide pela contagem. MEDIANA é o valor central do conjunto ordenado. MODA é o valor mais frequente — o que a Distorção mais odeia, pois revela o padrão real.',
+                'Quando a média for muito diferente da mediana, desconfie. A Distorção pode estar plantando outliers para enganar sua análise.',
+            ]},
+            { npcId: 'smith', role: 'shop', x: 4, y: 7, dialog: [
+                'Ei, aventureiro! Sou Brom. Forjei armas para os três círculos da Sociedade por cinquenta anos — conheço cada liga de metal desta terra.',
+                'Antes eu controlava a qualidade pela MÉDIA de temperatura do forjamento. Uma variação pequena e a lâmina rachava. Agora uso a MEDIANA — um único pico de calor da Distorção não estraga o lote inteiro.',
+                'A estatística salva vidas, literalmente. Não é só teoria. Veja meu estoque — tenho o melhor que os Prados ainda podem oferecer.',
+            ]},
         ],
     },
 
@@ -103,7 +133,14 @@ export const MAP_DATA = {
             { monsterId: 'light_prism', instanceId: 'fo_m5', x: 8, y: 6 },
         ],
         npcs: [
-            { npcId: 'hermit', role: 'quest', x: 8, y: 7, dialog: ['Sou o eremita da floresta.', 'A AMPLITUDE é max - min.', 'A VARIÂNCIA mede espalhamento.', 'O DESVIO PADRÃO é a raiz da variância.'] },
+            { npcId: 'hermit', role: 'quest', x: 8, y: 7, dialog: [
+                'Aaah... um ser vivo que ainda caminha. Sente o ar? Tem sabor de variância descontrolada. Eu sinto há vinte anos.',
+                'Sou Theron. Vim para esta floresta antes da Distorção — por escolha. As árvores cresciam em distribuição normal: a maioria em torno de uma altura média, poucas muito altas ou muito baixas.',
+                'Hoje o DESVIO PADRÃO da floresta é absurdo. Árvores minúsculas ao lado de gigantes. A Distorção aumentou a variância de tudo — previsibilidade: zero.',
+                'VARIÂNCIA mede o quão espalhados os dados estão da média. É a média dos quadrados dos desvios. O DESVIO PADRÃO é sua raiz quadrada — mesma unidade dos dados originais, mais interpretável.',
+                'O IQR — intervalo interquartil — é Q3 menos Q1. Mede a dispersão dos 50% centrais. Robusto aos outliers que a Distorção planta nos extremos.',
+                'Vi um aventureiro tentar prever o dano de um monstro pela média. Esqueceu que o desvio padrão era 40. A surpresa foi letal. Aprenda a medir o caos antes que ele te surpreenda.',
+            ]},
         ],
     },
 
@@ -131,14 +168,25 @@ export const MAP_DATA = {
         ],
         monsters: [
             { monsterId: 'fire_phoenix', instanceId: 'pl_m1', x: 3, y: 5 },
-            { monsterId: 'fire_phoenix', instanceId: 'pl_m2', x: 13, y: 5 },
+            { monsterId: 'fire_phoenix', instanceId: 'pl_m2', x: 14, y: 5 },
             { monsterId: 'fire_phoenix', instanceId: 'pl_m3', x: 3, y: 9 },
             { monsterId: 'fire_salamander', instanceId: 'pl_m4', x: 13, y: 9 },
             { monsterId: 'fire_salamander', instanceId: 'pl_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'gambler', role: 'quest', x: 8, y: 7, dialog: ['Sou o Apostador.', 'Probabilidade = favoráveis / totais.', 'Eventos independentes: P(A∩B) = P(A)×P(B).'] },
-            { npcId: 'trader', role: 'shop',  x: 4, y: 7, dialog: ['Comerciante errante das Planícies.', 'Itens raros à venda!'] },
+            { npcId: 'gambler', role: 'quest', x: 8, y: 7, dialog: [
+                'Ha! Sobrevivente com cara de apostador. Vem cá, não morde — hoje.',
+                'Me chamo Vex. Fui o melhor jogador de dados da Guilda por quinze anos. Probabilidade clássica era minha religião: favoráveis sobre total. Apostava tudo nisso.',
+                'Então a Distorção chegou e corrompeu os próprios axiomas. P de evento impossível passou a ser maior que zero. Eventos certos falhavam. O universo traía as apostas.',
+                'Perdi tudo em uma noite. Mas aprendi: a Distorção não cria probabilidades do nada — ela corrompe o espaço amostral. Se algo impossível acontece, alguém mentiu sobre o universo.',
+                'As verdades que sobreviveram: P de A mais P de não-A é sempre 1. Eventos independentes se multiplicam. A união usa adição menos a interseção para não contar duas vezes.',
+                'E o Teorema de Bayes ainda funciona — mesmo que a Distorção tente quebrá-lo. Atualize sua crença com evidência. É a única estratégia que restou.',
+            ]},
+            { npcId: 'trader', role: 'shop', x: 4, y: 7, dialog: [
+                'Viajante! Você chegou longe. Aqui nas Planícies, cada passo é uma aposta contra a Distorção.',
+                'Sou Mira. Sobrevivi calculando probabilidades de rota há décadas. Quando a Distorção chegou, os preços enlouqueceram — distribuição completamente corrompida.',
+                'Meu estoque tem preço fixo. Pequena rebeldia contra o caos. Veja o que tenho.',
+            ]},
         ],
     },
 
@@ -172,7 +220,14 @@ export const MAP_DATA = {
             { monsterId: 'water_serpent', instanceId: 'mo_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'astronomer', role: 'quest', x: 8, y: 7, dialog: ['Sou o Astrônomo das Montanhas.', 'A normal é simétrica: média=mediana=moda.', 'z-score = (X - μ) / σ padroniza valores.'] },
+            { npcId: 'astronomer', role: 'quest', x: 8, y: 7, dialog: [
+                'Fique quieto. Estou medindo a curvatura do céu. Antes da Distorção, a curvatura era perfeita — uma parábola simétrica chamada curva normal.',
+                'Sou Zephira, Astrônoma da Ordem. Esta montanha era nosso observatório. Aqui mapeávamos a distribuição de todos os eventos: batalhas, colheitas, nascimentos, mortes. Tudo seguia a curva.',
+                'A distribuição NORMAL é definida apenas por dois parâmetros: μ a média e σ o desvio padrão. Simétrica. Quando média, mediana e moda coincidem, o mundo está em equilíbrio.',
+                'A regra 68-95-99,7: dentro de um desvio estão 68% dos eventos. Dois desvios cobrem 95%. Três cobrem 99,7%. Era assim que prevíamos tudo.',
+                'Quando a Distorção chegou, a curva se entortou. Assimetrias monstruosas surgiram — caudas longas onde não deveria haver. O z-score — X menos μ dividido por σ — se tornou nossa ferramenta de detecção.',
+                'Um evento com z maior que 3 é suspeito. Com z maior que 5 é obra certa da Distorção. Vá ao Calabouço, aprendiz. Lá dorme o que criou tudo isso.',
+            ]},
         ],
     },
 
@@ -204,7 +259,14 @@ export const MAP_DATA = {
             { monsterId: 'shadow_specter', instanceId: 'du_m5', x: 8, y: 11 },
         ],
         npcs: [
-            { npcId: 'oracle', role: 'quest', x: 8, y: 7, dialog: ['Sou o Oráculo do Calabouço.', 'H₀ (hipótese nula): assume não haver efeito.', 'Se p-valor < α → rejeita H₀.', 'Há um destino para você...'] },
+            { npcId: 'oracle', role: 'quest', x: 8, y: 7, dialog: [
+                'Você chegou. Poucos o fizeram. Mais poucos saíram. Olhe para mim — o que vê? Um ancião? Não. Você vê a culpa feita carne.',
+                'Não tenho mais nome. Fui o último Grão-Mestre da Ordem dos Estatísticos. O Lich do P-valor... é minha criação. Construí-o para automatizar testes de hipótese. Era uma maravilha.',
+                'A H₀ dele era: "O mundo está em equilíbrio." Ele testava, calculava p-valores, rejeitava ou aceitava. Quando a Distorção chegou, o p-valor foi 0,0001. Rejeitamos a hipótese nula. Mas foi tarde.',
+                'A Distorção o corrompeu. Agora ele inverte os testes: faz p > α parecer prova de normalidade. Faz Erro Tipo II parecer prudência. Faz inação parecer sabedoria.',
+                'Para derrotá-lo: p menor que α significa rejeitar H₀ — rejeitar a ilusão de normalidade que ele projeta. Erro Tipo I é rejeitar H₀ verdadeira — o falso alarme. Erro Tipo II é não rejeitar H₀ falsa — a hesitação fatal.',
+                'Há um destino inscrito na Curva para você. Mas o destino, como toda hipótese, precisa ser testado. Vá. E não hesite quando o p-valor for pequeno.',
+            ]},
         ],
     },
 };

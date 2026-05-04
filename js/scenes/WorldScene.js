@@ -88,6 +88,7 @@ export class WorldScene extends Phaser.Scene {
         const mapMons  = this._mapManager.mapData?.monsters || [];
         for (const md of mapMons) {
             if (defeated[md.instanceId]) continue;
+            if (!this._mapManager.isWalkable(md.x, md.y)) continue;
             this._monsters.push(new Monster(this, md));
         }
 
@@ -198,7 +199,7 @@ export class WorldScene extends Phaser.Scene {
         for (const r of ready) {
             if (this._playerData.defeatedMonsters) delete this._playerData.defeatedMonsters[r.instanceId];
             const md = (this._mapManager.mapData?.monsters || []).find(m => m.instanceId === r.instanceId);
-            if (md && !this._monsters.some(m => m.instanceId === r.instanceId)) {
+            if (md && this._mapManager.isWalkable(md.x, md.y) && !this._monsters.some(m => m.instanceId === r.instanceId)) {
                 const newMon = new Monster(this, md);
                 this._monsters.push(newMon);
                 this._spawnRespawnEffect(newMon);
@@ -345,16 +346,21 @@ export class WorldScene extends Phaser.Scene {
         const npc = this._npcs.find(n => n.isAdjacentTo(col, row));
         if (!npc) return;
 
-        // Build dialog lines (cycle through their script + role-specific tail)
+        // Build dialog lines (cycle through their full lore script)
         const lines = [...(npc.dialog || [])];
+
+        // Action follow-up info (shop/quest) included as final lore-flavored line
+        let action = null;
         if (npc.role === 'shop') {
-            lines.push('Quer ver minhas mercadorias?');
+            lines.push('Examine minhas mercadorias quando estiver pronto, viajante.');
+            action = { label: 'ABRIR LOJA', kind: 'shop' };
         } else if (npc.role === 'quest') {
             const offers = QuestSystem.questsForNPC(this._playerData, npc.npcId);
-            const newOnes = offers.filter(o => o.status === 'available');
             const completes = offers.filter(o => o.status === 'complete');
-            for (const o of newOnes) lines.push(`>> Missão: ${o.quest.name}`);
-            for (const o of completes) lines.push(`>> Recompensa pronta: ${o.quest.name}!`);
+            const newOnes   = offers.filter(o => o.status === 'available');
+            for (const o of newOnes)   lines.push(`Tarefa proposta: {{accent:${o.quest.name}}}.`);
+            for (const o of completes) lines.push(`Você completou: {{good:${o.quest.name}}}! Reivindique sua recompensa.`);
+            if (completes.length > 0) action = { label: 'VER MISSÕES', kind: 'quest' };
         }
 
         this._paused = true;
@@ -362,30 +368,39 @@ export class WorldScene extends Phaser.Scene {
             speaker: this._displayName(npc.npcId),
             lines,
             role: npc.role || 'quest',
+            action,
             onClose: () => this._afterDialog(npc),
+            onAction: action ? () => this._performNpcAction(action.kind, npc) : null,
         });
     }
 
-    _afterDialog(npc) {
-        if (npc.role === 'shop') {
+    _performNpcAction(kind, npc) {
+        // Called when player clicks the dialog's action button. Dialog scene
+        // already closes itself; we just open the requested overlay.
+        this._paused = true;
+        if (kind === 'shop') {
             const shop = ShopSystem.shopForNPC(npc.npcId);
-            if (shop) { this.scene.launch('Shop', { shopId: shop.id }); this._paused = true; return; }
+            if (shop) this.scene.launch('Shop', { shopId: shop.id });
+        } else if (kind === 'quest') {
+            this.scene.launch('Quest');
         }
+    }
+
+    _afterDialog(npc) {
+        // Dialog itself is already closed by DialogScene when this fires.
+        // We only handle data side-effects + side overlays the player explicitly opted into.
         if (npc.role === 'quest') {
             const offers = QuestSystem.questsForNPC(this._playerData, npc.npcId);
             for (const o of offers) {
                 if (o.status === 'available') {
                     QuestSystem.accept(this._playerData, o.quest.id);
-                    this._chat(`Nova missão: ${o.quest.name}`, 'levelup');
+                    this._chat(`Nova {{quest:missão}} aceita: {{accent:${o.quest.name}}}`, 'levelup');
                     TutorialSystem.trigger(this._playerData, this, 'quest_received');
                 }
             }
-            if (offers.some(o => o.status === 'complete')) {
-                this.scene.launch('Quest');
-                this._paused = true;
-                return;
-            }
         }
+        // Resume world; no auto-launch of shop/quest scenes.
+        // Player must press a button (already shown via dialog last line).
         this._paused = false;
     }
 

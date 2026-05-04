@@ -36,11 +36,13 @@ export class DialogScene extends Phaser.Scene {
     constructor() { super('Dialog'); }
 
     init(data) {
-        this._speaker = data.speaker || 'NPC';
-        this._lines   = data.lines   || [];
-        this._onClose = data.onClose || (() => {});
-        this._role    = data.role    || 'quest';
-        this._idx     = 0;
+        this._speaker  = data.speaker || 'NPC';
+        this._lines    = data.lines   || [];
+        this._onClose  = data.onClose || (() => {});
+        this._action   = data.action  || null;     // { label, kind } or null
+        this._onAction = data.onAction || null;
+        this._role     = data.role     || 'quest';
+        this._idx      = 0;
         this._typingTimer = null;
         this._fullText    = '';
     }
@@ -94,18 +96,56 @@ export class DialogScene extends Phaser.Scene {
         this._fullText = line;
         this._pageTx.setText(`(${this._idx + 1} / ${this._lines.length})`);
 
-        // Clear any previously rendered tokens
         if (this._lineTokens) this._lineTokens.forEach(t => t.destroy());
         this._lineTokens = [];
 
-        // Render with keyword colorization (typewriter effect via Phaser tweens
-        // would clash with multi-text layout; instead we fade the whole line in).
         const tokens = this._tokenize(line);
         this._renderTokens(tokens);
 
-        // Subtle fade-in
         for (const t of this._lineTokens) t.setAlpha(0);
         this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 220 });
+
+        // On last line, show the action button (if any)
+        const isLast = this._idx === this._lines.length - 1;
+        this._setActionButtonVisible(isLast && !!this._action);
+    }
+
+    _setActionButtonVisible(visible) {
+        if (!this._action) return;
+        if (visible && !this._actionBtn) {
+            const W = this.scale.width;
+            const boxY = W ? this.scale.height - 130 : 350;
+            const btnY = boxY + 80;
+            const color = this._action.kind === 'shop' ? 0x33aa55 : 0x4488ff;
+            this._actionBtn = this.add.rectangle(W - 130, btnY, 110, 24, color, 1)
+                .setStrokeStyle(2, 0xffffff, 0.4)
+                .setOrigin(0, 0).setInteractive()
+                .on('pointerover', () => this._actionBtn.setFillStyle(color + 0x222222))
+                .on('pointerout',  () => this._actionBtn.setFillStyle(color))
+                .on('pointerdown', (p, lx, ly, ev) => { ev.stopPropagation(); this._triggerAction(); });
+            this._actionTx = this.add.text(W - 75, btnY + 12, this._action.label, {
+                fontSize: '10px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0.5);
+        } else if (!visible && this._actionBtn) {
+            this._actionBtn.destroy(); this._actionBtn = null;
+            this._actionTx?.destroy(); this._actionTx = null;
+        }
+    }
+
+    _triggerAction() {
+        const fn = this._onAction;
+        this._onAction = null;
+        this._actionTaken = true;
+        this._destroyAll();
+        this.scene.stop('Dialog');
+        try { fn && fn(); } catch (e) {}
+    }
+
+    _destroyAll() {
+        this.children.getAll().forEach(c => c.destroy());
+        this._lineTokens = [];
+        this._shade = this._box = this._tagBg = this._tagTx = null;
+        this._promptTx = this._pageTx = this._actionBtn = this._actionTx = null;
     }
 
     _tokenize(line) {
@@ -148,7 +188,9 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _close() {
-        if (this._lineTokens) this._lineTokens.forEach(t => t.destroy());
+        if (this._actionTaken) return;
+        this._actionTaken = true;
+        this._destroyAll();
         this.scene.stop('Dialog');
         try { this._onClose(); } catch (e) { /* swallow */ }
     }
