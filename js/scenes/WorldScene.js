@@ -375,33 +375,32 @@ export class WorldScene extends Phaser.Scene {
     }
 
     _performNpcAction(kind, npc) {
-        // Called when player clicks the dialog's action button. Dialog scene
-        // already closes itself; we just open the requested overlay.
         this._paused = true;
+        let launched = false;
         if (kind === 'shop') {
             const shop = ShopSystem.shopForNPC(npc.npcId);
-            if (shop) this.scene.launch('Shop', { shopId: shop.id });
+            if (shop) { this.scene.launch('Shop', { shopId: shop.id }); launched = true; }
         } else if (kind === 'quest') {
-            this.scene.launch('Quest');
+            this.scene.launch('Quest'); launched = true;
         }
+        // Safety: if nothing opened, unpause immediately to prevent permanent freeze
+        if (!launched) this._paused = false;
     }
 
     _afterDialog(npc) {
-        // Dialog itself is already closed by DialogScene when this fires.
-        // We only handle data side-effects + side overlays the player explicitly opted into.
-        if (npc.role === 'quest') {
-            const offers = QuestSystem.questsForNPC(this._playerData, npc.npcId);
-            for (const o of offers) {
-                if (o.status === 'available') {
-                    QuestSystem.accept(this._playerData, o.quest.id);
-                    this._chat(`Nova {{quest:missão}} aceita: {{accent:${o.quest.name}}}`, 'levelup');
-                    TutorialSystem.trigger(this._playerData, this, 'quest_received');
+        this._paused = false; // FIRST — guaranteed even if something below throws
+        try {
+            if (npc.role === 'quest') {
+                const offers = QuestSystem.questsForNPC(this._playerData, npc.npcId);
+                for (const o of offers) {
+                    if (o.status === 'available') {
+                        QuestSystem.accept(this._playerData, o.quest.id);
+                        this._chat(`Nova {{quest:missão}} aceita: {{accent:${o.quest.name}}}`, 'levelup');
+                        TutorialSystem.trigger(this._playerData, this, 'quest_received');
+                    }
                 }
             }
-        }
-        // Resume world; no auto-launch of shop/quest scenes.
-        // Player must press a button (already shown via dialog last line).
-        this._paused = false;
+        } catch (e) { console.error('[WorldScene] _afterDialog error:', e); }
     }
 
     _displayName(npcId) {
