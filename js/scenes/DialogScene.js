@@ -36,15 +36,16 @@ export class DialogScene extends Phaser.Scene {
     constructor() { super('Dialog'); }
 
     init(data) {
-        this._speaker  = data.speaker || 'NPC';
-        this._lines    = data.lines   || [];
-        this._onClose  = data.onClose || (() => {});
-        this._action   = data.action  || null;     // { label, kind } or null
-        this._onAction = data.onAction || null;
-        this._role     = data.role     || 'quest';
-        this._idx      = 0;
+        this._speaker     = data.speaker || 'NPC';
+        this._lines       = data.lines   || [];
+        this._onClose     = data.onClose || (() => {});
+        this._action      = data.action  || null;     // { label, kind } or null
+        this._onAction    = data.onAction || null;
+        this._role        = data.role     || 'quest';
+        this._idx         = 0;
         this._typingTimer = null;
         this._fullText    = '';
+        this._actionTaken = false;  // MUST reset: scene object is reused across launches
     }
 
     create() {
@@ -182,6 +183,7 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _advance() {
+        if (this._actionTaken) return;
         this._idx++;
         if (this._idx >= this._lines.length) this._close();
         else this._renderLine();
