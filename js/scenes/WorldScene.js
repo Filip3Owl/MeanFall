@@ -25,6 +25,7 @@ export class WorldScene extends Phaser.Scene {
         this._mapManager = new MapManager(this);
         this._monsters   = [];
         this._npcs       = [];
+        this._npcIcons   = this.add.group();
         this._paused     = false;
         this._spaceLock  = false;
         this._respawns   = [];
@@ -93,7 +94,19 @@ export class WorldScene extends Phaser.Scene {
         }
 
         const mapNpcs = this._mapManager.mapData?.npcs || [];
-        for (const nd of mapNpcs) this._npcs.push(new NPC(this, nd));
+        this._npcIcons.clear(true, true);
+        for (const nd of mapNpcs) {
+            const npc = new NPC(this, nd);
+            this._npcs.push(npc);
+
+            // Quest indicator icon
+            const icon = this.add.text(npc.sprite.x, npc.sprite.y - 14, '!', {
+                fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5, 0.5).setDepth(100).setVisible(false);
+            icon.npcId = nd.id;
+            this._npcIcons.add(icon);
+        }
     }
 
     // ── Update loop ───────────────────────────────────────────────────────────
@@ -109,6 +122,21 @@ export class WorldScene extends Phaser.Scene {
             this._maybeNearPortalTutorial(moved.x, moved.y);
             this._maybeNearMerchantTutorial(moved.x, moved.y);
         }
+
+        // Update quest icons
+        this._npcIcons.getChildren().forEach(icon => {
+            const quests = QuestSystem.questsForNPC(this._playerData, icon.npcId);
+            const hasComplete = quests.some(q => q.status === 'complete');
+            const hasAvailable = quests.some(q => q.status === 'available');
+
+            if (hasComplete) {
+                icon.setText('?').setColor('#44ff88').setVisible(true);
+            } else if (hasAvailable) {
+                icon.setText('!').setColor('#ffd700').setVisible(true);
+            } else {
+                icon.setVisible(false);
+            }
+        });
 
         for (const m of this._monsters) m.update(delta, this._mapManager);
 

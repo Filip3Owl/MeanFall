@@ -91,14 +91,28 @@ export class QuestScene extends Phaser.Scene {
 
             // Reward summary
             const r = entry.quest.reward || {};
-            const rewardParts = [];
-            if (r.xp)   rewardParts.push(`+${r.xp} XP`);
-            if (r.gold) rewardParts.push(`+${r.gold} ouro`);
-            if (r.items?.length) rewardParts.push(...r.items.map(it => ITEMS[it.itemId]?.name || it.itemId));
-            const rewTx = this.add.text(28, y + 74, 'Recompensa: ' + rewardParts.join(' · '), {
+            const xpText = r.xp ? `+${r.xp} XP` : '';
+            const goldText = r.gold ? `+${r.gold} ouro` : '';
+            const basicRewards = [xpText, goldText].filter(t => t).join(' · ');
+            
+            const rewLbl = this.add.text(28, y + 74, 'Recompensa: ' + basicRewards, {
                 fontSize: '9px', color: '#88ccff', fontFamily: 'Courier New',
             }).setOrigin(0, 0);
-            this._listContainer.add(rewTx);
+            this._listContainer.add(rewLbl);
+
+            if (r.items?.length) {
+                let itemX = rewLbl.x + rewLbl.width + (basicRewards ? 8 : 0);
+                r.items.forEach(it => {
+                    const item = ITEMS[it.itemId];
+                    if (!item) return;
+                    const icon = this.add.image(itemX + 8, y + 78, item.icon || 'item_potion_red').setScale(0.5);
+                    const itTx = this.add.text(itemX + 18, y + 74, (it.qty > 1 ? `×${it.qty} ` : '') + item.name, {
+                        fontSize: '9px', color: RARITY_COLORS[item.rarity] || '#88ccff', fontFamily: 'Courier New',
+                    }).setOrigin(0, 0);
+                    this._listContainer.add([icon, itTx]);
+                    itemX = itTx.x + itTx.width + 10;
+                });
+            }
 
             // Claim button if complete
             if (entry.status === 'complete') {
