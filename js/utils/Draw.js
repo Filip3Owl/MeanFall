@@ -164,6 +164,13 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_cave', S, S);
 
+    // Wall Shadow
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.25);
+        g.fillRect(0, 0, S, S / 2);
+    });
+    g.generateTexture('tile_wall_shadow', S, S);
+
     // ─── SPRITES ────────────────────────────────────────────────────────────
     // Default player sprite (24×32) — overridden later by buildPlayerSprite()
     buildPlayerSprite(scene, { gender: 'male', skin: 'light', hair: 'brown', robe: 'blue' });
@@ -287,6 +294,97 @@ export function generateTextures(scene) {
     px(g, 0x33ccff, 10, 12, 4, 6); // pendant
     px(g, 0xffffff, 11, 13, 2, 2); // sparkle
     g.generateTexture('item_amulet', 24, 24);
+
+    // ─── MAP DECORATIONS (32×32) ───────────────────────────────────────────
+    
+    // Flowers
+    const drawFlower = (key, color) => {
+        g.clear();
+        px(g, 0x2d6a35, 15, 20, 2, 10); // stem
+        px(g, 0x3d8b3d, 12, 22, 3, 2);  // leaf L
+        px(g, 0x3d8b3d, 17, 24, 3, 2);  // leaf R
+        px(g, color, 13, 14, 6, 6);     // petals
+        px(g, 0xffd700, 15, 16, 2, 2);  // center
+        g.generateTexture(key, 32, 32);
+    };
+    drawFlower('deco_flower_red',   0xcc2222);
+    drawFlower('deco_flower_blue',  0x2266ff);
+    drawFlower('deco_flower_white', 0xeeeeee);
+
+    // Rocks
+    tile(g, g => {
+        px(g, 0x555555, 10, 20, 12, 8);  // base
+        px(g, 0x777777, 12, 21, 8, 6);   // mid
+        px(g, 0x999999, 14, 22, 4, 2);   // highlight
+    });
+    g.generateTexture('deco_rock_small', 32, 32);
+
+    tile(g, g => {
+        px(g, 0x444444, 6, 15, 20, 14);  // shadow/base
+        px(g, 0x666666, 8, 16, 16, 12);  // body
+        px(g, 0x888888, 10, 18, 10, 6);  // mid
+        px(g, 0xaaaaaa, 12, 19, 4, 2);   // top
+    });
+    g.generateTexture('deco_rock_large', 32, 32);
+
+    // Grass Tuft
+    tile(g, g => {
+        g.fillStyle(0x5aab64);
+        g.fillRect(10, 22, 2, 8);
+        g.fillRect(15, 18, 2, 12);
+        g.fillRect(20, 24, 2, 6);
+        g.fillRect(12, 25, 8, 1); // connector
+    });
+    g.generateTexture('deco_grass_tuft', 32, 32);
+
+    // Bones (Dungeon)
+    tile(g, g => {
+        px(g, 0xddccaa, 12, 14, 8, 4);   // skull
+        px(g, 0x000000, 14, 15, 1, 1);   // eye L
+        px(g, 0x000000, 17, 15, 1, 1);   // eye R
+        px(g, 0xddccaa, 8, 20, 16, 2);   // long bone
+        px(g, 0xccbbaa, 8, 19, 2, 4);    // bone end L
+        px(g, 0xccbbaa, 22, 19, 2, 4);   // bone end R
+    });
+    g.generateTexture('deco_bones', 32, 32);
+
+    // Cracks (Walls/Stone)
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.4);
+        g.fillRect(10, 5, 2, 10);
+        g.fillRect(11, 12, 8, 2);
+        g.fillRect(18, 10, 2, 15);
+        g.fillRect(5, 13, 10, 1);
+    });
+    g.generateTexture('deco_cracks', 32, 32);
+
+    // Cacti (Sand)
+    tile(g, g => {
+        px(g, 0x2a5a22, 13, 10, 6, 20);  // main trunk
+        px(g, 0x2a5a22, 8, 15, 5, 4);    // arm L
+        px(g, 0x2a5a22, 8, 11, 3, 4);    // arm L up
+        px(g, 0x2a5a22, 19, 18, 5, 4);   // arm R
+        px(g, 0x2a5a22, 21, 14, 3, 4);   // arm R up
+        px(g, 0x1f4a18, 14, 11, 1, 18);  // shadow line
+    });
+    g.generateTexture('deco_cactus', 32, 32);
+
+    // Ice Crystals (Snow)
+    tile(g, g => {
+        px(g, 0x88ccff, 12, 12, 8, 8);   // center
+        px(g, 0xccf0ff, 14, 8, 4, 16);   // vertical
+        px(g, 0xccf0ff, 8, 14, 16, 4);   // horizontal
+        px(g, 0xffffff, 15, 15, 2, 2);   // sparkle
+    });
+    g.generateTexture('deco_ice_crystal', 32, 32);
+
+    // Snow Mound
+    tile(g, g => {
+        px(g, 0xeeeeff, 8, 22, 16, 6);   // body
+        px(g, 0xffffff, 10, 20, 12, 4);  // top
+        px(g, 0xccccdd, 12, 24, 8, 2);   // shadow
+    });
+    g.generateTexture('deco_snow_mound', 32, 32);
 
     g.destroy();
 }

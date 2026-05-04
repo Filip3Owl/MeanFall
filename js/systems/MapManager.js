@@ -19,9 +19,11 @@ export class MapManager {
     }
 
     _buildTiles() {
-        // Clear old tiles
+        // Clear old tiles and decorations
         this.tiles.forEach(row => row.forEach(img => img.destroy()));
+        if (this._decos) this._decos.forEach(d => d.destroy());
         this.tiles = [];
+        this._decos = [];
 
         const rows = this.mapData.tiles;
         for (let row = 0; row < rows.length; row++) {
@@ -31,8 +33,51 @@ export class MapManager {
                 const texKey  = TILE_TEXTURE_MAP[tileId] ?? 'tile_grass';
                 const x = col * TILE_SIZE + TILE_SIZE / 2;
                 const y = row * TILE_SIZE + TILE_SIZE / 2;
+                
                 const img = this.scene.add.image(x, y, texKey).setDepth(0);
                 this.tiles[row][col] = img;
+
+                // Wall shadows (shadow on tile below a wall)
+                if (row > 0 && this.mapData.tiles[row - 1][col] === 3 && tileId !== 3) {
+                    const shadow = this.scene.add.image(x, y - TILE_SIZE / 2, 'tile_wall_shadow').setOrigin(0.5, 0).setDepth(0.5);
+                    this._decos.push(shadow);
+                }
+
+                // Deterministic pseudo-random decoration
+                // Using a combination of coordinates and areaId for variety
+                const seed = row * 13 + col * 37 + (this.areaId?.length || 0);
+                const noise = Math.sin(seed); 
+                const chance = (noise + 1) / 2; // 0 to 1
+
+                if (chance > 0.75) {
+                    let decoTex = null;
+                    if (tileId === 0 || tileId === 9) { // Grass / Dark Grass
+                        if (chance > 0.96) decoTex = 'deco_flower_red';
+                        else if (chance > 0.92) decoTex = 'deco_flower_blue';
+                        else if (chance > 0.88) decoTex = 'deco_flower_white';
+                        else decoTex = 'deco_grass_tuft';
+                    } else if (tileId === 1) { // Stone Path
+                        if (chance > 0.90) decoTex = 'deco_cracks';
+                        else decoTex = 'deco_rock_small';
+                    } else if (tileId === 8) { // Sand
+                        if (chance > 0.92) decoTex = 'deco_cactus';
+                        else decoTex = 'deco_rock_small';
+                    } else if (tileId === 11) { // Snow
+                        if (chance > 0.93) decoTex = 'deco_ice_crystal';
+                        else decoTex = 'deco_snow_mound';
+                    } else if (tileId === 10) { // Mountain
+                        decoTex = (chance > 0.90) ? 'deco_rock_large' : 'deco_rock_small';
+                    } else if (tileId === 12 || tileId === 3) { // Cave or Wall
+                        if (chance > 0.97) decoTex = 'deco_bones';
+                        else if (chance > 0.88) decoTex = 'deco_rock_small';
+                    }
+
+                    if (decoTex) {
+                        const deco = this.scene.add.image(x, y, decoTex).setDepth(1).setAlpha(0.85);
+                        if (noise > 0) deco.setFlipX(true);
+                        this._decos.push(deco);
+                    }
+                }
             }
         }
     }
