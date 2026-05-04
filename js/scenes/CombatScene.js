@@ -571,7 +571,8 @@ export class CombatScene extends Phaser.Scene {
             const color = RARITY_COLORS[item.rarity] || '#cccccc';
             const yLine = py2 + 78 + rowIdx * 22;
             this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0).setDepth(102);
-            this.add.text(px2 + 28, yLine + 9, item.name, {
+            this.add.image(px2 + 32, yLine + 9, item.icon || 'item_potion_red').setScale(0.6).setDepth(102);
+            this.add.text(px2 + 46, yLine + 9, item.name, {
                 fontSize: '11px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5).setDepth(102);
             this.add.text(px2 + panelW - 28, yLine + 9, (item.rarity || 'common').toUpperCase(), {

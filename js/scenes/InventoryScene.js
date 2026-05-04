@@ -42,11 +42,12 @@ export class InventoryScene extends Phaser.Scene {
         this.add.rectangle(302, 44, 228, 246, 0x080604, 1).setOrigin(0, 0);
         this.add.text(416, 50, 'Detalhes', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
-        this._detName    = this.add.text(308, 70,  '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 216 } }).setOrigin(0, 0);
+        this._detName    = this.add.text(308, 70,  '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 160 } }).setOrigin(0, 0);
         this._detRarity  = this.add.text(308, 88,  '', { fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._detType    = this.add.text(308, 102, '', { fontSize: '10px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._detDesc    = this.add.text(308, 120, '', { fontSize: '11px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
         this._detCompare = this.add.text(308, 200, '', { fontSize: '9px', color: '#88ccff', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 2 }).setOrigin(0, 0);
+        this._detIcon    = this.add.image(490, 85, '').setScale(2.5).setVisible(false);
 
         // Action buttons
         this._useBg = this.add.rectangle(308, 250, 100, 26, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
@@ -77,7 +78,7 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     _renderList() {
-        this._rows.forEach(r => { if (r.bg.destroy) { r.bg.destroy(); r.tx.destroy(); r.qty.destroy(); } });
+        this._rows.forEach(r => { if (r.bg.destroy) { r.bg.destroy(); r.tx.destroy(); r.qty.destroy(); if (r.icon) r.icon.destroy(); } });
         this._rows = [];
 
         const inv = this._player.inventory || [];
@@ -102,14 +103,15 @@ export class InventoryScene extends Phaser.Scene {
                 .on('pointerout',  () => { if (this._selectedIdx !== i) bg.setFillStyle(0x111111); })
                 .on('pointerdown', () => this._selectItem(i));
 
-            const tx = this.add.text(22, y + 10, item.name, {
+            const icon = this.add.image(28, y + 10, item.icon || 'item_potion_red').setScale(0.65);
+            const tx = this.add.text(42, y + 10, item.name, {
                 fontSize: '10px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
             const qtyTxt = this.add.text(284, y + 10, qty > 1 ? `×${qty}` : (isEq ? '[E]' : ''), {
                 fontSize: '10px', color: isEq ? '#aaaaff' : '#666666', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
-            this._rows.push({ bg, tx, qty: qtyTxt, idx: i });
+            this._rows.push({ bg, tx, qty: qtyTxt, icon, idx: i });
         }
     }
 
@@ -135,20 +137,24 @@ export class InventoryScene extends Phaser.Scene {
             const x   = 308 + col * 108;
             const y   = 320 + row * 26;
             const itemId = this._player.equipment[slot];
-            const itemName = itemId ? (ITEMS[itemId]?.name || itemId) : '—';
-            const color    = itemId ? (RARITY_COLORS[ITEMS[itemId]?.rarity] || '#aaaaff') : '#444444';
+            const item     = itemId ? ITEMS[itemId] : null;
+            const itemName = item ? item.name : '—';
+            const color    = item ? (RARITY_COLORS[item.rarity] || '#aaaaff') : '#444444';
             const fillBg   = itemId ? 0x1a1a2a : 0x0a0a0a;
 
             const bg = this.add.rectangle(x, y, 104, 24, fillBg, 1).setOrigin(0, 0);
+            let icon = null;
             if (itemId) {
                 bg.setInteractive()
                     .on('pointerover', () => bg.setFillStyle(0x331111))
                     .on('pointerout',  () => bg.setFillStyle(fillBg))
                     .on('pointerdown', () => this._unequip(slot));
+                icon = this.add.image(x + 90, y + 12, item.icon || 'item_potion_red').setScale(0.5).setAlpha(0.6);
             }
             const lblTxt  = this.add.text(x + 3, y + 2,  label,    { fontSize: '8px',  color: '#666666', fontFamily: 'Courier New' }).setOrigin(0, 0);
             const itemTxt = this.add.text(x + 3, y + 12, itemName, { fontSize: '9px',  color, fontFamily: 'Courier New' }).setOrigin(0, 0);
             this._slotRows[slot] = [bg, lblTxt, itemTxt];
+            if (icon) this._slotRows[slot].push(icon);
         });
     }
 
@@ -176,6 +182,7 @@ export class InventoryScene extends Phaser.Scene {
         this._detRarity.setText((item.rarity || 'common').toUpperCase()).setColor(rarityColor);
         this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equipamento — ${item.slot}`);
         this._detDesc.setText(item.description || '');
+        this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
 
         // Comparison with currently equipped (if equipment)
         if (item.type === 'equipment' && item.slot) {
@@ -256,6 +263,7 @@ export class InventoryScene extends Phaser.Scene {
         this._detType.setText('');
         this._detDesc.setText('');
         this._detCompare.setText('');
+        this._detIcon.setVisible(false);
         this._useBg.setVisible(false); this._useTx.setVisible(false);
         this._eqBg.setVisible(false);  this._eqTx.setVisible(false);
     }

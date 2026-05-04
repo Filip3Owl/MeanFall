@@ -184,13 +184,109 @@ export function generateTextures(scene) {
 
     drawNPCSprites(g);
 
-    // Items
-    g.clear(); g.fillStyle(0xff4444); g.fillRect(4, 2, 10, 18); g.fillStyle(0xff8888); g.fillRect(6, 4, 6, 8);
-    g.generateTexture('item_potion_red', 18, 22);
-    g.clear(); g.fillStyle(0x4444ff); g.fillRect(4, 2, 10, 18); g.fillStyle(0x8888ff); g.fillRect(6, 4, 6, 8);
-    g.generateTexture('item_potion_blue', 18, 22);
-    g.clear(); g.fillStyle(0xd4a040); g.fillRect(2, 2, 20, 18); g.fillStyle(0x8b6020); g.fillRect(2, 2, 20, 3);
-    g.generateTexture('item_scroll', 24, 22);
+    // ─── ITEM ICONS (24×24) ────────────────────────────────────────────────
+    
+    // Potions
+    const drawPotion = (key, color) => {
+        g.clear();
+        const dark = shade(color, 0.4);
+        const light = shade(color, 1.5);
+        px(g, 0x6b452e, 10, 3, 4, 3);   // cork
+        px(g, dark,      7, 6, 10, 13); // bottle outline
+        px(g, color,     8, 7, 8, 11);  // liquid
+        px(g, light,     9, 8, 3, 4);   // sparkle
+        g.generateTexture(key, 24, 24);
+    };
+    drawPotion('item_potion_red', 0xcc2222);
+    drawPotion('item_potion_blue', 0x2244cc);
+
+    // Scroll
+    g.clear();
+    px(g, 0x5c3a1e, 3, 6, 18, 12);  // backing
+    px(g, 0xf0d8a0, 4, 7, 16, 10);  // paper
+    px(g, 0xc8a060, 4, 7, 1, 10);   // left roll
+    px(g, 0xc8a060, 19, 7, 1, 10);  // right roll
+    px(g, 0x8b5c2e, 10, 8, 4, 1);   // seal
+    g.generateTexture('item_scroll', 24, 24);
+
+    // Helm: Silver bucket
+    g.clear();
+    px(g, 0x999999, 6, 4, 12, 14); // helmet body
+    px(g, 0xbbbbbb, 8, 5, 8, 4);   // top highlight
+    px(g, 0x222222, 7, 10, 10, 2); // visor slit
+    px(g, 0x777777, 6, 17, 12, 1); // bottom edge
+    g.generateTexture('item_helm', 24, 24);
+
+    // Armor: Chestplate
+    g.clear();
+    px(g, 0x999999, 4, 6, 16, 12); // main body
+    px(g, 0xbbbbbb, 6, 7, 12, 3);  // top light
+    px(g, 0x777777, 4, 6, 1, 12);  // left edge shadow
+    px(g, 0x777777, 19, 6, 1, 12); // right edge shadow
+    px(g, 0x999999, 2, 6, 4, 4);   // shoulder left
+    px(g, 0x999999, 18, 6, 4, 4);  // shoulder right
+    g.generateTexture('item_armor', 24, 24);
+
+    // Legs: Greaves
+    g.clear();
+    px(g, 0x999999, 6, 4, 5, 16);  // left leg
+    px(g, 0x999999, 13, 4, 5, 16); // right leg
+    px(g, 0xbbbbbb, 7, 5, 3, 10);  // highlights
+    px(g, 0xbbbbbb, 14, 5, 3, 10);
+    px(g, 0x777777, 6, 4, 12, 2);  // waist top
+    g.generateTexture('item_legs', 24, 24);
+
+    // Boots: Leather
+    g.clear();
+    px(g, 0x5a3a1e, 4, 10, 6, 10); // left boot
+    px(g, 0x5a3a1e, 4, 17, 10, 3); // left sole
+    px(g, 0x5a3a1e, 14, 10, 6, 10); // right boot
+    px(g, 0x5a3a1e, 14, 17, 10, 3); // right sole
+    px(g, 0x7a4a2a, 5, 11, 3, 4);  // highlights
+    px(g, 0x7a4a2a, 15, 11, 3, 4);
+    g.generateTexture('item_boots', 24, 24);
+
+    // Sword: Vertical
+    g.clear();
+    px(g, 0xaaaaaa, 11, 2, 2, 14); // blade
+    px(g, 0xcccccc, 11, 2, 1, 14); // blade light
+    px(g, 0xd4af37, 8, 16, 8, 2);  // guard
+    px(g, 0x5a3a1e, 11, 18, 2, 4); // hilt
+    g.generateTexture('item_sword', 24, 24);
+
+    // Staff
+    g.clear();
+    px(g, 0x5a3a1e, 11, 4, 2, 18); // pole
+    px(g, 0x3388ff, 10, 2, 4, 4);  // gem
+    px(g, 0x88ccff, 11, 3, 2, 2);  // gem light
+    g.generateTexture('item_staff', 24, 24);
+
+    // Shield
+    g.clear();
+    px(g, 0x5a3a1e, 4, 4, 16, 16); // wood
+    px(g, 0x999999, 4, 4, 16, 2);  // top iron
+    px(g, 0x999999, 4, 18, 16, 2); // bottom iron
+    px(g, 0x999999, 4, 4, 2, 16);  // left iron
+    px(g, 0x999999, 18, 4, 2, 16); // right iron
+    px(g, 0xbbbbbb, 11, 11, 2, 2); // center stud
+    g.generateTexture('item_shield', 24, 24);
+
+    // Ring
+    g.clear();
+    px(g, 0xd4af37, 8, 10, 8, 8);  // outer ring
+    px(g, 0x000000, 10, 12, 4, 4); // inner hole
+    px(g, 0xff4444, 11, 9, 2, 2);  // gem
+    g.generateTexture('item_ring', 24, 24);
+
+    // Amulet
+    g.clear();
+    px(g, 0xcccccc, 7, 4, 10, 1);  // top chain
+    px(g, 0xcccccc, 6, 5, 1, 6);   // side chain L
+    px(g, 0xcccccc, 17, 5, 1, 6);  // side chain R
+    px(g, 0xcccccc, 8, 11, 8, 1);  // bottom chain V
+    px(g, 0x33ccff, 10, 12, 4, 6); // pendant
+    px(g, 0xffffff, 11, 13, 2, 2); // sparkle
+    g.generateTexture('item_amulet', 24, 24);
 
     g.destroy();
 }

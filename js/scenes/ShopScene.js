@@ -64,11 +64,12 @@ export class ShopScene extends Phaser.Scene {
         this.add.text(416, 116, 'DETALHES', { fontSize: '10px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         // Detail texts
-        this._detName  = this.add.text(308, 134, '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 216 } }).setOrigin(0, 0);
+        this._detName  = this.add.text(308, 134, '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 150 } }).setOrigin(0, 0);
         this._detTier  = this.add.text(308, 154, '', { fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._detType  = this.add.text(308, 168, '', { fontSize: '10px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._detDesc  = this.add.text(308, 184, '', { fontSize: '11px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
         this._detPrice = this.add.text(308, 280, '', { fontSize: '12px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._detIcon  = this.add.image(490, 150, '').setScale(2.5).setVisible(false);
 
         this._actionBg = this.add.rectangle(308, 360, 216, 32, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._actionBg.setFillStyle(0x2a5a2a))
@@ -110,7 +111,7 @@ export class ShopScene extends Phaser.Scene {
         this._sellTab.tx.setColor(this._tab === 'sell' ? '#ffffff' : '#aaaaff');
 
         // clear old rows
-        if (this._rows) this._rows.forEach(r => { r.bg.destroy(); r.tx.destroy(); r.priceTx.destroy(); });
+        if (this._rows) this._rows.forEach(r => { r.bg.destroy(); r.tx.destroy(); r.priceTx.destroy(); if (r.icon) r.icon.destroy(); });
         this._rows = [];
 
         const list = this._tab === 'buy'
@@ -138,7 +139,8 @@ export class ShopScene extends Phaser.Scene {
                 .on('pointerout',  () => { if (this._selected !== i) bg.setFillStyle(0x111111); })
                 .on('pointerdown', () => this._selectIdx(i));
 
-            const tx = this.add.text(24, y + 10, qty > 1 ? `${item.name} ×${qty}` : item.name, {
+            const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65);
+            const tx = this.add.text(44, y + 10, qty > 1 ? `${item.name} ×${qty}` : item.name, {
                 fontSize: '10px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
 
@@ -146,7 +148,7 @@ export class ShopScene extends Phaser.Scene {
                 fontSize: '10px', color: '#ffcc44', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
-            this._rows.push({ bg, tx, priceTx, idx: i, itemId });
+            this._rows.push({ bg, tx, icon, priceTx, idx: i, itemId });
         }
     }
 
@@ -166,6 +168,7 @@ export class ShopScene extends Phaser.Scene {
         this._detTier.setText(rName.toUpperCase()).setColor(rColor);
         this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equipamento — ${item.slot}`);
         this._detDesc.setText(item.description || '');
+        this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
 
         const price = this._tab === 'buy' ? ShopSystem.buyPrice(itemId) : ShopSystem.sellPrice(itemId);
         this._detPrice.setText(`${this._tab === 'buy' ? 'Custa' : 'Vende por'}: ${price} ouro`);
@@ -201,6 +204,7 @@ export class ShopScene extends Phaser.Scene {
         this._detType.setText('');
         this._detDesc.setText('');
         this._detPrice.setText('');
+        this._detIcon.setVisible(false);
         this._actionBg.setVisible(false);
         this._actionTx.setVisible(false);
     }
