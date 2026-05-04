@@ -77,10 +77,10 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     _renderList() {
-        this._rows.forEach(r => { r.bg.destroy(); r.tx.destroy(); r.qty.destroy(); });
+        this._rows.forEach(r => { if (r.bg.destroy) { r.bg.destroy(); r.tx.destroy(); r.qty.destroy(); } });
         this._rows = [];
 
-        const inv = this._player.inventory;
+        const inv = this._player.inventory || [];
         if (inv.length === 0) {
             const empty = this.add.text(154, 240, 'Inventário vazio', { fontSize: '11px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
             this._rows.push({ bg: empty, tx: empty, qty: empty });
@@ -153,13 +153,21 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     _selectItem(idx) {
-        if (this._selectedIdx >= 0 && this._rows[this._selectedIdx]?.bg.setFillStyle) {
+        if (this._selectedIdx >= 0 && this._rows[this._selectedIdx]?.bg?.setFillStyle) {
             this._rows[this._selectedIdx].bg.setFillStyle(0x111111);
         }
-        this._selectedIdx = idx;
-        if (this._rows[idx]?.bg.setFillStyle) this._rows[idx].bg.setFillStyle(0x1a1a33);
 
-        const { itemId } = this._player.inventory[idx];
+        const invItem = this._player.inventory[idx];
+        if (!invItem) {
+            this._selectedIdx = -1;
+            this._clearDetail();
+            return;
+        }
+
+        this._selectedIdx = idx;
+        if (this._rows[idx]?.bg?.setFillStyle) this._rows[idx].bg.setFillStyle(0x1a1a33);
+
+        const { itemId } = invItem;
         const item = ITEMS[itemId];
         if (!item) return;
 
@@ -193,7 +201,10 @@ export class InventoryScene extends Phaser.Scene {
 
     _useSelected() {
         if (this._selectedIdx < 0) return;
-        const { itemId } = this._player.inventory[this._selectedIdx];
+        const invItem = this._player.inventory[this._selectedIdx];
+        if (!invItem) return;
+
+        const { itemId } = invItem;
         const ok = CombatSystem.useItem(this._player, itemId, ITEMS);
         if (ok) {
             this._actionMsg.setColor('#88ff88').setText('Item usado!');
@@ -209,7 +220,10 @@ export class InventoryScene extends Phaser.Scene {
 
     _equipSelected() {
         if (this._selectedIdx < 0) return;
-        const { itemId } = this._player.inventory[this._selectedIdx];
+        const invItem = this._player.inventory[this._selectedIdx];
+        if (!invItem) return;
+
+        const { itemId } = invItem;
         const ok = CombatSystem.equipItem(this._player, itemId, ITEMS);
         if (ok) {
             this._actionMsg.setColor('#8888ff').setText('Equipado!');
