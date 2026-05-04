@@ -13,7 +13,9 @@ export class NPC {
         const px = data.x * TILE_SIZE + TILE_SIZE / 2;
         const py = data.y * TILE_SIZE + TILE_SIZE / 2;
 
-        const texKey = this.role === 'shop' ? 'sprite_npc_shop' : 'sprite_npc';
+        const perNpc = `sprite_npc_${this.npcId}`;
+        const texKey = scene.textures.exists(perNpc) ? perNpc
+            : (this.role === 'shop' ? 'sprite_npc_shop' : 'sprite_npc');
         this.sprite  = scene.add.image(px, py, texKey).setDepth(4);
 
         // Role badge above name

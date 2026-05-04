@@ -182,26 +182,7 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 26, 32, 'sprite_shadow_specter',   0x6633aa, 'wraith');
     drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
 
-    // NPC quest-giver (gold robe)
-    g.clear();
-    g.fillStyle(0xf4c27f); g.fillRect(8, 0, 12, 11);
-    g.fillStyle(0xd4af37); g.fillRect(6, 11, 16, 12);    // gold robe
-    g.fillStyle(0xaa8800); g.fillRect(6, 23, 7, 9); g.fillRect(13, 23, 7, 9);
-    g.fillStyle(0x8b5e3c); g.fillRect(2, 13, 4, 8); g.fillRect(22, 13, 4, 8);
-    g.fillStyle(0x000000); g.fillRect(10, 3, 3, 3); g.fillRect(15, 3, 3, 3);
-    g.fillStyle(0xffffff); g.fillRect(9, 8, 10, 2);
-    g.generateTexture('sprite_npc', 24, 32);
-
-    // NPC merchant (green apron, different colors)
-    g.clear();
-    g.fillStyle(0xf4c27f); g.fillRect(8, 0, 12, 11);
-    g.fillStyle(0x44aa66); g.fillRect(6, 11, 16, 12);    // green apron
-    g.fillStyle(0x226633); g.fillRect(6, 23, 7, 9); g.fillRect(13, 23, 7, 9);
-    g.fillStyle(0x8b5e3c); g.fillRect(2, 13, 4, 8); g.fillRect(22, 13, 4, 8);
-    g.fillStyle(0x000000); g.fillRect(10, 3, 3, 3); g.fillRect(15, 3, 3, 3);
-    g.fillStyle(0xffffff); g.fillRect(9, 8, 10, 2);
-    g.fillStyle(0xffaa00); g.fillRect(11, 14, 6, 3);     // gold coin chest accent
-    g.generateTexture('sprite_npc_shop', 24, 32);
+    drawNPCSprites(g);
 
     // Items
     g.clear(); g.fillStyle(0xff4444); g.fillRect(4, 2, 10, 18); g.fillStyle(0xff8888); g.fillRect(6, 4, 6, 8);
@@ -230,6 +211,314 @@ function shade(color, factor) {
 function px(g, color, x, y, w, h) {
     g.fillStyle(color, 1);
     g.fillRect(Math.floor(x), Math.floor(y), Math.max(1, Math.floor(w)), Math.max(1, Math.floor(h)));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// NPC SPRITES  (24×32 each, one unique texture per npcId)
+// ─────────────────────────────────────────────────────────────────────────
+function drawNPCSprites(g) {
+
+    // Shared base: layered humanoid (24×32).
+    // skin/hair/body/legs are hex; accent is belt color or null.
+    function humanBase(g, skin, hair, body, legs, accent) {
+        const bDark  = shade(body, 0.60);
+        const bLight = shade(body, 1.28);
+        const sDark  = shade(skin, 0.78);
+
+        // Hair
+        px(g, shade(hair, 0.75), 7,  0, 10, 1);
+        px(g, hair,              7,  1, 10, 3);
+        px(g, shade(hair, 1.22), 8,  1,  4, 1);
+
+        // Head (sides in shadow, center lit)
+        px(g, sDark,  7, 3,  1, 8);
+        px(g, skin,   8, 3,  8, 8);
+        px(g, sDark, 16, 3,  1, 8);
+
+        // Eyebrows
+        px(g, shade(hair, 0.88),  9, 4, 2, 1);
+        px(g, shade(hair, 0.88), 13, 4, 2, 1);
+
+        // Eyes: white sclera + dark pupil + bright highlight
+        px(g, 0xffffff,  9, 5, 2, 2);  px(g, 0xffffff, 13, 5, 2, 2);
+        px(g, 0x222222, 10, 5, 1, 2);  px(g, 0x222222, 14, 5, 1, 2);
+        px(g, 0xffffff,  9, 5, 1, 1);  px(g, 0xffffff, 13, 5, 1, 1);
+
+        // Nose & mouth
+        px(g, sDark, 11, 7, 2, 2);
+        px(g, shade(skin, 0.72), 10, 9, 4, 1);
+
+        // Neck
+        px(g, skin, 10, 11, 4, 2);
+
+        // Torso (shadow wrap + main + center fold highlight)
+        px(g, bDark,  5, 12, 14, 11);
+        px(g, body,   6, 12, 12, 10);
+        px(g, bLight, 10, 13,  4,  8);
+        if (accent) px(g, accent, 6, 17, 12, 2);
+
+        // Arms + hands
+        px(g, bDark,  1, 13, 5, 8);  px(g, body,  2, 13, 4, 8);
+        px(g, skin,   2, 19, 3, 4);
+        px(g, bDark, 18, 13, 5, 8);  px(g, body, 18, 13, 4, 8);
+        px(g, skin,  19, 19, 3, 4);
+
+        // Legs + boots
+        px(g, shade(legs, 0.65),  5, 22, 6, 10);
+        px(g, legs,               6, 22, 5,  9);
+        px(g, shade(legs, 0.65), 13, 22, 6, 10);
+        px(g, legs,              13, 22, 5,  9);
+        const boot = shade(legs, 0.48);
+        px(g, boot,  5, 29, 7, 3);  px(g, boot, 12, 29, 7, 3);
+        px(g, shade(legs, 0.38),  5, 31, 2, 1);
+        px(g, shade(legs, 0.38), 18, 31, 2, 1);
+    }
+
+    // ── ELDER — white hair + beard, deep-blue robe, golden staff
+    g.clear();
+    humanBase(g, 0xf0c07a, 0xdddddd, 0x1a2d88, 0x0e1a55, 0xd4af37);
+    px(g, 0xcccccc,  6,  0, 12,  4);   // wide white hair
+    px(g, 0xeeeeee,  7,  1, 10,  3);
+    px(g, 0xcccccc,  8,  9,  8,  3);   // beard top
+    px(g, 0xdddddd,  9, 10,  6,  3);   // beard body
+    px(g, 0xbbbbbb, 10, 12,  4,  1);   // beard fade
+    px(g, shade(0xf0c07a, 0.82),  9, 6, 1, 2);  // left wrinkle
+    px(g, shade(0xf0c07a, 0.82), 14, 6, 1, 2);  // right wrinkle
+    px(g, 0x0e1a55,  7, 11, 10,  2);   // robe collar shadow
+    px(g, 0x7a4c1e, 20,  4,  3, 27);   // staff shaft
+    px(g, 0x9a6030, 21,  4,  1, 27);   // shaft highlight
+    px(g, 0xd4af37, 18,  2,  7,  4);   // staff head
+    px(g, 0xffee44, 20,  2,  3,  3);   // gem glow
+    px(g, 0xffffff, 20,  2,  1,  1);   // gem sparkle
+    g.generateTexture('sprite_npc_elder', 24, 32);
+
+    // ── SCHOLAR — purple robe, wire glasses, scroll in right hand
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x6b3d1e, 0x7744bb, 0x3d1e77, 0x9966ee);
+    px(g, 0x999999,  8, 5, 3, 3);  px(g, 0x999999, 13, 5, 3, 3);  // frames
+    px(g, 0x88aaee,  9, 5, 2, 2);  px(g, 0x88aaee, 13, 5, 2, 2);  // lenses
+    px(g, 0x777777, 11, 6, 2, 1);   // nose bridge
+    px(g, 0xf0d8a0, 19, 13, 4, 9);  // scroll body
+    px(g, 0xc8a060, 19, 13, 1, 9);  px(g, 0xc8a060, 22, 13, 1, 9); // edges
+    px(g, 0xc8a060, 19, 13, 4, 1);  px(g, 0xc8a060, 19, 21, 4, 1); // caps
+    px(g, 0x4422aa, 20, 15, 2, 1);  // rune line 1
+    px(g, 0x4422aa, 20, 17, 1, 1);  // rune line 2
+    px(g, 0x4422aa, 21, 19, 1, 1);  // rune line 3
+    g.generateTexture('sprite_npc_scholar', 24, 32);
+
+    // ── MERCHANT — green apron over brown shirt, coin pouch, wide smile
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x8b4513, 0xaa6633, 0x5c3010, 0xd4af37);
+    px(g, 0x33884d,  7, 13, 10, 10);  // apron
+    px(g, 0x44aa66,  8, 14,  8,  8);
+    px(g, 0x66cc88, 10, 15,  4,  6);  // apron highlight
+    px(g, 0x226633,  7, 13, 10,  1);  // apron top stitch
+    px(g, 0x226633,  6, 12,  2,  3);  // strap left
+    px(g, 0x226633, 16, 12,  2,  3);  // strap right
+    px(g, 0x6b3010,  6, 19,  4,  4);  // coin pouch
+    px(g, 0xd4af37,  7, 20,  2,  2);  // gold coins
+    px(g, 0xd4af37,  2, 17,  3,  3);  // coin in hand
+    px(g, 0xffdd44,  3, 18,  1,  1);
+    px(g, 0xcc7744,  9,  9,  6,  1);  // smile
+    px(g, 0xffe8c0, 10,  9,  4,  1);  // teeth
+    g.generateTexture('sprite_npc_merchant', 24, 32);
+
+    // ── SAGE — deep hood, teal robe with gold trim, glowing hands/eyes
+    g.clear();
+    const sageRobe = 0x156060;
+    const sageDark = 0x0a3a3a;
+    const sageLt   = 0x2a9090;
+    px(g, sageDark,  4,  0, 16, 14);  // hood outer
+    px(g, sageRobe,  6,  1, 12, 12);  // hood inner
+    px(g, sageLt,    9,  2,  6,  2);  // hood highlight
+    px(g, 0xc09060,  8,  4,  8,  7);  // shadowed face
+    px(g, shade(0xc09060, 0.78),  8, 4, 1, 7);
+    px(g, shade(0xc09060, 0.78), 15, 4, 1, 7);
+    px(g, 0x004444,  9,  6,  2,  2);  px(g, 0x004444, 13, 6, 2, 2);  // eye base
+    px(g, 0x00ffcc, 10,  6,  1,  1);  px(g, 0x00ffcc, 14, 6, 1, 1);  // glow
+    px(g, 0xc09060, 10, 11,  4,  2);  // neck
+    px(g, 0xd4af37,  8, 11,  8,  2);  // gold collar
+    px(g, sageDark,  5, 12, 14, 11);
+    px(g, sageRobe,  6, 12, 12, 10);
+    px(g, sageLt,   10, 13,  4,  8);
+    px(g, 0xd4af37,  6, 12, 12,  1);  // trim top
+    px(g, 0xd4af37,  6, 17, 12,  1);  // trim belt
+    px(g, sageDark,  1, 13,  5,  8);  px(g, sageRobe,  2, 13, 4, 8);
+    px(g, sageDark, 18, 13,  5,  8);  px(g, sageRobe, 18, 13, 4, 8);
+    px(g, 0x66ffdd,  2, 19,  3,  4);  px(g, 0x66ffdd, 19, 19, 3, 4);  // glowing hands
+    px(g, 0x00ffcc,  3, 21,  1,  1);  px(g, 0x00ffcc, 20, 21, 1, 1);
+    px(g, sageDark,  4, 22, 16, 10);  // wide robe hem
+    px(g, sageRobe,  5, 22, 14,  9);
+    px(g, sageLt,    9, 24,  6,  6);
+    px(g, 0xd4af37,  5, 30, 14,  2);  // gold hem
+    g.generateTexture('sprite_npc_sage', 24, 32);
+
+    // ── SMITH — tanned, red bandana, thick leather apron, hammer
+    g.clear();
+    const smSkin = 0xcc8855;
+    humanBase(g, smSkin, 0x2a1400, 0x8b5c2e, 0x3d2810, 0x661100);
+    px(g, 0xcc2200,  7,  0, 10,  4);  // red bandana
+    px(g, 0xee3311,  8,  0,  5,  2);
+    px(g, 0xaa1100,  7,  3, 10,  1);  // bandana fold
+    px(g, 0xaa1100, 16,  0,  3,  3);  // bandana knot
+    px(g, shade(0x8b5c2e, 0.55),  0, 12, 6, 9);  // wide left arm
+    px(g, 0x8b5c2e,               1, 12, 5, 9);
+    px(g, smSkin,                  1, 18, 4, 4);
+    px(g, shade(0x8b5c2e, 0.55), 18, 12, 6, 9);
+    px(g, 0x8b5c2e,              18, 12, 5, 9);
+    px(g, smSkin,                19, 18, 4, 4);
+    px(g, 0x5c3010,  6, 13, 12, 10);  // leather apron
+    px(g, 0x7a4a1a,  7, 14, 10,  8);
+    px(g, 0x9a6030, 10, 15,  4,  6);  // apron highlight
+    px(g, 0x3d2008,  6, 13, 12,  1);  // stitch top
+    px(g, 0x3d2008,  6, 22, 12,  1);  // stitch bottom
+    px(g, 0xd4af37,  7, 14,  2,  2);  px(g, 0xd4af37, 15, 14, 2, 2);  // rivets
+    px(g, 0xd4af37,  7, 21,  2,  2);  px(g, 0xd4af37, 15, 21, 2, 2);
+    px(g, 0x888888, 20, 14,  3,  9);  // hammer handle
+    px(g, 0x9a9a9a, 21, 14,  1,  8);
+    px(g, 0x777777, 17, 12,  8,  4);  // hammer head
+    px(g, 0xcccccc, 18, 12,  3,  2);  // head highlight
+    px(g, 0x444444, 17, 15,  8,  1);  // shadow under head
+    g.generateTexture('sprite_npc_smith', 24, 32);
+
+    // ── HERMIT — weathered skin, wild hair, ragged earth cloak, rope belt
+    g.clear();
+    humanBase(g, 0xc87840, 0x554433, 0x5a3c1e, 0x2e1c08, 0x9a7040);
+    px(g, 0x443322,  5,  0, 14,  5);  // wild hair mass
+    px(g, 0x665544,  5,  0,  5,  3);  // left tuft
+    px(g, 0x665544, 14,  1,  5,  4);  // right tuft
+    px(g, 0x443322,  4,  3,  3,  2);  // stray left
+    px(g, 0x443322, 17,  2,  3,  3);  // stray right
+    px(g, 0xaaaaaa,  8,  1,  2,  3);  // gray streak left
+    px(g, 0xaaaaaa, 14,  2,  2,  2);  // gray streak right
+    px(g, 0x775544,  9,  9,  6,  2);  // stubble
+    px(g, 0x885544,  9, 10,  6,  3);  // beard start
+    px(g, 0x2e1c08,  4, 18,  2,  5);  // ragged cloak left
+    px(g, 0x2e1c08, 18, 19,  2,  4);  // ragged cloak right
+    px(g, 0x2e1c08,  5, 29,  2,  3);  // torn hem left
+    px(g, 0x2e1c08, 17, 30,  2,  2);  // torn hem right
+    px(g, 0xc89040,  5, 18, 14,  2);  // rope belt
+    px(g, 0xa07030,  6, 18,  3,  1);  // rope knot
+    px(g, 0x2d6a35,  1, 14,  3,  4);  // vine left
+    px(g, 0x3d8b3d,  2, 15,  2,  2);
+    px(g, 0x2d6a35, 20, 16,  3,  3);  // vine right
+    g.generateTexture('sprite_npc_hermit', 24, 32);
+
+    // ── GAMBLER — dark brim hat with gold band, red vest, playing cards
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x1a0a00, 0xaa1111, 0x1a0800, 0xffcc00);
+    px(g, 0x2a0a0a,  3,  2, 18,  2);  // hat brim
+    px(g, 0x550f0f,  7,  0, 10,  4);  // hat crown
+    px(g, 0x881111,  8,  0,  4,  2);  // crown highlight
+    px(g, 0xffcc00,  6,  3, 12,  1);  // gold hat band
+    px(g, 0xffffff,  9, 11,  6,  3);  // white collar
+    px(g, 0xffffff,  2, 18,  3,  3);  // left cuff
+    px(g, 0xffffff, 19, 18,  3,  3);  // right cuff
+    px(g, 0x881111,  7, 13,  4,  8);  // vest lapel left
+    px(g, 0x881111, 13, 13,  4,  8);  // vest lapel right
+    px(g, 0xcc1111,  8, 14,  3,  6);
+    px(g, 0xcc1111, 13, 14,  3,  6);
+    px(g, 0xffffff,  0, 15,  3,  6);  // card fan
+    px(g, 0xcc2222,  0, 15,  1,  2);  // red suit
+    px(g, 0xcc2222,  0, 20,  1,  2);
+    px(g, 0x222222,  1, 16,  1,  1);  // pip
+    px(g, 0x222222,  0, 18,  1,  1);
+    px(g, 0xd4af37, 10, 18,  4,  1);  // watch chain
+    g.generateTexture('sprite_npc_gambler', 24, 32);
+
+    // ── TRADER — floppy travel hat, tan cloak, backpack
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x5c3a1e, 0x996633, 0x5a3a1a, 0x7a5020);
+    px(g, 0x5c3a10,  2,  3, 20,  2);  // hat brim
+    px(g, 0x7a5020,  6,  0, 12,  4);  // hat crown
+    px(g, 0x9a6830,  7,  0,  5,  2);  // crown highlight
+    px(g, 0x5c3a1e, 18, 11,  6, 12);  // backpack
+    px(g, 0x7a5020, 19, 12,  5, 10);
+    px(g, 0x9a6830, 20, 13,  2,  4);  // pack highlight
+    px(g, 0xd4af37, 20, 17,  3,  2);  // pack buckle
+    px(g, 0x5c3a1e,  6, 12,  2, 10);  // pack strap
+    px(g, 0x5c3a1e,  5, 19,  4,  4);  // belt pouch
+    px(g, 0x7a5020,  6, 20,  2,  2);
+    px(g, 0x9a7040,  5, 28,  7,  4);  // dusty boots
+    px(g, 0x9a7040, 12, 28,  7,  4);
+    px(g, 0xccaa66,  6, 31,  3,  1);
+    px(g, 0xccaa66, 13, 31,  3,  1);
+    g.generateTexture('sprite_npc_trader', 24, 32);
+
+    // ── ASTRONOMER — pointed hat with stars, dark navy cloak, telescope
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x1a1a44, 0x0e0e55, 0x080833, 0x3333aa);
+    px(g, 0x080833,  9,  0,  6,  3);  // hat cone
+    px(g, 0x0e0e55,  8,  1,  8,  1);  // cone mid
+    px(g, 0x0e0e55,  5,  3, 14,  2);  // hat brim
+    px(g, 0x3333aa,  6,  4, 12,  1);  // brim highlight
+    px(g, 0xffdd44, 10,  1,  1,  1);  // hat star
+    px(g, 0xaaccff,  7,  4,  1,  1);  // hat sparkle
+    px(g, 0xffdd44, 15,  3,  1,  1);
+    px(g, 0xffdd44,  8, 14,  1,  1);  // cloak stars
+    px(g, 0xaaccff, 14, 18,  1,  1);
+    px(g, 0xffdd44,  7, 22,  1,  1);
+    px(g, 0xaaccff, 15, 25,  1,  1);
+    px(g, 0xffdd44, 10, 27,  1,  1);
+    px(g, 0xaa8833, 18, 16,  6,  3);  // telescope body
+    px(g, 0xd4af37, 18, 16,  6,  1);  // top edge gold
+    px(g, 0xd4af37, 18, 18,  6,  1);  // bottom edge gold
+    px(g, 0x88aaff, 23, 16,  2,  3);  // objective lens
+    g.generateTexture('sprite_npc_astronomer', 24, 32);
+
+    // ── ORACLE — ethereal, silver hair, lavender robe, glowing eyes, third eye
+    g.clear();
+    const oRobe = 0xbbaaee;
+    const oDark = 0x7755bb;
+    const oLt   = 0xddd0ff;
+    px(g, 0x9966ff,  0,  8,  2,  2);  // floating wisps
+    px(g, 0xaaaaff, 22, 12,  2,  2);
+    px(g, 0x9966ff,  1, 22,  2,  1);
+    px(g, 0xaaaaff, 21, 25,  2,  1);
+    px(g, 0xaabbcc,  5,  0, 14,  2);  // silver hair
+    px(g, 0xddeeff,  6,  1, 12,  4);
+    px(g, 0xffffff,  7,  1,  5,  2);  // hair highlight
+    px(g, 0xbbccdd, 14,  0,  5,  4);
+    px(g, 0xccddee,  6,  8,  2,  3);  // hair strands
+    px(g, 0xccddee, 16,  8,  2,  3);
+    px(g, 0xe8d8ff,  8,  3,  8,  8);  // pale face
+    px(g, shade(0xe8d8ff, 0.82),  8, 3, 1, 8);
+    px(g, shade(0xe8d8ff, 0.82), 15, 3, 1, 8);
+    px(g, 0xffaaff, 11,  4,  2,  1);  // third eye
+    px(g, 0xff88ff, 11,  4,  1,  1);
+    px(g, 0xcc99ff,  9,  5,  2,  2);  px(g, 0xcc99ff, 13, 5, 2, 2);  // glowing eyes
+    px(g, 0xffffff, 10,  5,  1,  1);  px(g, 0xffffff, 14, 5, 1, 1);
+    px(g, 0xccddff,  9,  4,  2,  1);  px(g, 0xccddff, 13, 4, 2, 1);  // eyebrows
+    px(g, shade(0xe8d8ff, 0.85), 11, 7, 2, 2);  // faint nose
+    px(g, 0xcc99ee, 10,  9,  4,  1);  // mouth
+    px(g, 0xe8d8ff, 10, 11,  4,  2);  // neck
+    px(g, 0xd4af37,  7, 11, 10,  2);  // gem collar
+    px(g, 0xffeeaa, 11, 11,  2,  2);  // center gem
+    px(g, oDark,     4, 12, 16, 11);  // body
+    px(g, oRobe,     5, 12, 14, 10);
+    px(g, oLt,      10, 13,  4,  8);
+    px(g, 0xd4af37,  5, 12, 14,  1);  // gold trim top
+    px(g, oDark,     1, 13,  5,  8);  px(g, oRobe,  2, 13, 4, 8);  // arms
+    px(g, 0xe8d8ff,  2, 19,  3,  4);
+    px(g, oDark,    18, 13,  5,  8);  px(g, oRobe, 18, 13, 4, 8);
+    px(g, 0xe8d8ff, 19, 19,  3,  4);
+    px(g, oDark,     3, 22, 18, 10);  // wide floating hem
+    px(g, oRobe,     4, 22, 16,  9);
+    px(g, oLt,       9, 24,  6,  6);
+    px(g, 0xd4af37,  4, 30, 16,  2);  // gold hem
+    px(g, 0xffffff, 11, 26,  2,  2);  // center rune
+    px(g, 0xdd99ff, 11, 27,  2,  1);
+    g.generateTexture('sprite_npc_oracle', 24, 32);
+
+    // ── Legacy fallback textures (used when npcId has no dedicated sprite)
+    g.clear();
+    humanBase(g, 0xf0c07a, 0xdddddd, 0x1a2d88, 0x0e1a55, 0xd4af37);
+    px(g, 0xcccccc, 6, 0, 12, 4);
+    g.generateTexture('sprite_npc', 24, 32);
+
+    g.clear();
+    humanBase(g, 0xf4c27f, 0x8b4513, 0x44aa66, 0x225533, 0xd4af37);
+    g.generateTexture('sprite_npc_shop', 24, 32);
 }
 
 // AIR — ethereal wisp / winged sylph
