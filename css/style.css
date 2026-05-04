@@ -357,9 +357,19 @@ body {
 .chat-msg {
     font-size: 11px;
     color: var(--text-dim);
-    line-height: 1.4;
+    line-height: 1.6;
     font-family: 'Courier New', monospace;
+    padding: 1px 0;
+    border-left: 2px solid transparent;
+    padding-left: 4px;
+    transition: background 0.2s;
 }
+.chat-msg:hover { background: rgba(212, 175, 55, 0.05); }
+.chat-msg.levelup    { border-left-color: #ffaa44; }
+.chat-msg.loot       { border-left-color: #ffd700; }
+.chat-msg.error      { border-left-color: #ff5555; }
+.chat-msg.portal     { border-left-color: #cc88ff; }
+.chat-msg.dialog     { border-left-color: #aaccee; }
 .chat-msg.system     { color: var(--text-mute); }
 .chat-msg.combat-hit { color: var(--damage); font-weight: bold; }
 .chat-msg.combat-win { color: var(--heal); font-weight: bold; }
@@ -376,9 +386,34 @@ body {
 .chat-time {
     color: #555a68;
     font-size: 9px;
-    margin-right: 2px;
+    margin-right: 4px;
     font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
 }
+
+/* Keyword highlights — used inside chat lines and dialog overlays */
+.kw-damage    { color: #ff5566; font-weight: bold; }
+.kw-heal      { color: #55ff88; font-weight: bold; }
+.kw-crit      { color: #ff88cc; font-weight: bold; text-shadow: 0 0 4px rgba(255,136,204,0.5); }
+.kw-dodge     { color: #88ccff; font-weight: bold; }
+.kw-xp        { color: #ffaa22; font-weight: bold; }
+.kw-gold      { color: #ffd700; font-weight: bold; }
+.kw-level     { color: #ffaa44; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+.kw-focus     { color: #88aaff; font-weight: bold; }
+.kw-loot      { color: #ffd700; font-weight: bold; }
+.kw-good      { color: #88ff88; font-weight: bold; }
+.kw-bad       { color: #ff5555; font-weight: bold; }
+.kw-quest     { color: #88ccff; font-weight: bold; }
+.kw-rarity    { color: #bb88ff; font-weight: bold; }
+.kw-uncommon  { color: #44cc44; font-weight: bold; }
+.kw-rare      { color: #4488ff; font-weight: bold; }
+.kw-epic      { color: #bb44ff; font-weight: bold; text-shadow: 0 0 4px rgba(187,68,255,0.5); }
+.kw-legendary { color: #ffaa22; font-weight: bold; text-shadow: 0 0 6px rgba(255,170,34,0.6); }
+.kw-fire      { color: #ff6644; font-weight: bold; }
+.kw-water     { color: #4488ff; font-weight: bold; }
+.kw-earth     { color: #aa8844; font-weight: bold; }
+.kw-ice       { color: #88ddff; font-weight: bold; }
+.kw-shadow    { color: #bb88ff; font-weight: bold; }
 
 /* ─── FOOTER ──────────────────────────────────────────────────────────── */
 #game-footer {

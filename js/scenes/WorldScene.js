@@ -143,6 +143,55 @@ export class WorldScene extends Phaser.Scene {
         if (changed) EventBus.emit('player-hp-change', { player: p });
     }
 
+    _spawnRespawnEffect(monster) {
+        // Visual fanfare when a creature reappears: pulsing rings + sprite fade-in
+        const cx = monster.tileX * TILE_SIZE + TILE_SIZE / 2;
+        const cy = monster.tileY * TILE_SIZE + TILE_SIZE / 2;
+        const elemColor = monster.def.color || 0xffffff;
+
+        // Sprite fade in from invisible + scale punch
+        if (monster.sprite) {
+            monster.sprite.setAlpha(0).setScale(0.2);
+            this.tweens.add({
+                targets: monster.sprite, alpha: 1, scale: 1,
+                duration: 600, ease: 'Back.easeOut',
+            });
+        }
+        if (monster._nameLabel) {
+            monster._nameLabel.setAlpha(0);
+            this.tweens.add({ targets: monster._nameLabel, alpha: 1, duration: 800, delay: 200 });
+        }
+
+        // Two expanding rings of color
+        const makeRing = (delay) => {
+            const ring = this.add.circle(cx, cy, 4, elemColor, 0).setStrokeStyle(2, elemColor, 0.9).setDepth(7);
+            this.tweens.add({
+                targets: ring,
+                radius: 24, alpha: 0,
+                duration: 700, delay,
+                ease: 'Sine.easeOut',
+                onComplete: () => ring.destroy(),
+            });
+        };
+        makeRing(0);
+        makeRing(180);
+
+        // Sparkle particles around the spawn point
+        for (let i = 0; i < 8; i++) {
+            const a = (i / 8) * Math.PI * 2;
+            const dx = Math.cos(a) * 16;
+            const dy = Math.sin(a) * 16;
+            const spark = this.add.rectangle(cx, cy, 2, 2, 0xffffff, 1).setDepth(8);
+            this.tweens.add({
+                targets: spark,
+                x: cx + dx, y: cy + dy, alpha: 0,
+                duration: 600,
+                ease: 'Quad.easeOut',
+                onComplete: () => spark.destroy(),
+            });
+        }
+    }
+
     _processRespawns(now) {
         if (!this._respawns?.length) return;
         const ready = this._respawns.filter(r => now >= r.respawnAt && r.areaId === this._playerData.currentArea);
@@ -150,8 +199,10 @@ export class WorldScene extends Phaser.Scene {
             if (this._playerData.defeatedMonsters) delete this._playerData.defeatedMonsters[r.instanceId];
             const md = (this._mapManager.mapData?.monsters || []).find(m => m.instanceId === r.instanceId);
             if (md && !this._monsters.some(m => m.instanceId === r.instanceId)) {
-                this._monsters.push(new Monster(this, md));
-                this._chat(`Uma criatura reapareceu na região!`, 'system');
+                const newMon = new Monster(this, md);
+                this._monsters.push(newMon);
+                this._spawnRespawnEffect(newMon);
+                this._chat(`{{accent:${newMon.def.name}}} reapareceu na região.`, 'system');
             }
         }
         this._respawns = this._respawns.filter(r => !ready.includes(r));
@@ -190,16 +241,16 @@ export class WorldScene extends Phaser.Scene {
 
             if (!levelOk || !mastOk) {
                 const reasons = [];
-                if (!levelOk) reasons.push(`nível ${unlock.minLevel}`);
-                if (!mastOk)  reasons.push(`${unlock.masteryPct}% de maestria em ${AREA_INFO[unlock.masteryArea]?.displayName}`);
-                this._chat(`Portal bloqueado! Necessita: ${reasons.join(' e ')}.`, 'error');
+                if (!levelOk) reasons.push(`{{level:nível ${unlock.minLevel}}}`);
+                if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em ${AREA_INFO[unlock.masteryArea]?.displayName}`);
+                this._chat(`{{bad:Portal bloqueado!}} Necessita: ${reasons.join(' e ')}.`, 'error');
                 this._playerData.position.y -= 1;
                 this._player.syncSprite();
                 return;
             }
         }
 
-        this._chat(`Viajando para ${AREA_INFO[nextArea]?.displayName}...`, 'portal');
+        this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
         this._playerData.currentArea = nextArea;
         this._playerData.position    = { ...exit.targetSpawn };
         this._playerData.lastSafePosition = { ...exit.targetSpawn };
@@ -247,9 +298,9 @@ export class WorldScene extends Phaser.Scene {
                     respawnAt: this.time.now + RESPAWN_TIME,
                 });
             }
-            if (xpGained) this._chat(`+${xpGained} XP`, 'xp');
+            if (xpGained) this._chat(`{{xp:+${xpGained} XP}} obtido em batalha.`, 'xp');
             if (loot?.length) {
-                this._chat(`Loot: ${loot.join(', ')}`, 'loot');
+                this._chat(`{{loot:LOOT:}} ${loot.join(', ')}`, 'loot');
                 this._playerData.pendingItemAlert = true;
                 EventBus.emit('item-alert', { player: this._playerData });
                 if (loot.some(s => s.startsWith('Livro:'))) {

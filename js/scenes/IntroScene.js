@@ -1,4 +1,5 @@
 import { STORY } from '../data/lore.js';
+import { layoutRichText } from '../utils/RichText.js';
 
 /**
  * IntroScene — animated prologue text. Plays once before character creation
@@ -28,18 +29,21 @@ export class IntroScene extends Phaser.Scene {
             fontSize: '11px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(0.5, 0);
 
-        // Prologue lines fade-in sequentially
+        // Prologue lines fade-in sequentially with rich coloring
         const lines = STORY.prologueLines;
-        const startY = 130;
-        const lineHeight = 30;
+        let cursorY = 120;
 
         lines.forEach((line, i) => {
-            const txt = this.add.text(W / 2, startY + i * lineHeight, line, {
-                fontSize: '11px', color: '#ddccaa', fontFamily: 'Courier New',
-                align: 'center', wordWrap: { width: W - 60 }, lineSpacing: 3,
-            }).setOrigin(0.5, 0).setAlpha(0);
-
-            this.tweens.add({ targets: txt, alpha: 1, duration: 1200, delay: i * 1100 });
+            const result = layoutRichText(this, 30, cursorY, line, {
+                fontSize: '11px', wrapWidth: W - 60, lineHeight: 16, baseColor: '#ddccaa',
+            });
+            // Center each block of text
+            const usedHeight = result.height;
+            this.tweens.add({
+                targets: result.objects, alpha: { from: 0, to: 1 },
+                duration: 1200, delay: i * 1100,
+            });
+            cursorY += usedHeight + 6;
         });
 
         // Skip / Continue button

@@ -7,13 +7,13 @@ export const STORY = {
     title: 'A Queda da Média',
     subtitle: 'Uma jornada estatística contra o caos',
     prologueLines: [
-        'Há eras, o mundo seguia a CURVA — toda criatura, toda chuva, toda guerra obedecia a leis precisas.',
-        'A Sociedade dos Estatísticos mantinha o equilíbrio: mediam, projetavam, previam.',
-        'Então veio a DISTORÇÃO. Eventos impossíveis começaram a se repetir. P-valores enlouqueceram.',
-        'Os monstros, antes raros, agora seguem distribuições corrompidas. Os outliers tomaram o trono.',
-        'Você é o último aprendiz da Ordem. Sua missão: derrotar a DISTORÇÃO usando a única arma que sobrou — o conhecimento estatístico.',
-        'Cada criatura derrotada é uma equação resolvida. Cada livro lido, um teorema recuperado.',
-        'O destino do mundo está na sua amostra...',
+        'Há eras, o mundo seguia a {{accent:Curva}} — toda criatura, toda chuva, toda guerra obedecia a leis precisas.',
+        'A {{accent:Sociedade dos Estatísticos}} mantinha o equilíbrio: mediam, projetavam, previam.',
+        'Então veio a {{bad:Distorção}}. Eventos impossíveis começaram a se repetir. {{rare:P-valores}} enlouqueceram.',
+        'Os {{bad:monstros}}, antes raros, agora seguem distribuições corrompidas. Os {{rare:outliers}} tomaram o trono.',
+        'Você é o {{good:último aprendiz}} da Ordem. Sua missão: derrotar a {{bad:Distorção}} usando a única arma que sobrou — o {{accent:conhecimento estatístico}}.',
+        'Cada criatura derrotada é uma {{good:equação resolvida}}. Cada livro lido, um {{good:teorema recuperado}}.',
+        'O destino do mundo está na sua {{accent:amostra}}...',
     ],
 
     chapters: [

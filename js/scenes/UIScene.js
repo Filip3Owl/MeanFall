@@ -3,6 +3,7 @@ import { AREA_INFO } from '../constants.js';
 import { xpToNext, masteryPercent } from '../systems/XPSystem.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { spendStatPoint } from '../systems/XPSystem.js';
+import { richToHtml } from '../utils/RichText.js';
 
 const MAX_MESSAGES = 80;
 
@@ -122,7 +123,9 @@ export class UIScene extends Phaser.Scene {
         const ss = String(now.getSeconds()).padStart(2, '0');
         const tsSpan = `<span class="chat-time">[${mm}:${ss}]</span> `;
 
-        div.innerHTML = tsSpan + highlightKeywords(text);
+        // Apply both layers: explicit {{tag:value}} tokens and keyword auto-highlight
+        const inner = highlightKeywords(richToHtml(String(text)));
+        div.innerHTML = tsSpan + inner;
         el.appendChild(div);
 
         while (el.children.length > MAX_MESSAGES) el.removeChild(el.firstChild);
@@ -256,17 +259,48 @@ function escapeHtml(s) {
     }[c]));
 }
 
+// Skip text that already contains <span> markers so we don't double-process
 function highlightKeywords(text) {
-    let s = escapeHtml(text);
-    s = s.replace(/(\+\d+\s*XP)/gi,                   '<span style="color:#ffaa22;font-weight:bold">$1</span>');
-    s = s.replace(/([+−-]\d+\s*HP)/gi,                '<span style="color:#ff5555;font-weight:bold">$1</span>');
-    s = s.replace(/(\d+\s*ouro)/gi,                   '<span style="color:#ffd700;font-weight:bold">$1</span>');
-    s = s.replace(/\b(NÍVEL\s*\d+|nv\.?\s*\d+|NIVEL\s*ACIMA)\b/gi, '<span style="color:#ffaa44;font-weight:bold">$1</span>');
-    s = s.replace(/\b(CRÍTICO|SUPER\s*EFICAZ)\b/gi,   '<span style="color:#ff88cc;font-weight:bold">$1</span>');
-    s = s.replace(/\b(LOOT|ITENS?\s*OBTIDOS?|Loot:)\b/gi, '<span style="color:#ffd700;font-weight:bold">$1</span>');
-    s = s.replace(/\b(DANO|dano)\b/g,                 '<span style="color:#ff5555">$1</span>');
-    s = s.replace(/\b(cura|HEAL|curou)\b/gi,          '<span style="color:#55ff88">$1</span>');
-    s = s.replace(/\b(Lendário|Épico|Raro|Incomum|Proibido|Essencial|Muito Importante|Importante)\b/gi, '<span style="color:#bb88ff;font-weight:bold">$1</span>');
-    s = s.replace(/\b(missão|Missão)\b/g,             '<span style="color:#88ccff;font-weight:bold">$1</span>');
+    // Only escape the parts NOT already wrapped in spans
+    if (text.includes('<span')) {
+        // assume input was already markup; only auto-augment plain segments
+        return text.replace(/>([^<]+)</g, (m, body) => {
+            return '>' + augmentPlain(body) + '<';
+        });
+    }
+    return augmentPlain(escapeHtml(text));
+}
+
+function augmentPlain(s) {
+    // XP / HP / Foco / Ouro counters
+    s = s.replace(/(\+\d+\s*XP)/gi,                '<span class="kw-xp">$1</span>');
+    s = s.replace(/([+−-]\d+\s*HP)/gi,             '<span class="kw-damage">$1</span>');
+    s = s.replace(/(\+\d+\s*Foco)/gi,              '<span class="kw-focus">$1</span>');
+    s = s.replace(/(\d+\s*ouro)/gi,                '<span class="kw-gold">$1</span>');
+    // Level
+    s = s.replace(/\b(NÍVEL\s*\d+|nv\.?\s*\d+|NIVEL\s*ACIMA|nível\s*\d+)\b/gi, '<span class="kw-level">$1</span>');
+    // Combat keywords
+    s = s.replace(/\b(CRÍTICO!?|SUPER\s*EFICAZ!?)\b/gi, '<span class="kw-crit">$1</span>');
+    s = s.replace(/\b(ESQUIVA|esquivou|desviou)\b/gi,  '<span class="kw-dodge">$1</span>');
+    s = s.replace(/\b(LOOT:?|ITENS?\s*OBTIDOS?)\b/gi,   '<span class="kw-loot">$1</span>');
+    s = s.replace(/\b(VITÓRIA!?|venceu)\b/gi,           '<span class="kw-good">$1</span>');
+    s = s.replace(/\b(DERROTAD[OA]|FALHOU)\b/gi,        '<span class="kw-bad">$1</span>');
+    // Rarity & importance
+    s = s.replace(/\b(Lendári[oa]|LENDÁRIO)\b/gi,       '<span class="kw-legendary">$1</span>');
+    s = s.replace(/\b(Épic[oa]|ÉPICO)\b/gi,             '<span class="kw-epic">$1</span>');
+    s = s.replace(/\b(Rar[oa]|RARO|raro)\b/gi,          '<span class="kw-rare">$1</span>');
+    s = s.replace(/\b(Incomum|INCOMUM)\b/gi,            '<span class="kw-uncommon">$1</span>');
+    s = s.replace(/\b(Proibid[oa]|Essencial|Muito Importante|Importante)\b/gi, '<span class="kw-rarity">$1</span>');
+    // Quest / dialog
+    s = s.replace(/\b(missão|Missão|Missões)\b/g,       '<span class="kw-quest">$1</span>');
+    // Elements
+    s = s.replace(/\b(Fogo|FIRE)\b/g,                   '<span class="kw-fire">$1</span>');
+    s = s.replace(/\b(Água|WATER)\b/g,                  '<span class="kw-water">$1</span>');
+    s = s.replace(/\b(Terra|EARTH)\b/g,                 '<span class="kw-earth">$1</span>');
+    s = s.replace(/\b(Gelo|ICE)\b/g,                    '<span class="kw-ice">$1</span>');
+    s = s.replace(/\b(Trevas|SHADOW)\b/g,               '<span class="kw-shadow">$1</span>');
+    // Damage / heal as words
+    s = s.replace(/\b(DANO|dano)\b/g,                   '<span class="kw-damage">$1</span>');
+    s = s.replace(/\b(cura|HEAL|curou|regenerou)\b/gi,  '<span class="kw-heal">$1</span>');
     return s;
 }

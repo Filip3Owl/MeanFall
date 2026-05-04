@@ -1,3 +1,32 @@
+// Highlight key terms in dialog text using Phaser BBCode-like tagging.
+// We can't use real BBCode without an extra plugin, so we render line in
+// segments: any token wrapped in {{tag:value}} is shown in its own colored
+// Text object positioned next to the previous one.
+
+const DIALOG_KEYWORDS = {
+    Estatística: '#ffd700', estatística: '#ffd700',
+    Distorção:   '#ff5566',
+    HIPÓTESE:    '#bb88ff', Hipótese: '#bb88ff',
+    Curva:       '#88ccff',  curva: '#88ccff',
+    Média:       '#aaee66',  média: '#aaee66',
+    Mediana:     '#88dd88',  mediana: '#88dd88',
+    Moda:        '#ddaa88',  moda: '#ddaa88',
+    Variância:   '#88ddff',  variância: '#88ddff',
+    Probabilidade: '#ff9966',
+    Inferência:  '#bb88ff',  inferência: '#bb88ff',
+    XP:          '#ffaa22',
+    nível:       '#ffaa44',  Nível: '#ffaa44',
+    missão:      '#88ccff',  Missão: '#88ccff', missões: '#88ccff',
+    LOOT:        '#ffd700',
+    Lendário:    '#ffaa22',
+    Importante:  '#44cc88',
+    Essencial:   '#bb44ff',
+    Foco:        '#88aaff',
+    'α':          '#ff88cc',
+    'p-valor':    '#ff88cc',
+    'H₀':         '#bb88ff',
+};
+
 /**
  * DialogScene — bottom dialog box like classic JRPGs.
  * Receives { speaker, lines, onClose, role }.
@@ -38,11 +67,8 @@ export class DialogScene extends Phaser.Scene {
             fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
-        // Body text
-        this._bodyTx = this.add.text(24, boxY + 18, '', {
-            fontSize: '12px', color: '#eeeedd', fontFamily: 'Courier New',
-            wordWrap: { width: W - 50 }, lineSpacing: 4,
-        }).setOrigin(0, 0);
+        // Body text container (tokens drawn dynamically by _renderTokens)
+        this._lineTokens = [];
 
         // Continue prompt (blinking)
         this._promptTx = this.add.text(W - 24, boxY + boxH - 18, '> Espaço / Clique', {
@@ -66,36 +92,63 @@ export class DialogScene extends Phaser.Scene {
         const line = this._lines[this._idx];
         if (!line) { this._close(); return; }
         this._fullText = line;
-        this._bodyTx.setText('');
-        this._pageTx.setText(`(${this._idx + 1}/${this._lines.length})`);
+        this._pageTx.setText(`(${this._idx + 1} / ${this._lines.length})`);
 
-        // Typewriter effect
-        if (this._typingTimer) this._typingTimer.remove();
-        let ch = 0;
-        this._typingTimer = this.time.addEvent({
-            delay: 22,
-            repeat: line.length - 1,
-            callback: () => {
-                ch++;
-                this._bodyTx.setText(line.substring(0, ch));
-            },
-        });
+        // Clear any previously rendered tokens
+        if (this._lineTokens) this._lineTokens.forEach(t => t.destroy());
+        this._lineTokens = [];
+
+        // Render with keyword colorization (typewriter effect via Phaser tweens
+        // would clash with multi-text layout; instead we fade the whole line in).
+        const tokens = this._tokenize(line);
+        this._renderTokens(tokens);
+
+        // Subtle fade-in
+        for (const t of this._lineTokens) t.setAlpha(0);
+        this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 220 });
+    }
+
+    _tokenize(line) {
+        // Split on whitespace, keeping the spaces so the layout looks natural.
+        return line.split(/(\s+)/);
+    }
+
+    _renderTokens(tokens) {
+        const startX = 24;
+        const startY = this.scale.height - 130 + 18;
+        const wrapWidth = this.scale.width - 50;
+        let cx = 0, cy = 0;
+        const lineHeight = 16;
+
+        for (const tok of tokens) {
+            if (tok === '') continue;
+            // Strip surrounding punctuation when matching keyword
+            const cleaned = tok.replace(/[.,!?;:()…]/g, '');
+            const color = DIALOG_KEYWORDS[cleaned] || null;
+            const isKw = !!color;
+            const txt = this.add.text(0, 0, tok, {
+                fontSize: '12px', color: color || '#eeeedd', fontFamily: 'Courier New',
+                fontStyle: isKw ? 'bold' : 'normal',
+            }).setOrigin(0, 0).setDepth(11);
+
+            const w = txt.width;
+            if (cx + w > wrapWidth && tok.trim() !== '') {
+                cx = 0; cy += lineHeight;
+            }
+            txt.setPosition(startX + cx, startY + cy);
+            cx += w;
+            this._lineTokens.push(txt);
+        }
     }
 
     _advance() {
-        if (this._typingTimer && !this._typingTimer.hasDispatched && this._typingTimer.repeatCount > 0) {
-            // Skip typewriter
-            this._typingTimer.remove();
-            this._bodyTx.setText(this._fullText);
-            return;
-        }
         this._idx++;
         if (this._idx >= this._lines.length) this._close();
         else this._renderLine();
     }
 
     _close() {
-        if (this._typingTimer) this._typingTimer.remove();
+        if (this._lineTokens) this._lineTokens.forEach(t => t.destroy());
         this.scene.stop('Dialog');
         try { this._onClose(); } catch (e) { /* swallow */ }
     }
