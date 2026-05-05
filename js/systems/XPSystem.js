@@ -1,9 +1,12 @@
-import { XP_TABLE } from '../constants.js';
+import { XP_TABLE, DIFFICULTIES } from '../constants.js';
 import EventBus from '../utils/EventBus.js';
 
 export function awardXP(player, baseXP) {
-    const mult = 1 + (player.intelligence * 0.02);
-    const earned = Math.floor(baseXP * mult);
+    const diffDef = DIFFICULTIES[player.difficulty] || DIFFICULTIES.medium;
+    const diffMult = diffDef.rewardMult;
+    const statMult = 1 + (player.intelligence * 0.02);
+    
+    const earned = Math.floor(baseXP * statMult * diffMult);
     player.xp += earned;
 
     let leveled = false;

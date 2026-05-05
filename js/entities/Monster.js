@@ -1,4 +1,4 @@
-import { TILE_SIZE, ELEMENTS } from '../constants.js';
+import { TILE_SIZE, ELEMENTS, DIFFICULTIES } from '../constants.js';
 import { MONSTERS } from '../data/monsters.js';
 
 export class Monster {
@@ -9,10 +9,15 @@ export class Monster {
         this.tileX      = instanceData.x;
         this.tileY      = instanceData.y;
 
+        const pData = scene.registry.get('player');
+        const diffDef = DIFFICULTIES[pData?.difficulty] || DIFFICULTIES.medium;
+
         const def   = MONSTERS[this.monsterId];
         this.def    = def;
-        this.hp     = def.maxHp;
-        this.maxHp  = def.maxHp;
+        
+        const scaledHp = Math.floor(def.maxHp * diffDef.monsterHp);
+        this.hp     = scaledHp;
+        this.maxHp  = scaledHp;
 
         const key = `sprite_${this.monsterId}`;
         const px  = this.tileX * TILE_SIZE + TILE_SIZE / 2;

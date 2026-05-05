@@ -3,9 +3,19 @@ import { ELEMENTS, TOPIC_TO_ELEMENT } from '../constants.js';
 
 export const QuestionEngine = {
 
-    getQuestion(topic, allowedDifficulties, mastery, recentIds = []) {
+    getQuestion(topic, playerDifficulty, mastery, recentIds = []) {
+        // Map global difficulty to question difficulty filters
+        const DIFFICULTY_MAP = {
+            easy:       ['easy', 'medium'],
+            medium:     ['easy', 'medium', 'hard'],
+            hard:       ['medium', 'hard'],
+            very_hard:  ['hard'],
+            improbable: ['hard'],
+        };
+        const allowed = DIFFICULTY_MAP[playerDifficulty] || DIFFICULTY_MAP.medium;
+
         const pool = (QUESTIONS[topic] || []).filter(q =>
-            allowedDifficulties.includes(q.difficulty) &&
+            allowed.includes(q.difficulty) &&
             !recentIds.includes(q.id)
         );
 
@@ -18,11 +28,11 @@ export const QuestionEngine = {
     },
 
     // Element-driven selection: routes by elemental affinity to the right topic.
-    getQuestionByElement(element, allowedDifficulties, mastery, recentIds = []) {
+    getQuestionByElement(element, playerDifficulty, mastery, recentIds = []) {
         const elem  = ELEMENTS[element];
         const topic = elem?.topic;
         if (!topic) return null;
-        return this.getQuestion(topic, allowedDifficulties, mastery, recentIds);
+        return this.getQuestion(topic, playerDifficulty, mastery, recentIds);
     },
 
     elementOfTopic(topic) {

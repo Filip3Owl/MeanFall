@@ -87,8 +87,38 @@ export const COLORS = {
     NEUTRAL:    0xaaaaaa,
 };
 
+// Difficulty levels — affects balance and question weights.
+export const DIFFICULTIES = {
+    easy: {
+        id: 'easy', name: 'Fácil', color: '#88ff88',
+        monsterDamage: 0.7, monsterHp: 0.8, rewardMult: 1.2,
+        desc: 'Para quem quer aprender sem pressão.'
+    },
+    medium: {
+        id: 'medium', name: 'Média', color: '#ffff88',
+        monsterDamage: 1.0, monsterHp: 1.0, rewardMult: 1.0,
+        desc: 'A experiência equilibrada original.'
+    },
+    hard: {
+        id: 'hard', name: 'Difícil', color: '#ffaa44',
+        monsterDamage: 1.3, monsterHp: 1.2, rewardMult: 0.9,
+        desc: 'Desafio aumentado para veteranos.'
+    },
+    very_hard: {
+        id: 'very_hard', name: 'Muito Difícil', color: '#ff5555',
+        monsterDamage: 1.6, monsterHp: 1.5, rewardMult: 0.8,
+        desc: 'Exige domínio total dos conceitos.'
+    },
+    improbable: {
+        id: 'improbable', name: 'Improvável', color: '#bb44ff',
+        monsterDamage: 2.0, monsterHp: 2.0, rewardMult: 0.7,
+        desc: 'Uma anomalia na curva. Boa sorte.'
+    },
+};
+
 export const PLAYER_DEFAULTS = {
     name: 'Aventureiro',
+    difficulty: 'medium',
     level: 1,
     xp: 0,
     hp: 100,

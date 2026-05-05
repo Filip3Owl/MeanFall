@@ -1,4 +1,4 @@
-import { ELEMENT_MATRIX, RARITIES } from '../constants.js';
+import { ELEMENT_MATRIX, RARITIES, DIFFICULTIES } from '../constants.js';
 
 export const CombatSystem = {
 
@@ -31,9 +31,14 @@ export const CombatSystem = {
     },
 
     calcMonsterDamage(monster, player) {
+        const diffDef = DIFFICULTIES[player.difficulty] || DIFFICULTIES.medium;
+        const diffMult = diffDef.monsterDamage;
+
         const agiRed = Math.floor(player.agility * 0.3);
         if (Math.random() < player.agility * 0.01) return { damage: 0, dodged: true };
-        const dmg = Math.max(1, (monster.attackDamage || 10) - agiRed);
+        
+        const baseDmg = monster.attackDamage || 10;
+        const dmg = Math.max(1, Math.floor(baseDmg * diffMult) - agiRed);
         return { damage: dmg, dodged: false };
     },
 

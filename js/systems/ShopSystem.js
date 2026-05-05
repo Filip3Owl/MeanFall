@@ -1,5 +1,6 @@
 import { ITEMS } from '../data/items.js';
 import { SHOPS, SELL_RATIO } from '../data/shops.js';
+import { DIFFICULTIES } from '../constants.js';
 import { CombatSystem } from './CombatSystem.js';
 import EventBus from '../utils/EventBus.js';
 
@@ -14,9 +15,11 @@ export const ShopSystem = {
         return item ? Math.floor(item.value || 0) : 0;
     },
 
-    sellPrice(itemId) {
+    sellPrice(itemId, player = null) {
         const item = ITEMS[itemId];
-        return item ? Math.floor((item.value || 0) * SELL_RATIO) : 0;
+        const diffDef = player ? (DIFFICULTIES[player.difficulty] || DIFFICULTIES.medium) : DIFFICULTIES.medium;
+        const diffMult = diffDef.rewardMult;
+        return item ? Math.floor((item.value || 0) * SELL_RATIO * diffMult) : 0;
     },
 
     buy(player, itemId) {
@@ -36,7 +39,7 @@ export const ShopSystem = {
         if (Object.values(player.equipment || {}).includes(itemId) && slot.qty <= 1) {
             return { ok: false, reason: 'Item equipado' };
         }
-        const price = this.sellPrice(itemId);
+        const price = this.sellPrice(itemId, player);
         slot.qty--;
         if (slot.qty <= 0) player.inventory = player.inventory.filter(s => s.itemId !== itemId);
         player.gold = (player.gold || 0) + price;
