@@ -7,6 +7,10 @@ export class Player {
 
         const px = this.position.x * TILE_SIZE + TILE_SIZE / 2;
         const py = this.position.y * TILE_SIZE + TILE_SIZE / 2;
+
+        // Shadow
+        this.shadow = scene.add.image(px, py + 10, 'entity_shadow').setScale(0.85).setDepth(2).setAlpha(0.6);
+
         this.sprite = scene.add.image(px, py, 'sprite_player').setDepth(5);
 
         this._moveCooldown = 0;
@@ -34,20 +38,20 @@ export class Player {
 
         this.position.x = nx;
         this.position.y = ny;
-        this.sprite.setPosition(
-            nx * TILE_SIZE + TILE_SIZE / 2,
-            ny * TILE_SIZE + TILE_SIZE / 2
-        );
+        const npx = nx * TILE_SIZE + TILE_SIZE / 2;
+        const npy = ny * TILE_SIZE + TILE_SIZE / 2;
+        this.sprite.setPosition(npx, npy);
+        this.shadow.setPosition(npx, npy + 10);
         this._moveCooldown = this._moveDelay;
 
         return { x: nx, y: ny };
     }
 
     syncSprite() {
-        this.sprite.setPosition(
-            this.position.x * TILE_SIZE + TILE_SIZE / 2,
-            this.position.y * TILE_SIZE + TILE_SIZE / 2
-        );
+        const px = this.position.x * TILE_SIZE + TILE_SIZE / 2;
+        const py = this.position.y * TILE_SIZE + TILE_SIZE / 2;
+        this.sprite.setPosition(px, py);
+        this.shadow.setPosition(px, py + 10);
     }
 
     refreshTexture() {
@@ -58,9 +62,12 @@ export class Player {
     heal(amount)       { this.hp = Math.min(this.maxHp, this.hp + amount); }
 
     toData() {
-        const { scene, sprite, _moveCooldown, _moveDelay, _facing, ...data } = this;
+        const { scene, sprite, shadow, _moveCooldown, _moveDelay, _facing, ...data } = this;
         return data;
     }
 
-    destroy() { this.sprite.destroy(); }
+    destroy() { 
+        this.sprite.destroy(); 
+        this.shadow.destroy();
+    }
 }

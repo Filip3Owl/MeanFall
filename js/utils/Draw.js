@@ -171,6 +171,13 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_wall_shadow', S, S);
 
+    // Entity Shadow (Universal oval)
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.35);
+        g.fillEllipse(S/2, S/2, S*0.8, S*0.4);
+    });
+    g.generateTexture('entity_shadow', S, S);
+
     // ─── SPRITES ────────────────────────────────────────────────────────────
     // Default player sprite (24×32) — overridden later by buildPlayerSprite()
     buildPlayerSprite(scene, { gender: 'male', skin: 'light', hair: 'brown', robe: 'blue' });

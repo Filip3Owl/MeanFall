@@ -16,6 +16,10 @@ export class NPC {
         const perNpc = `sprite_npc_${this.npcId}`;
         const texKey = scene.textures.exists(perNpc) ? perNpc
             : (this.role === 'shop' ? 'sprite_npc_shop' : 'sprite_npc');
+        
+        // Shadow
+        this.shadow = scene.add.image(px, py + 8, 'entity_shadow').setScale(0.8).setDepth(2).setAlpha(0.6);
+        
         this.sprite  = scene.add.image(px, py, texKey).setDepth(4);
 
         // Role badge above name
@@ -48,6 +52,7 @@ export class NPC {
 
     destroy() {
         this.sprite.destroy();
+        this.shadow.destroy();
         this._label.destroy();
         this._badge?.destroy();
     }

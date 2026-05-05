@@ -17,6 +17,10 @@ export class Monster {
         const key = `sprite_${this.monsterId}`;
         const px  = this.tileX * TILE_SIZE + TILE_SIZE / 2;
         const py  = this.tileY * TILE_SIZE + TILE_SIZE / 2;
+        
+        // Shadow
+        this.shadow = scene.add.image(px, py + 8, 'entity_shadow').setScale(0.8).setDepth(2).setAlpha(0.6);
+        
         this.sprite = scene.add.image(px, py, key).setDepth(4);
 
         // Patrol state
@@ -75,7 +79,10 @@ export class Monster {
 
         this.tileX = nx;
         this.tileY = ny;
-        this.sprite.setPosition(nx * TILE_SIZE + TILE_SIZE / 2, ny * TILE_SIZE + TILE_SIZE / 2);
+        const npx = nx * TILE_SIZE + TILE_SIZE / 2;
+        const npy = ny * TILE_SIZE + TILE_SIZE / 2;
+        this.sprite.setPosition(npx, npy);
+        this.shadow.setPosition(npx, npy + 8);
         this._refreshLabels();
     }
 
@@ -89,6 +96,7 @@ export class Monster {
 
     destroy() {
         this.sprite.destroy();
+        this.shadow.destroy();
         this._hpBar.destroy();
         this._nameLabel?.destroy();
     }

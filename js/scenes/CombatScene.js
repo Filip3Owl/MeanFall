@@ -404,12 +404,27 @@ export class CombatScene extends Phaser.Scene {
 
     _spawnDamageNumber(center, value, color, big) {
         if (!center) return;
+        
+        // Screen shake on hit
+        this.cameras.main.shake(big ? 250 : 150, big ? 0.012 : 0.006);
+
+        // Sprite jump/shake
+        const targetSprite = center === this._monsterPanelCenter ? this._monsterSprite : null;
+        if (targetSprite) {
+            this.tweens.add({
+                targets: targetSprite,
+                x: center.x + (big ? 10 : 5),
+                yoyo: true, duration: 50, repeat: 2,
+                onComplete: () => targetSprite.setX(center.x)
+            });
+        }
+
         const txt = this.add.text(center.x, center.y - 10, String(value), {
-            fontSize: big ? '22px' : '16px', color, fontFamily: 'Courier New', fontStyle: 'bold',
-            stroke: '#000000', strokeThickness: 3,
+            fontSize: big ? '24px' : '16px', color, fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4,
         }).setOrigin(0.5, 0.5).setDepth(50);
         this.tweens.add({
-            targets: txt, y: center.y - 40, alpha: 0,
+            targets: txt, y: center.y - 60, alpha: 0,
             duration: 1100, ease: 'Cubic.Out',
             onComplete: () => txt.destroy(),
         });
