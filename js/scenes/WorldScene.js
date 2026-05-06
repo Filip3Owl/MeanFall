@@ -21,6 +21,20 @@ export class WorldScene extends Phaser.Scene {
 
     create() {
         this._playerData = this.registry.get('player') || JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
+        
+        // Ensure new systems have data even on old saves
+        if (!this._playerData.discoveredTiles) this._playerData.discoveredTiles = {};
+        if (!this._playerData.elementalMastery) {
+            this._playerData.elementalMastery = JSON.parse(JSON.stringify(PLAYER_DEFAULTS.elementalMastery));
+        }
+        if (!this._playerData.openedChests) this._playerData.openedChests = {};
+        if (!this._playerData.inventory) this._playerData.inventory = [];
+        if (!this._playerData.equipment) this._playerData.equipment = {};
+        
+        // Ensure stats exist
+        const stats = ['strength', 'intelligence', 'agility', 'vitality'];
+        stats.forEach(s => { if (this._playerData[s] === undefined) this._playerData[s] = 5; });
+        
         // Rebuild player sprite from saved appearance
         if (this._playerData.appearance) buildPlayerSprite(this, this._playerData.appearance);
 

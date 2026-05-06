@@ -80,9 +80,23 @@ export function generateTextures(scene) {
     g.generateTexture('tile_wall', S, S);
 
     tile(g, g => {
+        // Grass background
         g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
         g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
-...
+        // Trunk shadow on ground
+        g.fillStyle(0x1a3d20, 0.4); g.fillRect(8, 24, 16, 6);
+        // Trunk
+        g.fillStyle(0x4a2d18); g.fillRect(13, 18, 6, 12);
+        g.fillStyle(0x5c3a1e); g.fillRect(14, 18, 4, 12);
+        g.fillStyle(0x6b4520, 0.6); g.fillRect(15, 19, 1, 10);
+        // Canopy — layered
+        g.fillStyle(0x1f4a22); g.fillRect(3, 5, 26, 16);
+        g.fillStyle(0x2d6a2d); g.fillRect(5, 4, 22, 16);
+        g.fillStyle(0x3d8b3d); g.fillRect(7, 6, 18, 12);
+        g.fillStyle(0x4ea84e, 0.7); g.fillRect(9, 7, 6, 5); g.fillRect(18, 9, 6, 4);
+        // Highlights
+        g.fillStyle(0x6cc66c, 0.5); g.fillRect(10, 8, 3, 2); g.fillRect(20, 10, 3, 2);
+    });
     g.generateTexture('tile_tree', S, S);
 
     // Improved Door: Panel detail and knob
