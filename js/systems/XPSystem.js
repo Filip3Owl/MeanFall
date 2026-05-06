@@ -64,10 +64,51 @@ export function awardElementalXP(player, elementId, baseXP) {
         mastery.xp -= xpToNextElement(mastery.level);
         mastery.level++;
         leveled = true;
+        
+        // Apply passive attribute bonuses every 2 levels
+        if (mastery.level % 2 === 0) {
+            applyElementalBonus(player, elementId);
+        }
     }
 
     EventBus.emit('element-xp-change', { player, elementId, earned: baseXP, leveled });
     return baseXP;
+}
+
+function applyElementalBonus(player, elementId) {
+    let stat = '';
+    let amount = 1;
+
+    switch(elementId) {
+        case 'fire':   stat = 'strength';     break;
+        case 'earth':  stat = 'vitality';     break;
+        case 'water':  stat = 'intelligence'; break;
+        case 'ice':    stat = 'agility';      break;
+        case 'shadow': 
+            // Shadow is harder, gives random primary stat
+            const stats = ['strength', 'intelligence', 'agility', 'vitality'];
+            stat = stats[Math.floor(Math.random() * stats.length)];
+            break;
+        case 'normal':
+            // Normal gives +HP/Focus directly
+            player.maxHp += 5;
+            player.maxFocus += 2;
+            EventBus.emit('chat', { msg: `Maestria Normal: +5 HP e +2 Foco permanentes!`, type: 'system' });
+            return;
+    }
+
+    if (stat) {
+        player[stat] += amount;
+        if (stat === 'vitality') player.maxHp += 5;
+        if (stat === 'intelligence') player.maxFocus += 3;
+        
+        const statNames = { strength: 'Força', intelligence: 'Inteligência', agility: 'Agilidade', vitality: 'Vitalidade' };
+        EventBus.emit('chat', { 
+            msg: `Maestria em ${elementId.toUpperCase()}: +1 em ${statNames[stat]} permanente!`, 
+            type: 'system' 
+        });
+        EventBus.emit('player-stats-changed', { player });
+    }
 }
 
 export function xpToNextElement(level) {

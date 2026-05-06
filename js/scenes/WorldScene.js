@@ -1,4 +1,4 @@
-import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK } from '../constants.js';
+import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS } from '../constants.js';
 import { MapManager } from '../systems/MapManager.js';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
@@ -54,10 +54,12 @@ export class WorldScene extends Phaser.Scene {
 
         EventBus.on('combat-end',     this._onCombatEnd.bind(this));
         EventBus.on('player-level-up', this._onLevelUp.bind(this));
+        EventBus.on('element-xp-change', () => this._updateElementalAura());
 
         this._syncTimer  = this.time.addEvent({ delay: 5000, loop: true, callback: this._autoSync, callbackScope: this });
         this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
 
+        this._updateElementalAura();
         EventBus.emit('area-changed', { areaId: this._playerData.currentArea });
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 
@@ -139,6 +141,8 @@ export class WorldScene extends Phaser.Scene {
         });
 
         for (const m of this._monsters) m.update(delta, this._mapManager);
+
+        this._syncAuraPosition();
 
         if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteractNPC();
         if (Phaser.Input.Keyboard.JustDown(this._iKey)) this._openOverlay('Inventory');
@@ -447,6 +451,72 @@ export class WorldScene extends Phaser.Scene {
 
     pauseForOverlay() { this._paused = true; }
     resumeFromOverlay() { this._paused = false; }
+
+    // ── Elemental Aura Visual Effect ──────────────────────────────────────────
+
+    _updateElementalAura() {
+        const p = this._playerData;
+        if (!p.elementalMastery || !this._player?.sprite) return;
+
+        // Find highest level element (must be at least level 2 to show aura)
+        let bestId = null;
+        let maxLevel = 1;
+
+        for (const [id, m] of Object.entries(p.elementalMastery)) {
+            if (m.level > maxLevel) {
+                maxLevel = m.level;
+                bestId = id;
+            }
+        }
+
+        // Cleanup old aura
+        if (this._playerAura) {
+            this._playerAura.destroy();
+            this._playerAura = null;
+        }
+
+        if (!bestId) return;
+
+        const data = ELEMENTS[bestId];
+        const color = data.color;
+
+        // Create a new container for the aura that will follow the player
+        const aura = this.add.container(0, 0).setDepth(this._player.sprite.depth - 1);
+        this._playerAura = aura;
+
+        // 1. Static glow
+        const glow = this.add.circle(0, 0, 16, color, 0.2);
+        aura.add(glow);
+        this.tweens.add({ targets: glow, alpha: 0.4, scale: 1.2, duration: 1000, yoyo: true, repeat: -1 });
+
+        // 2. Rotating particles
+        for (let i = 0; i < 3; i++) {
+            const p = this.add.rectangle(0, 0, 4, 4, color, 0.8);
+            aura.add(p);
+            const angle = (i / 3) * Math.PI * 2;
+            const radius = 18;
+            p.x = Math.cos(angle) * radius;
+            p.y = Math.sin(angle) * radius;
+
+            this.tweens.add({
+                targets: p,
+                angle: 360,
+                duration: 2000,
+                repeat: -1,
+                onUpdate: (tween) => {
+                    const currentAngle = angle + (tween.progress * Math.PI * 2);
+                    p.x = Math.cos(currentAngle) * radius;
+                    p.y = Math.sin(currentAngle) * radius;
+                }
+            });
+        }
+    }
+
+    _syncAuraPosition() {
+        if (this._playerAura && this._player?.sprite) {
+            this._playerAura.setPosition(this._player.sprite.x, this._player.sprite.y + 4);
+        }
+    }
 
     shutdown() {
         EventBus.off('combat-end', this._onCombatEnd);
