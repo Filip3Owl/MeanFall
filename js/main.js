@@ -18,6 +18,7 @@ import { QuestScene }             from './scenes/QuestScene.js';
 import { BookScene }              from './scenes/BookScene.js';
 import { SkillScene }             from './scenes/SkillScene.js';
 import { DialogScene }            from './scenes/DialogScene.js';
+import { InferenceScene }         from './scenes/InferenceScene.js';
 import { IntroScene }             from './scenes/IntroScene.js';
 import { CharacterCreationScene } from './scenes/CharacterCreationScene.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './constants.js';
@@ -30,7 +31,7 @@ const config = {
         BootScene, MainMenuScene, IntroScene, CharacterCreationScene,
         WorldScene, UIScene, CombatScene,
         InventoryScene, CharacterScene, ShopScene, QuestScene, BookScene, SkillScene,
-        DialogScene,
+        DialogScene, InferenceScene,
     ],
     scale: {
         mode: Phaser.Scale.NONE,

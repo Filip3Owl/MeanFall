@@ -8,6 +8,8 @@ export class MapManager {
         this.tiles = [];
         this.areaId = null;
         this.mapData = null;
+        this._scrollSprites = [];
+        this._decos = [];
     }
 
     load(areaId) {
@@ -22,8 +24,11 @@ export class MapManager {
         // Clear old tiles and decorations
         this.tiles.forEach(row => row.forEach(img => img.destroy()));
         if (this._decos) this._decos.forEach(d => d.destroy());
+        if (this._scrollSprites) this._scrollSprites.forEach(s => { s.sprite.destroy(); s.glow.destroy(); });
+        
         this.tiles = [];
         this._decos = [];
+        this._scrollSprites = [];
 
         const rows = this.mapData.tiles;
         for (let row = 0; row < rows.length; row++) {
@@ -37,26 +42,25 @@ export class MapManager {
                 const img = this.scene.add.image(x, y, texKey).setDepth(0);
                 this.tiles[row][col] = img;
 
-                // Wall shadows (shadow on tile below a wall)
+                // Wall shadows
                 if (row > 0 && this.mapData.tiles[row - 1][col] === 3 && tileId !== 3) {
                     const shadow = this.scene.add.image(x, y - TILE_SIZE / 2, 'tile_wall_shadow').setOrigin(0.5, 0).setDepth(0.5);
                     this._decos.push(shadow);
                 }
 
                 // Deterministic pseudo-random decoration
-                // Using a combination of coordinates and areaId for variety
                 const seed = row * 13 + col * 37 + (this.areaId?.length || 0);
                 const noise = Math.sin(seed); 
-                const chance = (noise + 1) / 2; // 0 to 1
+                const chance = (noise + 1) / 2;
 
                 if (chance > 0.75) {
                     let decoTex = null;
-                    if (tileId === 0 || tileId === 9) { // Grass / Dark Grass
+                    if (tileId === 0 || tileId === 9) { // Grass
                         if (chance > 0.96) decoTex = 'deco_flower_red';
                         else if (chance > 0.92) decoTex = 'deco_flower_blue';
                         else if (chance > 0.88) decoTex = 'deco_flower_white';
                         else decoTex = 'deco_grass_tuft';
-                    } else if (tileId === 1) { // Stone Path
+                    } else if (tileId === 1) { // Stone
                         if (chance > 0.90) decoTex = 'deco_cracks';
                         else decoTex = 'deco_rock_small';
                     } else if (tileId === 8) { // Sand
@@ -67,7 +71,7 @@ export class MapManager {
                         else decoTex = 'deco_snow_mound';
                     } else if (tileId === 10) { // Mountain
                         decoTex = (chance > 0.90) ? 'deco_rock_large' : 'deco_rock_small';
-                    } else if (tileId === 12 || tileId === 3) { // Cave or Wall
+                    } else if (tileId === 12 || tileId === 3) { // Cave
                         if (chance > 0.97) decoTex = 'deco_bones';
                         else if (chance > 0.88) decoTex = 'deco_rock_small';
                     }
@@ -80,6 +84,27 @@ export class MapManager {
                 }
             }
         }
+
+        // Render fixed scrolls
+        if (this.mapData.scrolls) {
+            for (const s of this.mapData.scrolls) {
+                const sx = s.x * TILE_SIZE + TILE_SIZE / 2;
+                const sy = s.y * TILE_SIZE + TILE_SIZE / 2;
+                const sprite = this.scene.add.image(sx, sy, 'item_scroll').setDepth(2).setScale(0.8);
+                sprite.scrollId = s.scrollId;
+                sprite.tileX = s.x;
+                sprite.tileY = s.y;
+                
+                const glow = this.scene.add.circle(sx, sy, 8, 0x88ccff, 0.3).setDepth(1.5);
+                this.scene.tweens.add({ targets: glow, alpha: 0.6, scale: 1.5, duration: 1200, yoyo: true, repeat: -1 });
+                
+                this._scrollSprites.push({ sprite, glow });
+            }
+        }
+    }
+
+    getScrollAt(x, y) {
+        return this._scrollSprites?.find(s => s.sprite.tileX === x && s.sprite.tileY === y);
     }
 
     isWalkable(col, row) {
@@ -96,10 +121,13 @@ export class MapManager {
         return (this.mapData?.exits || []).find(e => e.x === col && e.y === row) || null;
     }
 
-    drawMinimap(canvas) {
+    drawMinimap(canvas, playerData) {
         const ctx = canvas.getContext('2d');
         const rows = this.mapData?.tiles;
         if (!rows) return;
+        const areaId = playerData.currentArea;
+        const discovered = playerData.discoveredTiles[areaId] || {};
+        
         const COLS = rows[0].length;
         const ROWS = rows.length;
         const cw = canvas.width  / COLS;
@@ -108,7 +136,11 @@ export class MapManager {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
-                ctx.fillStyle = miniColor(rows[r][c]);
+                if (discovered[`${c},${r}`]) {
+                    ctx.fillStyle = miniColor(rows[r][c]);
+                } else {
+                    ctx.fillStyle = '#050308'; // Hidden
+                }
                 ctx.fillRect(c * cw, r * ch, cw, ch);
             }
         }

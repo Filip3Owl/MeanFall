@@ -10,7 +10,9 @@ import { ShopSystem } from '../systems/ShopSystem.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { TutorialSystem } from '../systems/TutorialSystem.js';
+import { FogManager } from '../systems/FogManager.js';
 import { ITEMS } from '../data/items.js';
+import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { buildPlayerSprite } from '../utils/Draw.js';
 import EventBus from '../utils/EventBus.js';
 
@@ -23,6 +25,7 @@ export class WorldScene extends Phaser.Scene {
         if (this._playerData.appearance) buildPlayerSprite(this, this._playerData.appearance);
 
         this._mapManager = new MapManager(this);
+        this._fogManager = new FogManager(this);
         this._monsters   = [];
         this._npcs       = [];
         this._npcIcons   = this.add.group();
@@ -60,6 +63,7 @@ export class WorldScene extends Phaser.Scene {
         this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
 
         this._updateElementalAura();
+        this._fogManager.update(this._playerData);
         EventBus.emit('area-changed', { areaId: this._playerData.currentArea });
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 
@@ -119,6 +123,7 @@ export class WorldScene extends Phaser.Scene {
         const moved = this._player.update(delta, this._cursors, this._wasd, this._mapManager);
         if (moved) {
             this._playerData.position = { ...moved };
+            this._fogManager.update(this._playerData);
             this._checkTileInteractions(moved.x, moved.y);
             EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
             this._maybeNearPortalTutorial(moved.x, moved.y);
@@ -144,7 +149,7 @@ export class WorldScene extends Phaser.Scene {
 
         this._syncAuraPosition();
 
-        if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteractNPC();
+        if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteract();
         if (Phaser.Input.Keyboard.JustDown(this._iKey)) this._openOverlay('Inventory');
         if (Phaser.Input.Keyboard.JustDown(this._cKey)) this._openOverlay('Character');
         if (Phaser.Input.Keyboard.JustDown(this._qKey)) this._openOverlay('Quest');
@@ -370,14 +375,54 @@ export class WorldScene extends Phaser.Scene {
         }
     }
 
-    // ── NPC interaction → dialog ──────────────────────────────────────────────
+    // ── Interaction ──────────────────────────────────────────────────────────
 
-    _tryInteractNPC() {
+    _tryInteract() {
         const col = this._playerData.position.x;
         const row = this._playerData.position.y;
-        const npc = this._npcs.find(n => n.isAdjacentTo(col, row));
-        if (!npc) return;
 
+        // Check for adjacent NPCs
+        const npc = this._npcs.find(n => n.isAdjacentTo(col, row));
+        if (npc) {
+            this._interactNPC(npc);
+            return;
+        }
+
+        // Check for adjacent Chests (Tile 7)
+        const adj = [
+            { x: col, y: row - 1 }, { x: col, y: row + 1 },
+            { x: col - 1, y: row }, { x: col + 1, y: row }
+        ];
+        for (const pos of adj) {
+            // Check for tile-based chests
+            if (this._mapManager.getTileId(pos.x, pos.y) === 7) {
+                this._interactChest(pos.x, pos.y);
+                return;
+            }
+            
+            // Check for scroll sprites
+            const scroll = this._mapManager.getScrollAt(pos.x, pos.y);
+            if (scroll) {
+                this._interactScroll(scroll);
+                return;
+            }
+        }
+    }
+
+    _interactScroll(scroll) {
+        const data = ANCIENT_SCROLLS[scroll.sprite.scrollId];
+        if (!data) return;
+
+        this._paused = true;
+        this.scene.launch('Dialog', {
+            speaker: data.title,
+            lines: [data.text],
+            role: 'lore',
+            onClose: () => { this._paused = false; }
+        });
+    }
+
+    _interactNPC(npc) {
         // Build dialog lines (cycle through their full lore script)
         const lines = [...(npc.dialog || [])];
 
@@ -404,6 +449,53 @@ export class WorldScene extends Phaser.Scene {
             onClose: () => this._afterDialog(npc),
             onAction: action ? () => this._performNpcAction(action.kind, npc) : null,
         });
+    }
+
+    _interactChest(x, y) {
+        const instanceId = `chest_${this._playerData.currentArea}_${x}_${y}`;
+        if (this._playerData.openedChests[instanceId]) {
+            this._chat('Este baú já está vazio.', 'system');
+            return;
+        }
+
+        // 30% chance of being a mimic in dungeon, 10% elsewhere
+        const mimicChance = this._playerData.currentArea === 'dungeon' ? 0.3 : 0.1;
+        const isActuallyMimic = Math.random() < mimicChance;
+
+        this._paused = true;
+        this.scene.launch('Inference', {
+            targetId: instanceId,
+            isActuallyMimic,
+            onResult: (result) => {
+                this._paused = false;
+                if (result === 'open') {
+                    this._openChest(x, y, instanceId);
+                } else if (result === 'mimic_trigger') {
+                    this._triggerMimic(x, y, instanceId);
+                }
+            }
+        });
+    }
+
+    _openChest(x, y, instanceId) {
+        this._playerData.openedChests[instanceId] = true;
+        // Basic rewards for now
+        const gold = 20 + Math.floor(Math.random() * 30);
+        this._playerData.gold += gold;
+        this._chat(`Você abriu o baú e encontrou {{gold:${gold} ouro}}!`, 'loot');
+        EventBus.emit('player-stats-changed', { player: this._playerData });
+        SaveSystem.autoSave(this._playerData);
+    }
+
+    _triggerMimic(x, y, instanceId) {
+        this._chat('{{bad:O BAÚ ERA UM MÍMICO!}}', 'combat-hit');
+        // Start combat with a special mimic monster
+        const mimicDef = {
+            id: 'mimic', name: 'Mímico de Madeira', level: this._playerData.level + 1,
+            maxHp: 80, hp: 80, attackDamage: 12, defense: 2, xpReward: 50, goldReward: 40,
+            element: 'shadow', questionTopic: 'inference', questionDifficulty: 'medium'
+        };
+        this._startCombat({ def: mimicDef, instanceId });
     }
 
     _performNpcAction(kind, npc) {

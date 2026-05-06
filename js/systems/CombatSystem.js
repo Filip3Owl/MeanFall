@@ -6,14 +6,33 @@ export const CombatSystem = {
 
     /**
      * Player damage with elemental matchup, weapon element, and rarity scaling.
-     * Returns: { damage, multiplier, isCrit, advantage: 'super'|'weak'|'neutral' }
+     * Incorporates statistical distributions (Uniform vs Normal) from weapons.
      */
-    calcPlayerDamage(player, monster, streak = 0) {
+    calcPlayerDamage(player, monster, streak = 0, weaponInfo = null) {
         const base       = 10 + (player.level * 1.5);
         const intBonus   = player.intelligence * 0.5;
         const strBonus   = player.strength * 0.3;
         const streakBonus = Math.min(streak * 2, 20);
-        let raw          = Math.floor(base + intBonus + strBonus + streakBonus);
+        let raw          = base + intBonus + strBonus + streakBonus;
+
+        // Apply statistical distribution multiplier
+        let distMult = 1.0;
+        const dist = weaponInfo?.damageDistribution || 'normal';
+        const range = weaponInfo?.damageRange || [0.8, 1.2]; // min/max multiplier
+
+        if (dist === 'uniform') {
+            distMult = range[0] + Math.random() * (range[1] - range[0]);
+        } else {
+            // Normal (Gauss) distribution using Box-Muller transform
+            // Mean at center of range, stdDev such that 95% is within range
+            const mean = (range[0] + range[1]) / 2;
+            const stdDev = (range[1] - range[0]) / 4;
+            distMult = this._boxMuller(mean, stdDev);
+            // Clamp to absolute range
+            distMult = Math.max(range[0], Math.min(range[1], distMult));
+        }
+
+        raw = Math.floor(raw * distMult);
 
         // Weapon element vs monster element
         const weaponElem = this._weaponElement(player);
@@ -27,7 +46,23 @@ export const CombatSystem = {
 
         const damage = Math.max(1, raw - (monster.defense || 0));
         const advantage = matchup > 1.1 ? 'super' : matchup < 0.9 ? 'weak' : 'neutral';
-        return { damage, multiplier: matchup, isCrit, advantage, weaponElement: weaponElem };
+        return { 
+            damage, 
+            multiplier: matchup, 
+            isCrit, 
+            advantage, 
+            weaponElement: weaponElem,
+            distribution: dist
+        };
+    },
+
+    // Standard Box-Muller for Normal Distribution
+    _boxMuller(mean, stdDev) {
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random();
+        while(v === 0) v = Math.random();
+        const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return z * stdDev + mean;
     },
 
     calcMonsterDamage(monster, player) {

@@ -90,23 +90,32 @@ export const ITEMS = {
     // ─── MÃOS ─────────────────────────────────────────────────────────────────
     wooden_sword: {
         id: 'wooden_sword', name: 'Espada de Madeira', type: 'equipment', slot: 'rightHand', rarity: 'common',
-        description: '+2 FOR.', bonuses: { strength: 2 }, value: 40, icon: 'item_sword',
+        description: '+2 FOR. Dano instável (Uniforme).', 
+        bonuses: { strength: 2 }, 
+        damageDistribution: 'uniform', damageRange: [0.7, 1.3],
+        value: 40, icon: 'item_sword',
     },
     iron_blade: {
         id: 'iron_blade', name: 'Lâmina de Ferro', type: 'equipment', slot: 'rightHand', rarity: 'uncommon',
-        description: '+5 FOR.', bonuses: { strength: 5 }, value: 110, icon: 'item_sword',
+        description: '+5 FOR. Dano consistente (Normal).', 
+        bonuses: { strength: 5 },
+        damageDistribution: 'normal', damageRange: [0.8, 1.2],
+        value: 110, icon: 'item_sword',
     },
     elemental_staff: {
         id: 'elemental_staff', name: 'Cajado Elemental', type: 'equipment', slot: 'rightHand', rarity: 'rare',
         element: 'shadow',
-        description: '+4 INT, +3 FOR, +10 Foco máx.',
-        bonuses: { intelligence: 4, strength: 3, maxFocus: 10 }, value: 220, icon: 'item_staff',
+        description: '+4 INT, +3 FOR, +10 Foco máx. Dano instável (Uniforme).',
+        bonuses: { intelligence: 4, strength: 3, maxFocus: 10 },
+        damageDistribution: 'uniform', damageRange: [0.5, 1.5],
+        value: 220, icon: 'item_staff',
     },
     blade_of_inference: {
         id: 'blade_of_inference', name: 'Lâmina da Inferência', type: 'equipment', slot: 'rightHand', rarity: 'legendary',
         element: 'shadow',
-        description: '+12 FOR, +6 INT, +20 Foco máx. Suprema entre as armas.',
+        description: '+12 FOR, +6 INT, +20 Foco máx. Dano muito preciso (Normal).',
         bonuses: { strength: 12, intelligence: 6, maxFocus: 20 },
+        damageDistribution: 'normal', damageRange: [0.9, 1.1],
         value: 1200, icon: 'item_sword',
     },
     wooden_shield: {

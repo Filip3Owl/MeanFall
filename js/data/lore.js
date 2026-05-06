@@ -62,6 +62,29 @@ export const STORY = {
     ],
 };
 
+export const ANCIENT_SCROLLS = {
+    'scroll_1': {
+        title: 'Fragmento do Parâmetro',
+        text: 'No início, não havia dados, apenas o {{accent:Parâmetro}}. Dele fluíram as primeiras leis. Se você vê caos, é apenas uma amostra enviesada do sagrado.'
+    },
+    'scroll_2': {
+        title: 'A Profecia do valor-p',
+        text: 'Quando o {{bad:P-valor}} cair abaixo do limiar do destino, a verdade oculta será revelada. Rejeite a nula, pois ela é o véu que cobre o místico.'
+    },
+    'scroll_3': {
+        title: 'O Canto da Gaussiana',
+        text: 'A perfeição habita no centro, mas a vida respira nas caudas. Quem teme os {{rare:Outliers}} nunca conhecerá a amplitude total da alma.'
+    },
+    'scroll_4': {
+        title: 'Tratado da Incerteza',
+        text: 'O sábio não busca a certeza, mas o controle do {{bad:Erro}}. A confiança é uma ponte de 95%; os outros 5% pertencem aos deuses.'
+    },
+    'scroll_5': {
+        title: 'A Maldição da Dimensionalidade',
+        text: 'Muitos caminhos levam à perdição. Quanto mais perguntas você faz ao universo, mais fácil é encontrar respostas que não significam nada.'
+    }
+};
+
 export const TUTORIAL_TIPS = [
     { id: 't_move',     trigger: 'start',          text: 'Use WASD ou setas para se mover. Aproxime-se de NPCs e pressione ESPAÇO para conversar.' },
     { id: 't_combat',   trigger: 'first_monster',  text: 'Para atacar uma criatura, encoste nela. Você responderá perguntas de estatística — acerte para causar dano!' },

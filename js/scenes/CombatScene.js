@@ -353,9 +353,10 @@ export class CombatScene extends Phaser.Scene {
 
             // Resolve weapon element from equipped item (live lookup)
             const weaponId = this._player.equipment?.rightHand || this._player.equipment?.leftHand;
-            this._player._weaponElement = (weaponId && ITEMS[weaponId]?.element) || 'normal';
+            const weaponInfo = ITEMS[weaponId] || null;
+            this._player._weaponElement = weaponInfo?.element || 'normal';
 
-            const result = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, this._streak);
+            const result = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, this._streak, weaponInfo);
             this._monsterHp = Math.max(0, this._monsterHp - result.damage);
             this._updateMonsterBar();
             this._spawnDamageNumber(this._monsterPanelCenter, result.damage, result.isCrit ? '#ff88cc' : '#ff5555', result.isCrit);
@@ -365,6 +366,11 @@ export class CombatScene extends Phaser.Scene {
             if (result.isCrit)              msg += ' [CRÍTICO!]';
             if (result.advantage === 'super') msg += ' [SUPER EFICAZ!]';
             if (result.advantage === 'weak')  msg += ' [Pouco eficaz...]';
+            
+            // Add distribution flair
+            if (result.distribution === 'uniform') msg += ' (Instável!)';
+            else if (weaponInfo) msg += ' (Consistente)';
+
             this._showFeedback(msg, result.isCrit ? '#ff88cc' : '#55ff88');
             if (btnBg) btnBg.setFillStyle(0x003300);
             if (this._streak > 1) this._streakTxt.setText(`${this._streak}× STREAK!`);

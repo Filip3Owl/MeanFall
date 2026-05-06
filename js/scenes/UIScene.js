@@ -250,7 +250,7 @@ export class UIScene extends Phaser.Scene {
 
     _updateMinimap(mapMgr, player) {
         if (!mapMgr || !this._els.minimap) return;
-        mapMgr.drawMinimap(this._els.minimap);
+        mapMgr.drawMinimap(this._els.minimap, player);
         mapMgr.drawMinimapPlayer(this._els.minimap, player.position.x, player.position.y);
     }
 

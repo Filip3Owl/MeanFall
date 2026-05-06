@@ -55,6 +55,9 @@ export const MAP_DATA = {
                 'Mas meu estoque ainda é real. Veja o que tenho — talvez encontre algo útil para sobreviver ao que vem pela frente.',
             ]},
         ],
+        scrolls: [
+            { scrollId: 'scroll_1', x: 1, y: 1 },
+        ],
     },
 
     meadows: {
@@ -101,6 +104,9 @@ export const MAP_DATA = {
                 'A estatística salva vidas, literalmente. Não é só teoria. Veja meu estoque — tenho o melhor que os Prados ainda podem oferecer.',
             ]},
         ],
+        scrolls: [
+            { scrollId: 'scroll_2', x: 15, y: 1 },
+        ],
     },
 
     forest: {
@@ -141,6 +147,9 @@ export const MAP_DATA = {
                 'O IQR — intervalo interquartil — é Q3 menos Q1. Mede a dispersão dos 50% centrais. Robusto aos outliers que a Distorção planta nos extremos.',
                 'Vi um aventureiro tentar prever o dano de um monstro pela média. Esqueceu que o desvio padrão era 40. A surpresa foi letal. Aprenda a medir o caos antes que ele te surpreenda.',
             ]},
+        ],
+        scrolls: [
+            { scrollId: 'scroll_3', x: 2, y: 13 },
         ],
     },
 
@@ -188,6 +197,9 @@ export const MAP_DATA = {
                 'Meu estoque tem preço fixo. Pequena rebeldia contra o caos. Veja o que tenho.',
             ]},
         ],
+        scrolls: [
+            { scrollId: 'scroll_4', x: 1, y: 13 },
+        ],
     },
 
     mountains: {
@@ -228,6 +240,9 @@ export const MAP_DATA = {
                 'Quando a Distorção chegou, a curva se entortou. Assimetrias monstruosas surgiram — caudas longas onde não deveria haver. O z-score — X menos μ dividido por σ — se tornou nossa ferramenta de detecção.',
                 'Um evento com z maior que 3 é suspeito. Com z maior que 5 é obra certa da Distorção. Vá ao Calabouço, aprendiz. Lá dorme o que criou tudo isso.',
             ]},
+        ],
+        scrolls: [
+            { scrollId: 'scroll_5', x: 15, y: 13 },
         ],
     },
 
