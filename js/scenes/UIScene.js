@@ -1,6 +1,6 @@
 import EventBus from '../utils/EventBus.js';
-import { AREA_INFO } from '../constants.js';
-import { xpToNext, masteryPercent } from '../systems/XPSystem.js';
+import { AREA_INFO, ELEMENTS } from '../constants.js';
+import { xpToNext, masteryPercent, xpToNextElement } from '../systems/XPSystem.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { spendStatPoint } from '../systems/XPSystem.js';
 import { richToHtml } from '../utils/RichText.js';
@@ -36,6 +36,7 @@ export class UIScene extends Phaser.Scene {
             areaTopic:  document.getElementById('area-topic'),
             headerArea: document.getElementById('header-area'),
             masterList: document.getElementById('mastery-list'),
+            elementalList: document.getElementById('elemental-mastery-list'),
             chatMsgs:   document.getElementById('chat-messages'),
             chatLog:    document.getElementById('chat-log'),
             minimap:    document.getElementById('minimap-canvas'),
@@ -51,6 +52,7 @@ export class UIScene extends Phaser.Scene {
     _bindEvents() {
         EventBus.on('player-hp-change',     ({ player }) => this._updateVitals(player));
         EventBus.on('player-xp-change',     ({ player }) => this._updateXP(player));
+        EventBus.on('element-xp-change',    ({ player }) => this._updateElementalMastery(player));
         EventBus.on('player-level-up',      ({ player }) => {
             this._updateAll(player);
             this.addMsg(`NIVEL ACIMA! Agora és nível ${player.level}!`, 'levelup');
@@ -145,6 +147,7 @@ export class UIScene extends Phaser.Scene {
         this._updateXP(player);
         this._updateStats(player);
         this._updateMastery(player);
+        this._updateElementalMastery(player);
         const e = this._els;
         if (e.charName) e.charName.textContent = player.name || 'Aventureiro';
         if (e.level) e.level.textContent = player.level;
@@ -197,6 +200,41 @@ export class UIScene extends Phaser.Scene {
                 <div class="mastery-name">${info.displayName}</div>
                 <div class="mastery-bar-track"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
                 <span class="mastery-pct">${pct}% (${m.correct}/${m.attempted})</span>`;
+            el.appendChild(div);
+        }
+    }
+
+    _updateElementalMastery(player) {
+        player = player || this.registry.get('player');
+        if (!player || !this._els.elementalList) return;
+        const el = this._els.elementalList;
+        el.innerHTML = '';
+
+        for (const [id, data] of Object.entries(ELEMENTS)) {
+            const m = player.elementalMastery[id];
+            if (!m) continue;
+
+            const next = xpToNextElement(m.level);
+            const pct = Math.min(100, (m.xp / next) * 100);
+            
+            // Get texture as data URL for DOM
+            const textureKey = `icon_element_${id}`;
+            const texture = this.textures.get(textureKey);
+            const canvas = texture.getSourceImage();
+            const iconUrl = canvas ? canvas.toDataURL() : '';
+
+            const div = document.createElement('div');
+            div.className = 'element-mastery-item';
+            div.innerHTML = `
+                <div class="element-header">
+                    <img src="${iconUrl}" class="element-icon" />
+                    <span class="element-name" style="color: #${data.color.toString(16).padStart(6, '0')}">${data.name}</span>
+                    <span class="element-level">Nv. ${m.level}</span>
+                </div>
+                <div class="element-bar-track">
+                    <div class="element-bar-fill" style="width:${pct}%; background-color: #${data.color.toString(16).padStart(6, '0')}"></div>
+                </div>
+            `;
             el.appendChild(div);
         }
     }

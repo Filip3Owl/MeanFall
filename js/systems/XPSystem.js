@@ -52,6 +52,29 @@ export function spendStatPoint(player, stat) {
     return true;
 }
 
+export function awardElementalXP(player, elementId, baseXP) {
+    if (!player.elementalMastery[elementId]) return 0;
+    
+    const mastery = player.elementalMastery[elementId];
+    mastery.xp += baseXP;
+    mastery.totalCorrect++;
+
+    let leveled = false;
+    while (mastery.xp >= xpToNextElement(mastery.level)) {
+        mastery.xp -= xpToNextElement(mastery.level);
+        mastery.level++;
+        leveled = true;
+    }
+
+    EventBus.emit('element-xp-change', { player, elementId, earned: baseXP, leveled });
+    return baseXP;
+}
+
+export function xpToNextElement(level) {
+    // Slower curve for elements: 50, 125, 230, 360...
+    return Math.floor(50 * Math.pow(level, 1.4));
+}
+
 export function masteryPercent(mastery) {
     if (!mastery || mastery.attempted === 0) return 0;
     return Math.round((mastery.correct / mastery.attempted) * 100);

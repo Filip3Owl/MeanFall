@@ -1,10 +1,10 @@
 import { CombatSystem }                from '../systems/CombatSystem.js';
 import { QuestionEngine }                from '../systems/QuestionEngine.js';
-import { awardXP }                       from '../systems/XPSystem.js';
+import { awardXP, awardElementalXP }           from '../systems/XPSystem.js';
 import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
-import { ELEMENTS, FLEE_XP_PENALTY }     from '../constants.js';
+import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js';
 import EventBus                          from '../utils/EventBus.js';
 
 export class CombatScene extends Phaser.Scene {
@@ -346,6 +346,10 @@ export class CombatScene extends Phaser.Scene {
             this._streak++;
             mastery.correct++;
             mastery.wrongIds = mastery.wrongIds.filter(id => id !== q.id);
+
+            // Award Elemental XP based on topic
+            const elementId = TOPIC_TO_ELEMENT[q.topic] || 'normal';
+            awardElementalXP(this._player, elementId, 15);
 
             // Resolve weapon element from equipped item (live lookup)
             const weaponId = this._player.equipment?.rightHand || this._player.equipment?.leftHand;

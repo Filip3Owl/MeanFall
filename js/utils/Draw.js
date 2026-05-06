@@ -197,6 +197,7 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
 
     drawNPCSprites(g);
+    drawElementIcons(g);
 
     // ─── ITEM ICONS (24×24) ────────────────────────────────────────────────
     
@@ -720,6 +721,110 @@ function drawNPCSprites(g) {
     g.clear();
     humanBase(g, 0xf4c27f, 0x8b4513, 0x44aa66, 0x225533, 0xd4af37);
     g.generateTexture('sprite_npc_shop', 24, 32);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ELEMENTAL ICONS (24×24)
+// Blends statistical symbols with RPG motifs.
+// ─────────────────────────────────────────────────────────────────────────
+function drawElementIcons(g) {
+    const S = 24;
+
+    // ── FIRE: Dice + Flames (Probability)
+    g.clear();
+    // Flames
+    px(g, 0xff4400, 4, 2, 16, 16);
+    px(g, 0xffaa00, 6, 4, 12, 12);
+    px(g, 0xffff00, 10, 6, 4, 8);
+    // Dice (D6)
+    px(g, 0xeeeeee, 6, 10, 12, 12); // face
+    px(g, 0xcccccc, 18, 10, 1, 12); // right edge
+    px(g, 0xcccccc, 6, 22, 12, 1);  // bottom edge
+    // Pips (3)
+    px(g, 0x333333, 8, 12, 2, 2);
+    px(g, 0x333333, 11, 15, 2, 2);
+    px(g, 0x333333, 14, 18, 2, 2);
+    g.generateTexture('icon_element_fire', S, S);
+
+    // ── EARTH: Bar Chart + Stone (Mean/Median/Mode)
+    g.clear();
+    px(g, 0x4a3820, 2, 20, 20, 2); // Base
+    // Bar 1 (Mean)
+    px(g, 0x886633, 4, 14, 4, 6);
+    px(g, 0xc69b5b, 5, 15, 2, 5);
+    // Bar 2 (Mode - Tallest)
+    px(g, 0x886633, 10, 6, 4, 14);
+    px(g, 0xc69b5b, 11, 7, 2, 13);
+    // Bar 3 (Median)
+    px(g, 0x886633, 16, 10, 4, 10);
+    px(g, 0xc69b5b, 17, 11, 2, 9);
+    // Stone Cracks
+    px(g, 0x332211, 12, 14, 1, 4);
+    px(g, 0x332211, 11, 16, 2, 1);
+    g.generateTexture('icon_element_earth', S, S);
+
+    // ── WATER: Gauss Curve + Ripple (Distributions)
+    g.clear();
+    // Gauss Curve (The "Bell")
+    px(g, 0x3388ff, 2, 18, 2, 2);   // start
+    px(g, 0x3388ff, 4, 16, 3, 3);
+    px(g, 0x3388ff, 7, 10, 3, 7);
+    px(g, 0x3388ff, 10, 4, 4, 14);  // peak
+    px(g, 0x3388ff, 14, 10, 3, 7);
+    px(g, 0x3388ff, 17, 16, 3, 3);
+    px(g, 0x3388ff, 20, 18, 2, 2);  // end
+    // Peak highlight
+    px(g, 0x88ccff, 11, 5, 2, 4);
+    // Wave ripple at bottom
+    px(g, 0x114488, 2, 21, 20, 1);
+    px(g, 0x88ccff, 4, 20, 4, 1);
+    px(g, 0x88ccff, 14, 20, 6, 1);
+    g.generateTexture('icon_element_water', S, S);
+
+    // ── ICE: Scatter Plot + Crystals (Spread)
+    g.clear();
+    // Main Crystal
+    px(g, 0x336677, 10, 2, 4, 20); // vertical
+    px(g, 0x336677, 4, 10, 16, 4); // horizontal
+    px(g, 0x88ddee, 11, 3, 2, 18);
+    px(g, 0x88ddee, 5, 11, 14, 2);
+    // Scatter points as smaller crystals
+    px(g, 0xccf2ff, 4, 4, 2, 2);
+    px(g, 0xccf2ff, 18, 6, 2, 2);
+    px(g, 0xccf2ff, 6, 18, 2, 2);
+    px(g, 0xccf2ff, 17, 16, 2, 2);
+    px(g, 0xffffff, 11, 11, 2, 2); // center sparkle
+    g.generateTexture('icon_element_ice', S, S);
+
+    // ── SHADOW: Inference Eye / Lens (Hypothesis Testing)
+    g.clear();
+    // Outer shadow ring
+    px(g, 0x331155, 6, 6, 12, 12);
+    px(g, 0x6633aa, 8, 8, 8, 8);
+    // The "Eye" of Inference
+    px(g, 0x000000, 10, 10, 4, 4); // pupil
+    px(g, 0xaa66dd, 10, 10, 1, 1);  // glow
+    // Handle (like a magnifying glass)
+    px(g, 0x331155, 16, 16, 6, 6);
+    px(g, 0xaa66dd, 17, 17, 4, 4);
+    // Spark of doubt
+    px(g, 0xffffff, 8, 8, 1, 1);
+    g.generateTexture('icon_element_shadow', S, S);
+
+    // ── NORMAL: Data Scroll / Table (Data Types)
+    g.clear();
+    // Scroll paper
+    px(g, 0x6688aa, 4, 4, 16, 18); // outline
+    px(g, 0xeef6ff, 5, 5, 14, 16); // paper
+    // Table lines
+    px(g, 0xaaccff, 7, 8, 10, 1);
+    px(g, 0xaaccff, 7, 11, 10, 1);
+    px(g, 0xaaccff, 7, 14, 10, 1);
+    px(g, 0xaaccff, 11, 8, 1, 7); // vertical
+    // Categories (A, B, C)
+    px(g, 0x6688aa, 7, 7, 2, 1);
+    px(g, 0x6688aa, 12, 7, 2, 1);
+    g.generateTexture('icon_element_normal', S, S);
 }
 
 // AIR — ethereal wisp / winged sylph
