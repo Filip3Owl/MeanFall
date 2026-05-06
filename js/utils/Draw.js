@@ -61,46 +61,123 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_water', S, S);
 
+    // Improved Wall: More variety and highlights
     tile(g, g => {
-        g.fillStyle(COLORS.WALL); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x333333);
+        g.fillStyle(0x666666); g.fillRect(0, 0, S, S);
         for (let row = 0; row < 4; row++) {
             const off = (row % 2) * 8;
-            for (let col = 0; col < 3; col++) g.fillRect(off + col * 16, row * 8, 14, 7);
+            for (let col = 0; col < 3; col++) {
+                const bx = off + col * 16;
+                const by = row * 8;
+                g.fillStyle(0x444444); g.fillRect(bx, by, 14, 7);
+                g.fillStyle(0x777777, 0.4); g.fillRect(bx, by, 14, 1); // top highlight
+            }
         }
-        g.fillStyle(0x777777, 0.3); g.fillRect(1, 1, S - 2, 3);
+        // Random grit
+        g.fillStyle(0x333333, 0.3);
+        g.fillRect(5, 5, 2, 2); g.fillRect(20, 20, 2, 2);
     });
     g.generateTexture('tile_wall', S, S);
 
-    // Tree — more detailed canopy + trunk shadow
     tile(g, g => {
-        // Grass background
         g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
         g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
-        // Trunk shadow on ground
-        g.fillStyle(0x1a3d20, 0.4); g.fillRect(8, 24, 16, 6);
-        // Trunk
-        g.fillStyle(0x4a2d18); g.fillRect(13, 18, 6, 12);
-        g.fillStyle(0x5c3a1e); g.fillRect(14, 18, 4, 12);
-        g.fillStyle(0x6b4520, 0.6); g.fillRect(15, 19, 1, 10);
-        // Canopy — layered
-        g.fillStyle(0x1f4a22); g.fillRect(3, 5, 26, 16);
-        g.fillStyle(0x2d6a2d); g.fillRect(5, 4, 22, 16);
-        g.fillStyle(0x3d8b3d); g.fillRect(7, 6, 18, 12);
-        g.fillStyle(0x4ea84e, 0.7); g.fillRect(9, 7, 6, 5); g.fillRect(18, 9, 6, 4);
-        // Highlights
-        g.fillStyle(0x6cc66c, 0.5); g.fillRect(10, 8, 3, 2); g.fillRect(20, 10, 3, 2);
-    });
+...
     g.generateTexture('tile_tree', S, S);
 
+    // Improved Door: Panel detail and knob
     tile(g, g => {
-        g.fillStyle(0x4a3222); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x6b4c2a);
-        g.fillRect(2, 2, S - 4, S - 4);
-        g.fillStyle(0xd4af37, 0.8);
-        g.fillRect(4, 14, 24, 4); g.fillRect(14, 4, 4, 24);
+        g.fillStyle(0x4a2d18); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x5c3a1e); g.fillRect(3, 3, S - 6, S - 6);
+        // Panels
+        g.fillStyle(0x4a2d18, 0.5);
+        g.fillRect(6, 6, 8, 8); g.fillRect(18, 6, 8, 8);
+        g.fillRect(6, 18, 8, 10); g.fillRect(18, 18, 8, 10);
+        // Knob
+        g.fillStyle(0xd4af37); g.fillRect(22, 14, 3, 3);
     });
     g.generateTexture('tile_door', S, S);
+
+    // ROOF: Terracotta shingles
+    tile(g, g => {
+        g.fillStyle(0x6b221a); g.fillRect(0, 0, S, S);
+        for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < 4; col++) {
+                const cx = col * 8;
+                const cy = row * 8;
+                g.fillStyle(0x882211); g.fillRect(cx, cy, 7, 7);
+                g.fillStyle(0xaa3322, 0.3); g.fillRect(cx, cy, 7, 2);
+            }
+        }
+    });
+    g.generateTexture('tile_roof', S, S);
+
+    // WINDOW: Glowing pane
+    tile(g, g => {
+        g.fillStyle(0x444444); g.fillRect(0, 0, S, S); // frame
+        g.fillStyle(0xffee88); g.fillRect(4, 4, S-8, S-8); // light
+        g.fillStyle(0xffaa00, 0.4); g.fillRect(4, 4, S-8, (S-8)/2); // reflection
+        // Grid
+        g.fillStyle(0x333333, 0.8);
+        g.fillRect(S/2 - 1, 4, 2, S-8);
+        g.fillRect(4, S/2 - 1, S-8, 2);
+    });
+    g.generateTexture('tile_window', S, S);
+
+    // SIGN: Wooden board
+    tile(g, g => {
+        g.fillStyle(0x5c3a1e); g.fillRect(2, 6, S-4, 16); // board
+        g.fillStyle(0x4a2d18); g.fillRect(2, 6, S-4, 2); // shadow
+        // Symbols (placeholder gold dots)
+        g.fillStyle(0xd4af37); g.fillRect(8, 12, 4, 4); g.fillRect(20, 12, 4, 4);
+    });
+    g.generateTexture('tile_sign', S, S);
+
+    // FENCE: Post and rail
+    tile(g, g => {
+        g.clear(); // Transparent background
+        g.fillStyle(0x5c3a1e);
+        g.fillRect(6, 0, 4, S); // Left post
+        g.fillRect(22, 0, 4, S); // Right post
+        g.fillRect(0, 8, S, 3); // Top rail
+        g.fillRect(0, 20, S, 3); // Bottom rail
+    });
+    g.generateTexture('tile_fence', S, S);
+
+    // BOOKSHELF: Small books
+    tile(g, g => {
+        g.fillStyle(0x4a2d18); g.fillRect(0, 0, S, S); // wood
+        const colors = [0xcc2222, 0x2266ff, 0x228822, 0xeeeeee, 0xffaa00];
+        for (let row = 0; row < 2; row++) {
+            const by = 4 + row * 12;
+            g.fillStyle(0x2d1a08); g.fillRect(2, by, S-4, 8); // shelf void
+            for (let i = 0; i < 5; i++) {
+                g.fillStyle(colors[Math.floor(Math.random()*colors.length)]);
+                g.fillRect(4 + i * 5, by + 1, 4, 7);
+            }
+        }
+    });
+    g.generateTexture('tile_bookshelf', S, S);
+
+    // TABLE: Plain wood
+    tile(g, g => {
+        g.fillStyle(0x5c3a1e); g.fillRect(2, 2, S-4, S-4);
+        g.fillStyle(0x7a4c2a); g.fillRect(4, 4, S-8, S-8);
+        g.fillStyle(0x4a2d18, 0.6); g.fillRect(2, 2, S-4, 2);
+    });
+    g.generateTexture('tile_table', S, S);
+
+    // RUG: Ornate pattern
+    tile(g, g => {
+        g.fillStyle(0x882222); g.fillRect(0, 0, S, S);
+        g.fillStyle(0xaa7711, 0.4);
+        g.fillRect(4, 4, S-8, S-8);
+        g.fillStyle(0x882222); g.fillRect(8, 8, S-16, S-16);
+        // Fringe
+        g.fillStyle(0xaa7711, 0.6);
+        for(let i=0; i<S; i+=4) { g.fillRect(i, 0, 2, 2); g.fillRect(i, S-2, 2, 2); }
+    });
+    g.generateTexture('tile_rug', S, S);
 
     tile(g, g => {
         g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
@@ -1176,4 +1253,11 @@ export const TILE_TEXTURE_MAP = {
     10: 'tile_mountain',
     11: 'tile_snow',
     12: 'tile_cave',
+    13: 'tile_roof',
+    14: 'tile_window',
+    15: 'tile_sign',
+    16: 'tile_fence',
+    17: 'tile_bookshelf',
+    18: 'tile_table',
+    19: 'tile_rug',
 };

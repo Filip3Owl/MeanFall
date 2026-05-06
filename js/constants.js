@@ -18,6 +18,13 @@ export const TILES = {
     MOUNTAIN:   10,
     SNOW:       11,
     CAVE_FLOOR: 12,
+    ROOF:       13,
+    WINDOW:     14,
+    SIGN:       15,
+    FENCE:      16,
+    BOOKSHELF:  17,
+    TABLE:      18,
+    RUG:        19,
 };
 
 export const TILE_WALKABLE = {
@@ -34,6 +41,13 @@ export const TILE_WALKABLE = {
     10: false,// mountain
     11: true, // snow
     12: true, // cave floor
+    13: false,// roof
+    14: false,// window
+    15: false,// sign
+    16: false,// fence
+    17: false,// bookshelf
+    18: false,// table
+    19: true, // rug
 };
 
 export const AREAS = {

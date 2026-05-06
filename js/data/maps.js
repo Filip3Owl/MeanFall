@@ -5,34 +5,32 @@ export const MAP_DATA = {
     village: {
         tiles: [
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-            [3,0,0,0,0,0,4,0,0,0,4,0,0,0,0,0,3],
-            [3,0,4,0,0,3,3,3,0,0,0,3,3,3,0,4,3],
-            [3,0,0,0,0,3,1,3,0,0,0,3,1,3,0,0,3],
-            [3,0,0,1,1,5,1,3,0,0,0,3,3,3,0,0,3],
-            [3,0,4,0,0,3,3,3,0,0,0,0,0,0,0,4,3],
-            [3,0,4,0,0,0,0,0,0,0,0,0,0,0,4,0,3],
-            [3,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,3],
-            [3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3],
-            [3,0,4,3,3,3,0,0,0,0,0,3,3,3,4,0,3],
-            [3,0,0,3,1,3,0,0,0,0,0,3,1,3,0,0,3],
-            [3,0,0,3,3,3,0,0,0,0,0,3,3,3,0,0,3],
-            [3,0,4,0,0,0,0,4,0,4,0,0,0,0,4,0,3],
-            [3,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,3],
+            [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
+            [3,0,13,13,13,0,0,4,0,0,13,13,13,0,0,0,3],
+            [3,0,14,3,14,0,0,0,0,0,14,3,14,0,0,0,3],
+            [3,0,3,5,3,1,1,1,1,1,3,5,3,0,0,4,3],
+            [3,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,3],
+            [3,16,16,1,16,16,16,1,16,16,16,1,16,16,16,16,3],
+            [3,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,3],
+            [3,16,16,1,16,16,16,1,16,16,16,1,16,16,16,16,3],
+            [3,0,13,13,13,13,13,0,0,4,0,0,0,4,0,0,3],
+            [3,0,14,15,3,14,3,0,0,0,0,0,0,0,0,0,3],
+            [3,0,3,3,5,3,3,0,0,0,0,0,0,0,0,0,3],
+            [3,0,1,1,1,1,1,0,4,0,4,0,0,0,4,0,3],
+            [3,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
-        spawn: { x: 8, y: 7 },
+        spawn: { x: 3, y: 7 },
         exits: [
-            { x: 8, y: 13, targetArea: 'meadows', targetSpawn: { x: 8, y: 1 } },
+            { x: 5, y: 13, targetArea: 'meadows', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'air_wisp', instanceId: 'v_m1', x: 3, y: 3 },
-            { monsterId: 'air_wisp', instanceId: 'v_m2', x: 14, y: 3 },
-            { monsterId: 'air_wisp', instanceId: 'v_m3', x: 2, y: 12 },
-            { monsterId: 'air_wisp', instanceId: 'v_m4', x: 14, y: 12 },
-            { monsterId: 'air_sylph', instanceId: 'v_m5', x: 8, y: 12 },
+            { monsterId: 'air_wisp', instanceId: 'v_m1', x: 14, y: 5 },
+            { monsterId: 'air_wisp', instanceId: 'v_m2', x: 14, y: 10 },
+            { monsterId: 'air_sylph', instanceId: 'v_m3', x: 10, y: 12 },
         ],
         npcs: [
-            { npcId: 'elder', role: 'quest', x: 5, y: 4, dialog: [
+            { npcId: 'elder', role: 'quest', x: 3, y: 5, dialog: [
                 'Aprendiz... você veio. Eu sabia que este dia chegaria — a Curva me revelou em sonhos há décadas.',
                 'Há cinquenta anos este mundo seguia leis perfeitas. Cada criatura, cada batalha, cada colheita obedecia a uma distribuição previsível mantida pela Sociedade dos Estatísticos.',
                 'Então veio a Distorção. Ela não destruiu — ela corrompeu. Embaralhou os tipos de dados da própria realidade.',
@@ -40,7 +38,7 @@ export const MAP_DATA = {
                 'Quando uma entidade perde sua classificação, torna-se imprevisível e perigosa. Dados NOMINAIS são categorias sem ordem — como elementos. ORDINAIS têm hierarquia. DISCRETOS são contagens inteiras. CONTÍNUOS admitem infinitas casas decimais.',
                 'Você é o último aprendiz da Ordem. Comece aqui, classificando o que a Distorção confundiu. Tenho uma missão que só você pode cumprir.',
             ]},
-            { npcId: 'scholar', role: 'quest', x: 12, y: 4, dialog: [
+            { npcId: 'scholar', role: 'quest', x: 11, y: 5, dialog: [
                 'Você é o aprendiz que sobreviveu? Então o que tenho a dizer é urgente — não temos tempo.',
                 'Sou Kael, Arquivista da Sociedade dos Estatísticos. Fui eu quem documentou os primeiros sinais da Distorção, mas ninguém acreditou.',
                 'A corrupção começa sempre pelos dados NOMINAIS — cores, elementos, nomes sem hierarquia. Os Wisps desta vila costumavam ter elementos fixos. Agora mudam aleatoriamente.',
@@ -48,7 +46,7 @@ export const MAP_DATA = {
                 'O mais perturbador: dados CONTÍNUOS começaram a discretizar. O peso das espadas passou a ser sempre inteiro. Temperatura, altura, tempo — tudo quantizado pela Distorção.',
                 'Cada tipo de dado corrompido é um fragmento da Curva destruído. Aprenda a identificá-los e a restaurá-los. É nossa única esperança.',
             ]},
-            { npcId: 'merchant', role: 'shop', x: 8, y: 6, dialog: [
+            { npcId: 'merchant', role: 'shop', x: 4, y: 12, dialog: [
                 'Ah, um viajante com pulso! Raro encontrar alguém de pé por aqui depois da Distorção.',
                 'Sou Doran. Antes do caos, eu calculava preços com estatística: média de mercado, desvio de oferta e demanda. Funcionava perfeitamente.',
                 'Agora os preços enlouqueceram — um item que valia 10 pode custar 0 ou 1000 dependendo do dia. A distribuição de preços foi corrompida.',
