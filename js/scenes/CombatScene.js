@@ -192,13 +192,6 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '9px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
-        // HP / FOCO labels
-        this.add.text(ix, PY + 52, 'HP',   { fontSize: '9px', color: '#aa9988', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this.add.text(ix, PY + 78, 'FOCO', { fontSize: '9px', color: '#aa9988', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-
-        this._pHpTxt    = this.add.text(PX + PW - 108, PY + 52, '', { fontSize: '9px', color: '#ffbbaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._pFocusTxt = this.add.text(PX + PW - 108, PY + 78, '', { fontSize: '9px', color: '#bbccff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-
         // Streak text (top-right of whole panel row)
         this._streakTxt = this.add.text(PX + PW - 6, PY + 8, '', {
             fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
@@ -644,16 +637,7 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _updatePlayerBars() {
-        const p    = this._player;
-        const hPct = Math.max(0, p.hp / p.maxHp);
-        const fPct = Math.max(0, p.focus / p.maxFocus);
-        const g    = this._pVitalsGfx;
-        g.clear();
-        this._drawBar(g, 286, 62, 148, 11, hPct, 0xdd3333, 0xff0000);
-        this._drawBar(g, 286, 88, 148, 11, fPct, 0x3355ee, 0x5566ff);
-
-        this._pHpTxt.setText(`${p.hp} / ${p.maxHp}`);
-        this._pFocusTxt.setText(`${p.focus} / ${p.maxFocus}`);
+        this._pVitalsGfx.clear();
     }
 
     // ─── ACTIONS ──────────────────────────────────────────────────────────────
