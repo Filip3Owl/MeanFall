@@ -1,3 +1,5 @@
+import { RICH_COLORS } from '../utils/RichText.js';
+
 // Highlight key terms in dialog text using Phaser BBCode-like tagging.
 // We can't use real BBCode without an extra plugin, so we render line in
 // segments: any token wrapped in {{tag:value}} is shown in its own colored
@@ -150,8 +152,25 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _tokenize(line) {
-        // Split on whitespace, keeping the spaces so the layout looks natural.
-        return line.split(/(\s+)/);
+        // Handles both {{tag:value}} rich tokens and plain words with keyword highlighting.
+        const tokens = [];
+        const re = /\{\{(\w+):([^}]+)\}\}|([^\s{]+|\s+)/g;
+        let m;
+        while ((m = re.exec(line)) !== null) {
+            if (m[1] && m[2]) {
+                // {{tag:body}} — color from RICH_COLORS, split for wrapping
+                const color = RICH_COLORS[m[1]] || '#ffd700';
+                for (const part of m[2].split(/(\s+)/)) {
+                    if (part) tokens.push({ text: part, color, bold: true });
+                }
+            } else {
+                const word = m[3] || '';
+                const cleaned = word.replace(/[.,!?;:()…]/g, '');
+                const kw = DIALOG_KEYWORDS[cleaned];
+                tokens.push({ text: word, color: kw || null, bold: !!kw });
+            }
+        }
+        return tokens;
     }
 
     _renderTokens(tokens) {
@@ -161,19 +180,15 @@ export class DialogScene extends Phaser.Scene {
         let cx = 0, cy = 0;
         const lineHeight = 16;
 
-        for (const tok of tokens) {
-            if (tok === '') continue;
-            // Strip surrounding punctuation when matching keyword
-            const cleaned = tok.replace(/[.,!?;:()…]/g, '');
-            const color = DIALOG_KEYWORDS[cleaned] || null;
-            const isKw = !!color;
-            const txt = this.add.text(0, 0, tok, {
+        for (const { text, color, bold } of tokens) {
+            if (!text) continue;
+            const txt = this.add.text(0, 0, text, {
                 fontSize: '12px', color: color || '#eeeedd', fontFamily: 'Courier New',
-                fontStyle: isKw ? 'bold' : 'normal',
+                fontStyle: bold ? 'bold' : 'normal',
             }).setOrigin(0, 0).setDepth(11);
 
             const w = txt.width;
-            if (cx + w > wrapWidth && tok.trim() !== '') {
+            if (cx + w > wrapWidth && text.trim() !== '') {
                 cx = 0; cy += lineHeight;
             }
             txt.setPosition(startX + cx, startY + cy);

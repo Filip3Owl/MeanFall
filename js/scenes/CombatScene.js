@@ -587,17 +587,21 @@ export class CombatScene extends Phaser.Scene {
                 lootIds.push(...batch);
             }
 
+            const RARITY_TAG = { legendary: 'legend', epic: 'epic', rare: 'rare', uncommon: 'loot', common: 'mute' };
             for (const itemId of lootIds) {
                 CombatSystem.addToInventory(this._player, itemId);
-                const name = ITEMS[itemId]?.name;
-                if (name) lootNames.push(name);
+                const itemDef = ITEMS[itemId];
+                if (itemDef) {
+                    const tag = RARITY_TAG[itemDef.rarity] || 'loot';
+                    lootNames.push(`{{${tag}:${itemDef.name}}}`);
+                }
             }
 
             bookIds = BookSystem.rollBookDrops(this._monsterDef.id.replace('Elite ', ''));
             for (const bookId of bookIds) {
                 BookSystem.addBook(this._player, bookId);
                 const b = BOOKS[bookId];
-                if (b) lootNames.push(`Livro: ${b.title}`);
+                if (b) lootNames.push(`{{hint:Livro: ${b.title}}}`);
             }
 
             EventBus.emit('player-stats-changed', { player: this._player });

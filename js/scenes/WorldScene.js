@@ -394,11 +394,10 @@ export class WorldScene extends Phaser.Scene {
             }
             if (xpGained) this._chat(`Você obteve {{xp:+${xpGained} XP}} na batalha!`, 'xp');
             if (loot?.length) {
-                const formattedLoot = loot.map(item => `{{loot:${item}}}`).join(', ');
-                this._chat(`{{accent:RECOMPENSAS:}} ${formattedLoot}`, 'loot');
+                this._chat(`{{accent:RECOMPENSAS:}} ${loot.join(', ')}`, 'loot');
                 this._playerData.pendingItemAlert = true;
                 EventBus.emit('item-alert', { player: this._playerData });
-                if (loot.some(s => s.startsWith('Livro:'))) {
+                if (loot.some(s => s.includes('Livro:'))) {
                     TutorialSystem.trigger(this._playerData, this, 'first_book');
                 }
             }
