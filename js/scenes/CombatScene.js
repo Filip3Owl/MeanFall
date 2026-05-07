@@ -25,6 +25,22 @@ export class CombatScene extends Phaser.Scene {
         this._player = JSON.parse(JSON.stringify(this.registry.get('player')));
         this._buildUI();
         this._nextQuestion();
+
+        // ── Entrance Animation ──────────────────────────────────────────────
+        this.cameras.main.fadeIn(300, 0, 0, 0);
+
+        if (this._monsterSprite) {
+            const finalScale = 2.5;
+            this._monsterSprite.setScale(0).setAlpha(0);
+            this.tweens.add({
+                targets: this._monsterSprite,
+                scale: finalScale,
+                alpha: 1,
+                duration: 600,
+                delay: 100,
+                ease: 'Back.easeOut'
+            });
+        }
     }
 
     // ─── UI CONSTRUCTION ──────────────────────────────────────────────────────
@@ -217,6 +233,23 @@ export class CombatScene extends Phaser.Scene {
         this.add.text(436, 456, 'FUGIR', {
             fontSize: '10px', color: '#ff8844', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0.5);
+
+        // Scratchpad (Calculator) button
+        const calcBg = this.add.rectangle(178, 442, 190, 28, 0x051a05, 1).setOrigin(0, 0)
+            .setInteractive()
+            .on('pointerover', () => calcBg.setFillStyle(0x0a2a0a))
+            .on('pointerout',  () => calcBg.setFillStyle(0x051a05))
+            .on('pointerdown', () => this._openScratchpad());
+        this.add.text(273, 456, 'NOTAS / CALC (N)', {
+            fontSize: '10px', color: '#88ff88', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0.5);
+
+        this.input.keyboard.on('keydown-N', () => this._openScratchpad());
+    }
+
+    _openScratchpad() {
+        if (this.scene.isActive('Scratchpad')) return;
+        this.scene.launch('Scratchpad', { parent: this });
     }
 
     // ─── QUESTION FLOW ────────────────────────────────────────────────────────

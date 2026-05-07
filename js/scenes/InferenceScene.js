@@ -99,17 +99,17 @@ export class InferenceScene extends Phaser.Scene {
         this._btnLeave.txt.setY(this._btnLeave.txt.y + 60);
 
         // Show results
-        this._resH0.setText(`H0: ${d.h0}`);
-        this._resH1.setText(`H1: ${d.h1}`);
-        this._resMetric.setText(`Evidência: ${d.evidence}${d.unit} (${d.metric})`);
+        this._resH0.setText(`H0 (Hipótese Nula): ${d.h0}`);
+        this._resH1.setText(`H1 (Hipótese Alternativa): ${d.h1}`);
+        this._resMetric.setText(`EVIDÊNCIA: ${d.evidence}${d.unit} (${d.metric})`);
         this._resPValue.setText(`Valor-p calculado: ${d.pValue}`);
 
         if (d.pValue < d.threshold) {
             this._resPValue.setColor('#ff5555');
-            this._resDecision.setText(`DECISÃO: p < ${d.threshold}. Rejeitamos H0! Evidência estatística de que o baú é um Mímico.`);
+            this._resDecision.setText(`DECISÃO: Como o valor-p (${d.pValue}) é menor que o limite (${d.threshold}), {{bad:REJEITAMOS H0}}. Há evidências estatísticas significativas de que o objeto é um {{bad:MÍMICO}}!`);
         } else {
             this._resPValue.setColor('#55ff88');
-            this._resDecision.setText(`DECISÃO: p >= ${d.threshold}. Falhamos em rejeitar H0. Não há evidência de perigo.`);
+            this._resDecision.setText(`DECISÃO: Como o valor-p (${d.pValue}) é maior ou igual ao limite (${d.threshold}), {{good:FALHAMOS EM REJEITAR H0}}. Não há evidência suficiente para afirmar que o objeto é perigoso.`);
         }
 
         this._resultContainer.setVisible(true);

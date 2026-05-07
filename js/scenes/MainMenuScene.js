@@ -76,7 +76,18 @@ export class MainMenuScene extends Phaser.Scene {
             fontSize: '10px', color: '#888', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(1, 1).setDepth(2);
 
+        // Donate Button (floating bottom right above author)
+        const donateBtn = this.add.text(W - 8, H - 24, '[ APOIAR PROJETO ]', {
+            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            backgroundColor: '#1a1505', padding: { x: 8, y: 4 }
+        }).setOrigin(1, 1).setDepth(3).setInteractive({ useHandCursor: true });
+
+        donateBtn.on('pointerover', () => donateBtn.setStyle({ color: '#ffffff', backgroundColor: '#332a0a' }));
+        donateBtn.on('pointerout',  () => donateBtn.setStyle({ color: '#ffd700', backgroundColor: '#1a1505' }));
+        donateBtn.on('pointerdown', () => this._showDonate());
+
         this._helpVisible = false;
+        this._donateVisible = false;
     }
 
     _makeButton(x, y, label, callback) {
@@ -158,6 +169,47 @@ export class MainMenuScene extends Phaser.Scene {
             this.children.list
                 .filter(c => c.depth === 11)
                 .forEach(c => c.destroy());
+        });
+    }
+
+    _showDonate() {
+        if (this._donateVisible) return;
+        this._donateVisible = true;
+        const W = this.scale.width;
+        const H = this.scale.height;
+
+        const overlay = this.add.rectangle(W / 2, H / 2, 380, 220, 0x110d05, 0.98)
+            .setStrokeStyle(2, 0xffd700).setDepth(20).setInteractive();
+
+        const title = this.add.text(W / 2, H / 2 - 70, 'APOIAR O DESENVOLVIMENTO', {
+            fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(21);
+
+        const msg = this.add.text(W / 2, H / 2 - 30, 'Se você está gostando do MeanFall e deseja\najudar a manter o projeto vivo e gratuito,\nconsidere fazer uma doação de qualquer valor.', {
+            fontSize: '11px', color: '#e8dfd1', fontFamily: 'Courier New', align: 'center', lineSpacing: 4
+        }).setOrigin(0.5).setDepth(21);
+
+        const pixLabel = this.add.text(W / 2, H / 2 + 30, 'CHAVE PIX (E-mail):', {
+            fontSize: '10px', color: '#888', fontFamily: 'Courier New'
+        }).setOrigin(0.5).setDepth(21);
+
+        const pixValue = this.add.text(W / 2, H / 2 + 50, 'solarcubix@gmail.com', {
+            fontSize: '15px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+            backgroundColor: '#2a2005', padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setDepth(21);
+
+        const closeHint = this.add.text(W / 2, H / 2 + 90, '[ Clique para fechar ]', {
+            fontSize: '10px', color: '#666', fontFamily: 'Courier New'
+        }).setOrigin(0.5).setDepth(21);
+
+        overlay.on('pointerdown', () => {
+            overlay.destroy();
+            title.destroy();
+            msg.destroy();
+            pixLabel.destroy();
+            pixValue.destroy();
+            closeHint.destroy();
+            this._donateVisible = false;
         });
     }
 }

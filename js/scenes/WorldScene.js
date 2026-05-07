@@ -62,6 +62,8 @@ export class WorldScene extends Phaser.Scene {
         this._qKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
         this._bKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this._kKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
+        this._lKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
+        this._nKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
         this._f5Key     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
 
         QuestSystem.init(this._playerData);
@@ -169,6 +171,8 @@ export class WorldScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this._qKey)) this._openOverlay('Quest');
         if (Phaser.Input.Keyboard.JustDown(this._bKey)) this._openOverlay('Book');
         if (Phaser.Input.Keyboard.JustDown(this._kKey)) this._openOverlay('Skill');
+        if (Phaser.Input.Keyboard.JustDown(this._lKey)) this._openOverlay('Compendium');
+        if (Phaser.Input.Keyboard.JustDown(this._nKey)) this._openOverlay('Scratchpad');
         if (Phaser.Input.Keyboard.JustDown(this._f5Key)) {
             SaveSystem.autoSave(this._playerData);
             this._chat('Jogo salvo!', 'system');
@@ -294,9 +298,21 @@ export class WorldScene extends Phaser.Scene {
             if (!levelOk || !mastOk) {
                 const reasons = [];
                 if (!levelOk) reasons.push(`{{level:nível ${unlock.minLevel}}}`);
-                if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em ${AREA_INFO[unlock.masteryArea]?.displayName}`);
-                this._chat(`{{bad:Portal bloqueado!}} Necessita: ${reasons.join(' e ')}.`, 'error');
+                if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em {{accent:${AREA_INFO[unlock.masteryArea]?.displayName}}}`);
+                this._chat(`{{bad:Portal bloqueado!}} Você precisa de: ${reasons.join(' e ')}.`, 'error');
                 this._playerData.position.y -= 1;
+                this._player.syncSprite();
+                return;
+            }
+        }
+
+        if (nextArea === 'village' && this._playerData.currentArea !== 'village') {
+            const heal = this._playerData.maxHp - this._playerData.hp;
+            if (heal > 0) {
+                this._playerData.hp = this._playerData.maxHp;
+                this._playerData.focus = this._playerData.maxFocus;
+                this._chat('Você descansa na vila e {{heal:recupera todas as suas energias}}!', 'heal');
+                EventBus.emit('player-hp-change', { player: this._playerData });
                 this._player.syncSprite();
                 return;
             }
@@ -320,7 +336,33 @@ export class WorldScene extends Phaser.Scene {
         this._playerData.lastSafePosition = { ...this._playerData.position };
         this.registry.set('player', this._playerData);
         TutorialSystem.trigger(this._playerData, this, 'first_monster');
-        this.scene.launch('Combat', { monster: monster.def, instanceId: monster.instanceId });
+
+        // ── Combat Entry Animation ───────────────────────────────────────────
+        
+        // Stop following the player to allow custom pan/zoom
+        this.cameras.main.stopFollow();
+        
+        // Shake and Flash
+        this.cameras.main.shake(400, 0.015);
+        this.cameras.main.flash(400, 255, 255, 255);
+
+        // Zoom and Pan towards the monster
+        if (monster.sprite) {
+            this.cameras.main.pan(monster.sprite.x, monster.sprite.y, 400, 'Quad.easeIn');
+            this.cameras.main.zoomTo(2.5, 400, 'Quad.easeIn');
+        }
+
+        // Wait for animation to finish before launching CombatScene
+        this.time.delayedCall(450, () => {
+            this.scene.launch('Combat', { monster: monster.def, instanceId: monster.instanceId });
+            
+            // Prepare camera for when we return (resets happen instantly behind the overlay)
+            this.cameras.main.zoomTo(1, 0);
+            if (this._player?.sprite) {
+                this.cameras.main.centerOn(this._player.sprite.x, this._player.sprite.y);
+                this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
+            }
+        });
     }
 
     // ── Combat result ─────────────────────────────────────────────────────────
@@ -350,9 +392,10 @@ export class WorldScene extends Phaser.Scene {
                     respawnAt: this.time.now + RESPAWN_TIME,
                 });
             }
-            if (xpGained) this._chat(`{{xp:+${xpGained} XP}} obtido em batalha.`, 'xp');
+            if (xpGained) this._chat(`Você obteve {{xp:+${xpGained} XP}} na batalha!`, 'xp');
             if (loot?.length) {
-                this._chat(`{{loot:LOOT:}} ${loot.join(', ')}`, 'loot');
+                const formattedLoot = loot.map(item => `{{loot:${item}}}`).join(', ');
+                this._chat(`{{accent:RECOMPENSAS:}} ${formattedLoot}`, 'loot');
                 this._playerData.pendingItemAlert = true;
                 EventBus.emit('item-alert', { player: this._playerData });
                 if (loot.some(s => s.startsWith('Livro:'))) {
@@ -367,7 +410,7 @@ export class WorldScene extends Phaser.Scene {
             this._playerData.position = { ...this._playerData.lastSafePosition };
             this._playerData.currentArea = this._playerData.lastSafeArea;
             this.registry.set('player', this._playerData);
-            this._chat('Você foi derrotado e reviveu em segurança.', 'combat-hit');
+            this._chat('{{bad:Você foi derrotado!}} Recuperando as energias em um local seguro...', 'combat-hit');
             this._loadArea(this._playerData.currentArea);
             EventBus.emit('player-hp-change', { player: this._playerData });
         }
@@ -377,6 +420,7 @@ export class WorldScene extends Phaser.Scene {
 
     _onLevelUp() {
         TutorialSystem.trigger(this._playerData, this, 'first_levelup');
+        this._chat('{{level:SUBIU DE NÍVEL!}} Seus atributos aumentaram.', 'levelup');
         // open skill picker if there are unlocked skills
         this.time.delayedCall(600, () => this._maybeOpenSkill());
     }
@@ -384,7 +428,7 @@ export class WorldScene extends Phaser.Scene {
     _maybeOpenSkill() {
         const pending = SkillSystem.pendingChoices(this._playerData);
         if (pending.length > 0) {
-            this._chat(`Você pode escolher uma nova habilidade! Pressione K.`, 'levelup');
+            this._chat(`{{accent:Pressione K}} para escolher uma nova habilidade!`, 'levelup');
             EventBus.emit('skill-alert', { player: this._playerData });
         }
     }
@@ -496,7 +540,7 @@ export class WorldScene extends Phaser.Scene {
         // Basic rewards for now
         const gold = 20 + Math.floor(Math.random() * 30);
         this._playerData.gold += gold;
-        this._chat(`Você abriu o baú e encontrou {{gold:${gold} ouro}}!`, 'loot');
+        this._chat(`Você abriu o baú e encontrou {{gold:${gold} moedas de ouro}}!`, 'loot');
         EventBus.emit('player-stats-changed', { player: this._playerData });
         SaveSystem.autoSave(this._playerData);
     }

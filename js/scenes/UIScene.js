@@ -45,6 +45,7 @@ export class UIScene extends Phaser.Scene {
             btnQuest:   document.getElementById('btn-quests'),
             btnBook:    document.getElementById('btn-books'),
             btnSkill:   document.getElementById('btn-skill'),
+            btnComp:    document.getElementById('btn-compendium'),
             btnSave:    document.getElementById('btn-save'),
         };
     }
@@ -96,6 +97,10 @@ export class UIScene extends Phaser.Scene {
             const ws = this.scene.get('World');
             if (ws) { ws.pauseForOverlay(); ws.scene.launch('Skill'); }
             this._setAlert('btnSkill', false);
+        });
+        this._els.btnComp?.addEventListener('click', () => {
+            const ws = this.scene.get('World');
+            if (ws) { ws.pauseForOverlay(); ws.scene.launch('Compendium'); }
         });
         this._els.btnSave?.addEventListener('click', () => {
             const player = this.registry.get('player');
