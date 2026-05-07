@@ -44,10 +44,11 @@ export class DialogScene extends Phaser.Scene {
         this._action      = data.action  || null;     // { label, kind } or null
         this._onAction    = data.onAction || null;
         this._role        = data.role     || 'quest';
-        this._idx         = 0;
-        this._typingTimer = null;
-        this._fullText    = '';
-        this._actionTaken = false;  // MUST reset: scene object is reused across launches
+        this._idx            = 0;
+        this._typingTimer    = null;
+        this._fullText       = '';
+        this._actionTaken    = false;  // MUST reset: scene object is reused across launches
+        this._autoCloseTimer = null;
     }
 
     create() {
@@ -108,9 +109,14 @@ export class DialogScene extends Phaser.Scene {
         for (const t of this._lineTokens) t.setAlpha(0);
         this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 220 });
 
-        // On last line, show the action button (if any)
+        // On last line, show the action button (if any) or auto-close
         const isLast = this._idx === this._lines.length - 1;
         this._setActionButtonVisible(isLast && !!this._action);
+
+        if (isLast && !this._action) {
+            this._promptTx.setText('Fechando...');
+            this._autoCloseTimer = this.time.delayedCall(2000, () => this._close());
+        }
     }
 
     _setActionButtonVisible(visible) {
@@ -207,6 +213,7 @@ export class DialogScene extends Phaser.Scene {
     _close() {
         if (this._actionTaken) return;
         this._actionTaken = true;
+        if (this._autoCloseTimer) { this._autoCloseTimer.remove(false); this._autoCloseTimer = null; }
         this._destroyAll();
         this.scene.stop('Dialog');
         try { this._onClose(); } catch (e) { /* swallow */ }
