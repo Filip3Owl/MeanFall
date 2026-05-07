@@ -129,6 +129,14 @@ export class WorldScene extends Phaser.Scene {
             icon.npcId = nd.id;
             this._npcIcons.add(icon);
         }
+
+        // The map is always 544×480 (same as the canvas), so the correct
+        // camera position is always scroll (0,0). Reset here to fix any
+        // drift left by combat pan/zoom animations.
+        const cam = this.cameras.main;
+        cam.stopFollow();
+        cam.setZoom(1);
+        cam.setScroll(0, 0);
     }
 
     // ── Update loop ───────────────────────────────────────────────────────────
@@ -356,12 +364,10 @@ export class WorldScene extends Phaser.Scene {
         this.time.delayedCall(450, () => {
             this.scene.launch('Combat', { monster: monster.def, instanceId: monster.instanceId });
             
-            // Prepare camera for when we return (resets happen instantly behind the overlay)
+            // Reset camera immediately behind the overlay — map is always
+            // 544×480 = canvas size, so scroll (0,0) is always correct.
             this.cameras.main.zoomTo(1, 0);
-            if (this._player?.sprite) {
-                this.cameras.main.centerOn(this._player.sprite.x, this._player.sprite.y);
-                this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
-            }
+            this.cameras.main.setScroll(0, 0);
         });
     }
 
