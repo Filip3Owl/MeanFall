@@ -15,6 +15,7 @@ import { ITEMS } from '../data/items.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { buildPlayerSprite } from '../utils/Draw.js';
 import EventBus from '../utils/EventBus.js';
+import { Sound } from '../utils/SoundSystem.js';
 
 export class WorldScene extends Phaser.Scene {
     constructor() { super('World'); }
@@ -327,6 +328,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
+        Sound.portal();
         this._playerData.currentArea = nextArea;
         this._playerData.position    = { ...exit.targetSpawn };
         this._playerData.lastSafePosition = { ...exit.targetSpawn };
@@ -400,6 +402,7 @@ export class WorldScene extends Phaser.Scene {
             }
             if (xpGained) this._chat(`Você obteve {{xp:+${xpGained} XP}} na batalha!`, 'xp');
             if (loot?.length) {
+                Sound.coins();
                 this._chat(`{{accent:RECOMPENSAS:}} ${loot.join(', ')}`, 'loot');
                 this._playerData.pendingItemAlert = true;
                 EventBus.emit('item-alert', { player: this._playerData });

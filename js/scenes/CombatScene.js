@@ -6,6 +6,7 @@ import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
 import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js';
 import EventBus                          from '../utils/EventBus.js';
+import { Sound }                         from '../utils/SoundSystem.js';
 
 export class CombatScene extends Phaser.Scene {
     constructor() { super('Combat'); }
@@ -25,6 +26,7 @@ export class CombatScene extends Phaser.Scene {
         this._player = JSON.parse(JSON.stringify(this.registry.get('player')));
         this._buildUI();
         this._nextQuestion();
+        Sound.combatStart();
 
         // ── Entrance Animation ──────────────────────────────────────────────
         this.cameras.main.fadeIn(300, 0, 0, 0);
@@ -508,18 +510,23 @@ export class CombatScene extends Phaser.Scene {
             this._spawnDamageNumber(this._monsterPanelCenter, result.damage, result.isCrit ? '#ff88cc' : '#ff5555', result.isCrit);
             this._flashTarget('monster', result.advantage === 'super' ? 0xffaa00 : 0xff3333);
 
+            if (result.isCrit) Sound.critical(); else Sound.hit();
+
             let msg = `Correto! Dano: ${result.damage}`;
             if (result.isCrit)              msg += ' [CRÍTICO!]';
             if (result.advantage === 'super') msg += ' [SUPER EFICAZ!]';
             if (result.advantage === 'weak')  msg += ' [Pouco eficaz...]';
-            
+
             // Add distribution flair
             if (result.distribution === 'uniform') msg += ' (Instável!)';
             else if (weaponInfo) msg += ' (Consistente)';
 
             this._showFeedback(msg, result.isCrit ? '#ff88cc' : '#55ff88');
             if (btnBg) btnBg.setFillStyle(0x003300);
-            if (this._streak > 1) this._streakTxt.setText(`${this._streak}× STREAK!`);
+            if (this._streak > 1) {
+                this._streakTxt.setText(`${this._streak}× STREAK!`);
+                Sound.streak(this._streak);
+            }
 
             if (q.explanation) this._explTxt.setText(`Explicação: ${q.explanation}`);
 
@@ -538,9 +545,12 @@ export class CombatScene extends Phaser.Scene {
             EventBus.emit('player-hp-change', { player: this._player });
 
             if (result.dodged) {
+                Sound.dodge();
                 this._showFeedback('Errado! Mas você ESQUIVOU o ataque!', '#88ccff');
                 this._spawnDamageNumber(this._playerPanelCenter, 'ESQUIVA', '#88ccff', false);
             } else {
+                Sound.wrong();
+                this.time.delayedCall(120, () => Sound.damage());
                 this._showFeedback(`Errado! Dano recebido: ${result.damage}`, '#ff5555');
                 this._spawnDamageNumber(this._playerPanelCenter, result.damage, '#ff5555', false);
                 this._flashTarget('player', 0xff3333);
@@ -660,6 +670,7 @@ export class CombatScene extends Phaser.Scene {
         this._player.focus -= 10;
         this._updatePlayerBars();
         EventBus.emit('player-hp-change', { player: this._player });
+        Sound.hint();
         this._explTxt.setText(`Dica: ${this._currentQ.hint}`);
     }
 
