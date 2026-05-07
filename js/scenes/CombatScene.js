@@ -227,7 +227,7 @@ export class CombatScene extends Phaser.Scene {
 
         // Section title
         this.add.text(W / 2, QY + 8, '◆  P E R G U N T A  ◆', {
-            fontSize: '9px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '10px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0).setAlpha(0.8);
 
         // Thin title separator
@@ -236,14 +236,14 @@ export class CombatScene extends Phaser.Scene {
 
         // Context text
         this._ctxTxt = this.add.text(16, QY + 24, '', {
-            fontSize: '10px', color: '#aabbcc', fontFamily: 'Courier New', fontStyle: 'italic',
+            fontSize: '12px', color: '#aabbcc', fontFamily: 'Courier New', fontStyle: 'italic',
             wordWrap: { width: W - 32 },
         }).setOrigin(0, 0).setVisible(false);
 
         // Question text
         this._qTxt = this.add.text(16, QY + 24, '', {
-            fontSize: '12px', color: '#ede8de', fontFamily: 'Courier New',
-            wordWrap: { width: W - 32 }, lineSpacing: 4,
+            fontSize: '15px', color: '#ede8de', fontFamily: 'Courier New',
+            wordWrap: { width: W - 32 }, lineSpacing: 5,
         }).setOrigin(0, 0);
 
         // Choice buttons (built dynamically in _showChoiceBtns)
@@ -261,12 +261,12 @@ export class CombatScene extends Phaser.Scene {
             const LABELS = ['A','B','C','D'];
             const badge = this.add.rectangle(bx + 3, by + 3, 24, 24, eColor, 0.25).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.6);
             const badgeTx = this.add.text(bx + 15, by + 15, LABELS[i], {
-                fontSize: '10px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '11px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
                 stroke: '#000000', strokeThickness: 2,
             }).setOrigin(0.5, 0.5);
 
             const tx = this.add.text(bx + 34, by + 15, '', {
-                fontSize: '11px', color: '#ddd8cc', fontFamily: 'Courier New', wordWrap: { width: 214 },
+                fontSize: '12px', color: '#ddd8cc', fontFamily: 'Courier New', wordWrap: { width: 214 },
             }).setOrigin(0, 0.5);
 
             this._aBtns.push({ bg, badge, badgeTx, tx });
@@ -274,7 +274,7 @@ export class CombatScene extends Phaser.Scene {
 
         // Numeric input
         this._numPrt = this.add.text(14, 306, '▶  DIGITE A RESPOSTA  ·  ENTER para confirmar', {
-            fontSize: '10px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0).setVisible(false);
 
         // Input box background
@@ -305,7 +305,7 @@ export class CombatScene extends Phaser.Scene {
 
         // Explanation text
         this._explTxt = this.add.text(16, 396, '', {
-            fontSize: '10px', color: '#99bbdd', fontFamily: 'Courier New',
+            fontSize: '11px', color: '#99bbdd', fontFamily: 'Courier New',
             wordWrap: { width: W - 32 }, fontStyle: 'italic',
         }).setOrigin(0, 0);
     }
