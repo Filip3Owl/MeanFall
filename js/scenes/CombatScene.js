@@ -47,17 +47,24 @@ export class CombatScene extends Phaser.Scene {
 
     _buildUI() {
         const W = 544;
+        const isElite = this._monsterDef.name.startsWith('Elite');
 
         // Dark overlay over WorldScene
         this.add.rectangle(0, 0, W, 480, 0x050201, 0.94).setOrigin(0, 0);
 
         // Header tinted with element color
         const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.air;
-        this.add.rectangle(0, 0, W, 28, elem.dark, 1).setOrigin(0, 0);
-        this.add.rectangle(0, 26, W, 2, elem.color, 1).setOrigin(0, 0);
-        const elemHex = '#' + elem.color.toString(16).padStart(6, '0');
-        this.add.text(W / 2, 14, `[${elem.symbol}] COMBATE — ${elem.topicLabel.toUpperCase()}`, {
-            fontSize: '12px', color: elemHex, fontFamily: 'Courier New',
+        const headerColor = isElite ? 0x443300 : elem.dark;
+        const borderColor = isElite ? 0xffd700 : elem.color;
+
+        this.add.rectangle(0, 0, W, 28, headerColor, 1).setOrigin(0, 0);
+        this.add.rectangle(0, 26, W, 2, borderColor, 1).setOrigin(0, 0);
+        
+        const elemHex = isElite ? '#ffd700' : ('#' + elem.color.toString(16).padStart(6, '0'));
+        const labelText = isElite ? `⭐ COMBATE ELITE — ${elem.topicLabel.toUpperCase()} ⭐` : `[${elem.symbol}] COMBATE — ${elem.topicLabel.toUpperCase()}`;
+        
+        this.add.text(W / 2, 14, labelText, {
+            fontSize: '12px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5, 0.5);
 
         this._buildMonsterPanel();
@@ -65,7 +72,7 @@ export class CombatScene extends Phaser.Scene {
 
         // VS
         this.add.text(W / 2, 90, 'VS', {
-            fontSize: '22px', color: '#d4af37', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '22px', color: isElite ? '#ffd700' : '#d4af37', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
         // Separator
@@ -551,22 +558,42 @@ export class CombatScene extends Phaser.Scene {
 
     _endCombat(outcome) {
         let xpGained = 0;
+        let goldGained = 0;
         const lootNames = [];
         let lootIds = [];
         let bookIds = [];
 
         if (outcome === 'win') {
+            const isElite = this._monsterDef.name.startsWith('Elite');
             xpGained = awardXP(this._player, this._monsterDef.xpReward);
-            this._player.gold = (this._player.gold || 0) + (this._monsterDef.goldReward || 0);
+            
+            // Base gold
+            goldGained = this._monsterDef.goldReward || 0;
+            
+            // STREAK BONUS: 20% extra gold per streak point above 2
+            if (this._streak >= 3) {
+                const multiplier = 1 + (this._streak - 2) * 0.2;
+                const bonus = Math.floor(goldGained * (multiplier - 1));
+                goldGained += bonus;
+                EventBus.emit('chat', { msg: `{{gold:STREAK BONUS!}} +${bonus} moedas extras!`, type: 'loot' });
+            }
 
-            lootIds = CombatSystem.rollDrops(this._monsterDef.id, DROP_TABLES);
+            this._player.gold = (this._player.gold || 0) + goldGained;
+
+            // Roll loot multiple times for Elites (2x rolls)
+            const rolls = isElite ? 2 : 1;
+            for (let i = 0; i < rolls; i++) {
+                const batch = CombatSystem.rollDrops(this._monsterDef.id.replace('Elite ', ''), DROP_TABLES);
+                lootIds.push(...batch);
+            }
+
             for (const itemId of lootIds) {
                 CombatSystem.addToInventory(this._player, itemId);
                 const name = ITEMS[itemId]?.name;
                 if (name) lootNames.push(name);
             }
 
-            bookIds = BookSystem.rollBookDrops(this._monsterDef.id);
+            bookIds = BookSystem.rollBookDrops(this._monsterDef.id.replace('Elite ', ''));
             for (const bookId of bookIds) {
                 BookSystem.addBook(this._player, bookId);
                 const b = BOOKS[bookId];
@@ -579,7 +606,7 @@ export class CombatScene extends Phaser.Scene {
         this.registry.set('player', this._player);
 
         if (outcome === 'win' && (lootIds.length > 0 || bookIds.length > 0)) {
-            this._showVictoryPopup(xpGained, this._monsterDef.goldReward || 0, lootIds, bookIds, () => {
+            this._showVictoryPopup(xpGained, goldGained, lootIds, bookIds, () => {
                 this._finishCombat(outcome, xpGained, lootNames);
             });
         } else {

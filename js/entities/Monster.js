@@ -13,9 +13,17 @@ export class Monster {
         const diffDef = DIFFICULTIES[pData?.difficulty] || DIFFICULTIES.medium;
 
         const def   = MONSTERS[this.monsterId];
-        this.def    = def;
+        this.def    = { ...def };
         
-        const scaledHp = Math.floor(def.maxHp * diffDef.monsterHp);
+        // Elite Chance (15% chance to be an Elite monster)
+        this.isElite = Math.random() < 0.15;
+        if (this.isElite) {
+            this.def.name = `Elite ${this.def.name}`;
+            this.def.xpReward = Math.floor(this.def.xpReward * 2.5);
+            this.def.goldReward = Math.floor(this.def.goldReward * 3);
+        }
+
+        const scaledHp = Math.floor(this.def.maxHp * diffDef.monsterHp * (this.isElite ? 2.0 : 1.0));
         this.hp     = scaledHp;
         this.maxHp  = scaledHp;
 
@@ -24,9 +32,21 @@ export class Monster {
         const py  = this.tileY * TILE_SIZE + TILE_SIZE / 2;
         
         // Shadow
-        this.shadow = scene.add.image(px, py + 8, 'entity_shadow').setScale(0.8).setDepth(2).setAlpha(0.6);
+        this.shadow = scene.add.image(px, py + 8, 'entity_shadow').setScale(this.isElite ? 1.2 : 0.8).setDepth(2).setAlpha(0.6);
         
         this.sprite = scene.add.image(px, py, key).setDepth(4);
+        if (this.isElite) {
+            this.sprite.setScale(1.3);
+            this.sprite.setTint(0xffd700); // Golden tint
+            // Add pulse effect for elite
+            scene.tweens.add({
+                targets: this.sprite,
+                alpha: 0.7,
+                duration: 800,
+                yoyo: true,
+                repeat: -1
+            });
+        }
 
         // Patrol state
         this._patrolDir = 1;
@@ -36,10 +56,10 @@ export class Monster {
         this._originY = instanceData.y;
 
         // Name label above HP bar
-        const elem = ELEMENTS[def.element] || ELEMENTS.normal;
-        const elemHex = '#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0');
-        this._nameLabel = scene.add.text(0, 0, `${def.name} Lv.${def.level}`, {
-            fontSize: '8px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        const elem = ELEMENTS[this.def.element] || ELEMENTS.normal;
+        const elemHex = this.isElite ? '#ffd700' : ('#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0'));
+        this._nameLabel = scene.add.text(0, 0, `${this.def.name} Lv.${this.def.level}`, {
+            fontSize: this.isElite ? '9px' : '8px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold',
             backgroundColor: '#000000bb', padding: { x: 2, y: 1 },
         }).setOrigin(0.5, 1).setDepth(6);
 

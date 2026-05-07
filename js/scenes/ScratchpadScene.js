@@ -10,42 +10,92 @@ export class ScratchpadScene extends Phaser.Scene {
     }
 
     create() {
-        const W = 240, H = 320;
-        const x = 10, y = 140; // Positioned to not overlap main combat UI too much
+        const W = 200, H = 340;
+        const x = 330, y = 135; // Moved to the right to avoid overlapping question box
 
         // Container for positioning
         this._container = this.add.container(x, y);
 
         // Background (Old school dark RPG style)
-        const bg = this.add.rectangle(0, 0, W, H, 0x0a0a0a, 0.95).setOrigin(0).setStrokeStyle(2, 0x554422);
+        const bg = this.add.rectangle(0, 0, W, H, 0x0a0a0a, 0.98).setOrigin(0).setStrokeStyle(2, 0x554422);
         
         // Header
         const header = this.add.rectangle(0, 0, W, 24, 0x221108, 1).setOrigin(0);
-        const title = this.add.text(W / 2, 12, 'CALCULADORA DE BATALHA', {
+        const title = this.add.text(W / 2, 12, 'CALCULADORA', {
             fontSize: '10px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Display Area (Calculation Result)
-        this.add.rectangle(10, 30, W - 20, 40, 0x1a1a1a, 1).setOrigin(0).setStrokeStyle(1, 0x333333);
-        this._displayTxt = this.add.text(W - 15, 50, '0', {
-            fontSize: '18px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold'
+        this.add.rectangle(10, 30, W - 20, 34, 0x1a1a1a, 1).setOrigin(0).setStrokeStyle(1, 0x333333);
+        this._displayTxt = this.add.text(W - 15, 47, '0', {
+            fontSize: '16px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(1, 0.5);
 
         // History Area
-        this.add.text(10, 75, 'HISTÓRICO:', { fontSize: '9px', color: '#554422', fontFamily: 'Courier New' });
-        this._historyTxt = this.add.text(10, 85, '', {
-            fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New', wordWrap: { width: W - 20 }
+        this.add.text(10, 70, 'HISTÓRICO:', { fontSize: '9px', color: '#554422', fontFamily: 'Courier New' });
+        this._historyTxt = this.add.text(10, 80, '', {
+            fontSize: '9px', color: '#888', fontFamily: 'Courier New', wordWrap: { width: W - 20 }
         });
 
-        // Instructions
-        const help = this.add.text(10, H - 25, 'TECLE NÚMEROS E OPERADORES (+,-,*,/)\nENTER: CALCULAR | ESC: FECHAR', {
-            fontSize: '8px', color: '#444', fontFamily: 'Courier New', align: 'center'
-        }).setOrigin(0, 0);
+        this._container.add([bg, header, title, this._displayTxt, this._historyTxt]);
 
-        this._container.add([bg, header, title, this._displayTxt, this._historyTxt, help]);
+        this._buildKeypad(W);
 
         // Input Listeners
         this.input.keyboard.on('keydown', this._onKeyDown.bind(this));
+    }
+
+    _buildKeypad(W) {
+        const startY = 150;
+        const btnW = 40, btnH = 30;
+        const gap = 6;
+        const keys = [
+            ['7', '8', '9', '/'],
+            ['4', '5', '6', '*'],
+            ['1', '2', '3', '-'],
+            ['0', '.', 'C', '+'],
+            ['(', ')', '=']
+        ];
+
+        keys.forEach((row, rowIndex) => {
+            row.forEach((key, colIndex) => {
+                const bx = 12 + colIndex * (btnW + gap);
+                const by = startY + rowIndex * (btnH + gap);
+                
+                // Wider button for "="
+                const finalW = (key === '=') ? (btnW * 2 + gap) : btnW;
+                
+                const btnBg = this.add.rectangle(bx, by, finalW, btnH, 0x1a1505, 1)
+                    .setOrigin(0).setStrokeStyle(1, 0x554422)
+                    .setInteractive({ useHandCursor: true });
+                
+                const btnTxt = this.add.text(bx + finalW/2, by + btnH/2, key, {
+                    fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
+                }).setOrigin(0.5);
+
+                btnBg.on('pointerover', () => btnBg.setFillStyle(0x332a0a));
+                btnBg.on('pointerout',  () => btnBg.setFillStyle(0x1a1505));
+                btnBg.on('pointerdown', () => {
+                    btnBg.setFillStyle(0x554422);
+                    this.time.delayedCall(100, () => btnBg.setFillStyle(0x332a0a));
+                    this._handleKeyPress(key);
+                });
+
+                this._container.add([btnBg, btnTxt]);
+            });
+        });
+    }
+
+    _handleKeyPress(key) {
+        if (key === '=') {
+            this._calculate();
+        } else if (key === 'C') {
+            this._currentInput = '';
+            this._updateDisplay();
+        } else {
+            this._currentInput += key;
+            this._updateDisplay();
+        }
     }
 
     _onKeyDown(event) {
