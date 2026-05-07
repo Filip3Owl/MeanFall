@@ -46,210 +46,305 @@ export class CombatScene extends Phaser.Scene {
     // ─── UI CONSTRUCTION ──────────────────────────────────────────────────────
 
     _buildUI() {
-        const W = 544;
+        const W = 544, H = 480;
         const isElite = this._monsterDef.name.startsWith('Elite');
+        const elem     = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
+        const eColor   = isElite ? 0xffd700 : elem.color;
+        const eDark    = isElite ? 0x2a1a00 : elem.dark;
+        const eHex     = '#' + eColor.toString(16).padStart(6, '0');
 
-        // Dark overlay over WorldScene
-        this.add.rectangle(0, 0, W, 480, 0x050201, 0.94).setOrigin(0, 0);
+        // ── Deep void background ─────────────────────────────────────────
+        this.add.rectangle(0, 0, W, H, 0x020106, 0.97).setOrigin(0, 0);
 
-        // Header tinted with element color
-        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
-        const headerColor = isElite ? 0x443300 : elem.dark;
-        const borderColor = isElite ? 0xffd700 : elem.color;
+        // Subtle ambient elemental glow at corners
+        const gfx = this.add.graphics();
+        gfx.fillStyle(eColor, 0.06);
+        gfx.fillRect(0, 0, W / 2, H / 2);
+        gfx.fillStyle(0x000000, 0.0);
 
-        this.add.rectangle(0, 0, W, 28, headerColor, 1).setOrigin(0, 0);
-        this.add.rectangle(0, 26, W, 2, borderColor, 1).setOrigin(0, 0);
-        
-        const elemHex = isElite ? '#ffd700' : ('#' + elem.color.toString(16).padStart(6, '0'));
-        const labelText = isElite ? `⭐ COMBATE ELITE — ${elem.topicLabel.toUpperCase()} ⭐` : `[${elem.symbol}] COMBATE — ${elem.topicLabel.toUpperCase()}`;
-        
-        this.add.text(W / 2, 14, labelText, {
-            fontSize: '12px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold'
+        // ── Ornamental top header ────────────────────────────────────────
+        this.add.rectangle(0, 0, W, 32, eDark, 1).setOrigin(0, 0);
+        this.add.rectangle(0, 31, W, 1, eColor, 0.9).setOrigin(0, 0);
+        this.add.rectangle(0, 32, W, 1, 0x000000, 0.6).setOrigin(0, 0);
+
+        // Corner runes
+        this.add.text(8, 6, '⟨ ⟩', { fontSize: '11px', color: eHex, fontFamily: 'Courier New', alpha: 0.6 }).setOrigin(0, 0);
+        this.add.text(W - 8, 6, '⟨ ⟩', { fontSize: '11px', color: eHex, fontFamily: 'Courier New', alpha: 0.6 }).setOrigin(1, 0);
+
+        const titleStr = isElite
+            ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
+            : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
+        this.add.text(W / 2, 16, titleStr, {
+            fontSize: '11px', color: eHex, fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
         }).setOrigin(0.5, 0.5);
 
-        this._buildMonsterPanel();
-        this._buildPlayerPanel();
+        // ── Build panels ─────────────────────────────────────────────────
+        this._buildMonsterPanel(elem, eColor, eDark, eHex, isElite);
+        this._buildPlayerPanel(eColor, eHex, isElite);
 
-        // VS
-        this.add.text(W / 2, 90, 'VS', {
-            fontSize: '22px', color: isElite ? '#ffd700' : '#d4af37', fontFamily: 'Courier New', fontStyle: 'bold',
+        // ── VS divider ───────────────────────────────────────────────────
+        const vsColor = isElite ? '#ffd700' : '#d4af37';
+        this.add.text(W / 2, 92, 'VS', {
+            fontSize: '18px', color: vsColor, fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 3,
         }).setOrigin(0.5, 0.5);
 
-        // Separator
-        this.add.rectangle(0, 158, W, 2, 0x554422, 1).setOrigin(0, 0);
+        // ── Horizontal divider ───────────────────────────────────────────
+        const divGfx = this.add.graphics();
+        divGfx.lineStyle(1, eColor, 0.35);
+        divGfx.lineBetween(12, 162, W - 12, 162);
+        divGfx.lineStyle(1, 0xffffff, 0.04);
+        divGfx.lineBetween(12, 163, W - 12, 163);
 
-        this._buildQuestionBox();
-        this._buildBottomBar();
+        // ── Question zone ────────────────────────────────────────────────
+        this._buildQuestionBox(eColor, eHex, isElite);
+        this._buildBottomBar(eColor, eHex, isElite);
 
         this.input.keyboard.on('keydown', this._onKeyDown.bind(this));
     }
 
-    _buildMonsterPanel() {
-        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
+    _buildMonsterPanel(elem, eColor, eDark, eHex, isElite) {
+        const PX = 8, PY = 32, PW = 258, PH = 128;
 
-        // Panel background tinted with element color
-        const bgDark = elem.dark || 0x1a0000;
-        this.add.rectangle(8, 28, 196, 130, bgDark, 1).setOrigin(0, 0);
-        this.add.rectangle(8, 28, 196, 130, elem.color, 0).setOrigin(0, 0)
-            .setStrokeStyle(1, elem.color, 0.5);
-        // Flash overlay (used for damage flashes)
-        this._monsterFlashRect = this.add.rectangle(8, 28, 196, 130, 0xff0000, 0).setOrigin(0, 0);
+        // Background
+        this.add.rectangle(PX, PY, PW, PH, eDark, 1).setOrigin(0, 0);
+        this.add.rectangle(PX, PY, PW, PH, eColor, 0).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.45);
+        // Top accent line
+        this.add.rectangle(PX, PY, PW, 2, eColor, 0.6).setOrigin(0, 0);
 
-        // Sprite with elemental glow
-        this._monsterPanelCenter = { x: 60, y: 88 };
+        // Flash overlay
+        this._monsterFlashRect = this.add.rectangle(PX, PY, PW, PH, 0xff2222, 0).setOrigin(0, 0);
+
+        // Sprite zone (left 100px)
+        this._monsterPanelCenter = { x: PX + 50, y: PY + 64 };
         const texKey = `sprite_${this._monsterDef.id}`;
         if (this.textures.exists(texKey)) {
-            const aura = this.add.circle(60, 88, 32, elem.color, 0.18);
-            this.tweens.add({ targets: aura, alpha: 0.35, scale: 1.1, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-            this._monsterSprite = this.add.image(60, 88, texKey).setScale(2.5);
+            const aura = this.add.circle(PX + 50, PY + 64, 36, eColor, 0.12).setDepth(0);
+            this.tweens.add({ targets: aura, alpha: 0.28, scale: 1.15, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            this._monsterSprite = this.add.image(PX + 50, PY + 64, texKey).setScale(2.4).setDepth(1);
         }
 
-        this.add.text(112, 36, this._monsterDef.name, {
-            fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', wordWrap: { width: 86 },
-        }).setOrigin(0, 0);
-        this.add.text(112, 54, `Nv. ${this._monsterDef.level}`, {
-            fontSize: '10px', color: '#ffaa44', fontFamily: 'Courier New',
-        }).setOrigin(0, 0);
-
-        // Element badge
-        const badgeColorHex = '#' + elem.color.toString(16).padStart(6, '0');
-        this.add.text(112, 68, `[${elem.symbol}] ${elem.name}`, {
-            fontSize: '10px', color: badgeColorHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        // Info panel (right side)
+        const ix = PX + 108;
+        this.add.text(ix, PY + 10, this._monsterDef.name.toUpperCase(), {
+            fontSize: '10px', color: '#f0e8d8', fontFamily: 'Courier New', fontStyle: 'bold',
+            wordWrap: { width: 148 },
         }).setOrigin(0, 0);
 
-        // HP label
-        this.add.text(112, 86, 'HP', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        // Level + element badge
+        const badgeBg = this.add.rectangle(ix, PY + 32, 60, 14, eColor, 0.2).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.5);
+        this.add.text(ix + 30, PY + 39, `${elem.symbol} · Nv.${this._monsterDef.level}`, {
+            fontSize: '9px', color: eHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5);
+
+        // HP label row
+        this.add.text(ix, PY + 52, 'HP', { fontSize: '9px', color: '#665544', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._mHpTxt = this.add.text(PX + PW - 6, PY + 52, '', { fontSize: '9px', color: '#ffaaaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
+
+        // HP bar graphics
         this._mHpGfx = this.add.graphics();
-        this._mHpTxt = this.add.text(135, 86, '', { fontSize: '10px', color: '#ff8888', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
         this._updateMonsterBar();
+
+        // Flavor text
+        if (this._monsterDef.flavor) {
+            this.add.text(ix, PY + 86, this._monsterDef.flavor, {
+                fontSize: '8px', color: '#554433', fontFamily: 'Courier New', fontStyle: 'italic',
+                wordWrap: { width: 148 }, lineSpacing: 1,
+            }).setOrigin(0, 0);
+        }
     }
 
-    _buildPlayerPanel() {
-        this.add.rectangle(340, 28, 196, 130, 0x001a0a, 1).setOrigin(0, 0);
-        this.add.rectangle(340, 28, 196, 130, 0x44cc44, 0).setOrigin(0, 0).setStrokeStyle(1, 0x44cc44, 0.4);
-        this._playerFlashRect   = this.add.rectangle(340, 28, 196, 130, 0xff0000, 0).setOrigin(0, 0);
-        this._playerPanelCenter = { x: 510, y: 90 };
-
+    _buildPlayerPanel(eColor, eHex, isElite) {
+        const PX = 278, PY = 32, PW = 258, PH = 128;
         const p = this._player;
+
+        // Background
+        this.add.rectangle(PX, PY, PW, PH, 0x001a08, 1).setOrigin(0, 0);
+        this.add.rectangle(PX, PY, PW, PH, 0x33cc66, 0).setOrigin(0, 0).setStrokeStyle(1, 0x33cc66, 0.35);
+        this.add.rectangle(PX, PY, PW, 2, 0x44dd77, 0.5).setOrigin(0, 0);
+
+        // Flash
+        this._playerFlashRect   = this.add.rectangle(PX, PY, PW, PH, 0xff2222, 0).setOrigin(0, 0);
+        this._playerPanelCenter = { x: PX + PW - 50, y: PY + 64 };
+
+        // Sprite
         if (this.textures.exists('sprite_player')) {
-            this.add.image(490, 90, 'sprite_player').setScale(1.4);
+            const aura = this.add.circle(PX + PW - 50, PY + 64, 30, 0x44ff88, 0.08);
+            this.tweens.add({ targets: aura, alpha: 0.2, scale: 1.1, duration: 1300, yoyo: true, repeat: -1 });
+            this.add.image(PX + PW - 50, PY + 64, 'sprite_player').setScale(1.5).setDepth(1);
         }
 
-        this.add.text(346, 36, p.name || 'Aventureiro', {
-            fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold',
-        }).setOrigin(0, 0);
-        this.add.text(346, 52, `Nv. ${p.level}`, {
-            fontSize: '10px', color: '#ffaa44', fontFamily: 'Courier New',
+        // Info (left side of panel)
+        const ix = PX + 8;
+        this.add.text(ix, PY + 10, (p.name || 'Aventureiro').toUpperCase(), {
+            fontSize: '10px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0);
 
-        this.add.text(346, 70, 'HP',   { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this.add.text(346, 96, 'FOCO', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        // Level badge
+        this.add.rectangle(ix, PY + 32, 56, 14, 0x44cc66, 0.18).setOrigin(0, 0).setStrokeStyle(1, 0x44cc66, 0.5);
+        this.add.text(ix + 28, PY + 39, `Nv. ${p.level}`, {
+            fontSize: '9px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5);
+
+        // HP / FOCO labels
+        this.add.text(ix, PY + 52, 'HP',   { fontSize: '9px', color: '#665544', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this.add.text(ix, PY + 78, 'FOCO', { fontSize: '9px', color: '#665544', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+
+        this._pHpTxt    = this.add.text(PX + PW - 108, PY + 52, '', { fontSize: '9px', color: '#ffaaaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._pFocusTxt = this.add.text(PX + PW - 108, PY + 78, '', { fontSize: '9px', color: '#aabbff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+
+        // Streak text (top-right of whole panel row)
+        this._streakTxt = this.add.text(PX + PW - 6, PY + 8, '', {
+            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 2,
+        }).setOrigin(1, 0);
 
         this._pVitalsGfx = this.add.graphics();
-        this._pHpTxt     = this.add.text(380, 70,  '', { fontSize: '10px', color: '#ff8888', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._pFocusTxt  = this.add.text(380, 96,  '', { fontSize: '10px', color: '#88aaff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._streakTxt  = this.add.text(530, 38,  '', { fontSize: '11px', color: '#ffaa44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
         this._updatePlayerBars();
     }
 
-    _buildQuestionBox() {
+    _buildQuestionBox(eColor, eHex, isElite) {
         const W = 544;
-        this.add.rectangle(8, 160, W - 16, 200, 0x0a0804, 1).setOrigin(0, 0);
-        this.add.rectangle(8, 160, W - 16, 200, 0x554422, 0).setOrigin(0, 0).setStrokeStyle(1, 0x554422);
-        this.add.text(W / 2, 168, 'Q U E S T Ã O', {
-            fontSize: '10px', color: '#554422', fontFamily: 'Courier New',
+        const QY = 166, QH = 270;
+
+        // Background
+        this.add.rectangle(8, QY, W - 16, QH, 0x060409, 1).setOrigin(0, 0);
+
+        // Ornamental frame
+        const fg = this.add.graphics();
+        fg.lineStyle(1, eColor, 0.3);
+        fg.strokeRect(8, QY, W - 16, QH);
+        fg.lineStyle(1, eColor, 0.12);
+        fg.strokeRect(11, QY + 3, W - 22, QH - 6);
+
+        // Corner ornaments
+        const cornerSz = 8;
+        fg.lineStyle(2, eColor, 0.55);
+        [[8, QY], [W - 8, QY], [8, QY + QH], [W - 8, QY + QH]].forEach(([cx, cy]) => {
+            const sx = cx === 8 ? 1 : -1, sy = cy === QY ? 1 : -1;
+            fg.lineBetween(cx, cy, cx + sx * cornerSz, cy);
+            fg.lineBetween(cx, cy, cx, cy + sy * cornerSz);
+        });
+
+        // Section title
+        this.add.text(W / 2, QY + 8, '◆  P E R G U N T A  ◆', {
+            fontSize: '9px', color: eHex, fontFamily: 'Courier New', alpha: 0.55,
         }).setOrigin(0.5, 0);
 
-        this._ctxTxt = this.add.text(16, 186, '', {
-            fontSize: '10px', color: '#999999', fontFamily: 'Courier New', fontStyle: 'italic',
-            wordWrap: { width: 512 },
+        // Thin title separator
+        fg.lineStyle(1, eColor, 0.15);
+        fg.lineBetween(30, QY + 20, W - 30, QY + 20);
+
+        // Context text
+        this._ctxTxt = this.add.text(16, QY + 24, '', {
+            fontSize: '10px', color: '#8899aa', fontFamily: 'Courier New', fontStyle: 'italic',
+            wordWrap: { width: W - 32 },
         }).setOrigin(0, 0).setVisible(false);
 
-        this._qTxt = this.add.text(16, 186, '', {
-            fontSize: '12px', color: '#ffffff', fontFamily: 'Courier New',
-            wordWrap: { width: 512 }, lineSpacing: 3,
+        // Question text
+        this._qTxt = this.add.text(16, QY + 24, '', {
+            fontSize: '12px', color: '#ede8de', fontFamily: 'Courier New',
+            wordWrap: { width: W - 32 }, lineSpacing: 4,
         }).setOrigin(0, 0);
 
-        // Choice buttons (4 max, 2 columns × 2 rows)
+        // Choice buttons (built dynamically in _showChoiceBtns)
         this._aBtns = [];
         for (let i = 0; i < 4; i++) {
-            const col = i % 2;
-            const row = Math.floor(i / 2);
+            const col = i % 2, row = Math.floor(i / 2);
             const bx = 10 + col * 262;
-            const by = 296 + row * 34;
-            const bg = this.add.rectangle(bx, by, 256, 28, 0x111122, 1)
-                .setOrigin(0, 0).setInteractive()
-                .on('pointerover', () => { if (!this._answerLock) bg.setFillStyle(0x22224a); })
-                .on('pointerout',  () => { if (!this._answerLock) bg.setFillStyle(0x111122); });
-            const tx = this.add.text(bx + 8, by + 14, '', {
-                fontSize: '11px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 238 },
+            const by = 306 + row * 36;
+            const bg = this.add.rectangle(bx, by, 256, 30, 0x0d0b18, 1)
+                .setOrigin(0, 0).setStrokeStyle(1, 0x2a2440, 1).setInteractive()
+                .on('pointerover', () => { if (!this._answerLock) { bg.setFillStyle(0x16122a); bg.setStrokeStyle(1, eColor, 0.6); } })
+                .on('pointerout',  () => { if (!this._answerLock) { bg.setFillStyle(0x0d0b18); bg.setStrokeStyle(1, 0x2a2440, 1); } });
+
+            // Label badge (A/B/C/D)
+            const LABELS = ['A','B','C','D'];
+            const badge = this.add.rectangle(bx + 3, by + 3, 24, 24, eColor, 0.15).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.4);
+            const badgeTx = this.add.text(bx + 15, by + 15, LABELS[i], {
+                fontSize: '10px', color: eHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0.5);
+
+            const tx = this.add.text(bx + 34, by + 15, '', {
+                fontSize: '11px', color: '#ccc8be', fontFamily: 'Courier New', wordWrap: { width: 214 },
             }).setOrigin(0, 0.5);
-            this._aBtns.push({ bg, tx });
+
+            this._aBtns.push({ bg, badge, badgeTx, tx });
         }
 
         // Numeric input
-        this._numPrt = this.add.text(14, 296, '>> DIGITE A RESPOSTA NO TECLADO E PRESSIONE ENTER:', {
-            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+        this._numPrt = this.add.text(14, 306, '▶  DIGITE A RESPOSTA  ·  ENTER para confirmar', {
+            fontSize: '10px', color: eHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0).setVisible(false);
-        this._numDisp = this.add.text(14, 314, '', {
-            fontSize: '18px', color: '#ffffff', fontFamily: 'Courier New',
-        }).setOrigin(0, 0).setVisible(false);
-        this._numCursor = this.add.text(14, 314, '_', {
-            fontSize: '18px', color: '#ffd700', fontFamily: 'Courier New',
-        }).setOrigin(0, 0).setVisible(false);
-        this._numOkBg = this.add.rectangle(14, 346, 130, 26, 0x1a3a1a, 1).setOrigin(0, 0)
-            .setInteractive()
-            .on('pointerover', () => this._numOkBg.setFillStyle(0x2a5a2a))
-            .on('pointerout',  () => this._numOkBg.setFillStyle(0x1a3a1a))
+
+        // Input box background
+        this._numBoxBg = this.add.rectangle(14, 322, W - 28, 28, 0x0a0814, 1).setOrigin(0, 0)
+            .setStrokeStyle(1, eColor, 0.4).setVisible(false);
+        this._numDisp = this.add.text(22, 336, '', {
+            fontSize: '16px', color: '#ffffff', fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5).setVisible(false);
+        this._numCursor = this.add.text(22, 336, '|', {
+            fontSize: '16px', color: eHex, fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5).setVisible(false);
+        this._numOkBg = this.add.rectangle(14, 356, 140, 26, 0x0a2010, 1).setOrigin(0, 0)
+            .setStrokeStyle(1, 0x33cc66, 0.6).setInteractive()
+            .on('pointerover', () => this._numOkBg.setFillStyle(0x153020))
+            .on('pointerout',  () => this._numOkBg.setFillStyle(0x0a2010))
             .on('pointerdown', () => this._submitNumeric())
             .setVisible(false);
-        this._numOkTx = this.add.text(79, 359, 'CONFIRMAR', {
-            fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New',
+        this._numOkTx = this.add.text(84, 369, '✓  CONFIRMAR', {
+            fontSize: '11px', color: '#55ee88', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5).setVisible(false);
 
-        // Feedback + explanation
-        this._feedbackTxt = this.add.text(W / 2, 366, '', {
-            fontSize: '11px', fontFamily: 'Courier New', wordWrap: { width: 512 },
+        // Feedback (correct/wrong)
+        this._feedbackTxt = this.add.text(W / 2, 376, '', {
+            fontSize: '12px', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 3,
+            wordWrap: { width: W - 32 },
         }).setOrigin(0.5, 0).setVisible(false);
 
-        this._explTxt = this.add.text(14, 386, '', {
-            fontSize: '10px', color: '#888888', fontFamily: 'Courier New', wordWrap: { width: 516 },
+        // Explanation text
+        this._explTxt = this.add.text(16, 396, '', {
+            fontSize: '10px', color: '#6688aa', fontFamily: 'Courier New',
+            wordWrap: { width: W - 32 }, fontStyle: 'italic',
         }).setOrigin(0, 0);
     }
 
-    _buildBottomBar() {
+    _buildBottomBar(eColor, eHex, isElite) {
         const W = 544;
-        this.add.rectangle(0, 436, W, 44, 0x080604, 1).setOrigin(0, 0);
+        const BY = 438;
 
-        // Hint button
-        const hintBg = this.add.rectangle(8, 442, 162, 28, 0x111133, 1).setOrigin(0, 0)
-            .setInteractive()
-            .on('pointerover', () => hintBg.setFillStyle(0x222255))
-            .on('pointerout',  () => hintBg.setFillStyle(0x111133))
-            .on('pointerdown', () => this._useHint());
-        this.add.text(89, 456, 'DICA  (−10 Foco)', {
-            fontSize: '10px', color: '#aaaaff', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0.5);
+        // Bar background
+        this.add.rectangle(0, BY - 1, W, 1, eColor, 0.2).setOrigin(0, 0);
+        this.add.rectangle(0, BY, W, 42, 0x040206, 1).setOrigin(0, 0);
 
-        // Flee button
-        const fleeBg = this.add.rectangle(376, 442, 120, 28, 0x2a1000, 1).setOrigin(0, 0)
-            .setInteractive()
-            .on('pointerover', () => fleeBg.setFillStyle(0x441800))
-            .on('pointerout',  () => fleeBg.setFillStyle(0x2a1000))
-            .on('pointerdown', () => this._flee());
-        this.add.text(436, 456, 'FUGIR', {
-            fontSize: '10px', color: '#ff8844', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0.5);
+        const btnStyle = (fillColor, borderColor, label, textColor, x, w) => {
+            const bg = this.add.rectangle(x, BY + 6, w, 28, fillColor, 1).setOrigin(0, 0)
+                .setStrokeStyle(1, borderColor, 0.5).setInteractive()
+                .on('pointerover', () => bg.setFillStyle(fillColor + 0x0a0a0a))
+                .on('pointerout',  () => bg.setFillStyle(fillColor));
+            this.add.text(x + w / 2, BY + 20, label, {
+                fontSize: '10px', color: textColor, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0.5);
+            return bg;
+        };
 
-        // Scratchpad (Calculator) button
-        const calcBg = this.add.rectangle(178, 442, 190, 28, 0x051a05, 1).setOrigin(0, 0)
-            .setInteractive()
-            .on('pointerover', () => calcBg.setFillStyle(0x0a2a0a))
-            .on('pointerout',  () => calcBg.setFillStyle(0x051a05))
-            .on('pointerdown', () => this._openScratchpad());
-        this.add.text(273, 456, 'NOTAS / CALC (N)', {
-            fontSize: '10px', color: '#88ff88', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0.5);
+        // DICA
+        const hintBg = btnStyle(0x080818, 0x4444aa, '◈  DICA  (−10 FOCO)', '#8888ee', 8, 168);
+        hintBg.on('pointerdown', () => this._useHint());
+
+        // NOTAS/CALC
+        const calcBg = btnStyle(0x060e06, 0x338833, '✦  NOTAS / CALC  [N]', '#55cc66', 184, 176);
+        calcBg.on('pointerdown', () => this._openScratchpad());
+
+        // FUGIR
+        const fleeBg = btnStyle(0x180808, 0xaa3322, '⊗  FUGIR', '#ee6644', 368, 100);
+        fleeBg.on('pointerdown', () => this._flee());
+
+        // Extra separator before Fugir
+        const sepGfx = this.add.graphics();
+        sepGfx.lineStyle(1, 0x331100, 0.8);
+        sepGfx.lineBetween(362, BY + 6, 362, BY + 34);
 
         this.input.keyboard.on('keydown-N', () => this._openScratchpad());
     }
@@ -310,47 +405,53 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _showChoiceBtns(options, startY) {
-        const LABELS = ['A', 'B', 'C', 'D'];
         for (let i = 0; i < this._aBtns.length; i++) {
-            const { bg, tx } = this._aBtns[i];
+            const { bg, badge, badgeTx, tx } = this._aBtns[i];
             if (i < options.length) {
                 const col = i % 2, row = Math.floor(i / 2);
-                const by  = startY + row * 34;
-                bg.setY(by).setFillStyle(0x111122).setVisible(true);
-                tx.setY(by + 14).setText(`${LABELS[i]}) ${options[i]}`).setVisible(true);
+                const by  = startY + row * 36;
+                bg.setY(by).setFillStyle(0x0d0b18).setVisible(true);
+                badge.setY(by + 3).setVisible(true);
+                badgeTx.setY(by + 15).setVisible(true);
+                tx.setY(by + 15).setText(options[i]).setVisible(true);
                 bg.removeAllListeners('pointerdown');
                 const answer = options[i];
                 bg.on('pointerdown', () => { if (!this._answerLock) this._onAnswer(answer, bg); });
             } else {
                 bg.setVisible(false);
+                badge.setVisible(false);
+                badgeTx.setVisible(false);
                 tx.setVisible(false);
             }
         }
     }
 
     _hideChoiceBtns() {
-        for (const { bg, tx } of this._aBtns) {
+        for (const { bg, badge, badgeTx, tx } of this._aBtns) {
             bg.setVisible(false).removeAllListeners('pointerdown');
+            badge.setVisible(false);
+            badgeTx.setVisible(false);
             tx.setVisible(false);
         }
     }
 
     _showNumericInput(startY) {
         this._numPrt.setY(startY).setVisible(true);
-        this._numDisp.setY(startY + 18).setText('').setVisible(true);
-        // Animated cursor for clear "type here" hint
-        this._numCursor.setY(startY + 18).setX(14).setVisible(true).setAlpha(1);
+        this._numBoxBg.setY(startY + 16).setVisible(true);
+        this._numDisp.setY(startY + 30).setText('').setVisible(true);
+        this._numCursor.setY(startY + 30).setX(22).setVisible(true).setAlpha(1);
         if (!this._cursorTween) {
             this._cursorTween = this.tweens.add({
-                targets: this._numCursor, alpha: 0.2, duration: 500, yoyo: true, repeat: -1,
+                targets: this._numCursor, alpha: 0.1, duration: 500, yoyo: true, repeat: -1,
             });
         }
-        this._numOkBg.setY(startY + 48).setVisible(true);
-        this._numOkTx.setY(startY + 61).setVisible(true);
+        this._numOkBg.setY(startY + 50).setVisible(true);
+        this._numOkTx.setY(startY + 63).setVisible(true);
     }
 
     _hideNumericInput() {
         this._numPrt.setVisible(false);
+        this._numBoxBg?.setVisible(false);
         this._numDisp.setVisible(false);
         this._numCursor.setVisible(false);
         this._numOkBg.setVisible(false);
@@ -497,14 +598,34 @@ export class CombatScene extends Phaser.Scene {
 
     // ─── BAR RENDERING ────────────────────────────────────────────────────────
 
+    _drawBar(g, x, y, w, h, pct, baseColor, dangerColor) {
+        const color  = pct < 0.3 ? dangerColor : baseColor;
+        const filled = Math.max(0, Math.floor(w * pct));
+        g.fillStyle(0x0a0008);       g.fillRect(x, y, w, h);
+        if (filled > 0) {
+            g.fillStyle(color, 0.85); g.fillRect(x, y, filled, h);
+            g.fillStyle(0xffffff, 0.18); g.fillRect(x, y, filled, Math.ceil(h * 0.4));
+        }
+        // Tick marks at 25%, 50%, 75%
+        g.fillStyle(0x000000, 0.4);
+        [0.25, 0.5, 0.75].forEach(t => { const tx = x + Math.floor(w * t); g.fillRect(tx, y, 1, h); });
+        // Border
+        g.lineStyle(1, color, 0.35); g.strokeRect(x, y, w, h);
+    }
+
     _updateMonsterBar() {
         const pct = Math.max(0, this._monsterHp / this._monsterDef.maxHp);
         const g   = this._mHpGfx;
         g.clear();
-        g.fillStyle(0x220000); g.fillRect(112, 96, 86, 10);
-        g.fillStyle(0xff3333); g.fillRect(112, 96, Math.max(0, Math.floor(86 * pct)), 10);
-        g.fillStyle(0xff8888, 0.4); g.fillRect(112, 96, Math.max(0, Math.floor(86 * pct)), 3);
-        this._mHpTxt.setText(`${this._monsterHp}/${this._monsterDef.maxHp}`);
+        this._drawBar(g, 108, 98, 148, 11, pct, 0xee3333, 0xff0000);
+        this._mHpTxt.setText(`${this._monsterHp} / ${this._monsterDef.maxHp}`);
+        // Pulse danger when low
+        if (pct < 0.3 && this._monsterSprite && !this._dangerPulse) {
+            this._dangerPulse = this.tweens.add({ targets: this._monsterSprite, alpha: 0.6, duration: 300, yoyo: true, repeat: -1 });
+        } else if (pct >= 0.3 && this._dangerPulse) {
+            this._dangerPulse.stop(); this._dangerPulse = null;
+            if (this._monsterSprite) this._monsterSprite.setAlpha(1);
+        }
     }
 
     _updatePlayerBars() {
@@ -513,17 +634,11 @@ export class CombatScene extends Phaser.Scene {
         const fPct = Math.max(0, p.focus / p.maxFocus);
         const g    = this._pVitalsGfx;
         g.clear();
-        // HP bar (with gradient effect using two layers)
-        g.fillStyle(0x220000); g.fillRect(346, 84, 130, 10);
-        g.fillStyle(0xff3333); g.fillRect(346, 84, Math.floor(130 * hPct), 10);
-        g.fillStyle(0xff8888, 0.4); g.fillRect(346, 84, Math.floor(130 * hPct), 3);
-        // Focus bar
-        g.fillStyle(0x000a22); g.fillRect(346, 110, 130, 10);
-        g.fillStyle(0x3355ff); g.fillRect(346, 110, Math.floor(130 * fPct), 10);
-        g.fillStyle(0x88aaff, 0.4); g.fillRect(346, 110, Math.floor(130 * fPct), 3);
+        this._drawBar(g, 286, 62, 148, 11, hPct, 0xdd3333, 0xff0000);
+        this._drawBar(g, 286, 88, 148, 11, fPct, 0x3355ee, 0x5566ff);
 
-        this._pHpTxt.setText(`${p.hp}/${p.maxHp}`);
-        this._pFocusTxt.setText(`${p.focus}/${p.maxFocus}`);
+        this._pHpTxt.setText(`${p.hp} / ${p.maxHp}`);
+        this._pFocusTxt.setText(`${p.focus} / ${p.maxFocus}`);
     }
 
     // ─── ACTIONS ──────────────────────────────────────────────────────────────
