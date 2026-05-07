@@ -26,18 +26,18 @@ export class ScratchpadScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Display Area (Calculation Result)
-        this.add.rectangle(10, 30, W - 20, 34, 0x1a1a1a, 1).setOrigin(0).setStrokeStyle(1, 0x333333);
+        const displayBg = this.add.rectangle(10, 30, W - 20, 34, 0x1a1a1a, 1).setOrigin(0).setStrokeStyle(1, 0x333333);
         this._displayTxt = this.add.text(W - 15, 47, '0', {
             fontSize: '16px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(1, 0.5);
 
         // History Area
-        this.add.text(10, 70, 'HISTÓRICO:', { fontSize: '9px', color: '#554422', fontFamily: 'Courier New' });
+        const historyLabel = this.add.text(10, 70, 'HISTÓRICO:', { fontSize: '9px', color: '#554422', fontFamily: 'Courier New' });
         this._historyTxt = this.add.text(10, 80, '', {
             fontSize: '9px', color: '#888', fontFamily: 'Courier New', wordWrap: { width: W - 20 }
         });
 
-        this._container.add([bg, header, title, this._displayTxt, this._historyTxt]);
+        this._container.add([bg, header, title, displayBg, this._displayTxt, historyLabel, this._historyTxt]);
 
         this._buildKeypad(W);
 

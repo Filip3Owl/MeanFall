@@ -12,7 +12,9 @@ export const QuestionEngine = {
             very_hard:  ['hard'],
             improbable: ['hard'],
         };
-        const allowed = DIFFICULTY_MAP[playerDifficulty] || DIFFICULTY_MAP.medium;
+        const allowed = Array.isArray(playerDifficulty)
+            ? playerDifficulty
+            : (DIFFICULTY_MAP[playerDifficulty] || DIFFICULTY_MAP.medium);
 
         const pool = (QUESTIONS[topic] || []).filter(q =>
             allowed.includes(q.difficulty) &&

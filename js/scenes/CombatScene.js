@@ -53,7 +53,7 @@ export class CombatScene extends Phaser.Scene {
         this.add.rectangle(0, 0, W, 480, 0x050201, 0.94).setOrigin(0, 0);
 
         // Header tinted with element color
-        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.air;
+        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
         const headerColor = isElite ? 0x443300 : elem.dark;
         const borderColor = isElite ? 0xffd700 : elem.color;
 
@@ -85,7 +85,7 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _buildMonsterPanel() {
-        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal || ELEMENTS.air;
+        const elem = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
 
         // Panel background tinted with element color
         const bgDark = elem.dark || 0x1a0000;
