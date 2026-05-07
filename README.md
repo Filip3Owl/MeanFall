@@ -1,254 +1,208 @@
-# MeanFall — Beta
+# MeanFall
 
-An educational top-down RPG that teaches statistics through tile-based exploration, turn-based combat, an elemental system, quests, and a fully functional merchant economy. Players answer statistics questions to deal damage, gather elemental loot, complete merchant-driven quests, and progress through six themed regions — each tied to a different statistical topic.
+> **RPG educacional de estatística — jogue em [meanfall.pro](https://www.meanfall.pro)**
 
-Built with vanilla JavaScript and Phaser 3. Single-page application, no build step, no bundler, no dependencies beyond the Phaser CDN script.
+Um RPG top-down que ensina estatística através de exploração tile-based, combate por turnos e um sistema elemental completo. O jogador responde questões de estatística para causar dano, coleta loot elemental, completa missões e progride por seis regiões temáticas — cada uma ligada a um tópico diferente de estatística.
 
-> **Status: BETA v0.9.0** — gameplay loop, content, and core systems are feature-complete. Balancing and polish are in progress.
-
----
-
-## Concept
-
-MeanFall replaces traditional click-to-attack combat with a knowledge-based loop: every encounter is a statistics question. A correct answer deals damage scaled by player attributes, weapon element, rarity bonuses, and a streak multiplier; an incorrect answer lets the monster strike back. Mastery percentage per region gates progression to higher-tier areas, so players cannot skip the underlying concepts.
-
-The world is divided into six regions, each focused on a different statistical topic:
-
-| Region                    | Topic                                | Element  | Suggested Level |
-|---------------------------|--------------------------------------|----------|-----------------|
-| Village of Data           | Data types (categorical, ordinal, continuous) | Normal   | 1     |
-| Meadows of Measures       | Mean, median, mode                   | Earth    | 3               |
-| Forest of Spread          | Variance, standard deviation, IQR    | Ice      | 5               |
-| Plains of Probability     | Basic and conditional probability    | Fire     | 8               |
-| Mountains of Distribution | Normal distribution, z-scores       | Water    | 12              |
-| Dungeon of Inference      | Hypothesis testing, p-values        | Shadow   | 15              |
+Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step, sem bundler, sem dependências além do CDN do Phaser.
 
 ---
 
-## Beta Highlights
+## 🎮 Jogar Agora
 
-- **Six elements** — Fire, Earth, Water, Ice, Shadow, Normal — with a damage multiplier matrix that produces super-effective and resisted matchups in combat.
-- **Five rarity tiers** — Common, Uncommon, Rare, Epic, Legendary — each with its own color, value multiplier, and stat scaling.
-- **Quest system** — seven quests across the world map, accepted automatically when you talk to quest-giving NPCs and tracked in a dedicated journal accessible with `Q`.
-- **Book / Codex system** — 14 in-world tomes drop from monsters and teach a specific statistics concept across multiple pages. Books carry an importance tier (Comum, Importante, Muito Importante, Essencial, Proibido) that determines first-read XP and one-time stat bonus. Library accessible with `B`.
-- **Merchant NPCs and shops** — three merchants in different regions sell tier-appropriate gear and consumables, and buy any item back at 50% of its base value.
-- **Loot system** — every monster guarantees at least one drop, plus rolls on a multi-tier loot table tied to its region and difficulty. Loot includes consumables, weapons, armor, accessories with elemental affinities, and rare books.
-- **Monster respawn** — defeated monsters automatically respawn after 90 seconds in their original location, enabling sustained farming and quest progression.
-- **67 questions with RPG context** — every statistics problem is framed inside the world (alchemist potions, dragon hoards, dungeon loot, party recruitment, magic casts) so the math is anchored to a setting.
-- **Critical hits and dodges** — Agility scales dodge chance and critical strike chance; criticals deal +60% damage and trigger pink damage numbers.
-- **Damage feedback** — floating damage numbers, screen flashes on hit, super-effective and resisted call-outs in the combat log.
-- **Polished UI** — refreshed theme with Beta tag, color-coded keywords (damage, heal, loot, level, XP, rarity, dialog), card-style panels, gradient bars with shine, and a footer crediting the developer.
+**[www.meanfall.pro](https://www.meanfall.pro)**
 
 ---
 
-## Features
+## Regiões do Mundo
 
-- **67 curated statistics questions** across six topics, balanced across easy, medium, and hard difficulty tiers, every one framed in the RPG world.
-- **Three question types**: multiple choice, true/false, and free-form numeric input with configurable tolerance.
-- **Turn-based combat** with damage scaling driven by player attributes, weapon element vs monster element matchup, rarity bonuses, critical hits, and streak bonuses.
-- **Adaptive question selection** that biases 60% of draws toward previously missed questions to reinforce weak concepts.
-- **Mastery-gated progression**: portals to advanced regions check both player level and per-region mastery percentage before unlocking.
-- **Inventory and equipment system** with consumables and equipment slots (head, chest, legs, feet, hands, ring, amulet) that apply stat bonuses and weapon elements.
-- **Three-slot save system** persisting to LocalStorage, with auto-save on area transitions and combat completion, plus manual save via F5.
-- **Procedural texture generation**: every tile, sprite, monster, item, and merchant is drawn at runtime via Phaser Graphics — no external image assets.
-- **Hint system** that costs 10 Focus per use, encouraging strategic resource management during combat.
-- **Quest journal** with progress bars, status badges (active, complete, claimed), and reward previews.
+| Região | Tópico | Elemento | Nível Sugerido |
+|---|---|---|---|
+| Vila dos Dados | Tipos de dados (categórico, ordinal, contínuo) | Normal | 1 |
+| Pradarias das Medidas | Média, mediana, moda | Terra | 3 |
+| Floresta da Dispersão | Variância, desvio padrão, IQR | Gelo | 5 |
+| Planícies da Probabilidade | Probabilidade básica e condicional | Fogo | 8 |
+| Montanhas das Distribuições | Distribuição normal, z-scores | Água | 12 |
+| Masmorra da Inferência | Testes de hipótese, p-valores | Trevas | 15 |
 
 ---
 
-## Tech Stack
+## Funcionalidades
 
-- **Phaser 3.60.0** (loaded via CDN)
-- **Vanilla JavaScript ES Modules** (no bundler, no transpilation)
-- **HTML5 Canvas** for the game viewport and minimap
-- **CSS3** with custom-property theming
-- **LocalStorage** for persistence
+- **52+ questões de estatística** em seis tópicos, balanceadas em fácil, médio e difícil, todas ambientadas no mundo do RPG
+- **24 monstros** (2 por área + variantes Elite com 15% de chance de spawn, 2× HP e 3× ouro)
+- **Três tipos de questão** — múltipla escolha, verdadeiro/falso e resposta numérica
+- **Combate por turnos** com dano escalado por atributos, matchup elemental, críticos e streak bonus
+- **Seleção adaptativa** — 60% das perguntas são biasadas para questões previamente erradas
+- **Progressão por maestria** — portais para regiões avançadas exigem nível e % de maestria
+- **Sistema de inventário e equipamentos** com slots (cabeça, peito, pernas, pés, mãos, anel, amuleto)
+- **Sistema de missões** — 7 missões com rastreamento automático e diário acessível com `Q`
+- **Sistema de livros/codex** — 14 tomos in-world dropáveis com 5 níveis de importância e bônus permanentes
+- **Mercadores e lojas** — 3 NPCs em regiões diferentes com catálogos tier-appropriate
+- **Calculadora + Bloco de Notas** arrastáveis durante o combate (tecla `N`), com salvamento em LocalStorage
+- **Fog of War** com exploração progressiva por região
+- **Respawn de monstros** a cada 20 segundos
+- **Sistema de save** em 3 slots via LocalStorage com auto-save
+- **Texturas procedurais** — todos os sprites são gerados em runtime, sem imagens externas
+- **Sistema elemental passivo** com maestria elemental, ícones procedurais e aura do jogador
 
 ---
 
-## Project Structure
+## Interface de Combate
+
+- Painel do monstro com sprite, aura elemental, barra de HP com marcações a 25/50/75%, flavor text e badge de nível/elemento
+- Painel do jogador com barras de HP e Foco com tick marks e pulso de perigo
+- Caixa de pergunta com frame ornamental, badges A/B/C/D, feedback de resposta com animação
+- Barra inferior com botões **DICA** (−10 Foco), **NOTAS/CALC** e **FUGIR**
+- Números de dano flutuantes, flash de tela e shake ao receber dano
+- Cores de texto garantidas legíveis em todos os elementos (usa `accent` do elemento, sempre mais claro que a cor base)
+
+---
+
+## Stack Tecnológica
+
+- **Phaser 3.60.0** (via CDN)
+- **JavaScript ES Modules** (sem bundler, sem transpilação)
+- **HTML5 Canvas** para viewport do jogo e minimapa
+- **CSS3** com custom properties
+- **LocalStorage** para persistência
+
+---
+
+## Estrutura do Projeto
 
 ```
 .
-├── index.html                  Game shell, DOM HUD, layout, footer
+├── index.html
 ├── css/
-│   └── style.css               Beta theme, cards, color-coded chat
+│   └── style.css
+├── icon/
+│   └── meanfallfav.png
 └── js/
-    ├── main.js                 Phaser configuration and entry point
-    ├── constants.js            Tile codes, areas, XP table, ELEMENTS,
-    │                           ELEMENT_MATRIX, RARITIES, VERSION info
+    ├── main.js
+    ├── constants.js
     ├── data/
-    │   ├── questions.js        58-question bank, organized by topic
-    │   ├── maps.js             6 hand-crafted tile maps with NPC roles
-    │   ├── monsters.js         12 elemental creatures
-    │   ├── items.js            27 items across 5 rarities, 6 elements
-    │   ├── quests.js           7 quests with progression chain
-    │   ├── shops.js            3 merchant catalogs
-    │   └── books.js            14 in-world tomes with importance tiers
+    │   ├── questions.js        52+ questões por tópico
+    │   ├── maps.js             6 mapas tile-based completos
+    │   ├── monsters.js         24 monstros com atributos e drops
+    │   ├── items.js            Itens em 5 raridades e 6 elementos
+    │   ├── quests.js           7 missões com cadeia de progressão
+    │   ├── shops.js            3 catálogos de mercador
+    │   └── books.js            14 tomos com 5 níveis de importância
     ├── systems/
-    │   ├── CombatSystem.js     Damage formulas with elemental matchup,
-    │   │                       crit, equip / unequip, inventory ops
-    │   ├── QuestionEngine.js   Question selection, answer checking
-    │   ├── XPSystem.js         XP awards, level-up, mastery
-    │   ├── SaveSystem.js       LocalStorage save slots
-    │   ├── MapManager.js       Tile rendering, collision, minimap
-    │   ├── QuestSystem.js      Quest log, progress tracking, rewards
-    │   ├── ShopSystem.js       Buy / sell, price calculation
-    │   └── BookSystem.js       Book drops, library, first-read rewards
+    │   ├── CombatSystem.js
+    │   ├── QuestionEngine.js
+    │   ├── XPSystem.js
+    │   ├── SaveSystem.js
+    │   ├── MapManager.js
+    │   ├── QuestSystem.js
+    │   ├── ShopSystem.js
+    │   ├── BookSystem.js
+    │   ├── SkillSystem.js
+    │   ├── TutorialSystem.js
+    │   └── FogManager.js
     ├── scenes/
-    │   ├── BootScene.js        Texture generation
-    │   ├── MainMenuScene.js    Menu with Beta badge and credits
-    │   ├── WorldScene.js       Player movement, NPC interaction,
-    │   │                       respawn timing, combat triggering
-    │   ├── UIScene.js          DOM HUD, color-coded chat
-    │   ├── CombatScene.js      Question UI, elemental damage feedback,
-    │   │                       crit / dodge / super-effective animations
-    │   ├── InventoryScene.js   Item list, equip / unequip, comparison
-    │   ├── CharacterScene.js   Vitals, attributes, equipment, mastery
-    │   ├── ShopScene.js        Merchant UI with Buy / Sell tabs
-    │   ├── QuestScene.js       Quest journal with progress bars
-    │   └── BookScene.js        Library + multi-page reader UI
+    │   ├── BootScene.js
+    │   ├── MainMenuScene.js
+    │   ├── WorldScene.js
+    │   ├── UIScene.js
+    │   ├── CombatScene.js
+    │   ├── InventoryScene.js
+    │   ├── CharacterScene.js
+    │   ├── ShopScene.js
+    │   ├── QuestScene.js
+    │   ├── BookScene.js
+    │   ├── DialogScene.js
+    │   └── ScratchpadScene.js  Calculadora + Notas arrastáveis
     ├── entities/
-    │   ├── Player.js           Sprite, grid movement
-    │   ├── Monster.js          Sprite, patrol AI, mini health bar
-    │   └── NPC.js              Quest-givers (gold robe) and merchants
-    │                           (green apron) with floating role badges
+    │   ├── Player.js
+    │   ├── Monster.js          Sistema Elite (15% chance de spawn)
+    │   └── NPC.js
     └── utils/
-        ├── EventBus.js         Module-level pub/sub
-        └── Draw.js             Procedural sprites for tiles, players,
-                                monsters, items, NPCs by element
+        ├── EventBus.js
+        ├── Draw.js             Sprites procedurais por elemento
+        └── RichText.js         Sistema de markup {{tag:valor}}
 ```
 
 ---
 
-## Architecture
+## Rodar Localmente
 
-The game uses a **scene composition** model: `WorldScene` runs continuously, while `UIScene` overlays the HTML HUD and listens to game events. `CombatScene`, `InventoryScene`, `CharacterScene`, `ShopScene`, and `QuestScene` are launched on demand and pause the world via `WorldScene.pauseForOverlay()` / `resumeFromOverlay()`.
-
-Cross-scene communication flows through a single module-level `EventBus`. Player state lives in the Phaser `registry` and is mutated by scenes that own the current interaction (combat, shop, inventory, character, quest journal).
-
-The combat loop is driven by `QuestionEngine.getQuestion()`, which filters by topic and difficulty, excludes the last six asked questions, and biases toward the player's prior wrong answers. Damage is computed by `CombatSystem.calcPlayerDamage()` using player level, intelligence, strength, weapon element vs monster element, rarity-scaled equipment bonuses, critical chance from agility, and streak bonus.
-
-`QuestSystem` tracks kills (per monster ID, per area, per element), item collection, and mastery percentages, automatically marking quests complete when all objectives are met. `ShopSystem` is a thin wrapper around inventory operations that handles gold transactions for both buying and selling.
-
-Monster respawn is handled in `WorldScene._processRespawns()`, which checks pending respawn timers each frame. When a respawn is due and the player is in the matching area, the monster is reinserted into the scene with a chat notification.
-
----
-
-## Running Locally
-
-The project uses ES modules, so it must be served over HTTP — opening `index.html` directly via `file://` will fail with a CORS error.
-
-### Option 1: Python
+O projeto usa ES modules e precisa ser servido via HTTP — abrir `index.html` direto pelo `file://` falha com erro CORS.
 
 ```bash
-python3 -m http.server 3001
+python3 -m http.server 8080
 ```
 
-### Option 2: Node
-
-```bash
-npx serve -p 3001
-```
-
-Then open `http://localhost:3001` in any modern browser.
+Abrir `http://localhost:8080` em qualquer browser moderno.
 
 ---
 
-## Controls
+## Controles
 
-| Key            | Action                          |
-|----------------|---------------------------------|
-| WASD or Arrows | Move player                     |
-| Space          | Talk to adjacent NPC / open shop|
-| I              | Open inventory                  |
-| C              | Open character sheet            |
-| Q              | Open quest journal              |
-| B              | Open book library / codex       |
-| F5             | Save game                       |
-| ESC            | Close any modal                 |
-
-In combat, multiple choice answers are clicked directly; numeric answers accept digits, minus, comma, and period, with Enter to submit.
+| Tecla | Ação |
+|---|---|
+| WASD / Setas | Mover jogador |
+| Espaço | Falar com NPC / abrir loja |
+| I | Inventário |
+| C | Ficha do personagem |
+| Q | Diário de missões |
+| B | Biblioteca de livros |
+| K | Habilidades |
+| L | Compêndio elemental |
+| N | Calculadora + Bloco de notas (durante combate) |
+| F5 | Salvar jogo |
+| ESC | Fechar qualquer modal |
 
 ---
 
-## Damage Formulas
+## Fórmulas de Dano
 
 ```
-Base                  = floor(10 + level × 1.5 + INT × 0.5 + STR × 0.3 + min(streak × 2, 20))
-Element multiplier    = ELEMENT_MATRIX[weapon.element][monster.element]   (0.75 / 1.0 / 1.5)
-Crit chance           = min(0.05 + AGI × 0.01, 0.30)
-Crit multiplier       = 1.6
-Player damage         = max(1, floor(Base × Element × CritMult) − monster.defense)
-
-Monster damage        = max(1, monster.attackDamage − floor(AGI × 0.3))
-Dodge chance          = AGI × 0.01
-XP gain               = floor(monster.xpReward × (1 + INT × 0.02))
+Base              = floor(10 + level × 1.5 + INT × 0.5 + STR × 0.3 + min(streak × 2, 20))
+Elemento          = ELEMENT_MATRIX[arma][monstro]   (0.75 / 1.0 / 1.5)
+Crítico           = min(0.05 + AGI × 0.01, 0.30) → ×1.6 de dano
+Dano do jogador   = max(1, floor(Base × Elemento × Crítico) − defesa do monstro)
+Dano do monstro   = max(1, ataque − floor(AGI × 0.3))
+Esquiva           = AGI × 1%
+XP ganho          = floor(xpReward × (1 + INT × 0.02))
 ```
 
-Stat points are awarded every three levels, with permanent HP bonuses for vitality and Focus bonuses for intelligence.
+---
+
+## Matriz Elemental
+
+| Atacante → Defensor | Fogo | Terra | Água | Gelo | Trevas | Normal |
+|---|---|---|---|---|---|---|
+| Fogo | 1.0 | **1.5** | 0.75 | **1.5** | 1.0 | 1.0 |
+| Terra | 0.75 | 1.0 | **1.5** | 1.0 | **1.5** | 1.0 |
+| Água | **1.5** | 0.75 | 1.0 | 0.75 | 1.0 | 1.0 |
+| Gelo | 0.75 | 1.0 | **1.5** | 1.0 | 0.75 | 1.0 |
+| Trevas | 1.0 | 0.75 | 1.0 | **1.5** | 1.0 | **1.5** |
+| Normal | 1.0 | 1.0 | 1.0 | 1.0 | 0.75 | 1.0 |
 
 ---
 
-## Element Matrix (advantage / neutral / weakness)
+## Raridades
 
-| Attacker → Defender | Fire | Earth | Water | Ice  | Shadow | Normal |
-|---------------------|------|-------|-------|------|--------|--------|
-| Fire                | 1.0  | 1.5   | 0.75  | 1.5  | 1.0    | 1.0    |
-| Earth               | 0.75 | 1.0   | 1.5   | 1.0  | 1.5    | 1.0    |
-| Water               | 1.5  | 0.75  | 1.0   | 0.75 | 1.0    | 1.0    |
-| Ice                 | 0.75 | 1.0   | 1.5   | 1.0  | 0.75   | 1.0    |
-| Shadow              | 1.0  | 0.75  | 1.0   | 1.5  | 1.0    | 1.5    |
-| Normal              | 1.0  | 1.0   | 1.0   | 1.0  | 0.75   | 1.0    |
-
----
-
-## Rarity Tiers
-
-| Rarity     | Color   | Value Multiplier | Power Scaling |
-|------------|---------|------------------|---------------|
-| Common     | Gray    | ×1.0             | ×1.0          |
-| Uncommon   | Green   | ×2.0             | ×1.4          |
-| Rare       | Blue    | ×4.0             | ×1.8          |
-| Epic       | Purple  | ×8.0             | ×2.5          |
-| Legendary  | Orange  | ×16.0            | ×3.5          |
+| Raridade | Cor | Multiplicador de Valor | Poder |
+|---|---|---|---|
+| Comum | Cinza | ×1.0 | ×1.0 |
+| Incomum | Verde | ×2.0 | ×1.4 |
+| Raro | Azul | ×4.0 | ×1.8 |
+| Épico | Roxo | ×8.0 | ×2.5 |
+| Lendário | Laranja | ×16.0 | ×3.5 |
 
 ---
 
-## Book Importance Tiers
+## Créditos
 
-Books drop from monsters and grant a one-time XP reward plus a permanent stat bonus on first read.
+Desenvolvido por **Filipe Rangel**.
 
-| Importance       | Color   | First-read XP | Bonus on first read           |
-|------------------|---------|---------------|-------------------------------|
-| Comum            | Gray    | +30           | —                             |
-| Importante       | Green   | +60           | +1 INT                        |
-| Muito Importante | Blue    | +120          | +2 INT                        |
-| Essencial        | Purple  | +240          | +3 INT, +5 max Foco           |
-| Proibido         | Orange  | +500          | +5 INT, +10 max Foco          |
-
-The current codex contains 14 books split across the six elements: data type catalogs (Normal), central tendency treatises (Earth), spread crystals (Ice), probability fundamentals (Fire), distribution scriptures (Water), and inference grimoires (Shadow). The forbidden tome is dropped only by the final boss at very low chance.
+Feito com [Phaser 3](https://phaser.io). Currículo de estatística e design do jogo originais.
 
 ---
 
-## Educational Design Notes
-
-Question difficulty is explicitly tagged per item, and monsters declare which difficulty bands they pull from. Early-region monsters draw only from `easy`, mid-region monsters draw from `easy` and `medium`, and end-game monsters favor `medium` and `hard`. Every question carries an explanation field shown after the answer and an optional hint surfaced in combat for a Focus cost.
-
-The 60% wrong-answer bias in question selection is designed to surface concepts the learner has struggled with, rather than the random uniform sampling typical of quiz games.
-
-Quests reinforce the same content from a different angle: rather than simply answering questions, the player must demonstrate mastery (kill counts, mastery percentage, item collection) to progress. The reward chain (basic gear → elemental gear → legendary gear) parallels the difficulty arc of the statistical content.
-
----
-
-## Credits
-
-**Developed by Filipe Rangel.**
-
-Built with [Phaser 3](https://phaser.io). Statistics curriculum and game design original.
-
----
-
-## License
+## Licença
 
 MIT.
