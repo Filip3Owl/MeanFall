@@ -484,6 +484,7 @@ export class WorldScene extends Phaser.Scene {
         const data = ANCIENT_SCROLLS[scroll.sprite.scrollId];
         if (!data) return;
 
+        Sound.interact();
         this._paused = true;
         this.scene.launch('Dialog', {
             speaker: data.title,
@@ -511,6 +512,7 @@ export class WorldScene extends Phaser.Scene {
             if (completes.length > 0) action = { label: 'VER MISSÕES', kind: 'quest' };
         }
 
+        Sound.interact();
         this._paused = true;
         this.scene.launch('Dialog', {
             speaker: this._displayName(npc.npcId),
@@ -550,7 +552,7 @@ export class WorldScene extends Phaser.Scene {
 
     _openChest(x, y, instanceId) {
         this._playerData.openedChests[instanceId] = true;
-        // Basic rewards for now
+        Sound.chest();
         const gold = 20 + Math.floor(Math.random() * 30);
         this._playerData.gold += gold;
         this._chat(`Você abriu o baú e encontrou {{gold:${gold} moedas de ouro}}!`, 'loot');

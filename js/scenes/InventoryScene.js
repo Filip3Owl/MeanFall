@@ -1,6 +1,7 @@
 import { CombatSystem }            from '../systems/CombatSystem.js';
 import { ITEMS, RARITY_COLORS }    from '../data/items.js';
 import EventBus                    from '../utils/EventBus.js';
+import { Sound }                   from '../utils/SoundSystem.js';
 
 export class InventoryScene extends Phaser.Scene {
     constructor() { super('Inventory'); }
@@ -214,6 +215,7 @@ export class InventoryScene extends Phaser.Scene {
         const { itemId } = invItem;
         const ok = CombatSystem.useItem(this._player, itemId, ITEMS);
         if (ok) {
+            Sound.useItem();
             this._actionMsg.setColor('#88ff88').setText('Item usado!');
             EventBus.emit('player-hp-change', { player: this._player });
             this.registry.set('player', this._player);
@@ -233,6 +235,7 @@ export class InventoryScene extends Phaser.Scene {
         const { itemId } = invItem;
         const ok = CombatSystem.equipItem(this._player, itemId, ITEMS);
         if (ok) {
+            Sound.equip();
             this._actionMsg.setColor('#8888ff').setText('Equipado!');
             EventBus.emit('player-stats-changed', { player: this._player });
             EventBus.emit('player-hp-change',     { player: this._player });
@@ -248,6 +251,7 @@ export class InventoryScene extends Phaser.Scene {
     _unequip(slot) {
         const ok = CombatSystem.unequipItem(this._player, slot, ITEMS);
         if (ok) {
+            Sound.unequip();
             this._actionMsg.setColor('#ffaa44').setText('Item desequipado.');
             EventBus.emit('player-stats-changed', { player: this._player });
             EventBus.emit('player-hp-change',     { player: this._player });

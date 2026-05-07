@@ -202,6 +202,59 @@ class SoundEngine {
         });
     }
 
+    // Item consumed (potion / consumable)
+    useItem() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 220, 'sine', t,        0.28, 0.16, 600); // glug: pitch rises
+            this._tone(ctx, dest, 880, 'sine', t + 0.22, 0.10, 0.12);      // sparkle pop
+            this._tone(ctx, dest, 1108,'sine', t + 0.28, 0.08, 0.10);
+        });
+    }
+
+    // Item equipped (weapon / armor clank + confirmation chime)
+    equip() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 180, 'sawtooth', t,        0.08, 0.20, 120); // metal clang
+            this._noise(ctx, dest, t, 0.07, 1800, 0.10);
+            this._tone(ctx, dest, 440, 'sine',     t + 0.06, 0.16, 0.12);      // confirmation
+            this._tone(ctx, dest, 660, 'sine',     t + 0.12, 0.14, 0.10);
+        });
+    }
+
+    // Item unequipped (softer descending version)
+    unequip() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 150, 'sawtooth', t,        0.08, 0.14, 90);
+            this._noise(ctx, dest, t, 0.05, 800, 0.07);
+            this._tone(ctx, dest, 380, 'sine',     t + 0.05, 0.12, 0.10);
+        });
+    }
+
+    // NPC dialog / interaction (friendly ascending chime)
+    interact() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 440, 'sine', t,        0.14, 0.13);
+            this._tone(ctx, dest, 550, 'sine', t + 0.09, 0.14, 0.11);
+            this._tone(ctx, dest, 660, 'sine', t + 0.17, 0.18, 0.13);
+        });
+    }
+
+    // Chest opened (wood creak + treasure sparkle)
+    chest() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._noise(ctx, dest, t, 0.18, 350, 0.14);                         // creak
+            this._tone(ctx, dest, 70, 'sawtooth', t, 0.16, 0.10, 50);           // thud
+            [659, 784, 988, 1319].forEach((freq, i) => {                         // sparkle
+                this._tone(ctx, dest, freq, 'sine', t + 0.16 + i * 0.07, 0.14, 0.12);
+            });
+        });
+    }
+
     // ── Settings ──────────────────────────────────────────────────────────────
 
     toggle() {

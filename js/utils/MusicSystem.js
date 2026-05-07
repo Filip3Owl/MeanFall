@@ -102,6 +102,11 @@ class MusicEngine {
             this._master = this._ctx.createGain();
             this._master.gain.value = this._volume;
             this._master.connect(this._ctx.destination);
+            // Resume on first user gesture (required by browser autoplay policy)
+            const resume = () => { if (this._ctx?.state === 'suspended') this._ctx.resume(); };
+            document.addEventListener('click',      resume);
+            document.addEventListener('keydown',    resume);
+            document.addEventListener('touchstart', resume, { passive: true });
         } catch (e) {
             this.enabled = false;
         }
@@ -215,6 +220,10 @@ class MusicEngine {
         const ctx   = this._ctx;
         const track = this._track;
         if (!ctx || !track) return;
+        // Context still suspended (no user gesture yet) — reset clock so no burst on resume
+        if (ctx.state !== 'running') { this._nextTime = ctx.currentTime + 0.08; return; }
+        // Fell behind (e.g. tab was hidden) — skip ahead instead of dumping notes
+        if (this._nextTime < ctx.currentTime) this._nextTime = ctx.currentTime + 0.02;
         const beatLen = 60 / track.bpm;
         while (this._nextTime < ctx.currentTime + 0.15) {
             const t  = this._nextTime;
