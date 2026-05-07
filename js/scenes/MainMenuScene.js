@@ -1,5 +1,6 @@
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PLAYER_DEFAULTS, VERSION } from '../constants.js';
+import { Music } from '../utils/MusicSystem.js';
 
 export class MainMenuScene extends Phaser.Scene {
     constructor() { super('MainMenu'); }
@@ -88,6 +89,8 @@ export class MainMenuScene extends Phaser.Scene {
 
         this._helpVisible = false;
         this._donateVisible = false;
+
+        Music.play('menu');
     }
 
     _makeButton(x, y, label, callback) {

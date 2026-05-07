@@ -16,6 +16,7 @@ import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { buildPlayerSprite } from '../utils/Draw.js';
 import EventBus from '../utils/EventBus.js';
 import { Sound } from '../utils/SoundSystem.js';
+import { Music } from '../utils/MusicSystem.js';
 
 export class WorldScene extends Phaser.Scene {
     constructor() { super('World'); }
@@ -138,6 +139,8 @@ export class WorldScene extends Phaser.Scene {
         cam.stopFollow();
         cam.setZoom(1);
         cam.setScroll(0, 0);
+
+        Music.play(areaId);
     }
 
     // ── Update loop ───────────────────────────────────────────────────────────
@@ -364,6 +367,7 @@ export class WorldScene extends Phaser.Scene {
 
         // Wait for animation to finish before launching CombatScene
         this.time.delayedCall(450, () => {
+            Music.play('combat');
             this.scene.launch('Combat', { monster: monster.def, instanceId: monster.instanceId });
             
             // Reset camera immediately behind the overlay — map is always
@@ -424,6 +428,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
+        Music.play(this._playerData.currentArea);
     }
 
     _onLevelUp() {

@@ -1,6 +1,7 @@
 import EventBus from '../utils/EventBus.js';
 import { AREA_INFO, ELEMENTS } from '../constants.js';
 import { Sound } from '../utils/SoundSystem.js';
+import { Music } from '../utils/MusicSystem.js';
 import { xpToNext, masteryPercent, xpToNextElement } from '../systems/XPSystem.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { spendStatPoint } from '../systems/XPSystem.js';
@@ -117,6 +118,7 @@ export class UIScene extends Phaser.Scene {
             if (!Sound.enabled) btnSound.classList.add('muted');
             btnSound.addEventListener('click', () => {
                 const on = Sound.toggle();
+                Music.setEnabled(on);
                 btnSound.textContent = on ? '🔊' : '🔇';
                 btnSound.classList.toggle('muted', !on);
                 if (on) Sound.click();
