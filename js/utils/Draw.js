@@ -287,6 +287,20 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 26, 32, 'sprite_shadow_specter',   0x6633aa, 'wraith');
     drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
 
+    // ── Novos monstros (12 adicionais) ─────────────────────────────────────
+    drawAirSprite   (g, 20, 22, 'sprite_data_imp',          0x99aabb, 'small');
+    drawAirSprite   (g, 24, 28, 'sprite_type_specter',      0xccddee, 'tall');
+    drawEarthSprite (g, 24, 26, 'sprite_mean_gnome',        0x7a6040, 'block');
+    drawEarthSprite (g, 28, 32, 'sprite_mode_treant',       0x357030, 'tree');
+    drawLightSprite (g, 22, 22, 'sprite_std_wisp',          0xaaddff, 'small');
+    drawLightSprite (g, 26, 28, 'sprite_range_crystal',     0xddeeff, 'crystal');
+    drawFireSprite  (g, 22, 24, 'sprite_prob_imp',          0xff8833, 'lizard');
+    drawFireSprite  (g, 28, 28, 'sprite_bayes_harpy',       0xdd3311, 'bird');
+    drawWaterSprite (g, 28, 22, 'sprite_binomial_crab',     0x2266cc, 'wave');
+    drawWaterSprite (g, 30, 28, 'sprite_poisson_jellyfish', 0x6699dd, 'beast');
+    drawShadowSprite(g, 24, 30, 'sprite_type_ii_shade',     0x884488, 'wraith');
+    drawShadowSprite(g, 26, 32, 'sprite_alpha_vampire',     0x440022, 'lich');
+
     drawNPCSprites(g);
     drawElementIcons(g);
 

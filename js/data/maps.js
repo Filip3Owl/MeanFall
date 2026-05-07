@@ -25,9 +25,12 @@ export const MAP_DATA = {
             { x: 5, y: 13, targetArea: 'meadows', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'air_wisp', instanceId: 'v_m1', x: 14, y: 5 },
-            { monsterId: 'air_wisp', instanceId: 'v_m2', x: 14, y: 10 },
-            { monsterId: 'air_sylph', instanceId: 'v_m3', x: 10, y: 12 },
+            { monsterId: 'air_wisp',     instanceId: 'v_m1', x: 14, y: 5  },
+            { monsterId: 'air_wisp',     instanceId: 'v_m2', x: 14, y: 10 },
+            { monsterId: 'air_sylph',    instanceId: 'v_m3', x: 10, y: 13 },
+            { monsterId: 'data_imp',     instanceId: 'v_m4', x: 9,  y: 1  },
+            { monsterId: 'data_imp',     instanceId: 'v_m5', x: 9,  y: 5  },
+            { monsterId: 'type_specter', instanceId: 'v_m6', x: 12, y: 13 },
         ],
         npcs: [
             { npcId: 'elder', role: 'quest', x: 3, y: 5, dialog: [
@@ -81,11 +84,14 @@ export const MAP_DATA = {
             { x: 8, y: 13, targetArea: 'forest', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'earth_golem', instanceId: 'me_m1', x: 3, y: 5 },
-            { monsterId: 'earth_golem', instanceId: 'me_m2', x: 13, y: 5 },
-            { monsterId: 'earth_golem', instanceId: 'me_m3', x: 3, y: 9 },
-            { monsterId: 'earth_dryad', instanceId: 'me_m4', x: 13, y: 9 },
-            { monsterId: 'earth_dryad', instanceId: 'me_m5', x: 8, y: 12 },
+            { monsterId: 'earth_golem',  instanceId: 'me_m1', x: 3,  y: 5  },
+            { monsterId: 'earth_golem',  instanceId: 'me_m2', x: 13, y: 5  },
+            { monsterId: 'earth_golem',  instanceId: 'me_m3', x: 3,  y: 9  },
+            { monsterId: 'earth_dryad',  instanceId: 'me_m4', x: 13, y: 9  },
+            { monsterId: 'earth_dryad',  instanceId: 'me_m5', x: 8,  y: 12 },
+            { monsterId: 'mean_gnome',   instanceId: 'me_m6', x: 1,  y: 3  },
+            { monsterId: 'mean_gnome',   instanceId: 'me_m7', x: 15, y: 3  },
+            { monsterId: 'mode_treant',  instanceId: 'me_m8', x: 2,  y: 12 },
         ],
         npcs: [
             { npcId: 'sage', role: 'quest', x: 8, y: 7, dialog: [
@@ -130,11 +136,14 @@ export const MAP_DATA = {
             { x: 8, y: 13, targetArea: 'plains', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'light_spark', instanceId: 'fo_m1', x: 2, y: 4 },
-            { monsterId: 'light_spark', instanceId: 'fo_m2', x: 14, y: 4 },
-            { monsterId: 'light_spark', instanceId: 'fo_m3', x: 2, y: 10 },
-            { monsterId: 'light_prism', instanceId: 'fo_m4', x: 14, y: 10 },
-            { monsterId: 'light_prism', instanceId: 'fo_m5', x: 8, y: 6 },
+            { monsterId: 'light_spark',   instanceId: 'fo_m1', x: 2,  y: 4  },
+            { monsterId: 'light_spark',   instanceId: 'fo_m2', x: 14, y: 4  },
+            { monsterId: 'light_spark',   instanceId: 'fo_m3', x: 2,  y: 10 },
+            { monsterId: 'light_prism',   instanceId: 'fo_m4', x: 14, y: 10 },
+            { monsterId: 'light_prism',   instanceId: 'fo_m5', x: 8,  y: 6  },
+            { monsterId: 'std_wisp',      instanceId: 'fo_m6', x: 1,  y: 1  },
+            { monsterId: 'std_wisp',      instanceId: 'fo_m7', x: 15, y: 1  },
+            { monsterId: 'range_crystal', instanceId: 'fo_m8', x: 5,  y: 7  },
         ],
         npcs: [
             { npcId: 'hermit', role: 'quest', x: 8, y: 7, dialog: [
@@ -174,11 +183,14 @@ export const MAP_DATA = {
             { x: 8, y: 13, targetArea: 'mountains', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'fire_phoenix', instanceId: 'pl_m1', x: 3, y: 5 },
-            { monsterId: 'fire_phoenix', instanceId: 'pl_m2', x: 14, y: 5 },
-            { monsterId: 'fire_phoenix', instanceId: 'pl_m3', x: 3, y: 9 },
-            { monsterId: 'fire_salamander', instanceId: 'pl_m4', x: 13, y: 9 },
-            { monsterId: 'fire_salamander', instanceId: 'pl_m5', x: 8, y: 11 },
+            { monsterId: 'fire_phoenix',    instanceId: 'pl_m1', x: 3,  y: 5  },
+            { monsterId: 'fire_phoenix',    instanceId: 'pl_m2', x: 14, y: 5  },
+            { monsterId: 'fire_phoenix',    instanceId: 'pl_m3', x: 3,  y: 9  },
+            { monsterId: 'fire_salamander', instanceId: 'pl_m4', x: 13, y: 9  },
+            { monsterId: 'fire_salamander', instanceId: 'pl_m5', x: 8,  y: 11 },
+            { monsterId: 'prob_imp',        instanceId: 'pl_m6', x: 1,  y: 1  },
+            { monsterId: 'prob_imp',        instanceId: 'pl_m7', x: 15, y: 1  },
+            { monsterId: 'bayes_harpy',     instanceId: 'pl_m8', x: 14, y: 13 },
         ],
         npcs: [
             { npcId: 'gambler', role: 'quest', x: 8, y: 7, dialog: [
@@ -223,11 +235,14 @@ export const MAP_DATA = {
             { x: 8, y: 13, targetArea: 'dungeon', targetSpawn: { x: 8, y: 1 } },
         ],
         monsters: [
-            { monsterId: 'water_serpent', instanceId: 'mo_m1', x: 3, y: 5 },
-            { monsterId: 'water_serpent', instanceId: 'mo_m2', x: 13, y: 5 },
-            { monsterId: 'water_leviathan', instanceId: 'mo_m3', x: 3, y: 9 },
-            { monsterId: 'water_leviathan', instanceId: 'mo_m4', x: 13, y: 9 },
-            { monsterId: 'water_serpent', instanceId: 'mo_m5', x: 8, y: 11 },
+            { monsterId: 'water_serpent',     instanceId: 'mo_m1', x: 3,  y: 5  },
+            { monsterId: 'water_serpent',     instanceId: 'mo_m2', x: 13, y: 5  },
+            { monsterId: 'water_leviathan',   instanceId: 'mo_m3', x: 3,  y: 9  },
+            { monsterId: 'water_leviathan',   instanceId: 'mo_m4', x: 13, y: 9  },
+            { monsterId: 'water_serpent',     instanceId: 'mo_m5', x: 8,  y: 11 },
+            { monsterId: 'binomial_crab',     instanceId: 'mo_m6', x: 1,  y: 1  },
+            { monsterId: 'binomial_crab',     instanceId: 'mo_m7', x: 15, y: 1  },
+            { monsterId: 'poisson_jellyfish', instanceId: 'mo_m8', x: 1,  y: 13 },
         ],
         npcs: [
             { npcId: 'astronomer', role: 'quest', x: 8, y: 7, dialog: [
@@ -265,11 +280,14 @@ export const MAP_DATA = {
         spawn: { x: 8, y: 1 },
         exits: [],
         monsters: [
-            { monsterId: 'shadow_specter', instanceId: 'du_m1', x: 3, y: 5 },
-            { monsterId: 'shadow_specter', instanceId: 'du_m2', x: 13, y: 5 },
-            { monsterId: 'shadow_lich', instanceId: 'du_m3', x: 3, y: 9 },
-            { monsterId: 'shadow_lich', instanceId: 'du_m4', x: 13, y: 9 },
-            { monsterId: 'shadow_specter', instanceId: 'du_m5', x: 8, y: 11 },
+            { monsterId: 'shadow_specter',  instanceId: 'du_m1', x: 3,  y: 5  },
+            { monsterId: 'shadow_specter',  instanceId: 'du_m2', x: 13, y: 5  },
+            { monsterId: 'shadow_lich',     instanceId: 'du_m3', x: 3,  y: 9  },
+            { monsterId: 'shadow_lich',     instanceId: 'du_m4', x: 13, y: 9  },
+            { monsterId: 'shadow_specter',  instanceId: 'du_m5', x: 8,  y: 11 },
+            { monsterId: 'type_ii_shade',   instanceId: 'du_m6', x: 1,  y: 1  },
+            { monsterId: 'type_ii_shade',   instanceId: 'du_m7', x: 15, y: 1  },
+            { monsterId: 'alpha_vampire',   instanceId: 'du_m8', x: 1,  y: 13 },
         ],
         npcs: [
             { npcId: 'oracle', role: 'quest', x: 8, y: 7, dialog: [

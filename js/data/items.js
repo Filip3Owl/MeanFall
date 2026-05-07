@@ -157,23 +157,41 @@ export const ITEMS = {
 
 // Drop tables: 'guaranteed' always drops; 'chance' rolls independently.
 export const DROP_TABLES = {
-    air_wisp:        [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'cloth_pants',       chance: 0.30 }, { itemId: 'copper_ring',       chance: 0.15 }],
-    air_sylph:       [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'leather_cap',       chance: 0.35 }, { itemId: 'worn_boots',        chance: 0.30 }],
+    // ── Vila ────────────────────────────────────────────────────────────────
+    air_wisp:          [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'cloth_pants',       chance: 0.30 }, { itemId: 'copper_ring',       chance: 0.15 }],
+    air_sylph:         [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'leather_cap',       chance: 0.35 }, { itemId: 'worn_boots',        chance: 0.30 }],
+    data_imp:          [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'worn_boots',        chance: 0.25 }, { itemId: 'copper_ring',       chance: 0.10 }],
+    type_specter:      [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'cloth_pants',       chance: 0.30 }, { itemId: 'leather_cap',       chance: 0.20 }],
 
-    earth_golem:     [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'wooden_sword',      chance: 0.30 }, { itemId: 'wooden_shield',     chance: 0.25 }],
-    earth_dryad:     [{ itemId: 'data_scroll',           guaranteed: true }, { itemId: 'leather_armor',     chance: 0.30 }, { itemId: 'leather_cap',       chance: 0.20 }],
+    // ── Prados ───────────────────────────────────────────────────────────────
+    earth_golem:       [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'wooden_sword',      chance: 0.30 }, { itemId: 'wooden_shield',     chance: 0.25 }],
+    earth_dryad:       [{ itemId: 'data_scroll',           guaranteed: true }, { itemId: 'leather_armor',     chance: 0.30 }, { itemId: 'leather_cap',       chance: 0.20 }],
+    mean_gnome:        [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'wooden_shield',     chance: 0.28 }, { itemId: 'leather_greaves',   chance: 0.18 }],
+    mode_treant:       [{ itemId: 'data_scroll',           guaranteed: true }, { itemId: 'leather_armor',     chance: 0.25 }, { itemId: 'worn_boots',        chance: 0.22 }],
 
-    light_spark:     [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'mage_hat',          chance: 0.20 }, { itemId: 'leather_greaves',   chance: 0.25 }],
-    light_prism:     [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'iron_blade',        chance: 0.18 }, { itemId: 'amulet_of_clarity', chance: 0.15 }],
+    // ── Floresta ─────────────────────────────────────────────────────────────
+    light_spark:       [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'mage_hat',          chance: 0.20 }, { itemId: 'leather_greaves',   chance: 0.25 }],
+    light_prism:       [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'iron_blade',        chance: 0.18 }, { itemId: 'amulet_of_clarity', chance: 0.15 }],
+    std_wisp:          [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'leather_greaves',   chance: 0.22 }, { itemId: 'mage_hat',          chance: 0.18 }],
+    range_crystal:     [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'amulet_of_clarity', chance: 0.20 }, { itemId: 'iron_blade',        chance: 0.15 }],
 
-    fire_phoenix:    [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_shield',       chance: 0.25 }, { itemId: 'boots_agility',     chance: 0.20 }],
-    fire_salamander: [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_blade',        chance: 0.30 }, { itemId: 'chain_mail',        chance: 0.18 }],
+    // ── Planícies ────────────────────────────────────────────────────────────
+    fire_phoenix:      [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_shield',       chance: 0.25 }, { itemId: 'boots_agility',     chance: 0.20 }],
+    fire_salamander:   [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_blade',        chance: 0.30 }, { itemId: 'chain_mail',        chance: 0.18 }],
+    prob_imp:          [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'boots_agility',     chance: 0.22 }, { itemId: 'iron_shield',       chance: 0.18 }],
+    bayes_harpy:       [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'chain_mail',        chance: 0.20 }, { itemId: 'iron_blade',        chance: 0.22 }],
 
-    water_serpent:   [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'amulet_of_clarity', chance: 0.30 }, { itemId: 'iron_shield',       chance: 0.20 }],
-    water_leviathan: [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'plate_armor',       chance: 0.18 }, { itemId: 'ring_of_focus',     chance: 0.15 }],
+    // ── Montanhas ────────────────────────────────────────────────────────────
+    water_serpent:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'amulet_of_clarity', chance: 0.30 }, { itemId: 'iron_shield',       chance: 0.20 }],
+    water_leviathan:   [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'plate_armor',       chance: 0.18 }, { itemId: 'ring_of_focus',     chance: 0.15 }],
+    binomial_crab:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_shield',       chance: 0.25 }, { itemId: 'amulet_of_clarity', chance: 0.18 }],
+    poisson_jellyfish: [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'ring_of_focus',     chance: 0.18 }, { itemId: 'plate_armor',       chance: 0.15 }],
 
-    shadow_specter:  [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'elemental_staff',   chance: 0.20 }, { itemId: 'stats_amulet',      chance: 0.10 }],
-    shadow_lich:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'crown_of_archmage', chance: 0.10 }, { itemId: 'blade_of_inference', chance: 0.08 }, { itemId: 'talisman_of_legends', chance: 0.07 }, { itemId: 'plate_armor', chance: 0.30 }, { itemId: 'stats_amulet', chance: 0.30 }],
+    // ── Calabouço ────────────────────────────────────────────────────────────
+    shadow_specter:    [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'elemental_staff',   chance: 0.20 }, { itemId: 'stats_amulet',      chance: 0.10 }],
+    shadow_lich:       [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'crown_of_archmage', chance: 0.10 }, { itemId: 'blade_of_inference', chance: 0.08 }, { itemId: 'talisman_of_legends', chance: 0.07 }, { itemId: 'plate_armor', chance: 0.30 }, { itemId: 'stats_amulet', chance: 0.30 }],
+    type_ii_shade:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'stats_amulet',      chance: 0.15 }, { itemId: 'elemental_staff',   chance: 0.15 }],
+    alpha_vampire:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'blade_of_inference', chance: 0.12 }, { itemId: 'crown_of_archmage', chance: 0.10 }, { itemId: 'talisman_of_legends', chance: 0.08 }],
 };
 
 export const RARITY_COLORS = {

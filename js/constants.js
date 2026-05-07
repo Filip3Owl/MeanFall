@@ -238,7 +238,7 @@ export const RARITIES = {
 };
 
 // Respawn timing for monsters once defeated (ms).
-export const RESPAWN_TIME = 40_000; // 40 seconds
+export const RESPAWN_TIME = 20_000; // 20 seconds
 
 // Out-of-combat passive regeneration (every 3000ms, exploring world).
 export const REGEN_INTERVAL_MS = 3000;
