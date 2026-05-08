@@ -1,6 +1,5 @@
 import { BOOKS, BOOK_IMPORTANCE } from '../data/books.js';
 import { ELEMENTS } from '../constants.js';
-import EventBus from '../utils/EventBus.js';
 
 const W = 544, H = 480;
 const SIDEBAR_W  = 168;
@@ -21,9 +20,10 @@ export class CompendiumScene extends Phaser.Scene {
 
     init() {
         this._selectedTopic  = null;
-        this._sidebarBtns    = [];   // { topic, bg, txt, dot } — small array, safe to iterate
-        this._contentObjs    = [];   // everything in the content area — destroyed manually
-        this._detailObjs     = [];   // book-detail overlay objects
+        this._sidebarBtns    = [];
+        this._contentObjs    = [];
+        this._detailObjs     = [];
+        this._scrollPx      = 0;   // scroll offset in pixels for book list
     }
 
     create() {
@@ -118,6 +118,7 @@ export class CompendiumScene extends Phaser.Scene {
 
     _selectTopic(topic) {
         this._selectedTopic = topic.id;
+        this._scrollPx = 0; // reset scroll on topic change
 
         // Reset all sidebar buttons — iterate our small stored array, NOT children.list
         this._sidebarBtns.forEach(({ topic: t, bg, txt }) => {
@@ -155,7 +156,7 @@ export class CompendiumScene extends Phaser.Scene {
 
         const x = CONTENT_X, y = 44;
 
-        // Topic header
+        // Topic header (always visible, not scrolled)
         const elem = ELEMENTS[topic.elem] || {};
         this._addContent(this.add.rectangle(x, y, CONTENT_W, 28, 0x111111, 1).setOrigin(0));
         this._addContent(this.add.circle(x + 10, y + 14, 5, elem.color ?? 0x888888, 0.9));
@@ -163,7 +164,6 @@ export class CompendiumScene extends Phaser.Scene {
             fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0.5));
 
-        // Mastery stats for this topic's area
         const areaMap = {
             data_types: 'village', mean_median_mode: 'meadows',
             spread: 'forest', probability: 'plains',
@@ -177,68 +177,119 @@ export class CompendiumScene extends Phaser.Scene {
             fontSize: '12px', color: masteryColor, fontFamily: 'Courier New',
         }).setOrigin(1, 0.5));
 
-        // Books list
+        // Build the full scrollable row list
         const readBooks  = this._player.readBooks || [];
         const topicBooks = Object.values(BOOKS).filter(b => b.topic === topic.id);
         const unlocked   = topicBooks.filter(b => readBooks.includes(b.id));
         const locked     = topicBooks.filter(b => !readBooks.includes(b.id));
 
-        let curY = y + 38;
-
+        // Virtual rows: { type: 'label'|'book'|'locked', data? }
+        const rows = [];
         if (unlocked.length === 0) {
-            this._addContent(this.add.text(x + CONTENT_W / 2, 240,
-                'Nenhum livro encontrado ainda.\n\nDerrote criaturas deste elemento\npara desbloquear entradas.', {
-                    fontSize: '13px', color: '#444', fontFamily: 'Courier New',
-                    align: 'center', fontStyle: 'italic',
-                }).setOrigin(0.5));
+            rows.push({ type: 'empty' });
         } else {
-            // Section label
-            this._addContent(this.add.text(x + 4, curY, `${unlocked.length} entrada(s) desbloqueada(s):`, {
-                fontSize: '11px', color: '#665533', fontFamily: 'Courier New',
-            }));
-            curY += 16;
-
-            unlocked.forEach(book => {
-                const imp       = BOOK_IMPORTANCE[book.importance] || BOOK_IMPORTANCE.normal;
-                const rowBg     = this._addContent(
-                    this.add.rectangle(x, curY, CONTENT_W, 28, 0x111111, 1).setOrigin(0)
-                        .setInteractive({ useHandCursor: true }));
-
-                const impBadge  = this._addContent(
-                    this.add.rectangle(x, curY, 4, 28, imp.color, 1).setOrigin(0));
-
-                const titleTx   = this._addContent(
-                    this.add.text(x + 10, curY + 14, book.title, {
-                        fontSize: '13px', color: imp.hex, fontFamily: 'Courier New',
-                    }).setOrigin(0, 0.5));
-
-                const authorTx  = this._addContent(
-                    this.add.text(x + CONTENT_W - 2, curY + 14, book.author || '', {
-                        fontSize: '11px', color: '#444', fontFamily: 'Courier New', fontStyle: 'italic',
-                    }).setOrigin(1, 0.5));
-
-                rowBg.on('pointerover',  () => { rowBg.setFillStyle(0x1e1a10); titleTx.setColor('#ffffff'); });
-                rowBg.on('pointerout',   () => { rowBg.setFillStyle(0x111111); titleTx.setColor(imp.hex); });
-                rowBg.on('pointerdown',  () => this._showBookDetail(book));
-
-                curY += 30;
-            });
+            rows.push({ type: 'label', text: `${unlocked.length} entrada(s) desbloqueada(s):`, color: '#665533' });
+            unlocked.forEach(book => rows.push({ type: 'book', book }));
         }
-
-        // Locked entries (greyed out)
         if (locked.length > 0) {
-            curY += 6;
-            this._addContent(this.add.text(x + 4, curY, `${locked.length} entrada(s) ainda bloqueada(s):`, {
-                fontSize: '11px', color: '#333', fontFamily: 'Courier New',
-            }));
-            curY += 14;
-            locked.forEach(book => {
-                this._addContent(this.add.text(x + 10, curY, `• ${book.title}`, {
-                    fontSize: '12px', color: '#2a2a2a', fontFamily: 'Courier New',
-                }));
-                curY += 18;
-            });
+            rows.push({ type: 'label', text: `${locked.length} entrada(s) ainda bloqueada(s):`, color: '#333' });
+            locked.forEach(book => rows.push({ type: 'locked', book }));
         }
+
+        // Row heights
+        const ROW_H = { label: 18, book: 30, locked: 18, empty: 0 };
+        const BODY_Y   = y + 38;
+        const BODY_MAX = H - BODY_Y - 10; // usable vertical space for rows
+
+        // Compute total height and max scroll
+        let totalH = 0;
+        rows.forEach(r => { totalH += ROW_H[r.type] || 0; });
+        const maxScroll = Math.max(0, totalH - BODY_MAX);
+
+        // Clamp scroll offset (pixels, not rows) to valid range
+        this._scrollPx = Math.min(this._scrollPx, maxScroll);
+
+        // Render rows shifted by scroll offset
+        let curY = BODY_Y - this._scrollPx;
+        rows.forEach(r => {
+            const rh = ROW_H[r.type] || 0;
+            const visible = curY + rh > BODY_Y && curY < H - 10;
+
+            if (r.type === 'empty') {
+                if (visible) {
+                    this._addContent(this.add.text(x + CONTENT_W / 2, BODY_Y + BODY_MAX / 2,
+                        'Nenhum livro encontrado ainda.\n\nDerrote criaturas deste elemento\npara desbloquear entradas.', {
+                            fontSize: '13px', color: '#444', fontFamily: 'Courier New',
+                            align: 'center', fontStyle: 'italic',
+                        }).setOrigin(0.5));
+                }
+            } else if (r.type === 'label') {
+                if (visible) {
+                    this._addContent(this.add.text(x + 4, curY, r.text, {
+                        fontSize: '11px', color: r.color, fontFamily: 'Courier New',
+                    }));
+                }
+                curY += rh;
+            } else if (r.type === 'book') {
+                if (visible) {
+                    const imp     = BOOK_IMPORTANCE[r.book.importance] || BOOK_IMPORTANCE.normal;
+                    const rowBg   = this._addContent(
+                        this.add.rectangle(x, curY, CONTENT_W, 28, 0x111111, 1).setOrigin(0)
+                            .setInteractive({ useHandCursor: true }));
+                    this._addContent(this.add.rectangle(x, curY, 4, 28, imp.color, 1).setOrigin(0));
+                    const titleTx = this._addContent(
+                        this.add.text(x + 10, curY + 14, r.book.title, {
+                            fontSize: '13px', color: imp.hex, fontFamily: 'Courier New',
+                        }).setOrigin(0, 0.5));
+                    this._addContent(
+                        this.add.text(x + CONTENT_W - 2, curY + 14, r.book.author || '', {
+                            fontSize: '11px', color: '#444', fontFamily: 'Courier New', fontStyle: 'italic',
+                        }).setOrigin(1, 0.5));
+                    rowBg.on('pointerover',  () => { rowBg.setFillStyle(0x1e1a10); titleTx.setColor('#ffffff'); });
+                    rowBg.on('pointerout',   () => { rowBg.setFillStyle(0x111111); titleTx.setColor(imp.hex); });
+                    rowBg.on('pointerdown',  () => this._showBookDetail(r.book));
+                }
+                curY += rh;
+            } else if (r.type === 'locked') {
+                if (visible) {
+                    this._addContent(this.add.text(x + 10, curY, `• ${r.book.title}`, {
+                        fontSize: '12px', color: '#2a2a2a', fontFamily: 'Courier New',
+                    }));
+                }
+                curY += rh;
+            }
+        });
+
+        // Scroll arrows when content overflows
+        if (maxScroll > 0) {
+            if (this._scrollPx > 0) {
+                this._addContent(
+                    this.add.text(x + CONTENT_W - 4, BODY_Y + 2, '▲', {
+                        fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+                    }).setOrigin(1, 0).setInteractive({ useHandCursor: true })
+                        .on('pointerdown', () => {
+                            this._scrollPx = Math.max(0, this._scrollPx - 30);
+                            this._renderTopicContent(topic);
+                        }));
+            }
+            if (this._scrollPx < maxScroll) {
+                this._addContent(
+                    this.add.text(x + CONTENT_W - 4, H - 16, '▼', {
+                        fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+                    }).setOrigin(1, 0).setInteractive({ useHandCursor: true })
+                        .on('pointerdown', () => {
+                            this._scrollPx = Math.min(maxScroll, this._scrollPx + 30);
+                            this._renderTopicContent(topic);
+                        }));
+            }
+        }
+
+        // Mouse wheel scroll
+        this.input.off('wheel'); // remove previous listener
+        this.input.on('wheel', (_ptr, _objs, _dx, dy) => {
+            this._scrollPx = Math.max(0, Math.min(maxScroll, (this._scrollPx || 0) + dy * 0.5));
+            this._renderTopicContent(topic);
+        });
     }
 
     // ── Book detail overlay ───────────────────────────────────────────────────
@@ -302,9 +353,11 @@ export class CompendiumScene extends Phaser.Scene {
     // ── Close ─────────────────────────────────────────────────────────────────
 
     _close() {
+        this.input.off('wheel');
         this._clearContent();
         this._clearDetail();
         this.scene.stop();
-        EventBus.emit('overlay-closed');
+        const world = this.scene.get('World');
+        if (world?.resumeFromOverlay) world.resumeFromOverlay();
     }
 }

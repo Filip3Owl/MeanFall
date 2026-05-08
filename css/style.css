@@ -110,7 +110,15 @@ body {
     letter-spacing: 1px;
     text-shadow: 0 0 8px var(--gold-glow);
 }
-#header-keys { font-size: 10px; color: var(--text-mute); letter-spacing: 0.5px; }
+#header-keys {
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 40vw;
+}
 .sound-btn {
     background: none;
     border: 1px solid var(--border);
@@ -134,13 +142,13 @@ body {
 }
 
 #left-panel, #right-panel {
-    width: 220px;
-    min-width: 220px;
+    width: clamp(160px, 18vw, 220px);
+    min-width: 0;
     background: linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-deep) 100%);
-    padding: 10px;
+    padding: clamp(6px, 1vw, 10px);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: clamp(6px, 0.8vw, 10px);
     overflow-y: auto;
 }
 #left-panel  { border-right: 1px solid var(--border); }
@@ -158,9 +166,11 @@ body {
 #game-container {
     width: 544px;
     height: 480px;
+    flex-shrink: 0;
     position: relative;
     border-radius: 3px;
     overflow: hidden;
+    transform-origin: center center;
     box-shadow:
         0 0 0 1px var(--border),
         0 0 24px rgba(0, 0, 0, 0.9),
@@ -230,6 +240,10 @@ body {
     font-weight: bold;
     letter-spacing: 1.5px;
     text-shadow: 0 0 10px var(--gold-glow);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 64px);
 }
 
 .char-level-badge {
@@ -385,24 +399,25 @@ body {
 /* ─── ACTION BUTTONS ──────────────────────────────────────────────────── */
 .action-btn {
     width: 100%;
-    padding: 7px 10px;
+    padding: clamp(4px, 0.6vh, 7px) 10px;
     background: linear-gradient(180deg, #16122a 0%, #0c0918 100%);
     border: 1px solid var(--border);
     color: var(--gold-soft);
     font-family: 'Courier New', monospace;
     font-size: 11px;
     cursor: pointer;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     transition: all 0.15s ease;
     text-align: left;
     border-radius: 3px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-weight: bold;
     letter-spacing: 0.3px;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 /* shimmer line on hover */
 .action-btn::after {
@@ -675,3 +690,36 @@ body {
     border: 1px solid transparent;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+/* ─── RESPONSIVE BREAKPOINTS ──────────────────────────────────────────── */
+
+/* Medium screens — tighten vertical chrome */
+@media (max-height: 700px) {
+    #game-header  { height: 36px; padding: 0 12px; }
+    #game-header h1 { font-size: 14px; letter-spacing: 2px; }
+    #chat-log     { height: 80px; }
+    #game-footer  { height: 18px; font-size: 9px; }
+    .panel-section { padding: 7px; }
+    .bar-container { margin-bottom: 5px; }
+    #minimap-canvas { width: 160px; height: 160px; }
+}
+
+/* Compact screens — simplify panels further */
+@media (max-width: 900px) {
+    #header-keys  { display: none; }
+    #left-panel, #right-panel { width: clamp(140px, 16vw, 180px); }
+    .panel-title  { font-size: 8px; letter-spacing: 2px; }
+    .stat-row     { font-size: 10px; }
+    .mastery-item { font-size: 9px; }
+    #minimap-canvas { width: 140px; height: 140px; }
+}
+
+/* Very narrow — hide left panel extras, keep minimap + stats visible */
+@media (max-width: 700px) {
+    #left-panel   { width: 130px; }
+    #right-panel  { width: 130px; }
+    #minimap-canvas { width: 110px; height: 110px; }
+    .element-mastery-item { display: none; }  /* hide elemental mastery to save space */
+    .action-btn span:not(.kbd):not(.alert-dot) { display: none; } /* show only key badge */
+    .action-btn { justify-content: center; }
+}

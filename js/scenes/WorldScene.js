@@ -6,6 +6,7 @@ import { NPC } from '../entities/NPC.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { masteryPercent } from '../systems/XPSystem.js';
 import { QuestSystem } from '../systems/QuestSystem.js';
+import { BountySystem } from '../systems/BountySystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
@@ -70,13 +71,17 @@ export class WorldScene extends Phaser.Scene {
         this._f5Key     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
 
         QuestSystem.init(this._playerData);
+        BountySystem.init(this._playerData);
         SkillSystem.init(this._playerData);
         TutorialSystem.init(this._playerData);
         CombatSystem.refreshWeaponElement(this._playerData, ITEMS);
 
-        EventBus.on('combat-end',     this._onCombatEnd.bind(this));
-        EventBus.on('player-level-up', this._onLevelUp.bind(this));
+        EventBus.on('combat-end',       this._onCombatEnd.bind(this));
+        EventBus.on('player-level-up',  this._onLevelUp.bind(this));
         EventBus.on('element-xp-change', () => this._updateElementalAura());
+        EventBus.on('bounty-complete',  ({ slot }) => {
+            this._chat(`{{accent:BÔNUS COMPLETO:}} ${slot.label} — abra o diário (Q) para coletar!`, 'xp');
+        });
 
         this._syncTimer  = this.time.addEvent({ delay: 5000, loop: true, callback: this._autoSync, callbackScope: this });
         this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
@@ -515,6 +520,7 @@ export class WorldScene extends Phaser.Scene {
             }
             if (defDef) {
                 QuestSystem.recordKill(this._playerData, defDef);
+                BountySystem.recordKill(this._playerData, defDef);
                 this._respawns.push({
                     instanceId, areaId: this._playerData.currentArea,
                     respawnAt: this.time.now + RESPAWN_TIME,
@@ -806,6 +812,7 @@ export class WorldScene extends Phaser.Scene {
     shutdown() {
         EventBus.off('combat-end', this._onCombatEnd);
         EventBus.off('player-level-up', this._onLevelUp);
+        EventBus.off('bounty-complete');
         this._syncTimer?.remove();
         this._regenTimer?.remove();
     }

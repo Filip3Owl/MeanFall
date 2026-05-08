@@ -21,7 +21,7 @@
             </div>
             <div id="header-info">
                 <span id="header-area">Vila dos Dados</span>
-                <span id="header-keys">WASD · Espaço · I: invent · C: pers · Q: miss · B: livros · K: skills · L: compêndio · F5: salvar</span>
+                <span id="header-keys">WASD · Espaço &nbsp;|&nbsp; I · C · Q · B · K · L · N · F5</span>
                 <button id="btn-sound" class="sound-btn" title="Ligar/desligar som">🔊</button>
             </div>
         </header>
@@ -122,5 +122,32 @@
     </div>
 
     <script type="module" src="js/main.js?v=0.9.1"></script>
+    <script>
+    /* Auto-scale the game canvas to fit the available viewport space.
+     * CSS transform is used so Phaser's logical coordinate system (544×480)
+     * is unaffected — getBoundingClientRect() reflects the transform, so
+     * Phaser's input remapping stays correct automatically. */
+    (function () {
+        var ticking = false;
+        function rescale() {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+                ticking = false;
+                var outer = document.getElementById('game-canvas-container');
+                var gc    = document.getElementById('game-container');
+                if (!outer || !gc) return;
+                var s = Math.min(1, outer.clientWidth / 544, outer.clientHeight / 480);
+                gc.style.transform       = s < 0.999 ? 'scale(' + s.toFixed(4) + ')' : '';
+                gc.style.transformOrigin = 'center center';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            rescale();
+            setTimeout(rescale, 200); // catch late font/layout shifts
+            window.addEventListener('resize', rescale);
+        });
+    })();
+    </script>
 </body>
 </html>
