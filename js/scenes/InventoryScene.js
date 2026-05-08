@@ -1,7 +1,14 @@
 import { CombatSystem }            from '../systems/CombatSystem.js';
 import { ITEMS, RARITY_COLORS }    from '../data/items.js';
+import { SaveSystem }              from '../systems/SaveSystem.js';
 import EventBus                    from '../utils/EventBus.js';
 import { Sound }                   from '../utils/SoundSystem.js';
+
+const W = 544, H = 480;
+const LIST_X = 14,  LIST_W = 282;
+const DET_X  = 304, DET_W  = 226;
+const TABS_Y = 44,  BODY_Y = 68;
+const ROW_H  = 26,  MAX_ROWS = 14;
 
 export class InventoryScene extends Phaser.Scene {
     constructor() { super('Inventory'); }
@@ -9,19 +16,26 @@ export class InventoryScene extends Phaser.Scene {
     create() {
         this._player      = JSON.parse(JSON.stringify(this.registry.get('player')));
         this._selectedIdx = -1;
+        this._filter      = 'all';
+        this._scroll      = 0;
         this._rows        = [];
+        this._listBg      = null;
+        this._scrollUp    = null;
+        this._scrollDn    = null;
+        this._footerTx    = null;
+        this._tabObjs     = {};   // { key: { bg, tx } }
 
-        this._buildUI();
+        this._buildFrame();
+        this._buildFilterTabs();
+        this._buildDetailPanel();
+        this._buildEquippedPanel();
         this._renderList();
-
-        const close = () => this._close();
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', close);
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I).on('down', close);
+        this._bindKeys();
     }
 
-    _buildUI() {
-        const W = 544, H = 480;
+    // ── Frame ─────────────────────────────────────────────────────────────────
 
+    _buildFrame() {
         this.add.rectangle(0, 0, W, H, 0x000000, 0.92).setOrigin(0, 0);
         this.add.rectangle(10, 10, W - 20, H - 20, 0x0d0a03, 1).setOrigin(0, 0);
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(1, 0xd4af37);
@@ -30,149 +44,233 @@ export class InventoryScene extends Phaser.Scene {
             fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
 
-        // Close button
-        this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
-            .setInteractive().on('pointerdown', () => this._close());
+        const closeBg = this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
+            .setInteractive()
+            .on('pointerover', () => closeBg.setFillStyle(0x660000))
+            .on('pointerout',  () => closeBg.setFillStyle(0x330000))
+            .on('pointerdown', () => this._close());
         this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
-        // Item list panel (left)
-        this.add.rectangle(14, 44, 280, 392, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(154, 50, 'Itens', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        // Divider between left/right panels
+        this.add.rectangle(LIST_X + LIST_W + 4, BODY_Y, 2, H - BODY_Y - 28, 0xd4af37, 0.15).setOrigin(0, 0);
+    }
 
-        // Detail panel (right)
-        this.add.rectangle(302, 44, 228, 246, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(416, 50, 'Detalhes', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+    // ── Filter tabs ───────────────────────────────────────────────────────────
 
-        this._detName    = this.add.text(308, 70,  '', { fontSize: '15px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 160 } }).setOrigin(0, 0);
-        this._detRarity  = this.add.text(308, 88,  '', { fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detType    = this.add.text(308, 102, '', { fontSize: '16px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detDesc    = this.add.text(308, 120, '', { fontSize: '17px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
-        this._detCompare = this.add.text(308, 200, '', { fontSize: '15px', color: '#88ccff', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 2 }).setOrigin(0, 0);
-        this._detIcon    = this.add.image(490, 85, '').setScale(2.5).setVisible(false);
+    _buildFilterTabs() {
+        const tabs = [
+            { label: 'Todos',       key: 'all'       },
+            { label: 'Consumíveis', key: 'consumable' },
+            { label: 'Equipamentos',key: 'equipment'  },
+        ];
+        const tabW = Math.floor(LIST_W / tabs.length);
+
+        tabs.forEach(({ label, key }, i) => {
+            const tx = LIST_X + i * tabW;
+            const active = this._filter === key;
+
+            const bg = this.add.rectangle(tx, TABS_Y, tabW - 2, 22, active ? 0x2a1a00 : 0x111111, 1)
+                .setOrigin(0, 0)
+                .setStrokeStyle(1, active ? 0xd4af37 : 0x333333)
+                .setInteractive()
+                .on('pointerover', () => { if (this._filter !== key) bg.setFillStyle(0x1a1100); })
+                .on('pointerout',  () => { if (this._filter !== key) bg.setFillStyle(0x111111); })
+                .on('pointerdown', () => this._setFilter(key));
+
+            const txt = this.add.text(tx + tabW / 2 - 1, TABS_Y + 11, label, {
+                fontSize: '12px', color: active ? '#ffd700' : '#777777', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0.5);
+
+            this._tabObjs[key] = { bg, txt };
+        });
+    }
+
+    // ── Detail panel ──────────────────────────────────────────────────────────
+
+    _buildDetailPanel() {
+        this.add.rectangle(DET_X, BODY_Y, DET_W, 190, 0x080604, 1).setOrigin(0, 0);
+        this.add.text(DET_X + DET_W / 2, BODY_Y + 6, 'Detalhes', {
+            fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0);
+
+        const dy = BODY_Y + 24;
+        this._detName    = this.add.text(DET_X + 6, dy,       '', { fontSize: '15px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: DET_W - 40 } }).setOrigin(0, 0);
+        this._detRarity  = this.add.text(DET_X + 6, dy + 18,  '', { fontSize: '11px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detType    = this.add.text(DET_X + 90, dy + 18, '', { fontSize: '11px', color: '#666666', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detDesc    = this.add.text(DET_X + 6, dy + 33,  '', { fontSize: '13px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
+        this._detBonuses = this.add.text(DET_X + 6, dy + 72,  '', { fontSize: '13px', color: '#88ff88', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
+        this._detCompare = this.add.text(DET_X + 6, dy + 112, '', { fontSize: '12px', color: '#88aaff', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
+        this._detIcon    = this.add.image(DET_X + DET_W - 18, BODY_Y + 30, '').setScale(2.2).setVisible(false).setAlpha(0.65);
 
         // Action buttons
-        this._useBg = this.add.rectangle(308, 250, 100, 26, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
+        const btnY = BODY_Y + 196;
+        this._useBg = this.add.rectangle(DET_X, btnY, 108, 26, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._useBg.setFillStyle(0x2a5a2a))
             .on('pointerout',  () => this._useBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => this._useSelected())
             .setVisible(false);
-        this._useTx = this.add.text(358, 263, 'USAR', { fontSize: '17px', color: '#88ff88', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._useTx = this.add.text(DET_X + 54, btnY + 13, '[ USAR ]', {
+            fontSize: '14px', color: '#88ff88', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0.5).setVisible(false);
 
-        this._eqBg = this.add.rectangle(418, 250, 106, 26, 0x1a1a3a, 1).setOrigin(0, 0).setInteractive()
+        this._eqBg = this.add.rectangle(DET_X + 114, btnY, 112, 26, 0x1a1a3a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._eqBg.setFillStyle(0x2a2a5a))
             .on('pointerout',  () => this._eqBg.setFillStyle(0x1a1a3a))
             .on('pointerdown', () => this._equipSelected())
             .setVisible(false);
-        this._eqTx = this.add.text(471, 263, 'EQUIPAR', { fontSize: '17px', color: '#8888ff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._eqTx = this.add.text(DET_X + 170, btnY + 13, '[ EQUIPAR ]', {
+            fontSize: '14px', color: '#8888ff', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0.5).setVisible(false);
 
-        this._actionMsg = this.add.text(416, 282, '', { fontSize: '16px', fontFamily: 'Courier New', wordWrap: { width: 216 } }).setOrigin(0.5, 0);
-
-        // Equipped panel
-        this.add.rectangle(302, 296, 228, 140, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(416, 302, 'Equipado', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
-        this._slotRows = {};
-        this._renderEquipped();
-
-        this.add.text(W / 2, 456, 'I ou ESC para fechar  ·  clique no slot equipado p/ desequipar', {
-            fontSize: '15px', color: '#444444', fontFamily: 'Courier New',
+        this._actionMsg = this.add.text(DET_X + DET_W / 2, btnY + 34, '', {
+            fontSize: '13px', fontFamily: 'Courier New', align: 'center', wordWrap: { width: DET_W - 10 },
         }).setOrigin(0.5, 0);
     }
 
-    _renderList() {
-        this._rows.forEach(r => { if (r.bg.destroy) { r.bg.destroy(); r.tx.destroy(); r.qty.destroy(); if (r.icon) r.icon.destroy(); } });
-        this._rows = [];
+    // ── Equipped panel ────────────────────────────────────────────────────────
 
+    _buildEquippedPanel() {
+        const py = BODY_Y + 260;
+        this.add.rectangle(DET_X, py, DET_W, 178, 0x080604, 1).setOrigin(0, 0);
+        this.add.text(DET_X + DET_W / 2, py + 6, 'Equipado', {
+            fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0);
+        this._slotRows = {};
+        this._renderEquipped();
+    }
+
+    // ── List rendering ────────────────────────────────────────────────────────
+
+    _filteredInventory() {
         const inv = this._player.inventory || [];
-        if (inv.length === 0) {
-            const empty = this.add.text(154, 240, 'Inventário vazio', { fontSize: '17px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
-            this._rows.push({ bg: empty, tx: empty, qty: empty });
-            return;
+        if (this._filter === 'all') return inv;
+        return inv.filter(({ itemId }) => (ITEMS[itemId]?.type || '') === this._filter);
+    }
+
+    _renderList() {
+        this._rows.forEach(r => [r.bg, r.tx, r.qty, r.icon].forEach(o => o?.destroy()));
+        this._rows = [];
+        this._listBg?.destroy();
+        this._scrollUp?.destroy(); this._scrollUp = null;
+        this._scrollDn?.destroy(); this._scrollDn = null;
+        this._footerTx?.destroy(); this._footerTx = null;
+
+        this._listBg = this.add.rectangle(LIST_X, BODY_Y, LIST_W, H - BODY_Y - 28, 0x080604, 1).setOrigin(0, 0);
+
+        const filtered = this._filteredInventory();
+        const maxScroll = Math.max(0, filtered.length - MAX_ROWS);
+        this._scroll = Math.max(0, Math.min(this._scroll, maxScroll));
+
+        if (filtered.length === 0) {
+            const msg = this._filter === 'all' ? 'Inventário vazio' : 'Sem itens nesta categoria';
+            this.add.text(LIST_X + LIST_W / 2, BODY_Y + (H - BODY_Y) / 2 - 20, msg, {
+                fontSize: '14px', color: '#444444', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0.5);
+        } else {
+            // Scroll arrows
+            if (this._scroll > 0) {
+                this._scrollUp = this.add.text(LIST_X + LIST_W - 12, BODY_Y + 4, '▲', {
+                    fontSize: '12px', color: '#888888', fontFamily: 'Courier New',
+                }).setOrigin(0.5, 0).setInteractive()
+                    .on('pointerdown', () => { this._scroll--; this._renderList(); this._restoreDetail(); });
+            }
+            if (this._scroll < maxScroll) {
+                this._scrollDn = this.add.text(LIST_X + LIST_W - 12, BODY_Y + MAX_ROWS * ROW_H - 4, '▼', {
+                    fontSize: '12px', color: '#888888', fontFamily: 'Courier New',
+                }).setOrigin(0.5, 1).setInteractive()
+                    .on('pointerdown', () => { this._scroll++; this._renderList(); this._restoreDetail(); });
+            }
+
+            const visible = filtered.slice(this._scroll, this._scroll + MAX_ROWS);
+            visible.forEach((invItem, visIdx) => {
+                const filtIdx = this._scroll + visIdx;
+                const { itemId, qty } = invItem;
+                const item = ITEMS[itemId];
+                if (!item) return;
+
+                const isEq   = Object.values(this._player.equipment || {}).includes(itemId);
+                const isSel  = this._selectedIdx === filtIdx;
+                const color  = RARITY_COLORS[item.rarity] || '#cccccc';
+                const y      = BODY_Y + visIdx * ROW_H;
+                const fillBg = isSel ? 0x1a1a33 : 0x111111;
+
+                const bg = this.add.rectangle(LIST_X, y, LIST_W, ROW_H, fillBg, 1)
+                    .setOrigin(0, 0).setInteractive()
+                    .on('pointerover', () => {
+                        if (!isSel) bg.setFillStyle(0x1a1100);
+                        this._showDetail(filtIdx, false);
+                    })
+                    .on('pointerout', () => {
+                        if (this._selectedIdx !== filtIdx) bg.setFillStyle(0x111111);
+                        this._restoreDetail();
+                    })
+                    .on('pointerdown', () => this._selectItem(filtIdx));
+
+                const icon = this.add.image(LIST_X + 14, y + ROW_H / 2, item.icon || 'item_potion_red')
+                    .setScale(0.65).setOrigin(0.5, 0.5);
+
+                const tx = this.add.text(LIST_X + 27, y + ROW_H / 2, item.name, {
+                    fontSize: '14px', color, fontFamily: 'Courier New',
+                }).setOrigin(0, 0.5);
+
+                const qtyLabel = isEq ? '[E]' : (qty > 1 ? `×${qty}` : '');
+                const qty2 = this.add.text(LIST_X + LIST_W - 5, y + ROW_H / 2, qtyLabel, {
+                    fontSize: '13px', color: isEq ? '#8888ff' : '#666666', fontFamily: 'Courier New',
+                }).setOrigin(1, 0.5);
+
+                this._rows.push({ bg, tx, qty: qty2, icon, filtIdx });
+            });
         }
 
-        for (let i = 0; i < inv.length; i++) {
-            const { itemId, qty } = inv[i];
-            const item = ITEMS[itemId];
-            if (!item) continue;
-
-            const isEq   = Object.values(this._player.equipment).includes(itemId);
-            const color  = RARITY_COLORS[item.rarity] || '#cccccc';
-            const y      = 66 + i * 22;
-
-            const bg = this.add.rectangle(16, y, 276, 20, 0x111111, 1).setOrigin(0, 0)
-                .setInteractive()
-                .on('pointerover', () => { if (this._selectedIdx !== i) bg.setFillStyle(0x1a1a22); })
-                .on('pointerout',  () => { if (this._selectedIdx !== i) bg.setFillStyle(0x111111); })
-                .on('pointerdown', () => this._selectItem(i));
-
-            const icon = this.add.image(28, y + 10, item.icon || 'item_potion_red').setScale(0.65);
-            const tx = this.add.text(42, y + 10, item.name, {
-                fontSize: '16px', color, fontFamily: 'Courier New',
-            }).setOrigin(0, 0.5);
-            const qtyTxt = this.add.text(284, y + 10, qty > 1 ? `×${qty}` : (isEq ? '[E]' : ''), {
-                fontSize: '16px', color: isEq ? '#aaaaff' : '#666666', fontFamily: 'Courier New',
-            }).setOrigin(1, 0.5);
-
-            this._rows.push({ bg, tx, qty: qtyTxt, icon, idx: i });
-        }
+        // Footer hint
+        this._footerTx = this.add.text(W / 2, H - 10, '↑↓ navegar  ·  Enter: ação  ·  I / ESC: fechar', {
+            fontSize: '12px', color: '#444444', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 1);
     }
 
     _renderEquipped() {
-        // Clear old rows
-        Object.values(this._slotRows).forEach(r => r.forEach(o => o.destroy()));
+        Object.values(this._slotRows).forEach(r => r.forEach(o => o?.destroy()));
         this._slotRows = {};
 
         const SLOTS = [
-            ['head',      'Cabeça'],
-            ['chest',     'Peito'],
-            ['legs',      'Pernas'],
-            ['feet',      'Pés'],
-            ['leftHand',  'M.Esq'],
-            ['rightHand', 'M.Dir'],
-            ['ring',      'Anel'],
-            ['amulet',    'Amul'],
+            ['head',      'Cabeça'], ['chest',     'Peito'],
+            ['legs',      'Pernas'], ['feet',      'Pés'],
+            ['leftHand',  'M.Esq'],  ['rightHand', 'M.Dir'],
+            ['ring',      'Anel'],   ['amulet',    'Amul'],
         ];
+        const py = BODY_Y + 280;
 
         SLOTS.forEach(([slot, label], i) => {
-            const col = i % 2;
-            const row = Math.floor(i / 2);
-            const x   = 308 + col * 108;
-            const y   = 320 + row * 26;
-            const itemId = this._player.equipment[slot];
+            const col = i % 2, row = Math.floor(i / 2);
+            const x   = DET_X + col * 113;
+            const y   = py + row * 30;
+
+            const itemId   = this._player.equipment?.[slot];
             const item     = itemId ? ITEMS[itemId] : null;
-            const itemName = item ? item.name : '—';
-            const color    = item ? (RARITY_COLORS[item.rarity] || '#aaaaff') : '#444444';
+            const shortName = item ? (item.name.length > 9 ? item.name.slice(0, 9) + '…' : item.name) : '—';
+            const color    = item ? (RARITY_COLORS[item.rarity] || '#aaaaff') : '#2a2a2a';
             const fillBg   = itemId ? 0x1a1a2a : 0x0a0a0a;
 
-            const bg = this.add.rectangle(x, y, 104, 24, fillBg, 1).setOrigin(0, 0);
-            let icon = null;
+            const bg = this.add.rectangle(x, y, 111, 28, fillBg, 1).setOrigin(0, 0)
+                .setStrokeStyle(1, itemId ? 0x334466 : 0x181818);
             if (itemId) {
                 bg.setInteractive()
                     .on('pointerover', () => bg.setFillStyle(0x331111))
                     .on('pointerout',  () => bg.setFillStyle(fillBg))
                     .on('pointerdown', () => this._unequip(slot));
-                icon = this.add.image(x + 90, y + 12, item.icon || 'item_potion_red').setScale(0.5).setAlpha(0.6);
             }
-            const lblTxt  = this.add.text(x + 3, y + 2,  label,    { fontSize: '17px',  color: '#666666', fontFamily: 'Courier New' }).setOrigin(0, 0);
-            const itemTxt = this.add.text(x + 3, y + 12, itemName, { fontSize: '15px',  color, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const lblTxt  = this.add.text(x + 4, y + 3,  label,     { fontSize: '11px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const itemTxt = this.add.text(x + 4, y + 14, shortName, { fontSize: '12px', color,             fontFamily: 'Courier New' }).setOrigin(0, 0);
             this._slotRows[slot] = [bg, lblTxt, itemTxt];
-            if (icon) this._slotRows[slot].push(icon);
         });
     }
 
-    _selectItem(idx) {
-        if (this._selectedIdx >= 0 && this._rows[this._selectedIdx]?.bg?.setFillStyle) {
-            this._rows[this._selectedIdx].bg.setFillStyle(0x111111);
-        }
+    // ── Detail display ────────────────────────────────────────────────────────
 
-        const invItem = this._player.inventory[idx];
-        if (!invItem) {
-            this._selectedIdx = -1;
-            this._clearDetail();
-            return;
-        }
-
-        this._selectedIdx = idx;
-        if (this._rows[idx]?.bg?.setFillStyle) this._rows[idx].bg.setFillStyle(0x1a1a33);
+    _showDetail(filtIdx, isSelected) {
+        const filtered = this._filteredInventory();
+        const invItem  = filtered[filtIdx];
+        if (!invItem) { this._clearDetail(); return; }
 
         const { itemId } = invItem;
         const item = ITEMS[itemId];
@@ -181,84 +279,58 @@ export class InventoryScene extends Phaser.Scene {
         const rarityColor = RARITY_COLORS[item.rarity] || '#aaaaaa';
         this._detName.setText(item.name).setColor(rarityColor);
         this._detRarity.setText((item.rarity || 'common').toUpperCase()).setColor(rarityColor);
-        this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equipamento — ${item.slot}`);
+        this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equip · ${item.slot || ''}`).setColor('#666666');
         this._detDesc.setText(item.description || '');
         this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
 
-        // Comparison with currently equipped (if equipment)
+        // Bonuses
+        if (item.bonuses && Object.keys(item.bonuses).length > 0) {
+            const labels = { strength: 'FOR', intelligence: 'INT', agility: 'AGI', vitality: 'VIT', maxHp: 'HP máx', maxFocus: 'Foco máx' };
+            const lines = Object.entries(item.bonuses).map(([k, v]) => `+${v} ${labels[k] || k}`);
+            this._detBonuses.setText(lines.join('   '));
+        } else {
+            this._detBonuses.setText('');
+        }
+
+        // Stat comparison
         if (item.type === 'equipment' && item.slot) {
-            const currentId = this._player.equipment[item.slot];
-            if (currentId && currentId !== itemId) {
-                const cur = ITEMS[currentId];
-                this._detCompare.setText(`Substituirá:\n  ${cur.name}\n  (${cur.description})`);
+            const currentId = this._player.equipment?.[item.slot];
+            if (!currentId) {
+                this._detCompare.setText('Slot livre').setColor('#88ff88');
             } else if (currentId === itemId) {
-                this._detCompare.setText('Já equipado.');
+                this._detCompare.setText('Já equipado').setColor('#888888');
             } else {
-                this._detCompare.setText('Slot vazio.');
+                const cur    = ITEMS[currentId];
+                const labels = { strength: 'FOR', intelligence: 'INT', agility: 'AGI', vitality: 'VIT', maxHp: 'HP', maxFocus: 'Foco' };
+                const newB   = item.bonuses || {}, curB = cur?.bonuses || {};
+                const allKeys = new Set([...Object.keys(newB), ...Object.keys(curB)]);
+                const diffs = [];
+                allKeys.forEach(k => {
+                    const d = (newB[k] || 0) - (curB[k] || 0);
+                    if (d !== 0) diffs.push((d > 0 ? '+' : '') + d + ' ' + (labels[k] || k));
+                });
+                const hasGain = diffs.some(d => d.startsWith('+'));
+                if (diffs.length) {
+                    this._detCompare.setText(`vs ${cur.name.slice(0, 11)}:\n${diffs.join('   ')}`).setColor(hasGain ? '#88ccff' : '#ff8866');
+                } else {
+                    this._detCompare.setText(`Similar a ${cur.name.slice(0, 11)}`).setColor('#888888');
+                }
             }
         } else {
             this._detCompare.setText('');
         }
 
+        // Action buttons — only when truly selected (clicked)
+        const sel = isSelected !== false && this._selectedIdx === filtIdx;
         const isConsumable = item.type === 'consumable';
-        const isEquipment  = item.type === 'equipment' && this._player.equipment[item.slot] !== itemId;
-        this._useBg.setVisible(isConsumable); this._useTx.setVisible(isConsumable);
-        this._eqBg.setVisible(isEquipment);   this._eqTx.setVisible(isEquipment);
-        this._actionMsg.setText('');
+        const isEquippable = item.type === 'equipment' && this._player.equipment?.[item.slot] !== itemId;
+        this._useBg.setVisible(sel && isConsumable); this._useTx.setVisible(sel && isConsumable);
+        this._eqBg.setVisible(sel && isEquippable);  this._eqTx.setVisible(sel && isEquippable);
     }
 
-    _useSelected() {
-        if (this._selectedIdx < 0) return;
-        const invItem = this._player.inventory[this._selectedIdx];
-        if (!invItem) return;
-
-        const { itemId } = invItem;
-        const ok = CombatSystem.useItem(this._player, itemId, ITEMS);
-        if (ok) {
-            Sound.useItem();
-            this._actionMsg.setColor('#88ff88').setText('Item usado!');
-            EventBus.emit('player-hp-change', { player: this._player });
-            this.registry.set('player', this._player);
-            this._selectedIdx = -1;
-            this._clearDetail();
-            this._renderList();
-        } else {
-            this._actionMsg.setColor('#ff4444').setText('Não foi possível usar.');
-        }
-    }
-
-    _equipSelected() {
-        if (this._selectedIdx < 0) return;
-        const invItem = this._player.inventory[this._selectedIdx];
-        if (!invItem) return;
-
-        const { itemId } = invItem;
-        const ok = CombatSystem.equipItem(this._player, itemId, ITEMS);
-        if (ok) {
-            Sound.equip();
-            this._actionMsg.setColor('#8888ff').setText('Equipado!');
-            EventBus.emit('player-stats-changed', { player: this._player });
-            EventBus.emit('player-hp-change',     { player: this._player });
-            this.registry.set('player', this._player);
-            this._renderEquipped();
-            this._renderList();
-            this._selectItem(this._selectedIdx);
-        } else {
-            this._actionMsg.setColor('#ff4444').setText('Não foi possível equipar.');
-        }
-    }
-
-    _unequip(slot) {
-        const ok = CombatSystem.unequipItem(this._player, slot, ITEMS);
-        if (ok) {
-            Sound.unequip();
-            this._actionMsg.setColor('#ffaa44').setText('Item desequipado.');
-            EventBus.emit('player-stats-changed', { player: this._player });
-            EventBus.emit('player-hp-change',     { player: this._player });
-            this.registry.set('player', this._player);
-            this._renderEquipped();
-            this._renderList();
-        }
+    _restoreDetail() {
+        if (this._selectedIdx >= 0) this._showDetail(this._selectedIdx, true);
+        else this._clearDetail();
     }
 
     _clearDetail() {
@@ -266,14 +338,172 @@ export class InventoryScene extends Phaser.Scene {
         this._detRarity.setText('');
         this._detType.setText('');
         this._detDesc.setText('');
+        this._detBonuses.setText('');
         this._detCompare.setText('');
         this._detIcon.setVisible(false);
         this._useBg.setVisible(false); this._useTx.setVisible(false);
         this._eqBg.setVisible(false);  this._eqTx.setVisible(false);
+        this._actionMsg.setText('');
     }
+
+    // ── Selection & navigation ────────────────────────────────────────────────
+
+    _selectItem(filtIdx) {
+        const prev = this._selectedIdx;
+        if (prev >= 0) {
+            const prevRow = this._rows.find(r => r.filtIdx === prev);
+            if (prevRow?.bg?.setFillStyle) prevRow.bg.setFillStyle(0x111111);
+        }
+
+        if (prev === filtIdx) {
+            // Toggle off
+            this._selectedIdx = -1;
+            this._clearDetail();
+            return;
+        }
+
+        this._selectedIdx = filtIdx;
+        const row = this._rows.find(r => r.filtIdx === filtIdx);
+        if (row?.bg?.setFillStyle) row.bg.setFillStyle(0x1a1a33);
+        this._showDetail(filtIdx, true);
+    }
+
+    _moveSelection(delta) {
+        const filtered = this._filteredInventory();
+        if (!filtered.length) return;
+        const cur  = this._selectedIdx < 0 ? (delta > 0 ? -1 : filtered.length) : this._selectedIdx;
+        const next = Math.max(0, Math.min(filtered.length - 1, cur + delta));
+        if (next === this._selectedIdx) return;
+
+        if (next < this._scroll) this._scroll = next;
+        else if (next >= this._scroll + MAX_ROWS) this._scroll = next - MAX_ROWS + 1;
+
+        this._selectedIdx = next;
+        this._renderList();
+        this._showDetail(next, true);
+    }
+
+    _actionSelected() {
+        if (this._selectedIdx < 0) return;
+        const filtered = this._filteredInventory();
+        const invItem  = filtered[this._selectedIdx];
+        if (!invItem) return;
+        const item = ITEMS[invItem.itemId];
+        if (!item) return;
+        if (item.type === 'consumable') this._useSelected();
+        else if (item.type === 'equipment') this._equipSelected();
+    }
+
+    _setFilter(key) {
+        this._filter      = key;
+        this._selectedIdx = -1;
+        this._scroll      = 0;
+        this._clearDetail();
+
+        Object.entries(this._tabObjs).forEach(([k, { bg, txt }]) => {
+            const active = k === key;
+            bg.setFillStyle(active ? 0x2a1a00 : 0x111111);
+            bg.setStrokeStyle(1, active ? 0xd4af37 : 0x333333);
+            txt.setColor(active ? '#ffd700' : '#777777');
+        });
+        this._renderList();
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    _useSelected() {
+        if (this._selectedIdx < 0) return;
+        const filtered = this._filteredInventory();
+        const invItem  = filtered[this._selectedIdx];
+        if (!invItem) return;
+
+        const ok = CombatSystem.useItem(this._player, invItem.itemId, ITEMS);
+        if (ok) {
+            Sound.useItem();
+            this._flash('#88ff88', 'Item usado!');
+            EventBus.emit('player-hp-change', { player: this._player });
+            this.registry.set('player', this._player);
+            SaveSystem.autoSave(this._player);
+            this._selectedIdx = -1;
+            this._clearDetail();
+            this._renderList();
+        } else {
+            this._flash('#ff4444', 'Não foi possível usar.');
+        }
+    }
+
+    _equipSelected() {
+        if (this._selectedIdx < 0) return;
+        const filtered = this._filteredInventory();
+        const invItem  = filtered[this._selectedIdx];
+        if (!invItem) return;
+
+        const prevIdx  = this._selectedIdx;
+        const ok = CombatSystem.equipItem(this._player, invItem.itemId, ITEMS);
+        if (ok) {
+            Sound.equip();
+            this._flash('#8888ff', 'Equipado!');
+            EventBus.emit('player-stats-changed', { player: this._player });
+            EventBus.emit('player-hp-change',     { player: this._player });
+            this.registry.set('player', this._player);
+            SaveSystem.autoSave(this._player);
+            this._renderEquipped();
+            this._renderList();
+            // Keep selection if item is still in filtered list
+            const newFiltered = this._filteredInventory();
+            this._selectedIdx = Math.min(prevIdx, newFiltered.length - 1);
+            if (this._selectedIdx >= 0) this._showDetail(this._selectedIdx, true);
+        } else {
+            this._flash('#ff4444', 'Não foi possível equipar.');
+        }
+    }
+
+    _unequip(slot) {
+        const ok = CombatSystem.unequipItem(this._player, slot, ITEMS);
+        if (ok) {
+            Sound.unequip();
+            this._flash('#ffaa44', 'Item desequipado.');
+            EventBus.emit('player-stats-changed', { player: this._player });
+            EventBus.emit('player-hp-change',     { player: this._player });
+            this.registry.set('player', this._player);
+            SaveSystem.autoSave(this._player);
+            this._renderEquipped();
+            this._renderList();
+        }
+    }
+
+    _flash(color, msg) {
+        this._actionMsg.setAlpha(1).setColor(color).setText(msg);
+        this.tweens.killTweensOf(this._actionMsg);
+        this.tweens.add({
+            targets: this._actionMsg, alpha: 0, duration: 900, delay: 900,
+            onComplete: () => this._actionMsg.setAlpha(1).setText(''),
+        });
+    }
+
+    // ── Keys & scroll ─────────────────────────────────────────────────────────
+
+    _bindKeys() {
+        const close = () => this._close();
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', close);
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I).on('down', close);
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP).on('down', () => this._moveSelection(-1));
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN).on('down', () => this._moveSelection(1));
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER).on('down', () => this._actionSelected());
+
+        this.input.on('wheel', (_p, _o, _dx, dy) => {
+            const maxScroll = Math.max(0, this._filteredInventory().length - MAX_ROWS);
+            this._scroll = Math.max(0, Math.min(this._scroll + (dy > 0 ? 1 : -1), maxScroll));
+            this._renderList();
+            this._restoreDetail();
+        });
+    }
+
+    // ── Close ─────────────────────────────────────────────────────────────────
 
     _close() {
         this.registry.set('player', this._player);
+        SaveSystem.autoSave(this._player);
         this.scene.stop('Inventory');
         const world = this.scene.get('World');
         if (world?.resumeFromOverlay) world.resumeFromOverlay();

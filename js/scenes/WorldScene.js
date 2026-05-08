@@ -615,7 +615,11 @@ export class WorldScene extends Phaser.Scene {
     _chat(msg, type) { EventBus.emit('chat', { msg, type }); }
 
     pauseForOverlay() { this._paused = true; }
-    resumeFromOverlay() { this._paused = false; }
+    resumeFromOverlay() {
+        this._paused = false;
+        const updated = this.registry.get('player');
+        if (updated) Object.assign(this._playerData, updated);
+    }
 
     // ── Elemental Aura Visual Effect ──────────────────────────────────────────
 
