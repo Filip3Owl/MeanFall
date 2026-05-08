@@ -301,6 +301,14 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 24, 30, 'sprite_type_ii_shade',     0x884488, 'wraith');
     drawShadowSprite(g, 26, 32, 'sprite_alpha_vampire',     0x440022, 'lich');
 
+    // ── Boss sprites (um por área) ───────────────────────────────────────────
+    drawAirSprite   (g, 36, 40, 'sprite_boss_village',   0xddeeff, 'tall');
+    drawEarthSprite (g, 38, 42, 'sprite_boss_meadows',   0x886633, 'block');
+    drawLightSprite (g, 40, 44, 'sprite_boss_forest',    0x88ddee, 'crystal');
+    drawFireSprite  (g, 42, 46, 'sprite_boss_plains',    0xff6622, 'bird');
+    drawWaterSprite (g, 44, 48, 'sprite_boss_mountains', 0x3388ff, 'beast');
+    drawShadowSprite(g, 46, 50, 'sprite_boss_dungeon',   0x6633aa, 'lich');
+
     drawNPCSprites(g);
     drawElementIcons(g);
 

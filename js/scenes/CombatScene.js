@@ -90,6 +90,7 @@ export class CombatScene extends Phaser.Scene {
         // ── Build panels ─────────────────────────────────────────────────
         this._buildMonsterPanel(elem, eColor, eDark, eHex, eTextHex, isElite);
         this._buildPlayerPanel(eColor, eHex, eTextHex, isElite);
+        this._buildInfoOverlay(elem, eColor, eTextHex);
 
         // ── VS divider ───────────────────────────────────────────────────
         const vsColor = isElite ? '#ffe55a' : '#f5c842';
@@ -154,13 +155,22 @@ export class CombatScene extends Phaser.Scene {
         this._mHpGfx = this.add.graphics();
         this._updateMonsterBar();
 
-        // Flavor text
-        if (this._monsterDef.flavor) {
-            this.add.text(ix, PY + 82, this._monsterDef.flavor, {
-                fontSize: '11px', color: '#aa9977', fontFamily: 'Courier New', fontStyle: 'italic',
-                wordWrap: { width: 148 }, lineSpacing: 2,
+        // Boss crown badge
+        if (this._monsterDef.isBoss) {
+            this.add.text(ix, PY + 82, '☠  CHEFE DE ÁREA', {
+                fontSize: '11px', color: '#ff8844', fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0, 0);
         }
+
+        // Info button [i]
+        const infoBtnBg = this.add.rectangle(PX + PW - 32, PY + PH - 22, 24, 16, 0x1a1020, 1)
+            .setOrigin(0, 0).setStrokeStyle(1, eColor, 0.6).setInteractive()
+            .on('pointerover', () => infoBtnBg.setFillStyle(0x2a1840))
+            .on('pointerout',  () => infoBtnBg.setFillStyle(0x1a1020))
+            .on('pointerdown', () => this._toggleInfo());
+        this.add.text(PX + PW - 20, PY + PH - 14, 'i', {
+            fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5);
     }
 
     _buildPlayerPanel(eColor, eHex, eTextHex, isElite) {
@@ -211,6 +221,103 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '11px', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5).setVisible(false);
         this._updateStatusDisplay();
+    }
+
+    _buildInfoOverlay(elem, eColor, eTextHex) {
+        const W = 544, H = 480;
+        const OX = 16, OY = 28, OW = W - 32, OH = H - 56;
+        const m = this._monsterDef;
+
+        this._infoOverlay = this.add.container(0, 0).setDepth(90).setVisible(false);
+
+        // Dim backdrop
+        const dim = this.add.rectangle(0, 0, W, H, 0x000000, 0.75).setOrigin(0, 0)
+            .setInteractive().on('pointerdown', () => this._toggleInfo());
+        this._infoOverlay.add(dim);
+
+        // Card background
+        const card = this.add.rectangle(OX, OY, OW, OH, 0x060210, 1).setOrigin(0, 0)
+            .setStrokeStyle(2, eColor, 0.8);
+        const topBar = this.add.rectangle(OX, OY, OW, 3, eColor, 0.9).setOrigin(0, 0);
+        this._infoOverlay.add([card, topBar]);
+
+        // Close button
+        const closeBg = this.add.rectangle(OX + OW - 28, OY + 6, 22, 18, 0x330000, 1)
+            .setOrigin(0, 0).setStrokeStyle(1, 0xff4444, 0.6).setInteractive()
+            .on('pointerdown', () => this._toggleInfo());
+        const closeTx = this.add.text(OX + OW - 17, OY + 15, 'X', {
+            fontSize: '13px', color: '#ff5555', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5);
+        this._infoOverlay.add([closeBg, closeTx]);
+
+        // Monster name
+        const namePrefix = m.isBoss ? '☠  ' : '';
+        const nameTx = this.add.text(OX + 12, OY + 10, namePrefix + m.name.toUpperCase(), {
+            fontSize: '17px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0, 0);
+        this._infoOverlay.add(nameTx);
+
+        // Element + level badge
+        const badgeBg = this.add.rectangle(OX + 12, OY + 34, 110, 16, eColor, 0.2)
+            .setOrigin(0, 0).setStrokeStyle(1, eColor, 0.5);
+        const badgeTx = this.add.text(OX + 67, OY + 42, `${elem.symbol} ${elem.name.toUpperCase()}  ·  NÍVEL ${m.level}`, {
+            fontSize: '11px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5);
+        this._infoOverlay.add([badgeBg, badgeTx]);
+
+        // Stats row
+        const statY = OY + 58;
+        const stats = [
+            { label: 'HP',    value: m.maxHp },
+            { label: 'ATQ',   value: m.attackDamage },
+            { label: 'DEF',   value: m.defense || 0 },
+            { label: 'XP',    value: m.xpReward },
+            { label: 'OURO',  value: m.goldReward },
+        ];
+        stats.forEach((s, i) => {
+            const sx = OX + 12 + i * 96;
+            const statBox = this.add.rectangle(sx, statY, 88, 32, 0x0d0820, 1)
+                .setOrigin(0, 0).setStrokeStyle(1, eColor, 0.25);
+            const statLbl = this.add.text(sx + 44, statY + 8, s.label, {
+                fontSize: '10px', color: '#6655aa', fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0);
+            const statVal = this.add.text(sx + 44, statY + 18, String(s.value), {
+                fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0);
+            this._infoOverlay.add([statBox, statLbl, statVal]);
+        });
+
+        // Divider
+        const div = this.add.graphics();
+        div.lineStyle(1, eColor, 0.2);
+        div.lineBetween(OX + 12, statY + 40, OX + OW - 12, statY + 40);
+        this._infoOverlay.add(div);
+
+        // Full flavor text
+        if (m.flavor) {
+            const flavorTx = this.add.text(OX + 12, statY + 48, `"${m.flavor}"`, {
+                fontSize: '13px', color: '#bb9966', fontFamily: 'Courier New', fontStyle: 'italic',
+                wordWrap: { width: OW - 24 }, lineSpacing: 4,
+            }).setOrigin(0, 0);
+            this._infoOverlay.add(flavorTx);
+        }
+
+        // Topic label
+        const topicTx = this.add.text(OX + 12, OY + OH - 22, `Tópico: ${elem.topicLabel}`, {
+            fontSize: '12px', color: '#554466', fontFamily: 'Courier New',
+        }).setOrigin(0, 0);
+        const closeLbl = this.add.text(OX + OW - 12, OY + OH - 22, 'Clique fora para fechar', {
+            fontSize: '11px', color: '#443355', fontFamily: 'Courier New',
+        }).setOrigin(1, 0);
+        this._infoOverlay.add([topicTx, closeLbl]);
+    }
+
+    _toggleInfo() {
+        if (!this._infoOverlay) return;
+        const next = !this._infoOverlay.visible;
+        this._infoOverlay.setVisible(next);
+        // While info is open, block answer interaction
+        this._answerLock = next;
     }
 
     _buildQuestionBox(eColor, eHex, eTextHex, isElite) {
