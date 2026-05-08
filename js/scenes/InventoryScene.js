@@ -27,27 +27,27 @@ export class InventoryScene extends Phaser.Scene {
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(1, 0xd4af37);
 
         this.add.text(W / 2, 22, 'I N V E N T Á R I O', {
-            fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New',
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
 
         // Close button
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
             .setInteractive().on('pointerdown', () => this._close());
-        this.add.text(515, 25, 'X', { fontSize: '12px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         // Item list panel (left)
         this.add.rectangle(14, 44, 280, 392, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(154, 50, 'Itens', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(154, 50, 'Itens', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         // Detail panel (right)
         this.add.rectangle(302, 44, 228, 246, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(416, 50, 'Detalhes', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(416, 50, 'Detalhes', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
-        this._detName    = this.add.text(308, 70,  '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 160 } }).setOrigin(0, 0);
-        this._detRarity  = this.add.text(308, 88,  '', { fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detType    = this.add.text(308, 102, '', { fontSize: '10px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detDesc    = this.add.text(308, 120, '', { fontSize: '11px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
-        this._detCompare = this.add.text(308, 200, '', { fontSize: '9px', color: '#88ccff', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 2 }).setOrigin(0, 0);
+        this._detName    = this.add.text(308, 70,  '', { fontSize: '15px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 160 } }).setOrigin(0, 0);
+        this._detRarity  = this.add.text(308, 88,  '', { fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detType    = this.add.text(308, 102, '', { fontSize: '16px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detDesc    = this.add.text(308, 120, '', { fontSize: '17px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
+        this._detCompare = this.add.text(308, 200, '', { fontSize: '15px', color: '#88ccff', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 2 }).setOrigin(0, 0);
         this._detIcon    = this.add.image(490, 85, '').setScale(2.5).setVisible(false);
 
         // Action buttons
@@ -56,25 +56,25 @@ export class InventoryScene extends Phaser.Scene {
             .on('pointerout',  () => this._useBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => this._useSelected())
             .setVisible(false);
-        this._useTx = this.add.text(358, 263, 'USAR', { fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._useTx = this.add.text(358, 263, 'USAR', { fontSize: '17px', color: '#88ff88', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
 
         this._eqBg = this.add.rectangle(418, 250, 106, 26, 0x1a1a3a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._eqBg.setFillStyle(0x2a2a5a))
             .on('pointerout',  () => this._eqBg.setFillStyle(0x1a1a3a))
             .on('pointerdown', () => this._equipSelected())
             .setVisible(false);
-        this._eqTx = this.add.text(471, 263, 'EQUIPAR', { fontSize: '11px', color: '#8888ff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._eqTx = this.add.text(471, 263, 'EQUIPAR', { fontSize: '17px', color: '#8888ff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
 
-        this._actionMsg = this.add.text(416, 282, '', { fontSize: '10px', fontFamily: 'Courier New', wordWrap: { width: 216 } }).setOrigin(0.5, 0);
+        this._actionMsg = this.add.text(416, 282, '', { fontSize: '16px', fontFamily: 'Courier New', wordWrap: { width: 216 } }).setOrigin(0.5, 0);
 
         // Equipped panel
         this.add.rectangle(302, 296, 228, 140, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(416, 302, 'Equipado', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(416, 302, 'Equipado', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
         this._slotRows = {};
         this._renderEquipped();
 
         this.add.text(W / 2, 456, 'I ou ESC para fechar  ·  clique no slot equipado p/ desequipar', {
-            fontSize: '9px', color: '#444444', fontFamily: 'Courier New',
+            fontSize: '15px', color: '#444444', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
     }
 
@@ -84,7 +84,7 @@ export class InventoryScene extends Phaser.Scene {
 
         const inv = this._player.inventory || [];
         if (inv.length === 0) {
-            const empty = this.add.text(154, 240, 'Inventário vazio', { fontSize: '11px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+            const empty = this.add.text(154, 240, 'Inventário vazio', { fontSize: '17px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
             this._rows.push({ bg: empty, tx: empty, qty: empty });
             return;
         }
@@ -106,10 +106,10 @@ export class InventoryScene extends Phaser.Scene {
 
             const icon = this.add.image(28, y + 10, item.icon || 'item_potion_red').setScale(0.65);
             const tx = this.add.text(42, y + 10, item.name, {
-                fontSize: '10px', color, fontFamily: 'Courier New',
+                fontSize: '16px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
             const qtyTxt = this.add.text(284, y + 10, qty > 1 ? `×${qty}` : (isEq ? '[E]' : ''), {
-                fontSize: '10px', color: isEq ? '#aaaaff' : '#666666', fontFamily: 'Courier New',
+                fontSize: '16px', color: isEq ? '#aaaaff' : '#666666', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
             this._rows.push({ bg, tx, qty: qtyTxt, icon, idx: i });
@@ -152,8 +152,8 @@ export class InventoryScene extends Phaser.Scene {
                     .on('pointerdown', () => this._unequip(slot));
                 icon = this.add.image(x + 90, y + 12, item.icon || 'item_potion_red').setScale(0.5).setAlpha(0.6);
             }
-            const lblTxt  = this.add.text(x + 3, y + 2,  label,    { fontSize: '8px',  color: '#666666', fontFamily: 'Courier New' }).setOrigin(0, 0);
-            const itemTxt = this.add.text(x + 3, y + 12, itemName, { fontSize: '9px',  color, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const lblTxt  = this.add.text(x + 3, y + 2,  label,    { fontSize: '17px',  color: '#666666', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const itemTxt = this.add.text(x + 3, y + 12, itemName, { fontSize: '15px',  color, fontFamily: 'Courier New' }).setOrigin(0, 0);
             this._slotRows[slot] = [bg, lblTxt, itemTxt];
             if (icon) this._slotRows[slot].push(icon);
         });

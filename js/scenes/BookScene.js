@@ -32,31 +32,31 @@ export class BookScene extends Phaser.Scene {
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(2, 0xd4af37);
 
         this.add.text(W / 2, 22, 'B I B L I O T E C A   D E   T O M O S', {
-            fontSize: '13px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0);
 
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0).setInteractive()
             .on('pointerdown', () => this._close());
-        this.add.text(515, 25, 'X', { fontSize: '12px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         // Left list
         this.add.rectangle(14, 44, 220, 392, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(124, 50, 'TOMOS', { fontSize: '10px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(124, 50, 'TOMOS', { fontSize: '16px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         // Right reader
         this.add.rectangle(238, 44, 292, 392, 0x110d05, 1).setOrigin(0, 0);
 
-        this._titleTx     = this.add.text(244, 50, '', { fontSize: '13px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold', wordWrap: { width: 280 } }).setOrigin(0, 0);
-        this._authorTx    = this.add.text(244, 70, '', { fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic' }).setOrigin(0, 0);
-        this._importanceTx = this.add.text(244, 86, '', { fontSize: '10px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._topicTx     = this.add.text(244, 102, '', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._titleTx     = this.add.text(244, 50, '', { fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold', wordWrap: { width: 280 } }).setOrigin(0, 0);
+        this._authorTx    = this.add.text(244, 70, '', { fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic' }).setOrigin(0, 0);
+        this._importanceTx = this.add.text(244, 86, '', { fontSize: '16px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._topicTx     = this.add.text(244, 102, '', { fontSize: '15px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
 
         // Page text
         this._pageTx = this.add.text(244, 130, '', {
-            fontSize: '11px', color: '#dddddd', fontFamily: 'Courier New', wordWrap: { width: 280 }, lineSpacing: 4,
+            fontSize: '17px', color: '#dddddd', fontFamily: 'Courier New', wordWrap: { width: 280 }, lineSpacing: 4,
         }).setOrigin(0, 0);
 
-        this._pageNumTx = this.add.text(382, 380, '', { fontSize: '10px', color: '#666666', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this._pageNumTx = this.add.text(382, 380, '', { fontSize: '16px', color: '#666666', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         // Page navigation buttons
         this._prevBg = this.add.rectangle(244, 376, 60, 22, 0x1a1a3a, 1).setOrigin(0, 0).setInteractive()
@@ -64,14 +64,14 @@ export class BookScene extends Phaser.Scene {
             .on('pointerout',  () => this._prevBg.setFillStyle(0x1a1a3a))
             .on('pointerdown', () => this._prevPage())
             .setVisible(false);
-        this._prevTx = this.add.text(274, 387, '< ANT', { fontSize: '10px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._prevTx = this.add.text(274, 387, '< ANT', { fontSize: '16px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
 
         this._nextBg = this.add.rectangle(466, 376, 60, 22, 0x1a1a3a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._nextBg.setFillStyle(0x2a2a55))
             .on('pointerout',  () => this._nextBg.setFillStyle(0x1a1a3a))
             .on('pointerdown', () => this._nextPage())
             .setVisible(false);
-        this._nextTx = this.add.text(496, 387, 'PROX >', { fontSize: '10px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._nextTx = this.add.text(496, 387, 'PROX >', { fontSize: '16px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5).setVisible(false);
 
         // Read button (claims first-read reward)
         this._readBg = this.add.rectangle(310, 408, 156, 24, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
@@ -79,11 +79,11 @@ export class BookScene extends Phaser.Scene {
             .on('pointerout',  () => this._readBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => this._claimRead())
             .setVisible(false);
-        this._readTx = this.add.text(388, 420, 'ESTUDAR (XP+)', { fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._readTx = this.add.text(388, 420, 'ESTUDAR (XP+)', { fontSize: '17px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5, 0.5).setVisible(false);
 
-        this._readMsg = this.add.text(384, 440, '', { fontSize: '9px', color: '#888888', fontFamily: 'Courier New', wordWrap: { width: 280 } }).setOrigin(0.5, 0);
+        this._readMsg = this.add.text(384, 440, '', { fontSize: '15px', color: '#888888', fontFamily: 'Courier New', wordWrap: { width: 280 } }).setOrigin(0.5, 0);
 
-        this.add.text(W / 2, 462, 'B ou ESC para fechar', { fontSize: '9px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(W / 2, 462, 'B ou ESC para fechar', { fontSize: '15px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
     }
 
     _renderList() {
@@ -93,7 +93,7 @@ export class BookScene extends Phaser.Scene {
         const owned = BookSystem.ownedBooks(this._player);
         if (owned.length === 0) {
             const empty = this.add.text(124, 240, 'Nenhum livro coletado.\n\nDerrote criaturas para encontrar tomos.', {
-                fontSize: '10px', color: '#444444', fontFamily: 'Courier New', align: 'center', wordWrap: { width: 200 },
+                fontSize: '16px', color: '#444444', fontFamily: 'Courier New', align: 'center', wordWrap: { width: 200 },
             }).setOrigin(0.5, 0.5);
             this._rows.push({ bg: empty, tx: empty, tag: empty });
             return;
@@ -110,12 +110,12 @@ export class BookScene extends Phaser.Scene {
                 .on('pointerdown', () => this._selectIdx(i));
 
             const tx = this.add.text(24, y + 6, entry.book.title, {
-                fontSize: '10px', color: imp.hex, fontFamily: 'Courier New', wordWrap: { width: 168 },
+                fontSize: '16px', color: imp.hex, fontFamily: 'Courier New', wordWrap: { width: 168 },
             }).setOrigin(0, 0);
 
             const tagText = entry.read ? '[LIDO]' : `[${imp.name.toUpperCase()}]`;
             const tag = this.add.text(226, y + 18, tagText, {
-                fontSize: '8px', color: entry.read ? '#666666' : imp.hex, fontFamily: 'Courier New',
+                fontSize: '17px', color: entry.read ? '#666666' : imp.hex, fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
             this._rows.push({ bg, tx, tag, idx: i, bookId: entry.id });

@@ -30,16 +30,16 @@ export class QuestScene extends Phaser.Scene {
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(2, 0xd4af37);
 
         this.add.text(W / 2, 22, 'D I Á R I O   D E   M I S S Õ E S', {
-            fontSize: '13px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0);
 
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0).setInteractive()
             .on('pointerdown', () => this._close());
-        this.add.text(515, 25, 'X', { fontSize: '12px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         this._listContainer = this.add.container(0, 0);
 
-        this.add.text(W / 2, 458, 'Q ou ESC para fechar', { fontSize: '9px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(W / 2, 458, 'Q ou ESC para fechar', { fontSize: '15px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
     }
 
     _render() {
@@ -51,7 +51,7 @@ export class QuestScene extends Phaser.Scene {
 
         if (known.length === 0) {
             const empty = this.add.text(272, 240, 'Nenhuma missão ativa.\nFale com NPCs para receber missões.', {
-                fontSize: '12px', color: '#666666', fontFamily: 'Courier New', align: 'center',
+                fontSize: '15px', color: '#666666', fontFamily: 'Courier New', align: 'center',
             }).setOrigin(0.5, 0.5);
             this._listContainer.add(empty);
             return;
@@ -66,15 +66,15 @@ export class QuestScene extends Phaser.Scene {
             // Status badge
             const badge = this.add.rectangle(28, y + 8, 80, 16, this._statusColor(entry.status), 0.3).setOrigin(0, 0);
             const badgeTx = this.add.text(68, y + 16, this._statusLabel(entry.status), {
-                fontSize: '9px', fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '15px', fontFamily: 'Courier New', fontStyle: 'bold',
                 color: this._statusColorHex(entry.status),
             }).setOrigin(0.5, 0.5);
 
             const name = this.add.text(116, y + 12, entry.quest.name, {
-                fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '15px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0, 0);
             const desc = this.add.text(28, y + 30, entry.quest.description, {
-                fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New', wordWrap: { width: 480 },
+                fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New', wordWrap: { width: 480 },
             }).setOrigin(0, 0);
 
             // Progress bar
@@ -84,7 +84,7 @@ export class QuestScene extends Phaser.Scene {
             const barBg = this.add.rectangle(28, y + 60, 360, 8, 0x222222).setOrigin(0, 0);
             const barFg = this.add.rectangle(28, y + 60, Math.floor(360 * pct), 8, this._statusColor(entry.status)).setOrigin(0, 0);
             const barTx = this.add.text(394, y + 60, `${cur}/${tgt}`, {
-                fontSize: '10px', color: '#cccccc', fontFamily: 'Courier New',
+                fontSize: '16px', color: '#cccccc', fontFamily: 'Courier New',
             }).setOrigin(0, 0);
 
             this._listContainer.add([card, badge, badgeTx, name, desc, barBg, barFg, barTx]);
@@ -96,7 +96,7 @@ export class QuestScene extends Phaser.Scene {
             const basicRewards = [xpText, goldText].filter(t => t).join(' · ');
             
             const rewLbl = this.add.text(28, y + 74, 'Recompensa: ' + basicRewards, {
-                fontSize: '9px', color: '#88ccff', fontFamily: 'Courier New',
+                fontSize: '15px', color: '#88ccff', fontFamily: 'Courier New',
             }).setOrigin(0, 0);
             this._listContainer.add(rewLbl);
 
@@ -107,7 +107,7 @@ export class QuestScene extends Phaser.Scene {
                     if (!item) return;
                     const icon = this.add.image(itemX + 8, y + 78, item.icon || 'item_potion_red').setScale(0.5);
                     const itTx = this.add.text(itemX + 18, y + 74, (it.qty > 1 ? `×${it.qty} ` : '') + item.name, {
-                        fontSize: '9px', color: RARITY_COLORS[item.rarity] || '#88ccff', fontFamily: 'Courier New',
+                        fontSize: '15px', color: RARITY_COLORS[item.rarity] || '#88ccff', fontFamily: 'Courier New',
                     }).setOrigin(0, 0);
                     this._listContainer.add([icon, itTx]);
                     itemX = itTx.x + itTx.width + 10;
@@ -121,7 +121,7 @@ export class QuestScene extends Phaser.Scene {
                     .on('pointerout',  () => btn.setFillStyle(0x1a3a1a))
                     .on('pointerdown', () => this._claim(entry.id));
                 const btnTx = this.add.text(459, y + 20, 'COLETAR', {
-                    fontSize: '11px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold',
+                    fontSize: '17px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold',
                 }).setOrigin(0.5, 0.5);
                 this._listContainer.add([btn, btnTx]);
             }

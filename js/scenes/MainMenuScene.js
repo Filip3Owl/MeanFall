@@ -35,11 +35,11 @@ export class MainMenuScene extends Phaser.Scene {
         const betaBadge = this.add.rectangle(W / 2 + 100, TITLE_Y - 8, 50, 20, 0xcc1144, 1).setDepth(3);
         betaBadge.setStrokeStyle(1, 0xff4477);
         this.add.text(W / 2 + 100, TITLE_Y - 8, 'BETA', {
-            fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '17px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(4);
 
         this.add.text(W / 2, TITLE_Y + 30, 'Aprenda Estatística através da aventura', {
-            fontSize: '12px', color: '#d4af37', fontFamily: 'Courier New', fontStyle: 'italic',
+            fontSize: '15px', color: '#d4af37', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(0.5).setDepth(2);
 
         // Divider under subtitle
@@ -70,16 +70,16 @@ export class MainMenuScene extends Phaser.Scene {
 
         // Version + credits at the very bottom
         this.add.text(8, H - 6, `v${VERSION.number} ${VERSION.label}`, {
-            fontSize: '10px', color: '#666', fontFamily: 'Courier New',
+            fontSize: '16px', color: '#666', fontFamily: 'Courier New',
         }).setOrigin(0, 1).setDepth(2);
 
         this.add.text(W - 8, H - 6, `Developed by ${VERSION.author}`, {
-            fontSize: '10px', color: '#888', fontFamily: 'Courier New', fontStyle: 'italic',
+            fontSize: '16px', color: '#888', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(1, 1).setDepth(2);
 
         // Donate Button (floating bottom right above author)
         const donateBtn = this.add.text(W - 8, H - 24, '[ APOIAR PROJETO ]', {
-            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
             backgroundColor: '#1a1505', padding: { x: 8, y: 4 }
         }).setOrigin(1, 1).setDepth(3).setInteractive({ useHandCursor: true });
 
@@ -162,7 +162,7 @@ export class MainMenuScene extends Phaser.Scene {
         ];
 
         this.add.text(W / 2, H / 2, lines.join('\n'), {
-            fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New',
+            fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New',
             align: 'left', lineSpacing: 4,
         }).setOrigin(0.5).setDepth(11);
 
@@ -189,11 +189,11 @@ export class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(21);
 
         const msg = this.add.text(W / 2, H / 2 - 30, 'Se você está gostando do MeanFall e deseja\najudar a manter o projeto vivo e gratuito,\nconsidere fazer uma doação de qualquer valor.', {
-            fontSize: '11px', color: '#e8dfd1', fontFamily: 'Courier New', align: 'center', lineSpacing: 4
+            fontSize: '17px', color: '#e8dfd1', fontFamily: 'Courier New', align: 'center', lineSpacing: 4
         }).setOrigin(0.5).setDepth(21);
 
         const pixLabel = this.add.text(W / 2, H / 2 + 30, 'CHAVE PIX (E-mail):', {
-            fontSize: '10px', color: '#888', fontFamily: 'Courier New'
+            fontSize: '16px', color: '#888', fontFamily: 'Courier New'
         }).setOrigin(0.5).setDepth(21);
 
         const pixValue = this.add.text(W / 2, H / 2 + 50, 'solarcubix@gmail.com', {
@@ -202,7 +202,7 @@ export class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(21);
 
         const closeHint = this.add.text(W / 2, H / 2 + 90, '[ Clique para fechar ]', {
-            fontSize: '10px', color: '#666', fontFamily: 'Courier New'
+            fontSize: '16px', color: '#666', fontFamily: 'Courier New'
         }).setOrigin(0.5).setDepth(21);
 
         overlay.on('pointerdown', () => {

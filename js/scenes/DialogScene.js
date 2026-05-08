@@ -70,7 +70,7 @@ export class DialogScene extends Phaser.Scene {
         const tagColor = this._role === 'shop' ? 0x33aa55 : 0xaa6633;
         this._tagBg = this.add.rectangle(20, boxY - 14, 130, 22, tagColor, 1).setOrigin(0, 0).setStrokeStyle(1, 0xd4af37);
         this._tagTx = this.add.text(85, boxY - 3, this._speaker.toUpperCase(), {
-            fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '17px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
         // Body text container (tokens drawn dynamically by _renderTokens)
@@ -78,13 +78,13 @@ export class DialogScene extends Phaser.Scene {
 
         // Continue prompt (blinking)
         this._promptTx = this.add.text(W - 24, boxY + boxH - 18, '> Espaço / Clique', {
-            fontSize: '9px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
+            fontSize: '15px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
         }).setOrigin(1, 0.5);
         this.tweens.add({ targets: this._promptTx, alpha: 0.3, duration: 700, yoyo: true, repeat: -1 });
 
         // Page indicator
         this._pageTx = this.add.text(20, boxY + boxH - 18, '', {
-            fontSize: '9px', color: '#aaaaaa', fontFamily: 'Courier New',
+            fontSize: '15px', color: '#aaaaaa', fontFamily: 'Courier New',
         }).setOrigin(0, 0.5);
 
         this.input.keyboard.on('keydown-SPACE', () => this._advance());
@@ -133,7 +133,7 @@ export class DialogScene extends Phaser.Scene {
                 .on('pointerout',  () => this._actionBtn.setFillStyle(color))
                 .on('pointerdown', (p, lx, ly, ev) => { ev.stopPropagation(); this._triggerAction(); });
             this._actionTx = this.add.text(W - 75, btnY + 12, this._action.label, {
-                fontSize: '10px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '16px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0.5, 0.5);
         } else if (!visible && this._actionBtn) {
             this._actionBtn.destroy(); this._actionBtn = null;
@@ -184,12 +184,12 @@ export class DialogScene extends Phaser.Scene {
         const startY = this.scale.height - 130 + 18;
         const wrapWidth = this.scale.width - 50;
         let cx = 0, cy = 0;
-        const lineHeight = 16;
+        const lineHeight = 20;
 
         for (const { text, color, bold } of tokens) {
             if (!text) continue;
             const txt = this.add.text(0, 0, text, {
-                fontSize: '12px', color: color || '#eeeedd', fontFamily: 'Courier New',
+                fontSize: '15px', color: color || '#eeeedd', fontFamily: 'Courier New',
                 fontStyle: bold ? 'bold' : 'normal',
             }).setOrigin(0, 0).setDepth(11);
 

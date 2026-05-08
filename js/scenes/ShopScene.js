@@ -37,20 +37,20 @@ export class ShopScene extends Phaser.Scene {
 
         // Title
         this.add.text(W / 2, 20, this._shop.name.toUpperCase(), {
-            fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0);
         this.add.text(W / 2, 38, this._shop.greeting, {
-            fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
+            fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
             wordWrap: { width: W - 60 },
         }).setOrigin(0.5, 0);
 
         // Close button
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0).setInteractive()
             .on('pointerdown', () => this._close());
-        this.add.text(515, 25, 'X', { fontSize: '12px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         // Gold display
-        this._goldTxt = this.add.text(W - 30, 60, '', { fontSize: '12px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
+        this._goldTxt = this.add.text(W - 30, 60, '', { fontSize: '15px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
 
         // Tabs
         this._buyTab  = this._makeTab(20,  78, 'COMPRAR', () => this._switchTab('buy'));
@@ -60,15 +60,15 @@ export class ShopScene extends Phaser.Scene {
         this.add.rectangle(14, 110, 280, 326, 0x080604, 1).setOrigin(0, 0);
         this.add.rectangle(302, 110, 228, 326, 0x080604, 1).setOrigin(0, 0);
 
-        this.add.text(154, 116, 'CATÁLOGO',  { fontSize: '10px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
-        this.add.text(416, 116, 'DETALHES', { fontSize: '10px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(154, 116, 'CATÁLOGO',  { fontSize: '16px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(416, 116, 'DETALHES', { fontSize: '16px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         // Detail texts
-        this._detName  = this.add.text(308, 134, '', { fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 150 } }).setOrigin(0, 0);
-        this._detTier  = this.add.text(308, 154, '', { fontSize: '10px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detType  = this.add.text(308, 168, '', { fontSize: '10px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
-        this._detDesc  = this.add.text(308, 184, '', { fontSize: '11px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
-        this._detPrice = this.add.text(308, 280, '', { fontSize: '12px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._detName  = this.add.text(308, 134, '', { fontSize: '15px', color: '#ffd700', fontFamily: 'Courier New', wordWrap: { width: 150 } }).setOrigin(0, 0);
+        this._detTier  = this.add.text(308, 154, '', { fontSize: '16px', color: '#aaaaaa', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detType  = this.add.text(308, 168, '', { fontSize: '16px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this._detDesc  = this.add.text(308, 184, '', { fontSize: '17px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
+        this._detPrice = this.add.text(308, 280, '', { fontSize: '15px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
         this._detIcon  = this.add.image(490, 150, '').setScale(2.5).setVisible(false);
 
         this._actionBg = this.add.rectangle(308, 360, 216, 32, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
@@ -76,11 +76,11 @@ export class ShopScene extends Phaser.Scene {
             .on('pointerout',  () => this._actionBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => this._doAction())
             .setVisible(false);
-        this._actionTx = this.add.text(416, 376, '', { fontSize: '12px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5, 0.5).setVisible(false);
+        this._actionTx = this.add.text(416, 376, '', { fontSize: '15px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5, 0.5).setVisible(false);
 
-        this._actionMsg = this.add.text(416, 405, '', { fontSize: '10px', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this._actionMsg = this.add.text(416, 405, '', { fontSize: '16px', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
-        this.add.text(W / 2, 458, 'ESC para fechar', { fontSize: '9px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(W / 2, 458, 'ESC para fechar', { fontSize: '15px', color: '#444444', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         this._refreshGold();
     }
@@ -88,7 +88,7 @@ export class ShopScene extends Phaser.Scene {
     _makeTab(x, y, label, onClick) {
         const bg = this.add.rectangle(x, y, 100, 24, 0x1a1a2a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerdown', onClick);
-        const tx = this.add.text(x + 50, y + 12, label, { fontSize: '11px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        const tx = this.add.text(x + 50, y + 12, label, { fontSize: '17px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
         return { bg, tx };
     }
 
@@ -120,7 +120,7 @@ export class ShopScene extends Phaser.Scene {
 
         if (list.length === 0) {
             const empty = this.add.text(154, 270, this._tab === 'buy' ? 'Nada à venda' : 'Você não tem itens', {
-                fontSize: '11px', color: '#444444', fontFamily: 'Courier New',
+                fontSize: '17px', color: '#444444', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0.5);
             this._rows.push({ bg: empty, tx: empty, priceTx: empty });
             return;
@@ -141,11 +141,11 @@ export class ShopScene extends Phaser.Scene {
 
             const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65);
             const tx = this.add.text(44, y + 10, qty > 1 ? `${item.name} ×${qty}` : item.name, {
-                fontSize: '10px', color, fontFamily: 'Courier New',
+                fontSize: '16px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
 
             const priceTx = this.add.text(284, y + 10, `${price}g`, {
-                fontSize: '10px', color: '#ffcc44', fontFamily: 'Courier New',
+                fontSize: '16px', color: '#ffcc44', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
             this._rows.push({ bg, tx, icon, priceTx, idx: i, itemId });

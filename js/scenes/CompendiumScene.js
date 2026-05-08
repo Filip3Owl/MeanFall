@@ -20,12 +20,12 @@ export class CompendiumScene extends Phaser.Scene {
         // Header
         this.add.rectangle(0, 0, W, 32, 0x1a1a1a, 1).setOrigin(0);
         this.add.text(W / 2, 16, 'COMPÊNDIO DE ESTATÍSTICA', {
-            fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Close button hint
         this.add.text(W - 10, 16, '[ESC] VOLTAR', {
-            fontSize: '10px', color: '#888', fontFamily: 'Courier New'
+            fontSize: '16px', color: '#888', fontFamily: 'Courier New'
         }).setOrigin(1, 0.5);
 
         // Sidebar (Topics)
@@ -50,14 +50,14 @@ export class CompendiumScene extends Phaser.Scene {
             { id: 'inference',        name: 'Inferência',       elem: 'shadow' }
         ];
 
-        this.add.text(x, yStart - 15, 'TÓPICOS:', { fontSize: '10px', color: '#554422', fontFamily: 'Courier New' });
+        this.add.text(x, yStart - 15, 'TÓPICOS:', { fontSize: '16px', color: '#554422', fontFamily: 'Courier New' });
 
         topics.forEach((t, i) => {
             const ty = yStart + i * 28;
             const elem = ELEMENTS[t.elem];
             const bg = this.add.rectangle(x, ty, 160, 24, 0x1a1a1a, 1).setOrigin(0).setInteractive({ useHandCursor: true });
             const txt = this.add.text(x + 8, ty + 12, t.name, {
-                fontSize: '11px', color: '#aaaaaa', fontFamily: 'Courier New'
+                fontSize: '17px', color: '#aaaaaa', fontFamily: 'Courier New'
             }).setOrigin(0, 0.5);
 
             bg.on('pointerover', () => { if (this._selectedTopic !== t.id) bg.setFillStyle(0x2a2a2a); });
@@ -84,7 +84,7 @@ export class CompendiumScene extends Phaser.Scene {
     _renderEmptyState() {
         this._contentGroup.clear(true, true);
         const txt = this.add.text(360, 240, 'Selecione um tópico para\nrevisar o conhecimento\nadquirido em sua jornada.', {
-            fontSize: '12px', color: '#444', fontFamily: 'Courier New', align: 'center'
+            fontSize: '15px', color: '#444', fontFamily: 'Courier New', align: 'center'
         }).setOrigin(0.5);
         this._contentGroup.add(txt);
     }
@@ -94,7 +94,7 @@ export class CompendiumScene extends Phaser.Scene {
         const x = 180, y = 45;
 
         this.add.text(x, y, `CONHECIMENTO: ${topic.name.toUpperCase()}`, {
-            fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }, this._contentGroup);
 
         // Find books for this topic that the player has READ
@@ -104,7 +104,7 @@ export class CompendiumScene extends Phaser.Scene {
 
         if (unlocked.length === 0) {
             this.add.text(x, y + 40, 'Nenhum conhecimento registrado.\n\nDerrote criaturas deste elemento\npara encontrar livros e pergaminhos.', {
-                fontSize: '11px', color: '#666', fontFamily: 'Courier New', fontStyle: 'italic'
+                fontSize: '17px', color: '#666', fontFamily: 'Courier New', fontStyle: 'italic'
             }, this._contentGroup);
             return;
         }
@@ -113,7 +113,7 @@ export class CompendiumScene extends Phaser.Scene {
         unlocked.forEach(book => {
             const imp = BOOK_IMPORTANCE[book.importance];
             const title = this.add.text(x, curY, `• ${book.title}`, {
-                fontSize: '12px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold'
+                fontSize: '15px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold'
             }, this._contentGroup).setInteractive({ useHandCursor: true });
 
             title.on('pointerover', () => title.setColor('#ffffff'));
@@ -129,7 +129,7 @@ export class CompendiumScene extends Phaser.Scene {
         
         const masteryText = `Precisão de Batalha nesta região: ${pct}% (${mastery.correct}/${mastery.attempted})`;
         this.add.text(x, 450, masteryText, {
-            fontSize: '10px', color: '#888', fontFamily: 'Courier New'
+            fontSize: '16px', color: '#888', fontFamily: 'Courier New'
         }, this._contentGroup);
     }
 
@@ -146,11 +146,11 @@ export class CompendiumScene extends Phaser.Scene {
         // Combine all pages for the compendium view
         const content = book.pages.join('\n\n');
         const text = this.add.text(W/2 - 180, H/2 - 90, content, {
-            fontSize: '11px', color: '#e8dfd1', fontFamily: 'Courier New', wordWrap: { width: 360 }, lineSpacing: 4
+            fontSize: '17px', color: '#e8dfd1', fontFamily: 'Courier New', wordWrap: { width: 360 }, lineSpacing: 4
         }).setOrigin(0).setDepth(102);
 
         const closeHint = this.add.text(W/2, H/2 + 130, '[ CLIQUE PARA VOLTAR ]', {
-            fontSize: '10px', color: '#888', fontFamily: 'Courier New'
+            fontSize: '16px', color: '#888', fontFamily: 'Courier New'
         }).setOrigin(0.5).setDepth(102);
 
         overlay.on('pointerdown', () => {

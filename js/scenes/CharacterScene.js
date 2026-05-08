@@ -26,20 +26,20 @@ export class CharacterScene extends Phaser.Scene {
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(1, 0xd4af37);
 
         this.add.text(W / 2, 22, 'P E R S O N A G E M', {
-            fontSize: '14px', color: '#ffd700', fontFamily: 'Courier New',
+            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
 
         // Close button
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
             .setInteractive().on('pointerdown', () => this._close());
-        this.add.text(515, 25, 'X', { fontSize: '12px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+        this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         // Name + level
         this.add.text(W / 2, 46, p.name || 'Aventureiro', {
             fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
         this.add.text(W / 2, 66, `Nível ${p.level}`, {
-            fontSize: '12px', color: '#888888', fontFamily: 'Courier New',
+            fontSize: '15px', color: '#888888', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
 
         this._buildVitalsPanel();
@@ -48,14 +48,14 @@ export class CharacterScene extends Phaser.Scene {
         this._buildMasteryPanel();
 
         this.add.text(W / 2, 458, 'C ou ESC para fechar', {
-            fontSize: '10px', color: '#444444', fontFamily: 'Courier New',
+            fontSize: '16px', color: '#444444', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
     }
 
     _buildVitalsPanel() {
         const p = this._player;
         this.add.rectangle(14, 86, 252, 122, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(140, 92, 'Vitais', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(140, 92, 'Vitais', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const rows = [
             ['HP',    `${p.hp} / ${p.maxHp}`],
@@ -65,15 +65,15 @@ export class CharacterScene extends Phaser.Scene {
         ];
         rows.forEach(([label, val], i) => {
             const y = 110 + i * 22;
-            this.add.text(22, y, label, { fontSize: '11px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
-            this.add.text(260, y, val,  { fontSize: '11px', color: '#ffffff',  fontFamily: 'Courier New' }).setOrigin(1, 0);
+            this.add.text(22, y, label, { fontSize: '17px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            this.add.text(260, y, val,  { fontSize: '17px', color: '#ffffff',  fontFamily: 'Courier New' }).setOrigin(1, 0);
         });
     }
 
     _buildAttributesPanel() {
         const p = this._player;
         this.add.rectangle(274, 86, 256, 122, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(402, 92, 'Atributos', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(402, 92, 'Atributos', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const STATS = [
             ['strength',     'Força'],
@@ -87,10 +87,10 @@ export class CharacterScene extends Phaser.Scene {
 
         STATS.forEach(([key, label], i) => {
             const y = 110 + i * 24;
-            this.add.text(282, y, label, { fontSize: '11px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            this.add.text(282, y, label, { fontSize: '17px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
 
             this._statValTxts[key] = this.add.text(404, y, String(p[key]), {
-                fontSize: '11px', color: '#ffffff', fontFamily: 'Courier New',
+                fontSize: '17px', color: '#ffffff', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0);
 
             const btn = this.add.rectangle(426, y, 56, 18, 0x1a1a33, 1).setOrigin(0, 0)
@@ -98,12 +98,12 @@ export class CharacterScene extends Phaser.Scene {
                 .on('pointerover', () => btn.setFillStyle(0x2a2a55))
                 .on('pointerout',  () => btn.setFillStyle(0x1a1a33))
                 .on('pointerdown', () => this._spendPoint(key));
-            this.add.text(454, y + 9, '+1', { fontSize: '10px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
+            this.add.text(454, y + 9, '+1', { fontSize: '16px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
             this._plusBtns[key] = btn;
         });
 
         this._statPointsTxt = this.add.text(402, 208, '', {
-            fontSize: '10px', color: '#ffaa00', fontFamily: 'Courier New',
+            fontSize: '16px', color: '#ffaa00', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
         this._refreshStatPoints();
     }
@@ -111,7 +111,7 @@ export class CharacterScene extends Phaser.Scene {
     _buildEquipmentPanel() {
         const p = this._player;
         this.add.rectangle(14, 218, 516, 122, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(272, 224, 'Equipamentos', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(272, 224, 'Equipamentos', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const SLOTS = [
             ['head',      'Cabeça'],  ['chest',     'Peito'],
@@ -129,15 +129,15 @@ export class CharacterScene extends Phaser.Scene {
             const name   = itemId ? (ITEMS[itemId]?.name || itemId) : '—';
             const color  = itemId ? '#aaaaff' : '#333333';
 
-            this.add.text(x, y, label, { fontSize: '9px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
-            this.add.text(x, y + 14, name, { fontSize: '10px', color, fontFamily: 'Courier New', wordWrap: { width: 118 } }).setOrigin(0, 0);
+            this.add.text(x, y, label, { fontSize: '15px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            this.add.text(x, y + 14, name, { fontSize: '16px', color, fontFamily: 'Courier New', wordWrap: { width: 118 } }).setOrigin(0, 0);
         });
     }
 
     _buildMasteryPanel() {
         const p = this._player;
         this.add.rectangle(14, 350, 516, 102, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(272, 356, 'Maestria por Área', { fontSize: '11px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.text(272, 356, 'Maestria por Área', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const areas = Object.keys(p.mastery);
         areas.forEach((area, i) => {
@@ -147,15 +147,15 @@ export class CharacterScene extends Phaser.Scene {
             const color = pct >= 70 ? '#00cc44' : pct >= 40 ? '#ffaa00' : '#777777';
             const short = info?.displayName?.split(' ')[0] || area;
 
-            this.add.text(x + 30, 374, short, { fontSize: '8px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            this.add.text(x + 30, 374, short, { fontSize: '17px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
             // Bar track
             this.add.rectangle(x, 388, 60, 8, 0x111111, 1).setOrigin(0, 0);
             if (pct > 0) this.add.rectangle(x, 388, Math.floor(60 * pct / 100), 8, color === '#00cc44' ? 0x00cc44 : color === '#ffaa00' ? 0xffaa00 : 0x777777, 1).setOrigin(0, 0);
 
-            this.add.text(x + 30, 400, `${pct}%`, { fontSize: '10px', color, fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            this.add.text(x + 30, 400, `${pct}%`, { fontSize: '16px', color, fontFamily: 'Courier New' }).setOrigin(0.5, 0);
             this.add.text(x + 30, 414, `${p.mastery[area].correct}/${p.mastery[area].attempted}`, {
-                fontSize: '9px', color: '#555555', fontFamily: 'Courier New',
+                fontSize: '15px', color: '#555555', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0);
         });
     }
