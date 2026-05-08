@@ -13,6 +13,7 @@ import { SkillSystem } from '../systems/SkillSystem.js';
 import { TutorialSystem } from '../systems/TutorialSystem.js';
 import { FogManager } from '../systems/FogManager.js';
 import { ITEMS } from '../data/items.js';
+import { MONSTERS } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { buildPlayerSprite } from '../utils/Draw.js';
 import EventBus from '../utils/EventBus.js';
@@ -324,6 +325,28 @@ export class WorldScene extends Phaser.Scene {
             }
         }
 
+        // Boss gate — each area's boss must be defeated before using the exit
+        const AREA_BOSS = {
+            village:   { monsterId: 'boss_village',   instanceId: 'v_boss'  },
+            meadows:   { monsterId: 'boss_meadows',   instanceId: 'me_boss' },
+            forest:    { monsterId: 'boss_forest',    instanceId: 'fo_boss' },
+            plains:    { monsterId: 'boss_plains',    instanceId: 'pl_boss' },
+            mountains: { monsterId: 'boss_mountains', instanceId: 'mo_boss' },
+        };
+        const bossEntry = AREA_BOSS[this._playerData.currentArea];
+        if (bossEntry) {
+            const defeated = this._playerData.defeatedMonsters || {};
+            if (!defeated[bossEntry.instanceId]) {
+                const bossDef = MONSTERS[bossEntry.monsterId];
+                if (bossDef) {
+                    this._chat(`☠ {{bad:${bossDef.name.toUpperCase()} BLOQUEIA A SAÍDA!}} Derrote o chefe para avançar.`, 'error');
+                    this._portalBoss = { def: bossDef, instanceId: bossEntry.instanceId };
+                    this.time.delayedCall(900, () => this._startCombat(this._portalBoss));
+                    return;
+                }
+            }
+        }
+
         if (nextArea === 'village' && this._playerData.currentArea !== 'village') {
             const heal = this._playerData.maxHp - this._playerData.hp;
             if (heal > 0) {
@@ -517,6 +540,12 @@ export class WorldScene extends Phaser.Scene {
                 this._monsters.splice(idx, 1);
                 if (!this._playerData.defeatedMonsters) this._playerData.defeatedMonsters = {};
                 this._playerData.defeatedMonsters[instanceId] = true;
+            } else if (this._portalBoss?.instanceId === instanceId) {
+                // Boss was triggered by portal gate, not a map entity
+                defDef = this._portalBoss.def;
+                this._portalBoss = null;
+                if (!this._playerData.defeatedMonsters) this._playerData.defeatedMonsters = {};
+                this._playerData.defeatedMonsters[instanceId] = true;
             }
             if (defDef) {
                 QuestSystem.recordKill(this._playerData, defDef);
@@ -529,6 +558,11 @@ export class WorldScene extends Phaser.Scene {
                 }
                 if (defDef.isBoss) {
                     this._chat(`☠ {{level:CHEFE DERROTADO!}} {{accent:${defDef.name}}} foi vencido!`, 'levelup');
+                    if (this._mapManager.mapData?.exits?.length > 0) {
+                        this.time.delayedCall(600, () =>
+                            this._chat('{{accent:O portal está livre!}} Você pode avançar para a próxima área.', 'portal')
+                        );
+                    }
                 }
             }
             if (xpGained) this._chat(`Você obteve {{xp:+${xpGained} XP}} na batalha!`, 'xp');
