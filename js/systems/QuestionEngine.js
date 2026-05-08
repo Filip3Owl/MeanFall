@@ -1,5 +1,6 @@
 import { QUESTIONS } from '../data/questions.js';
 import { ELEMENTS, TOPIC_TO_ELEMENT } from '../constants.js';
+import { GENERATORS } from './QuestionGenerator.js';
 
 export const QuestionEngine = {
 
@@ -21,12 +22,11 @@ export const QuestionEngine = {
             !recentIds.includes(q.id)
         );
 
-        if (pool.length === 0) {
-            // Fallback: ignore recentIds filter
-            return this._pickFrom(QUESTIONS[topic] || [], mastery);
-        }
+        const q = pool.length === 0
+            ? this._pickFrom(QUESTIONS[topic] || [], mastery)
+            : this._pickFrom(pool, mastery);
 
-        return this._pickFrom(pool, mastery);
+        return this._applyGenerator(q);
     },
 
     // Element-driven selection: routes by elemental affinity to the right topic.
@@ -39,6 +39,17 @@ export const QuestionEngine = {
 
     elementOfTopic(topic) {
         return TOPIC_TO_ELEMENT[topic] || null;
+    },
+
+    _applyGenerator(q) {
+        if (!q) return null;
+        const gen = GENERATORS[q.id];
+        if (!gen) return q;
+        try {
+            return { ...q, ...gen() };
+        } catch (e) {
+            return q;
+        }
     },
 
     _pickFrom(pool, mastery) {
