@@ -57,8 +57,8 @@ export class ScratchpadScene extends Phaser.Scene {
         const headerLine = this.add.rectangle(0, 25, W, 1, 0x4433aa, 0.35).setOrigin(0);
 
         // Title
-        const titleTx = this.add.text(W / 2 - 10, 13, '⟨ CALCULADORA & NOTAS ⟩', {
-            fontSize: '9px', color: '#9a7c30', fontFamily: 'Courier New',
+        const titleTx = this.add.text(W / 2 - 10, 13, '⟨ CALC & NOTAS ⟩', {
+            fontSize: '11px', color: '#9a7c30', fontFamily: 'Courier New',
             fontStyle: 'bold', letterSpacing: 0.5,
         }).setOrigin(0.5);
 
@@ -110,13 +110,13 @@ export class ScratchpadScene extends Phaser.Scene {
         this._calcTabBg = this.add.rectangle(2, 27, halfW - 3, 22, 0x17112e, 1).setOrigin(0)
             .setStrokeStyle(1, 0x4d3899, 1).setInteractive({ useHandCursor: true });
         this._calcTabTx = this.add.text(2 + (halfW - 3) / 2, 38, '⊞ CALC', {
-            fontSize: '10px', color: '#9977ee', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: '#9977ee', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5);
 
         this._notesTabBg = this.add.rectangle(halfW + 1, 27, W - halfW - 3, 22, 0x0b0914, 1).setOrigin(0)
             .setStrokeStyle(1, 0x2e224c, 1).setInteractive({ useHandCursor: true });
         this._notesTabTx = this.add.text(halfW + 1 + (W - halfW - 3) / 2, 38, '✎ NOTAS', {
-            fontSize: '10px', color: '#5f4d99', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: '#5f4d99', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5);
 
         this._calcTabBg .on('pointerdown', () => this._switchTab('calc'));
@@ -140,8 +140,8 @@ export class ScratchpadScene extends Phaser.Scene {
         // Display area
         const dispBg = this.add.rectangle(8, topY, W - 16, 40, 0x030109, 1).setOrigin(0)
             .setStrokeStyle(1, 0x2d2050, 1);
-        this._historyTxt = this.add.text(W - 12, topY + 8, '', {
-            fontSize: '8px', color: '#3d2d60', fontFamily: 'Courier New', align: 'right',
+        this._historyTxt = this.add.text(W - 12, topY + 6, '', {
+            fontSize: '10px', color: '#3d2d60', fontFamily: 'Courier New', align: 'right',
         }).setOrigin(1, 0);
         this._displayTxt = this.add.text(W - 12, topY + 32, '0', {
             fontSize: '15px', color: '#88ff99', fontFamily: 'Courier New', fontStyle: 'bold',
@@ -210,7 +210,7 @@ export class ScratchpadScene extends Phaser.Scene {
 
         // Text display
         this._notesTxt = this.add.text(12, topY + 6, '', {
-            fontSize: '10px', color: '#c8c0e8', fontFamily: 'Courier New',
+            fontSize: '12px', color: '#c8c0e8', fontFamily: 'Courier New',
             wordWrap: { width: W - 28 }, lineSpacing: 3,
         }).setOrigin(0);
 
@@ -223,7 +223,7 @@ export class ScratchpadScene extends Phaser.Scene {
         const saveBg = this.add.rectangle(8, H - 33, saveW, btnH, 0x07100a, 1).setOrigin(0)
             .setStrokeStyle(1, 0x1e5528, 0.9).setInteractive({ useHandCursor: true });
         const saveTx = this.add.text(8 + saveW / 2, H - 20, '✓  SALVAR', {
-            fontSize: '10px', color: '#3dbb55', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: '#3dbb55', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5);
         saveBg.on('pointerover', () => saveBg.setFillStyle(0x0e1e10));
         saveBg.on('pointerout',  () => saveBg.setFillStyle(0x07100a));
@@ -235,7 +235,7 @@ export class ScratchpadScene extends Phaser.Scene {
         const clearBg = this.add.rectangle(clearX, H - 33, clearW, btnH, 0x100708, 1).setOrigin(0)
             .setStrokeStyle(1, 0x552020, 0.9).setInteractive({ useHandCursor: true });
         const clearTx = this.add.text(clearX + clearW / 2, H - 20, '⊗  LIMPAR', {
-            fontSize: '10px', color: '#bb3322', fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: '#bb3322', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5);
         clearBg.on('pointerover', () => clearBg.setFillStyle(0x1e0e0e));
         clearBg.on('pointerout',  () => clearBg.setFillStyle(0x100708));

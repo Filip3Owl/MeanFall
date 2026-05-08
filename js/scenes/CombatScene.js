@@ -73,14 +73,14 @@ export class CombatScene extends Phaser.Scene {
         this.add.rectangle(0, 32, W, 1, 0x000000, 0.6).setOrigin(0, 0);
 
         // Corner runes
-        this.add.text(8, 6, '⟨ ⟩', { fontSize: '11px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(0, 0).setAlpha(0.7);
-        this.add.text(W - 8, 6, '⟨ ⟩', { fontSize: '11px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(1, 0).setAlpha(0.7);
+        this.add.text(8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(0, 0).setAlpha(0.7);
+        this.add.text(W - 8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(1, 0).setAlpha(0.7);
 
         const titleStr = isElite
             ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
             : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
         this.add.text(W / 2, 16, titleStr, {
-            fontSize: '11px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
+            fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
             stroke: '#000000', strokeThickness: 2,
         }).setOrigin(0.5, 0.5);
 
@@ -132,20 +132,20 @@ export class CombatScene extends Phaser.Scene {
 
         // Info panel (right side)
         const ix = PX + 108;
-        this.add.text(ix, PY + 10, this._monsterDef.name.toUpperCase(), {
-            fontSize: '10px', color: '#f0e8d8', fontFamily: 'Courier New', fontStyle: 'bold',
+        this.add.text(ix, PY + 8, this._monsterDef.name.toUpperCase(), {
+            fontSize: '13px', color: '#f0e8d8', fontFamily: 'Courier New', fontStyle: 'bold',
             wordWrap: { width: 148 },
         }).setOrigin(0, 0);
 
         // Level + element badge
-        const badgeBg = this.add.rectangle(ix, PY + 32, 60, 14, eColor, 0.2).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.5);
-        this.add.text(ix + 30, PY + 39, `${elem.symbol} · Nv.${this._monsterDef.level}`, {
-            fontSize: '9px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+        const badgeBg = this.add.rectangle(ix, PY + 30, 72, 16, eColor, 0.2).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.5);
+        this.add.text(ix + 36, PY + 38, `${elem.symbol} · Nv.${this._monsterDef.level}`, {
+            fontSize: '11px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
         // HP label row
-        this.add.text(ix, PY + 52, 'HP', { fontSize: '9px', color: '#aa9988', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._mHpTxt = this.add.text(PX + PW - 6, PY + 52, '', { fontSize: '9px', color: '#ffbbaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
+        this.add.text(ix, PY + 52, 'HP', { fontSize: '11px', color: '#aa9988', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._mHpTxt = this.add.text(PX + PW - 6, PY + 52, '', { fontSize: '11px', color: '#ffbbaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
 
         // HP bar graphics
         this._mHpGfx = this.add.graphics();
@@ -153,9 +153,9 @@ export class CombatScene extends Phaser.Scene {
 
         // Flavor text
         if (this._monsterDef.flavor) {
-            this.add.text(ix, PY + 86, this._monsterDef.flavor, {
-                fontSize: '8px', color: '#998877', fontFamily: 'Courier New', fontStyle: 'italic',
-                wordWrap: { width: 148 }, lineSpacing: 1,
+            this.add.text(ix, PY + 82, this._monsterDef.flavor, {
+                fontSize: '11px', color: '#aa9977', fontFamily: 'Courier New', fontStyle: 'italic',
+                wordWrap: { width: 148 }, lineSpacing: 2,
             }).setOrigin(0, 0);
         }
     }
@@ -182,14 +182,14 @@ export class CombatScene extends Phaser.Scene {
 
         // Info (left side of panel)
         const ix = PX + 8;
-        this.add.text(ix, PY + 10, (p.name || 'Aventureiro').toUpperCase(), {
-            fontSize: '10px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
+        this.add.text(ix, PY + 8, (p.name || 'Aventureiro').toUpperCase(), {
+            fontSize: '13px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0, 0);
 
         // Level badge
-        this.add.rectangle(ix, PY + 32, 56, 14, 0x44cc66, 0.18).setOrigin(0, 0).setStrokeStyle(1, 0x44cc66, 0.5);
-        this.add.text(ix + 28, PY + 39, `Nv. ${p.level}`, {
-            fontSize: '9px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
+        this.add.rectangle(ix, PY + 30, 64, 16, 0x44cc66, 0.18).setOrigin(0, 0).setStrokeStyle(1, 0x44cc66, 0.5);
+        this.add.text(ix + 32, PY + 38, `Nv. ${p.level}`, {
+            fontSize: '11px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
         // Streak text (top-right of whole panel row)
@@ -227,7 +227,7 @@ export class CombatScene extends Phaser.Scene {
 
         // Section title
         this.add.text(W / 2, QY + 8, '◆  P E R G U N T A  ◆', {
-            fontSize: '10px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+            fontSize: '12px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0).setAlpha(0.8);
 
         // Thin title separator
@@ -261,7 +261,7 @@ export class CombatScene extends Phaser.Scene {
             const LABELS = ['A','B','C','D'];
             const badge = this.add.rectangle(bx + 3, by + 3, 24, 24, eColor, 0.25).setOrigin(0, 0).setStrokeStyle(1, eColor, 0.6);
             const badgeTx = this.add.text(bx + 15, by + 15, LABELS[i], {
-                fontSize: '11px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold',
                 stroke: '#000000', strokeThickness: 2,
             }).setOrigin(0.5, 0.5);
 
@@ -324,7 +324,7 @@ export class CombatScene extends Phaser.Scene {
                 .on('pointerover', () => bg.setFillStyle(fillColor + 0x0a0a0a))
                 .on('pointerout',  () => bg.setFillStyle(fillColor));
             this.add.text(x + w / 2, BY + 20, label, {
-                fontSize: '10px', color: textColor, fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '12px', color: textColor, fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0.5, 0.5);
             return bg;
         };
@@ -761,11 +761,11 @@ export class CombatScene extends Phaser.Scene {
         }).setOrigin(0.5, 0).setDepth(102);
 
         this.add.text(W / 2, py2 + 38, `+${xp} XP    +${gold} Ouro`, {
-            fontSize: '12px', color: '#ffaa44', fontFamily: 'Courier New',
+            fontSize: '14px', color: '#ffaa44', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(102);
 
         this.add.text(W / 2, py2 + 60, 'ITENS OBTIDOS:', {
-            fontSize: '10px', color: '#888888', fontFamily: 'Courier New',
+            fontSize: '12px', color: '#888888', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(102);
 
         let rowIdx = 0;
@@ -777,10 +777,10 @@ export class CombatScene extends Phaser.Scene {
             this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0).setDepth(102);
             this.add.image(px2 + 32, yLine + 9, item.icon || 'item_potion_red').setScale(0.6).setDepth(102);
             this.add.text(px2 + 46, yLine + 9, item.name, {
-                fontSize: '11px', color, fontFamily: 'Courier New',
+                fontSize: '13px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5).setDepth(102);
             this.add.text(px2 + panelW - 28, yLine + 9, (item.rarity || 'common').toUpperCase(), {
-                fontSize: '9px', color: '#666666', fontFamily: 'Courier New',
+                fontSize: '11px', color: '#666666', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5).setDepth(102);
             rowIdx++;
         });
@@ -793,10 +793,10 @@ export class CombatScene extends Phaser.Scene {
             const yLine = py2 + 78 + rowIdx * 22;
             this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x1a1108, 1).setOrigin(0, 0).setDepth(102);
             this.add.text(px2 + 28, yLine + 9, `[Livro] ${book.title}`, {
-                fontSize: '11px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '12px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0, 0.5).setDepth(102);
             this.add.text(px2 + panelW - 28, yLine + 9, imp.name.toUpperCase(), {
-                fontSize: '9px', color: imp.hex, fontFamily: 'Courier New',
+                fontSize: '11px', color: imp.hex, fontFamily: 'Courier New',
             }).setOrigin(1, 0.5).setDepth(102);
             rowIdx++;
         });
@@ -808,7 +808,7 @@ export class CombatScene extends Phaser.Scene {
             .on('pointerout',  () => btnBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => onContinue());
         this.add.text(W / 2, btnY + 14, 'CONTINUAR', {
-            fontSize: '12px', color: '#88ff88', fontFamily: 'Courier New',
+            fontSize: '14px', color: '#88ff88', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0.5).setDepth(102);
 
         // Auto-continue after 6s as fallback
