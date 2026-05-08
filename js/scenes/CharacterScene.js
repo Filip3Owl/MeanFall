@@ -110,7 +110,7 @@ export class CharacterScene extends Phaser.Scene {
 
     _buildEquipmentPanel() {
         const p = this._player;
-        this.add.rectangle(14, 218, 516, 122, 0x080604, 1).setOrigin(0, 0);
+        this.add.rectangle(14, 218, 516, 148, 0x080604, 1).setOrigin(0, 0);
         this.add.text(272, 224, 'Equipamentos', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const SLOTS = [
@@ -132,12 +132,23 @@ export class CharacterScene extends Phaser.Scene {
             this.add.text(x, y, label, { fontSize: '15px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
             this.add.text(x, y + 14, name, { fontSize: '16px', color, fontFamily: 'Courier New', wordWrap: { width: 118 } }).setOrigin(0, 0);
         });
+
+        // ── Relic slot (full width) ───────────────────────────────────────────
+        const relicId   = p.equipment?.relic;
+        const relicItem = relicId ? ITEMS[relicId] : null;
+        const relicName = relicItem ? relicItem.name : '—  Nenhuma relíquia equipada';
+        const relicColor = relicItem ? (relicItem.rarity === 'legendary' ? '#ffaa22' : '#aaaaff') : '#333333';
+        this.add.text(22,  338, 'Relíquia', { fontSize: '15px', color: '#aa8800', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        this.add.text(110, 338, relicName,  { fontSize: '15px', color: relicColor, fontFamily: 'Courier New', wordWrap: { width: 400 } }).setOrigin(0, 0);
+        if (relicItem?.passiveEffect) {
+            this.add.text(110, 352, relicItem.description || '', { fontSize: '13px', color: '#888888', fontFamily: 'Courier New', wordWrap: { width: 400 } }).setOrigin(0, 0);
+        }
     }
 
     _buildMasteryPanel() {
         const p = this._player;
-        this.add.rectangle(14, 350, 516, 102, 0x080604, 1).setOrigin(0, 0);
-        this.add.text(272, 356, 'Maestria por Área', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+        this.add.rectangle(14, 376, 516, 96, 0x080604, 1).setOrigin(0, 0);
+        this.add.text(272, 382, 'Maestria por Área', { fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
         const areas = Object.keys(p.mastery);
         areas.forEach((area, i) => {
@@ -147,15 +158,15 @@ export class CharacterScene extends Phaser.Scene {
             const color = pct >= 70 ? '#00cc44' : pct >= 40 ? '#ffaa00' : '#777777';
             const short = info?.displayName?.split(' ')[0] || area;
 
-            this.add.text(x + 30, 374, short, { fontSize: '17px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            this.add.text(x + 30, 400, short, { fontSize: '15px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
             // Bar track
-            this.add.rectangle(x, 388, 60, 8, 0x111111, 1).setOrigin(0, 0);
-            if (pct > 0) this.add.rectangle(x, 388, Math.floor(60 * pct / 100), 8, color === '#00cc44' ? 0x00cc44 : color === '#ffaa00' ? 0xffaa00 : 0x777777, 1).setOrigin(0, 0);
+            this.add.rectangle(x, 414, 60, 7, 0x111111, 1).setOrigin(0, 0);
+            if (pct > 0) this.add.rectangle(x, 414, Math.floor(60 * pct / 100), 7, color === '#00cc44' ? 0x00cc44 : color === '#ffaa00' ? 0xffaa00 : 0x777777, 1).setOrigin(0, 0);
 
-            this.add.text(x + 30, 400, `${pct}%`, { fontSize: '16px', color, fontFamily: 'Courier New' }).setOrigin(0.5, 0);
-            this.add.text(x + 30, 414, `${p.mastery[area].correct}/${p.mastery[area].attempted}`, {
-                fontSize: '15px', color: '#555555', fontFamily: 'Courier New',
+            this.add.text(x + 30, 424, `${pct}%`, { fontSize: '15px', color, fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            this.add.text(x + 30, 438, `${p.mastery[area].correct}/${p.mastery[area].attempted}`, {
+                fontSize: '13px', color: '#555555', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0);
         });
     }

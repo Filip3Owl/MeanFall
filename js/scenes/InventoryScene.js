@@ -131,7 +131,7 @@ export class InventoryScene extends Phaser.Scene {
 
     _buildEquippedPanel() {
         const py = BODY_Y + 260;
-        this.add.rectangle(DET_X, py, DET_W, 178, 0x080604, 1).setOrigin(0, 0);
+        this.add.rectangle(DET_X, py, DET_W, 210, 0x080604, 1).setOrigin(0, 0);
         this.add.text(DET_X + DET_W / 2, py + 6, 'Equipado', {
             fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
@@ -222,8 +222,8 @@ export class InventoryScene extends Phaser.Scene {
             });
         }
 
-        // Footer hint
-        this._footerTx = this.add.text(W / 2, H - 10, '↑↓ navegar  ·  Enter: ação  ·  I / ESC: fechar', {
+        // Footer hint — centered on left panel to avoid overlap with relic slot
+        this._footerTx = this.add.text(LIST_X + LIST_W / 2, H - 10, '↑↓  Enter: ação  ·  I/ESC: fechar', {
             fontSize: '12px', color: '#444444', fontFamily: 'Courier New',
         }).setOrigin(0.5, 1);
     }
@@ -239,19 +239,21 @@ export class InventoryScene extends Phaser.Scene {
             ['ring',      'Anel'],   ['amulet',    'Amul'],
         ];
         const py = BODY_Y + 280;
+        const SH = 24; // slot height
+        const SP = 24; // slot spacing
 
         SLOTS.forEach(([slot, label], i) => {
             const col = i % 2, row = Math.floor(i / 2);
             const x   = DET_X + col * 113;
-            const y   = py + row * 30;
+            const y   = py + row * SP;
 
-            const itemId   = this._player.equipment?.[slot];
-            const item     = itemId ? ITEMS[itemId] : null;
+            const itemId    = this._player.equipment?.[slot];
+            const item      = itemId ? ITEMS[itemId] : null;
             const shortName = item ? (item.name.length > 9 ? item.name.slice(0, 9) + '…' : item.name) : '—';
-            const color    = item ? (RARITY_COLORS[item.rarity] || '#aaaaff') : '#2a2a2a';
-            const fillBg   = itemId ? 0x1a1a2a : 0x0a0a0a;
+            const color     = item ? (RARITY_COLORS[item.rarity] || '#aaaaff') : '#2a2a2a';
+            const fillBg    = itemId ? 0x1a1a2a : 0x0a0a0a;
 
-            const bg = this.add.rectangle(x, y, 111, 28, fillBg, 1).setOrigin(0, 0)
+            const bg = this.add.rectangle(x, y, 111, SH, fillBg, 1).setOrigin(0, 0)
                 .setStrokeStyle(1, itemId ? 0x334466 : 0x181818);
             if (itemId) {
                 bg.setInteractive()
@@ -259,10 +261,31 @@ export class InventoryScene extends Phaser.Scene {
                     .on('pointerout',  () => bg.setFillStyle(fillBg))
                     .on('pointerdown', () => this._unequip(slot));
             }
-            const lblTxt  = this.add.text(x + 4, y + 3,  label,     { fontSize: '11px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
-            const itemTxt = this.add.text(x + 4, y + 14, shortName, { fontSize: '12px', color,             fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const lblTxt  = this.add.text(x + 4, y + 2,  label,     { fontSize: '10px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const itemTxt = this.add.text(x + 4, y + 12, shortName, { fontSize: '11px', color,             fontFamily: 'Courier New' }).setOrigin(0, 0);
             this._slotRows[slot] = [bg, lblTxt, itemTxt];
         });
+
+        // ── Relic slot (full width, gold-bordered) ────────────────────────────
+        const relicY   = py + 4 * SP + 4;
+        const relicId  = this._player.equipment?.relic;
+        const relicItem = relicId ? ITEMS[relicId] : null;
+        const relicName = relicItem ? relicItem.name : '—  Nenhuma relíquia equipada';
+        const relicColor = relicItem ? (RARITY_COLORS[relicItem.rarity] || '#ffaa22') : '#333333';
+        const relicFill  = relicId ? 0x1a1200 : 0x0a0a0a;
+        const relicStroke = relicId ? 0xaa8800 : 0x222222;
+
+        const relicBg = this.add.rectangle(DET_X, relicY, DET_W - 2, SH + 4, relicFill, 1).setOrigin(0, 0)
+            .setStrokeStyle(1, relicStroke);
+        if (relicId) {
+            relicBg.setInteractive()
+                .on('pointerover', () => relicBg.setFillStyle(0x332200))
+                .on('pointerout',  () => relicBg.setFillStyle(relicFill))
+                .on('pointerdown', () => this._unequip('relic'));
+        }
+        const relicLbl  = this.add.text(DET_X + 4,  relicY + 2,  'Relíquia',  { fontSize: '10px', color: relicId ? '#cc9900' : '#444444', fontFamily: 'Courier New' }).setOrigin(0, 0);
+        const relicTxt  = this.add.text(DET_X + 70, relicY + 2,  relicName,   { fontSize: '11px', color: relicColor, fontFamily: 'Courier New', wordWrap: { width: DET_W - 78 } }).setOrigin(0, 0);
+        this._slotRows['relic'] = [relicBg, relicLbl, relicTxt];
     }
 
     // ── Detail display ────────────────────────────────────────────────────────

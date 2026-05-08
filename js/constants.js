@@ -149,7 +149,7 @@ export const PLAYER_DEFAULTS = {
     lastSafePosition: { x: 8, y: 7 },
     lastSafeArea: 'village',
     inventory: [],
-    equipment: { head: null, chest: null, legs: null, feet: null, leftHand: null, rightHand: null, ring: null, amulet: null },
+    equipment: { head: null, chest: null, legs: null, feet: null, leftHand: null, rightHand: null, ring: null, amulet: null, relic: null },
     mastery: {
         village:   { attempted: 0, correct: 0, wrongIds: [] },
         meadows:   { attempted: 0, correct: 0, wrongIds: [] },

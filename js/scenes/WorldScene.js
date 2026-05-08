@@ -34,6 +34,7 @@ export class WorldScene extends Phaser.Scene {
         if (!this._playerData.openedChests) this._playerData.openedChests = {};
         if (!this._playerData.inventory) this._playerData.inventory = [];
         if (!this._playerData.equipment) this._playerData.equipment = {};
+        if (this._playerData.equipment.relic === undefined) this._playerData.equipment.relic = null;
         
         // Ensure stats exist
         const stats = ['strength', 'intelligence', 'agility', 'vitality'];
@@ -922,6 +923,8 @@ export class WorldScene extends Phaser.Scene {
     }
 
     shutdown() {
+        this._rematchOverlay?.destroy();
+        this._rematchOverlay = null;
         EventBus.off('combat-end', this._onCombatEnd);
         EventBus.off('player-level-up', this._onLevelUp);
         EventBus.off('bounty-complete');
