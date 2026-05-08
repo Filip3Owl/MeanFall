@@ -19,6 +19,8 @@ export const SHOPS = {
             'wooden_sword',
             'wooden_shield',
             'copper_ring',
+            'supreme_health_potion',
+            'full_focus_elixir',
         ],
     },
 
@@ -37,6 +39,9 @@ export const SHOPS = {
             'iron_shield',
             'iron_blade',
             'amulet_of_clarity',
+            'shield_of_inference',
+            'greaves_of_wind',
+            'boots_of_swiftness',
         ],
     },
 
@@ -56,6 +61,14 @@ export const SHOPS = {
             'ring_of_focus',
             'amulet_of_clarity',
             'stats_amulet',
+            'sword_of_probability',
+            'staff_of_distributions',
+            'specialist_armor',
+            'ring_of_mastery',
+            'blade_of_sigma',
+            'staff_of_the_oracle',
+            'legendary_robe',
+            'arcane_talisman',
         ],
     },
 };

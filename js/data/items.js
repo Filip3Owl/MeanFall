@@ -22,6 +22,16 @@ export const ITEMS = {
         description: 'Restaura 10 HP e 10 Foco.', effect: { hp: 10, focus: 10 }, value: 25, icon: 'item_scroll',
     },
 
+    // ─── CONSUMÍVEIS AVANÇADOS ────────────────────────────────────────────────
+    supreme_health_potion: {
+        id: 'supreme_health_potion', name: 'Elixir da Vida', type: 'consumable', rarity: 'rare',
+        description: 'Restaura todo o HP.', effect: { hp: 9999 }, value: 220, icon: 'item_potion_red',
+    },
+    full_focus_elixir: {
+        id: 'full_focus_elixir', name: 'Elixir de Foco Total', type: 'consumable', rarity: 'uncommon',
+        description: 'Restaura todo o Foco.', effect: { focus: 9999 }, value: 160, icon: 'item_potion_blue',
+    },
+
     // ─── CABEÇA ───────────────────────────────────────────────────────────────
     leather_cap: {
         id: 'leather_cap', name: 'Capuz de Couro', type: 'equipment', slot: 'head', rarity: 'common',
@@ -67,6 +77,28 @@ export const ITEMS = {
         bonuses: { maxHp: 80, vitality: 6, strength: 3 }, value: 500, icon: 'item_armor',
     },
 
+    // ─── CABEÇA (continuação) ─────────────────────────────────────────────────
+    crown_of_statistics: {
+        id: 'crown_of_statistics', name: 'Coroa do Estatístico', type: 'equipment', slot: 'head', rarity: 'epic',
+        element: 'normal',
+        description: '+8 INT, +8 VIT, +40 HP máx, +20 Foco máx.',
+        bonuses: { intelligence: 8, vitality: 8, maxHp: 40, maxFocus: 20 }, value: 2200, icon: 'item_helm',
+    },
+
+    // ─── PEITO (continuação) ──────────────────────────────────────────────────
+    specialist_armor: {
+        id: 'specialist_armor', name: 'Armadura do Especialista', type: 'equipment', slot: 'chest', rarity: 'epic',
+        element: 'earth',
+        description: '+100 HP máx, +8 VIT, +3 FOR.',
+        bonuses: { maxHp: 100, vitality: 8, strength: 3 }, value: 1500, icon: 'item_armor',
+    },
+    legendary_robe: {
+        id: 'legendary_robe', name: 'Veste Lendária', type: 'equipment', slot: 'chest', rarity: 'legendary',
+        element: 'water',
+        description: '+150 HP máx, +10 VIT, +5 FOR, +5 INT.',
+        bonuses: { maxHp: 150, vitality: 10, strength: 5, intelligence: 5 }, value: 4500, icon: 'item_armor',
+    },
+
     // ─── PERNAS ───────────────────────────────────────────────────────────────
     cloth_pants: {
         id: 'cloth_pants', name: 'Calças de Pano', type: 'equipment', slot: 'legs', rarity: 'common',
@@ -77,6 +109,11 @@ export const ITEMS = {
         description: '+10 HP máx, +2 AGI.', bonuses: { maxHp: 10, agility: 2 }, value: 70, icon: 'item_legs',
     },
 
+    greaves_of_wind: {
+        id: 'greaves_of_wind', name: 'Grevas do Vento', type: 'equipment', slot: 'legs', rarity: 'rare',
+        description: '+5 AGI, +15 HP máx.', bonuses: { agility: 5, maxHp: 15 }, value: 420, icon: 'item_legs',
+    },
+
     // ─── PÉS ──────────────────────────────────────────────────────────────────
     worn_boots: {
         id: 'worn_boots', name: 'Botas Gastas', type: 'equipment', slot: 'feet', rarity: 'common',
@@ -85,6 +122,11 @@ export const ITEMS = {
     boots_agility: {
         id: 'boots_agility', name: 'Botas da Agilidade', type: 'equipment', slot: 'feet', rarity: 'uncommon',
         description: '+3 AGI.', bonuses: { agility: 3 }, value: 80, icon: 'item_boots',
+    },
+
+    boots_of_swiftness: {
+        id: 'boots_of_swiftness', name: 'Botas da Velocidade', type: 'equipment', slot: 'feet', rarity: 'rare',
+        description: '+6 AGI, +5 VIT.', bonuses: { agility: 6, vitality: 5 }, value: 480, icon: 'item_boots',
     },
 
     // ─── MÃOS ─────────────────────────────────────────────────────────────────
@@ -118,6 +160,38 @@ export const ITEMS = {
         damageDistribution: 'normal', damageRange: [0.9, 1.1],
         value: 1200, icon: 'item_sword',
     },
+    sword_of_probability: {
+        id: 'sword_of_probability', name: 'Espada da Probabilidade', type: 'equipment', slot: 'rightHand', rarity: 'epic',
+        element: 'fire',
+        description: '+12 FOR, +4 INT. Dano consistente (Normal).',
+        bonuses: { strength: 12, intelligence: 4 },
+        damageDistribution: 'normal', damageRange: [0.85, 1.15],
+        value: 950, icon: 'item_sword',
+    },
+    staff_of_distributions: {
+        id: 'staff_of_distributions', name: 'Cajado das Distribuições', type: 'equipment', slot: 'rightHand', rarity: 'epic',
+        element: 'water',
+        description: '+10 INT, +5 AGI, +25 Foco máx. Dano variável (Uniforme).',
+        bonuses: { intelligence: 10, agility: 5, maxFocus: 25 },
+        damageDistribution: 'uniform', damageRange: [0.6, 1.4],
+        value: 1100, icon: 'item_staff',
+    },
+    blade_of_sigma: {
+        id: 'blade_of_sigma', name: 'Lâmina de Sigma', type: 'equipment', slot: 'rightHand', rarity: 'legendary',
+        element: 'ice',
+        description: '+20 FOR, +8 AGI. Dano ultra-preciso (±5%).',
+        bonuses: { strength: 20, agility: 8 },
+        damageDistribution: 'normal', damageRange: [0.95, 1.05],
+        value: 3500, icon: 'item_sword',
+    },
+    staff_of_the_oracle: {
+        id: 'staff_of_the_oracle', name: 'Cajado do Oráculo', type: 'equipment', slot: 'rightHand', rarity: 'legendary',
+        element: 'shadow',
+        description: '+14 INT, +8 AGI, +40 Foco máx. Dano caótico mas devastador.',
+        bonuses: { intelligence: 14, agility: 8, maxFocus: 40 },
+        damageDistribution: 'uniform', damageRange: [0.5, 1.5],
+        value: 4000, icon: 'item_staff',
+    },
     wooden_shield: {
         id: 'wooden_shield', name: 'Escudo de Madeira', type: 'equipment', slot: 'leftHand', rarity: 'common',
         description: '+8 HP máx, +1 VIT.', bonuses: { maxHp: 8, vitality: 1 }, value: 35, icon: 'item_shield',
@@ -125,6 +199,18 @@ export const ITEMS = {
     iron_shield: {
         id: 'iron_shield', name: 'Escudo de Ferro', type: 'equipment', slot: 'leftHand', rarity: 'uncommon',
         description: '+20 HP máx, +3 VIT.', bonuses: { maxHp: 20, vitality: 3 }, value: 120, icon: 'item_shield',
+    },
+
+    shield_of_inference: {
+        id: 'shield_of_inference', name: 'Escudo da Inferência', type: 'equipment', slot: 'leftHand', rarity: 'rare',
+        element: 'shadow',
+        description: '+35 HP máx, +5 VIT.', bonuses: { maxHp: 35, vitality: 5 }, value: 800, icon: 'item_shield',
+    },
+    bulwark_of_distribution: {
+        id: 'bulwark_of_distribution', name: 'Baluarte das Distribuições', type: 'equipment', slot: 'leftHand', rarity: 'epic',
+        element: 'water',
+        description: '+60 HP máx, +8 VIT, +3 FOR.',
+        bonuses: { maxHp: 60, vitality: 8, strength: 3 }, value: 1800, icon: 'item_shield',
     },
 
     // ─── ACESSÓRIOS ───────────────────────────────────────────────────────────
@@ -153,45 +239,68 @@ export const ITEMS = {
         id: 'amulet_of_clarity', name: 'Amuleto da Clareza', type: 'equipment', slot: 'amulet', rarity: 'uncommon',
         description: '+2 INT, +15 Foco máx.', bonuses: { intelligence: 2, maxFocus: 15 }, value: 100, icon: 'item_amulet',
     },
+    ring_of_mastery: {
+        id: 'ring_of_mastery', name: 'Anel da Maestria', type: 'equipment', slot: 'ring', rarity: 'epic',
+        element: 'normal',
+        description: '+5 INT, +5 AGI, +20 Foco máx.',
+        bonuses: { intelligence: 5, agility: 5, maxFocus: 20 }, value: 1200, icon: 'item_ring',
+    },
+    arcane_talisman: {
+        id: 'arcane_talisman', name: 'Talismã Arcano', type: 'equipment', slot: 'amulet', rarity: 'legendary',
+        element: 'normal',
+        description: '+8 em todos atributos, +50 HP máx, +30 Foco máx.',
+        bonuses: { strength: 8, intelligence: 8, agility: 8, vitality: 8, maxHp: 50, maxFocus: 30 },
+        value: 6000, icon: 'item_amulet',
+    },
 };
 
 // Drop tables: 'guaranteed' always drops; 'chance' rolls independently.
+// Regular monsters: no guaranteed drops — consumable ~15%, equipment 2-7%.
+// Bosses: guaranteed rare+ loot as reward for the gate encounter.
 export const DROP_TABLES = {
     // ── Vila ────────────────────────────────────────────────────────────────
-    air_wisp:          [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'cloth_pants',       chance: 0.30 }, { itemId: 'copper_ring',       chance: 0.15 }],
-    air_sylph:         [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'leather_cap',       chance: 0.35 }, { itemId: 'worn_boots',        chance: 0.30 }],
-    data_imp:          [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'worn_boots',        chance: 0.25 }, { itemId: 'copper_ring',       chance: 0.10 }],
-    type_specter:      [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'cloth_pants',       chance: 0.30 }, { itemId: 'leather_cap',       chance: 0.20 }],
+    air_wisp:          [{ itemId: 'health_potion',  chance: 0.18 }, { itemId: 'cloth_pants',  chance: 0.06 }, { itemId: 'copper_ring',   chance: 0.03 }],
+    air_sylph:         [{ itemId: 'focus_potion',   chance: 0.18 }, { itemId: 'leather_cap',  chance: 0.06 }, { itemId: 'worn_boots',    chance: 0.05 }],
+    data_imp:          [{ itemId: 'health_potion',  chance: 0.16 }, { itemId: 'worn_boots',   chance: 0.05 }, { itemId: 'copper_ring',   chance: 0.03 }],
+    type_specter:      [{ itemId: 'focus_potion',   chance: 0.16 }, { itemId: 'cloth_pants',  chance: 0.06 }, { itemId: 'leather_cap',   chance: 0.04 }],
 
     // ── Prados ───────────────────────────────────────────────────────────────
-    earth_golem:       [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'wooden_sword',      chance: 0.30 }, { itemId: 'wooden_shield',     chance: 0.25 }],
-    earth_dryad:       [{ itemId: 'data_scroll',           guaranteed: true }, { itemId: 'leather_armor',     chance: 0.30 }, { itemId: 'leather_cap',       chance: 0.20 }],
-    mean_gnome:        [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'wooden_shield',     chance: 0.28 }, { itemId: 'leather_greaves',   chance: 0.18 }],
-    mode_treant:       [{ itemId: 'data_scroll',           guaranteed: true }, { itemId: 'leather_armor',     chance: 0.25 }, { itemId: 'worn_boots',        chance: 0.22 }],
+    earth_golem:       [{ itemId: 'health_potion',  chance: 0.18 }, { itemId: 'wooden_sword',     chance: 0.06 }, { itemId: 'wooden_shield',    chance: 0.05 }],
+    earth_dryad:       [{ itemId: 'data_scroll',    chance: 0.16 }, { itemId: 'leather_armor',    chance: 0.06 }, { itemId: 'leather_cap',      chance: 0.04 }],
+    mean_gnome:        [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'wooden_shield',    chance: 0.05 }, { itemId: 'leather_greaves',  chance: 0.04 }],
+    mode_treant:       [{ itemId: 'data_scroll',    chance: 0.16 }, { itemId: 'leather_armor',    chance: 0.05 }, { itemId: 'worn_boots',       chance: 0.04 }],
 
     // ── Floresta ─────────────────────────────────────────────────────────────
-    light_spark:       [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'mage_hat',          chance: 0.20 }, { itemId: 'leather_greaves',   chance: 0.25 }],
-    light_prism:       [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'iron_blade',        chance: 0.18 }, { itemId: 'amulet_of_clarity', chance: 0.15 }],
-    std_wisp:          [{ itemId: 'focus_potion',          guaranteed: true }, { itemId: 'leather_greaves',   chance: 0.22 }, { itemId: 'mage_hat',          chance: 0.18 }],
-    range_crystal:     [{ itemId: 'health_potion',         guaranteed: true }, { itemId: 'amulet_of_clarity', chance: 0.20 }, { itemId: 'iron_blade',        chance: 0.15 }],
+    light_spark:       [{ itemId: 'focus_potion',   chance: 0.17 }, { itemId: 'mage_hat',         chance: 0.05 }, { itemId: 'leather_greaves',  chance: 0.04 }],
+    light_prism:       [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'iron_blade',       chance: 0.04 }, { itemId: 'amulet_of_clarity',chance: 0.03 }],
+    std_wisp:          [{ itemId: 'focus_potion',   chance: 0.16 }, { itemId: 'leather_greaves',  chance: 0.05 }, { itemId: 'mage_hat',         chance: 0.04 }],
+    range_crystal:     [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'amulet_of_clarity',chance: 0.04 }, { itemId: 'iron_blade',       chance: 0.03 }],
 
     // ── Planícies ────────────────────────────────────────────────────────────
-    fire_phoenix:      [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_shield',       chance: 0.25 }, { itemId: 'boots_agility',     chance: 0.20 }],
-    fire_salamander:   [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_blade',        chance: 0.30 }, { itemId: 'chain_mail',        chance: 0.18 }],
-    prob_imp:          [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'boots_agility',     chance: 0.22 }, { itemId: 'iron_shield',       chance: 0.18 }],
-    bayes_harpy:       [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'chain_mail',        chance: 0.20 }, { itemId: 'iron_blade',        chance: 0.22 }],
+    fire_phoenix:      [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_shield',  chance: 0.05 }, { itemId: 'boots_agility',    chance: 0.04 }],
+    fire_salamander:   [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_blade',   chance: 0.05 }, { itemId: 'chain_mail',       chance: 0.03 }],
+    prob_imp:          [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'boots_agility',chance: 0.05 }, { itemId: 'iron_shield',      chance: 0.04 }],
+    bayes_harpy:       [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'chain_mail',   chance: 0.04 }, { itemId: 'iron_blade',       chance: 0.04 }],
 
     // ── Montanhas ────────────────────────────────────────────────────────────
-    water_serpent:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'amulet_of_clarity', chance: 0.30 }, { itemId: 'iron_shield',       chance: 0.20 }],
-    water_leviathan:   [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'plate_armor',       chance: 0.18 }, { itemId: 'ring_of_focus',     chance: 0.15 }],
-    binomial_crab:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'iron_shield',       chance: 0.25 }, { itemId: 'amulet_of_clarity', chance: 0.18 }],
-    poisson_jellyfish: [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'ring_of_focus',     chance: 0.18 }, { itemId: 'plate_armor',       chance: 0.15 }],
+    water_serpent:     [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'amulet_of_clarity', chance: 0.05 }, { itemId: 'iron_shield',       chance: 0.04 }],
+    water_leviathan:   [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'plate_armor',       chance: 0.03 }, { itemId: 'ring_of_focus',     chance: 0.03 }],
+    binomial_crab:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'iron_shield',       chance: 0.04 }, { itemId: 'amulet_of_clarity', chance: 0.03 }],
+    poisson_jellyfish: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'ring_of_focus',     chance: 0.03 }, { itemId: 'plate_armor',       chance: 0.025}],
 
     // ── Calabouço ────────────────────────────────────────────────────────────
-    shadow_specter:    [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'elemental_staff',   chance: 0.20 }, { itemId: 'stats_amulet',      chance: 0.10 }],
-    shadow_lich:       [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'crown_of_archmage', chance: 0.10 }, { itemId: 'blade_of_inference', chance: 0.08 }, { itemId: 'talisman_of_legends', chance: 0.07 }, { itemId: 'plate_armor', chance: 0.30 }, { itemId: 'stats_amulet', chance: 0.30 }],
-    type_ii_shade:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'stats_amulet',      chance: 0.15 }, { itemId: 'elemental_staff',   chance: 0.15 }],
-    alpha_vampire:     [{ itemId: 'greater_health_potion', guaranteed: true }, { itemId: 'blade_of_inference', chance: 0.12 }, { itemId: 'crown_of_archmage', chance: 0.10 }, { itemId: 'talisman_of_legends', chance: 0.08 }],
+    shadow_specter:    [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'elemental_staff',    chance: 0.04 }, { itemId: 'stats_amulet',      chance: 0.02 }],
+    shadow_lich:       [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'blade_of_inference', chance: 0.015}, { itemId: 'talisman_of_legends', chance: 0.012}, { itemId: 'plate_armor', chance: 0.05 }, { itemId: 'stats_amulet', chance: 0.04 }],
+    type_ii_shade:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'stats_amulet',       chance: 0.03 }, { itemId: 'elemental_staff',    chance: 0.03 }],
+    alpha_vampire:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'blade_of_inference', chance: 0.025}, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'talisman_of_legends', chance: 0.015}],
+
+    // ── Bosses (loot garantido por ser o chefe de área) ───────────────────────
+    boss_village:   [{ itemId: 'mage_hat',           guaranteed: true }, { itemId: 'crown_of_insight',      chance: 0.12 }, { itemId: 'ring_of_focus',        chance: 0.08 }],
+    boss_meadows:   [{ itemId: 'plate_armor',         guaranteed: true }, { itemId: 'dragonscale_mail',      chance: 0.10 }, { itemId: 'shield_of_inference',  chance: 0.15 }],
+    boss_forest:    [{ itemId: 'ring_of_focus',       guaranteed: true }, { itemId: 'stats_amulet',          chance: 0.18 }, { itemId: 'specialist_armor',     chance: 0.08 }],
+    boss_plains:    [{ itemId: 'sword_of_probability',guaranteed: true }, { itemId: 'specialist_armor',      chance: 0.12 }, { itemId: 'bulwark_of_distribution',chance:0.08}],
+    boss_mountains: [{ itemId: 'dragonscale_mail',    guaranteed: true }, { itemId: 'blade_of_sigma',        chance: 0.08 }, { itemId: 'legendary_robe',       chance: 0.05 }, { itemId: 'ring_of_mastery', chance: 0.15 }],
+    boss_dungeon:   [{ itemId: 'blade_of_inference',  guaranteed: true }, { itemId: 'arcane_talisman',       chance: 0.12 }, { itemId: 'staff_of_the_oracle',  chance: 0.10 }, { itemId: 'crown_of_archmage', chance: 0.20 }],
 };
 
 export const RARITY_COLORS = {
