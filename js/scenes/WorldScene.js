@@ -45,9 +45,10 @@ export class WorldScene extends Phaser.Scene {
         this._monsters   = [];
         this._npcs       = [];
         this._npcIcons   = this.add.group();
-        this._paused     = false;
-        this._spaceLock  = false;
-        this._respawns   = [];
+        this._paused        = false;
+        this._spaceLock     = false;
+        this._respawns      = [];
+        this._transitioning = false;
 
         this._loadArea(this._playerData.currentArea);
 
@@ -330,18 +331,133 @@ export class WorldScene extends Phaser.Scene {
             }
         }
 
+        if (this._transitioning) return;
+        this._transitioning = true;
+        this._paused = true;
+
         this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
         Sound.portal();
-        this._playerData.currentArea = nextArea;
-        this._playerData.position    = { ...exit.targetSpawn };
-        this._playerData.lastSafePosition = { ...exit.targetSpawn };
-        this._playerData.lastSafeArea     = nextArea;
-        this.registry.set('player', this._playerData);
-        SaveSystem.autoSave(this._playerData);
 
-        this._loadArea(nextArea);
-        EventBus.emit('area-changed', { areaId: nextArea });
-        EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
+        // ── Portal visual effect ─────────────────────────────────────────────
+        const px = this._player.sprite.x;
+        const py = this._player.sprite.y;
+        this._spawnPortalEffect(px, py, nextArea);
+
+        // Fade to black after brief effect display, then load the new area
+        this.time.delayedCall(220, () => {
+            this.cameras.main.fade(480, 0, 0, 0, false, (_cam, progress) => {
+                if (progress < 1) return;
+
+                this._playerData.currentArea      = nextArea;
+                this._playerData.position         = { ...exit.targetSpawn };
+                this._playerData.lastSafePosition = { ...exit.targetSpawn };
+                this._playerData.lastSafeArea     = nextArea;
+                this.registry.set('player', this._playerData);
+                SaveSystem.autoSave(this._playerData);
+
+                this._loadArea(nextArea);
+                EventBus.emit('area-changed',    { areaId: nextArea });
+                EventBus.emit('minimap-update',  { mapMgr: this._mapManager, player: this._playerData });
+
+                this._transitioning = false;
+                this._paused        = false;
+
+                this.cameras.main.fadeIn(650, 0, 0, 0);
+                this._showAreaBanner(nextArea);
+            });
+        });
+    }
+
+    _spawnPortalEffect(px, py, targetArea) {
+        const COLOR_MAP = {
+            village: 0x88ddff, meadows: 0x88ee88, forest: 0x44bb44,
+            plains:  0xff9944, mountains: 0x8899ff, dungeon: 0xcc44ff,
+        };
+        const color = COLOR_MAP[targetArea] || 0xffffff;
+
+        // Three expanding rings with staggered delay
+        [0, 140, 280].forEach((delay, i) => {
+            const ring = this.add.circle(px, py, 6, 0, 0).setDepth(30);
+            ring.setStrokeStyle(3 - i * 0.5, color, 1);
+            this.tweens.add({
+                targets: ring,
+                scaleX: 7, scaleY: 7, alpha: 0,
+                duration: 650, delay,
+                ease: 'Cubic.Out',
+                onComplete: () => ring.destroy(),
+            });
+        });
+
+        // Sparkle particles radiating outward
+        for (let i = 0; i < 14; i++) {
+            const angle = (i / 14) * Math.PI * 2;
+            const dist  = 28 + Math.random() * 28;
+            const size  = 1.5 + Math.random() * 2;
+            const p = this.add.circle(px, py, size, color, 0.95).setDepth(30);
+            this.tweens.add({
+                targets: p,
+                x: px + Math.cos(angle) * dist,
+                y: py + Math.sin(angle) * dist,
+                alpha: 0, scaleX: 0, scaleY: 0,
+                duration: 400 + Math.random() * 200,
+                ease: 'Quad.Out',
+                onComplete: () => p.destroy(),
+            });
+        }
+
+        // Central bright flash circle
+        const flash = this.add.circle(px, py, 14, color, 0.6).setDepth(29);
+        this.tweens.add({
+            targets: flash, alpha: 0, scaleX: 3, scaleY: 3,
+            duration: 300, ease: 'Cubic.Out',
+            onComplete: () => flash.destroy(),
+        });
+
+        // Player sprite squeezes upward and vanishes
+        if (this._player?.sprite) {
+            this.tweens.add({
+                targets: this._player.sprite,
+                scaleY: 0, alpha: 0,
+                duration: 340, ease: 'Cubic.In',
+            });
+        }
+    }
+
+    _showAreaBanner(areaId) {
+        const info = AREA_INFO[areaId];
+        if (!info) return;
+        const W = this.scale.width, H = this.scale.height;
+
+        // Dark backing strip
+        const strip = this.add.rectangle(0, H / 2, W, 50, 0x000000, 0.6)
+            .setOrigin(0, 0.5).setScrollFactor(0).setDepth(50).setAlpha(0);
+
+        // Area name
+        const nameTx = this.add.text(W / 2, H / 2 - 5, info.displayName.toUpperCase(), {
+            fontSize: '22px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 5,
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(51).setAlpha(0);
+
+        // Sub-label (topic)
+        const subTx = this.add.text(W / 2, H / 2 + 16, info.topic, {
+            fontSize: '13px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(51).setAlpha(0);
+
+        const objs = [strip, nameTx, subTx];
+
+        // Fade in
+        this.tweens.add({
+            targets: objs, alpha: 1, duration: 380, ease: 'Cubic.Out',
+            onComplete: () => {
+                // Hold then fade out
+                this.time.delayedCall(1100, () => {
+                    this.tweens.add({
+                        targets: objs, alpha: 0, duration: 420, ease: 'Cubic.In',
+                        onComplete: () => objs.forEach(o => o.destroy()),
+                    });
+                });
+            },
+        });
     }
 
     _startCombat(monster) {
