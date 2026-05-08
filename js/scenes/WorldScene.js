@@ -585,7 +585,7 @@ export class WorldScene extends Phaser.Scene {
 
         // Wait for animation to finish before launching CombatScene
         this.time.delayedCall(450, () => {
-            Music.play('combat');
+            Music.play(monster.def?.isBoss ? 'boss' : 'combat');
             this.scene.launch('Combat', { monster: monster.def, instanceId: monster.instanceId });
             
             // Reset camera immediately behind the overlay — map is always

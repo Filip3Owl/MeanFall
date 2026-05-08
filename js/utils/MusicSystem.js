@@ -73,23 +73,38 @@ const TRACKS = {
         padWave:    'sawtooth',
         melodyWave: 'square',
     },
+    // ── Boss fight: heavy rock / metal ─────────────────────────────────────────
+    // E minor power chord pad + gallop bass + Em pentatonic riff + live drums
+    boss: {
+        bpm: 170,
+        pad:        [40, 47, 52, 55],                          // E2 B2 E3 G3 — Em power voicing
+        bass:       [28, 28, 40, 28],                          // E1 E1 E2 E1 — heavy pump
+        melody:     [52, 52, 64, 62, 64, 52, 59, 57],          // E3 E3 E4 D4 E4 E3 B3 A3 — metal riff
+        padWave:    'square',
+        melodyWave: 'square',
+        melodyPeak: 0.09,    // louder lead
+        bassPeak:   0.18,    // heavy low end
+        melodyDur:  0.45,    // staccato — punchy palm-mute feel
+        perc:       { kick: [0, 4], snare: [2, 6] },           // classic rock 4/4 beat (8-beat cycle)
+    },
 };
 
 // ─── Engine ───────────────────────────────────────────────────────────────────
 
 class MusicEngine {
     constructor() {
-        this._ctx      = null;
-        this._master   = null;
-        this._padNodes = [];   // { osc, gain | null } — persistent pad oscillators
-        this._schedId  = null; // setInterval ID
-        this._beat     = 0;
-        this._nextTime = 0;
-        this._track    = null;
-        this._key      = null;
-        this._wantKey  = null; // remembered key for re-enable
-        this.enabled   = localStorage.getItem('meanfall_sound') !== 'off';
-        this._volume   = 0.20;
+        this._ctx         = null;
+        this._master      = null;
+        this._padNodes    = [];   // { osc, gain | null } — persistent pad oscillators
+        this._schedId     = null; // setInterval ID
+        this._beat        = 0;
+        this._nextTime    = 0;
+        this._track       = null;
+        this._key         = null;
+        this._wantKey     = null; // remembered key for re-enable
+        this._noiseBuffer = null; // reusable white noise buffer for snare drum
+        this.enabled      = localStorage.getItem('meanfall_sound') !== 'off';
+        this._volume      = 0.20;
     }
 
     _ensureCtx() {
@@ -228,15 +243,73 @@ class MusicEngine {
         while (this._nextTime < ctx.currentTime + 0.15) {
             const t  = this._nextTime;
             // Melody: every beat
-            const mi = this._beat % track.melody.length;
-            this._note(midiToHz(track.melody[mi]), track.melodyWave || 'sine', t, beatLen * 0.78, 0.06);
+            const mi    = this._beat % track.melody.length;
+            const mDur  = track.melodyDur  ?? 0.78;
+            const mPeak = track.melodyPeak ?? 0.06;
+            this._note(midiToHz(track.melody[mi]), track.melodyWave || 'sine', t, beatLen * mDur, mPeak);
             // Bass: every 2 beats
             if (this._beat % 2 === 0) {
-                const bi = (this._beat / 2) % track.bass.length;
-                this._note(midiToHz(track.bass[bi]), 'sine', t, beatLen * 1.5, 0.09);
+                const bi    = (this._beat / 2) % track.bass.length;
+                const bPeak = track.bassPeak ?? 0.09;
+                this._note(midiToHz(track.bass[bi]), 'sine', t, beatLen * 1.5, bPeak);
+            }
+            // Percussion (optional — boss track uses this for live drum kit)
+            if (track.perc) {
+                const pb = this._beat % 8;
+                if (track.perc.kick?.includes(pb))  this._percNote(t, 'kick');
+                if (track.perc.snare?.includes(pb)) this._percNote(t, 'snare');
             }
             this._beat++;
             this._nextTime += beatLen;
+        }
+    }
+
+    // ── Internal: drum hit (kick + snare synthesis) ───────────────────────────
+
+    _percNote(t, type) {
+        const ctx = this._ctx;
+        if (!ctx) return;
+        if (type === 'kick') {
+            // Kick drum: sine sweep 150 → 40 Hz with fast attack
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, t);
+            osc.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+            gain.gain.setValueAtTime(0.42, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.20);
+            osc.connect(gain);
+            gain.connect(this._master);
+            osc.start(t);
+            osc.stop(t + 0.22);
+        } else {
+            // Snare: white noise burst + pitched body
+            if (!this._noiseBuffer) {
+                const sr = ctx.sampleRate;
+                this._noiseBuffer = ctx.createBuffer(1, sr, sr);
+                const d = this._noiseBuffer.getChannelData(0);
+                for (let i = 0; i < sr; i++) d[i] = Math.random() * 2 - 1;
+            }
+            const noise = ctx.createBufferSource();
+            const nGain = ctx.createGain();
+            noise.buffer = this._noiseBuffer;
+            nGain.gain.setValueAtTime(0.22, t);
+            nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+            noise.connect(nGain);
+            nGain.connect(this._master);
+            noise.start(t);
+            noise.stop(t + 0.13);
+            // Snare body tone
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = 200;
+            gain.gain.setValueAtTime(0.11, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+            osc.connect(gain);
+            gain.connect(this._master);
+            osc.start(t);
+            osc.stop(t + 0.09);
         }
     }
 }
