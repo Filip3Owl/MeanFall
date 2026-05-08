@@ -521,10 +521,15 @@ export class WorldScene extends Phaser.Scene {
             if (defDef) {
                 QuestSystem.recordKill(this._playerData, defDef);
                 BountySystem.recordKill(this._playerData, defDef);
-                this._respawns.push({
-                    instanceId, areaId: this._playerData.currentArea,
-                    respawnAt: this.time.now + RESPAWN_TIME,
-                });
+                if (!defDef.isBoss) {
+                    this._respawns.push({
+                        instanceId, areaId: this._playerData.currentArea,
+                        respawnAt: this.time.now + RESPAWN_TIME,
+                    });
+                }
+                if (defDef.isBoss) {
+                    this._chat(`☠ {{level:CHEFE DERROTADO!}} {{accent:${defDef.name}}} foi vencido!`, 'levelup');
+                }
             }
             if (xpGained) this._chat(`Você obteve {{xp:+${xpGained} XP}} na batalha!`, 'xp');
             if (loot?.length) {

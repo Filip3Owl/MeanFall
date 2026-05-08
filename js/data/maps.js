@@ -31,6 +31,7 @@ export const MAP_DATA = {
             { monsterId: 'data_imp',     instanceId: 'v_m4', x: 9,  y: 1  },
             { monsterId: 'data_imp',     instanceId: 'v_m5', x: 9,  y: 5  },
             { monsterId: 'type_specter', instanceId: 'v_m6', x: 12, y: 13 },
+            { monsterId: 'boss_village', instanceId: 'v_boss', x: 9, y: 13 },
         ],
         npcs: [
             { npcId: 'elder', role: 'quest', x: 3, y: 5, dialog: [
@@ -92,6 +93,7 @@ export const MAP_DATA = {
             { monsterId: 'mean_gnome',   instanceId: 'me_m6', x: 1,  y: 3  },
             { monsterId: 'mean_gnome',   instanceId: 'me_m7', x: 15, y: 3  },
             { monsterId: 'mode_treant',  instanceId: 'me_m8', x: 2,  y: 12 },
+            { monsterId: 'boss_meadows', instanceId: 'me_boss', x: 12, y: 12 },
         ],
         npcs: [
             { npcId: 'sage', role: 'quest', x: 8, y: 7, dialog: [
@@ -144,6 +146,7 @@ export const MAP_DATA = {
             { monsterId: 'std_wisp',      instanceId: 'fo_m6', x: 1,  y: 1  },
             { monsterId: 'std_wisp',      instanceId: 'fo_m7', x: 15, y: 1  },
             { monsterId: 'range_crystal', instanceId: 'fo_m8', x: 5,  y: 7  },
+            { monsterId: 'boss_forest',   instanceId: 'fo_boss', x: 11, y: 11 },
         ],
         npcs: [
             { npcId: 'hermit', role: 'quest', x: 8, y: 7, dialog: [
@@ -191,6 +194,7 @@ export const MAP_DATA = {
             { monsterId: 'prob_imp',        instanceId: 'pl_m6', x: 1,  y: 1  },
             { monsterId: 'prob_imp',        instanceId: 'pl_m7', x: 15, y: 1  },
             { monsterId: 'bayes_harpy',     instanceId: 'pl_m8', x: 14, y: 13 },
+            { monsterId: 'boss_plains',     instanceId: 'pl_boss', x: 5, y: 12 },
         ],
         npcs: [
             { npcId: 'gambler', role: 'quest', x: 8, y: 7, dialog: [
@@ -243,6 +247,7 @@ export const MAP_DATA = {
             { monsterId: 'binomial_crab',     instanceId: 'mo_m6', x: 1,  y: 1  },
             { monsterId: 'binomial_crab',     instanceId: 'mo_m7', x: 15, y: 1  },
             { monsterId: 'poisson_jellyfish', instanceId: 'mo_m8', x: 1,  y: 13 },
+            { monsterId: 'boss_mountains',    instanceId: 'mo_boss', x: 7, y: 12 },
         ],
         npcs: [
             { npcId: 'astronomer', role: 'quest', x: 8, y: 7, dialog: [
@@ -288,6 +293,7 @@ export const MAP_DATA = {
             { monsterId: 'type_ii_shade',   instanceId: 'du_m6', x: 1,  y: 1  },
             { monsterId: 'type_ii_shade',   instanceId: 'du_m7', x: 15, y: 1  },
             { monsterId: 'alpha_vampire',   instanceId: 'du_m8', x: 1,  y: 13 },
+            { monsterId: 'boss_dungeon',    instanceId: 'du_boss', x: 8, y: 12 },
         ],
         npcs: [
             { npcId: 'oracle', role: 'quest', x: 8, y: 7, dialog: [

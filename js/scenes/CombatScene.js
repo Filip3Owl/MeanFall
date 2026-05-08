@@ -32,7 +32,7 @@ export class CombatScene extends Phaser.Scene {
         this.cameras.main.fadeIn(300, 0, 0, 0);
 
         if (this._monsterSprite) {
-            const finalScale = 2.5;
+            const finalScale = this._monsterDef.isBoss ? 3.5 : 2.5;
             this._monsterSprite.setScale(0).setAlpha(0);
             this.tweens.add({
                 targets: this._monsterSprite,
@@ -49,13 +49,13 @@ export class CombatScene extends Phaser.Scene {
 
     _buildUI() {
         const W = 544, H = 480;
-        const isElite = this._monsterDef.name.startsWith('Elite');
+        const isBoss  = !!this._monsterDef.isBoss;
+        const isElite = isBoss || this._monsterDef.name.startsWith('Elite');
         const elem     = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
-        const eColor   = isElite ? 0xffd700 : elem.color;
-        const eDark    = isElite ? 0x2a1a00 : elem.dark;
+        const eColor   = isBoss ? 0xff4400 : isElite ? 0xffd700 : elem.color;
+        const eDark    = isBoss ? 0x1a0800 : isElite ? 0x2a1a00 : elem.dark;
         const eHex     = '#' + eColor.toString(16).padStart(6, '0');
-        // eTextHex = accent (always brighter than eColor) → safe for text on dark bg
-        const eAccent  = isElite ? 0xffd700 : elem.accent;
+        const eAccent  = isBoss ? 0xff8844 : isElite ? 0xffd700 : elem.accent;
         const eTextHex = '#' + eAccent.toString(16).padStart(6, '0');
 
         // ── Deep void background ─────────────────────────────────────────
@@ -76,9 +76,11 @@ export class CombatScene extends Phaser.Scene {
         this.add.text(8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(0, 0).setAlpha(0.7);
         this.add.text(W - 8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(1, 0).setAlpha(0.7);
 
-        const titleStr = isElite
-            ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
-            : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
+        const titleStr = isBoss
+            ? `☠  CHEFE DE ÁREA  ·  ${elem.topicLabel.toUpperCase()}  ☠`
+            : isElite
+                ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
+                : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
         this.add.text(W / 2, 16, titleStr, {
             fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
             stroke: '#000000', strokeThickness: 2,
