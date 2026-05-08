@@ -5,6 +5,7 @@ import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
 import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js';
+import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
 import EventBus                          from '../utils/EventBus.js';
 import { Sound }                         from '../utils/SoundSystem.js';
 
@@ -202,6 +203,14 @@ export class CombatScene extends Phaser.Scene {
 
         this._pVitalsGfx = this.add.graphics();
         this._updatePlayerBars();
+
+        // Status effect badge (bottom of player panel)
+        this._statusBadgeBg = this.add.rectangle(PX + 8, PY + 108, PW - 16, 16, 0x0a0010, 1)
+            .setOrigin(0, 0).setStrokeStyle(1, 0x440066, 0.6).setVisible(false);
+        this._statusBadgeTx = this.add.text(PX + PW / 2, PY + 116, '', {
+            fontSize: '11px', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5).setVisible(false);
+        this._updateStatusDisplay();
     }
 
     _buildQuestionBox(eColor, eHex, eTextHex, isElite) {
@@ -359,6 +368,9 @@ export class CombatScene extends Phaser.Scene {
     // ─── QUESTION FLOW ────────────────────────────────────────────────────────
 
     _nextQuestion() {
+        StatusEffectSystem.tick(this._player);
+        this._updateStatusDisplay();
+
         const area    = this._player.currentArea;
         const mastery = this._player.mastery[area] || { attempted: 0, correct: 0, wrongIds: [] };
         const q = QuestionEngine.getQuestion(
@@ -479,8 +491,11 @@ export class CombatScene extends Phaser.Scene {
         if (this._answerLock) return;
         this._answerLock = true;
 
-        const q       = this._currentQ;
-        const correct = QuestionEngine.checkAnswer(q, userAnswer);
+        const q = this._currentQ;
+        const qForCheck = StatusEffectSystem.isToleranceZero(this._player) && q.type === 'fill_numeric'
+            ? { ...q, tolerance: 0 }
+            : q;
+        const correct = QuestionEngine.checkAnswer(qForCheck, userAnswer);
         const area    = this._player.currentArea;
         const mastery = this._player.mastery[area];
         mastery.attempted++;
@@ -507,12 +522,12 @@ export class CombatScene extends Phaser.Scene {
 
             if (result.isCrit) Sound.critical(); else Sound.hit();
 
-            let msg = `Correto! Dano: ${result.damage}`;
-            if (result.isCrit)              msg += ' [CRÍTICO!]';
-            if (result.advantage === 'super') msg += ' [SUPER EFICAZ!]';
-            if (result.advantage === 'weak')  msg += ' [Pouco eficaz...]';
+            if (result.advantage !== 'neutral') {
+                this._spawnElementalBanner(result.advantage, result.multiplier);
+            }
 
-            // Add distribution flair
+            let msg = `Correto! Dano: ${result.damage}`;
+            if (result.isCrit) msg += ' [CRÍTICO!]';
             if (result.distribution === 'uniform') msg += ' (Instável!)';
             else if (weaponInfo) msg += ' (Consistente)';
 
@@ -535,9 +550,22 @@ export class CombatScene extends Phaser.Scene {
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
 
             const result = CombatSystem.calcMonsterDamage(this._monsterDef, this._player);
-            this._player.hp = Math.max(0, this._player.hp - result.damage);
+
+            let finalDamage = result.damage;
+            let statusLabel = null;
+            if (!result.dodged) {
+                const mod = StatusEffectSystem.modifyDamage(this._player, result.damage);
+                finalDamage = mod.damage;
+                statusLabel = mod.label;
+            }
+
+            this._player.hp = Math.max(0, this._player.hp - finalDamage);
             this._updatePlayerBars();
             EventBus.emit('player-hp-change', { player: this._player });
+
+            // Apply new status effect from monster element
+            const newEffect = StatusEffectSystem.apply(this._player, this._monsterDef.element);
+            this._updateStatusDisplay();
 
             if (result.dodged) {
                 Sound.dodge();
@@ -546,9 +574,28 @@ export class CombatScene extends Phaser.Scene {
             } else {
                 Sound.wrong();
                 this.time.delayedCall(120, () => Sound.damage());
-                this._showFeedback(`Errado! Dano recebido: ${result.damage}`, '#ff5555');
-                this._spawnDamageNumber(this._playerPanelCenter, result.damage, '#ff5555', false);
+                let msg = `Errado! Dano recebido: ${finalDamage}`;
+                if (statusLabel) msg += `  ${statusLabel}`;
+                this._showFeedback(msg, '#ff5555');
+                this._spawnDamageNumber(this._playerPanelCenter, finalDamage, '#ff5555', false);
                 this._flashTarget('player', 0xff3333);
+                if (newEffect) {
+                    const def = STATUS_DEFS[newEffect];
+                    if (def) {
+                        const effectTxt = this.add.text(278 + 129, 148, `⚠ ${def.name.toUpperCase()} APLICADO!`, {
+                            fontSize: '11px', color: def.color, fontFamily: 'Courier New', fontStyle: 'bold',
+                            stroke: '#000000', strokeThickness: 3,
+                        }).setOrigin(0.5, 0).setAlpha(0).setDepth(60);
+                        this.tweens.add({
+                            targets: effectTxt, alpha: 1, duration: 200,
+                            onComplete: () => this.tweens.add({
+                                targets: effectTxt, alpha: 0, y: effectTxt.y - 20,
+                                delay: 700, duration: 400,
+                                onComplete: () => effectTxt.destroy(),
+                            }),
+                        });
+                    }
+                }
             }
             if (btnBg) btnBg.setFillStyle(0x330000);
 
@@ -606,6 +653,44 @@ export class CombatScene extends Phaser.Scene {
         this._feedbackTxt.setText(msg).setColor(color).setVisible(true);
     }
 
+    _updateStatusDisplay() {
+        const effect = StatusEffectSystem.getActive(this._player);
+        if (!effect) {
+            this._statusBadgeBg?.setVisible(false);
+            this._statusBadgeTx?.setVisible(false);
+            return;
+        }
+        this._statusBadgeBg?.setFillStyle(effect.bg).setStrokeStyle(1, parseInt(effect.color.replace('#',''), 16), 0.8).setVisible(true);
+        this._statusBadgeTx?.setText(`⚠ ${effect.name.toUpperCase()} · ${effect.desc}`).setColor(effect.color).setVisible(true);
+    }
+
+    _spawnElementalBanner(advantage, multiplier) {
+        const W = 544;
+        const isSuper = advantage === 'super';
+        const label = isSuper
+            ? `⚡ SUPER EFICAZ!  ×${multiplier.toFixed(1)} ⚡`
+            : `🛡 POUCO EFICAZ  ×${multiplier.toFixed(1)}`;
+        const color = isSuper ? '#ffcc00' : '#6699cc';
+        const size  = isSuper ? '20px' : '15px';
+
+        const txt = this.add.text(W / 2, 92, label, {
+            fontSize: size, color, fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4,
+        }).setOrigin(0.5, 0.5).setAlpha(0).setDepth(60);
+
+        this.tweens.add({
+            targets: txt, alpha: 1, y: isSuper ? 82 : 86,
+            duration: 180, ease: 'Back.Out',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: txt, alpha: 0, y: isSuper ? 62 : 70,
+                    delay: 500, duration: 400, ease: 'Quad.In',
+                    onComplete: () => txt.destroy(),
+                });
+            },
+        });
+    }
+
     // ─── BAR RENDERING ────────────────────────────────────────────────────────
 
     _drawBar(g, x, y, w, h, pct, baseColor, dangerColor) {
@@ -645,6 +730,10 @@ export class CombatScene extends Phaser.Scene {
     // ─── ACTIONS ──────────────────────────────────────────────────────────────
 
     _useHint() {
+        if (StatusEffectSystem.isHintBlocked(this._player)) {
+            this._explTxt.setText('❄ CONGELADO! Dica bloqueada neste turno.');
+            return;
+        }
         if (!this._currentQ?.hint) {
             this._explTxt.setText('Nenhuma dica disponível para esta questão.');
             return;
@@ -674,6 +763,7 @@ export class CombatScene extends Phaser.Scene {
     // ─── COMBAT END ───────────────────────────────────────────────────────────
 
     _endCombat(outcome) {
+        StatusEffectSystem.clear(this._player);
         let xpGained = 0;
         let goldGained = 0;
         const lootNames = [];
