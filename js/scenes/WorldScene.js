@@ -306,51 +306,126 @@ export class WorldScene extends Phaser.Scene {
 
     _tryPortal(exit) {
         const nextArea = exit.targetArea;
-        const unlock   = AREA_UNLOCK[nextArea];
 
-        if (unlock) {
-            const player = this._playerData;
-            const mastery = masteryPercent(player.mastery[unlock.masteryArea]);
-            const levelOk = !unlock.minLevel || player.level >= unlock.minLevel;
-            const mastOk  = mastery >= unlock.masteryPct;
+        // Back portals bypass all lock/boss checks — always allowed
+        if (!exit.isBack) {
+            const unlock = AREA_UNLOCK[nextArea];
+            if (unlock) {
+                const player  = this._playerData;
+                const mastery = masteryPercent(player.mastery[unlock.masteryArea]);
+                const levelOk = !unlock.minLevel || player.level >= unlock.minLevel;
+                const mastOk  = mastery >= unlock.masteryPct;
 
-            if (!levelOk || !mastOk) {
-                const reasons = [];
-                if (!levelOk) reasons.push(`{{level:nível ${unlock.minLevel}}}`);
-                if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em {{accent:${AREA_INFO[unlock.masteryArea]?.displayName}}}`);
-                this._chat(`{{bad:Portal bloqueado!}} Você precisa de: ${reasons.join(' e ')}.`, 'error');
-                this._playerData.position.y -= 1;
-                this._player.syncSprite();
-                return;
-            }
-        }
-
-        // Boss gate — each area's boss must be defeated before using the exit
-        const AREA_BOSS = {
-            village:   { monsterId: 'boss_village',   instanceId: 'v_boss'  },
-            meadows:   { monsterId: 'boss_meadows',   instanceId: 'me_boss' },
-            forest:    { monsterId: 'boss_forest',    instanceId: 'fo_boss' },
-            plains:    { monsterId: 'boss_plains',    instanceId: 'pl_boss' },
-            mountains: { monsterId: 'boss_mountains', instanceId: 'mo_boss' },
-        };
-        const bossEntry = AREA_BOSS[this._playerData.currentArea];
-        if (bossEntry) {
-            const defeated = this._playerData.defeatedMonsters || {};
-            if (!defeated[bossEntry.instanceId]) {
-                const bossDef = MONSTERS[bossEntry.monsterId];
-                if (bossDef) {
-                    this._chat(`☠ {{bad:${bossDef.name.toUpperCase()} BLOQUEIA A SAÍDA!}} Derrote o chefe para avançar.`, 'error');
-                    this._portalBoss = { def: bossDef, instanceId: bossEntry.instanceId };
-                    this.time.delayedCall(900, () => this._startCombat(this._portalBoss));
+                if (!levelOk || !mastOk) {
+                    const reasons = [];
+                    if (!levelOk) reasons.push(`{{level:nível ${unlock.minLevel}}}`);
+                    if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em {{accent:${AREA_INFO[unlock.masteryArea]?.displayName}}}`);
+                    this._chat(`{{bad:Portal bloqueado!}} Você precisa de: ${reasons.join(' e ')}.`, 'error');
+                    this._playerData.position.y -= 1;
+                    this._player.syncSprite();
                     return;
+                }
+            }
+
+            // Boss gate — each area's boss must be defeated before using the exit
+            const AREA_BOSS = {
+                village:   { monsterId: 'boss_village',   instanceId: 'v_boss'  },
+                meadows:   { monsterId: 'boss_meadows',   instanceId: 'me_boss' },
+                forest:    { monsterId: 'boss_forest',    instanceId: 'fo_boss' },
+                plains:    { monsterId: 'boss_plains',    instanceId: 'pl_boss' },
+                mountains: { monsterId: 'boss_mountains', instanceId: 'mo_boss' },
+            };
+            const bossEntry = AREA_BOSS[this._playerData.currentArea];
+            if (bossEntry) {
+                const defeated = this._playerData.defeatedMonsters || {};
+                const bossDef  = MONSTERS[bossEntry.monsterId];
+                if (bossDef) {
+                    if (!defeated[bossEntry.instanceId]) {
+                        // Boss not yet defeated — force encounter
+                        this._chat(`☠ {{bad:${bossDef.name.toUpperCase()} BLOQUEIA A SAÍDA!}} Derrote o chefe para avançar.`, 'error');
+                        this._portalBoss = { def: bossDef, instanceId: bossEntry.instanceId };
+                        this.time.delayedCall(900, () => this._startCombat(this._portalBoss));
+                        return;
+                    } else {
+                        // Boss already defeated — offer rematch
+                        this._showBossRematchDialog(bossDef, bossEntry, exit);
+                        return;
+                    }
                 }
             }
         }
 
+        this._doPortalTransition(exit);
+    }
+
+    _showBossRematchDialog(bossDef, bossEntry, exit) {
+        if (this._rematchOverlay) return;
+        this._paused = true;
+
+        const W = 544, H = 480;
+        const container = this.add.container(0, 0).setDepth(100);
+        this._rematchOverlay = container;
+
+        // Dim
+        const dim = this.add.rectangle(0, 0, W, H, 0x000000, 0.75).setOrigin(0, 0).setInteractive();
+        container.add(dim);
+
+        // Card
+        const cx = W / 2, cy = H / 2;
+        const cardW = 320, cardH = 180;
+        const card = this.add.rectangle(cx, cy, cardW, cardH, 0x1a0808, 1);
+        card.setStrokeStyle(2, 0xff4400);
+        container.add(card);
+
+        // Title
+        container.add(this.add.text(cx, cy - 68, '☠ REVANCHE', {
+            fontSize: '18px', color: '#ff6622', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4,
+        }).setOrigin(0.5));
+
+        container.add(this.add.text(cx, cy - 44, bossDef.name, {
+            fontSize: '14px', color: '#ffcc88', fontFamily: 'Courier New',
+        }).setOrigin(0.5));
+
+        container.add(this.add.text(cx, cy - 18, 'Você já derrotou este chefe.\nDeseja enfrentá-lo novamente?', {
+            fontSize: '13px', color: '#cccccc', fontFamily: 'Courier New', align: 'center',
+        }).setOrigin(0.5));
+
+        // YES button
+        const yesBg = this.add.rectangle(cx - 60, cy + 48, 100, 32, 0x3a0a00).setStrokeStyle(1, 0xff4400).setInteractive({ useHandCursor: true });
+        const yesTx = this.add.text(cx - 60, cy + 48, 'ENFRENTAR', { fontSize: '12px', color: '#ff8844', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+        yesBg.on('pointerover',  () => yesBg.setFillStyle(0x660f00));
+        yesBg.on('pointerout',   () => yesBg.setFillStyle(0x3a0a00));
+        yesBg.on('pointerdown',  () => {
+            container.destroy();
+            this._rematchOverlay = null;
+            this._paused = false;
+            this._portalBoss = { def: bossDef, instanceId: bossEntry.instanceId };
+            this.time.delayedCall(200, () => this._startCombat(this._portalBoss));
+        });
+        container.add([yesBg, yesTx]);
+
+        // NO button
+        const noBg = this.add.rectangle(cx + 60, cy + 48, 100, 32, 0x0a0a0a).setStrokeStyle(1, 0x555555).setInteractive({ useHandCursor: true });
+        const noTx = this.add.text(cx + 60, cy + 48, 'AVANÇAR', { fontSize: '12px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5);
+        noBg.on('pointerover',  () => noBg.setFillStyle(0x222222));
+        noBg.on('pointerout',   () => noBg.setFillStyle(0x0a0a0a));
+        noBg.on('pointerdown',  () => {
+            container.destroy();
+            this._rematchOverlay = null;
+            this._paused = false;
+            this._doPortalTransition(exit);
+        });
+        container.add([noBg, noTx]);
+    }
+
+    _doPortalTransition(exit) {
+        const nextArea = exit.targetArea;
+
         if (nextArea === 'village' && this._playerData.currentArea !== 'village') {
             const heal = this._playerData.maxHp - this._playerData.hp;
             if (heal > 0) {
-                this._playerData.hp = this._playerData.maxHp;
+                this._playerData.hp    = this._playerData.maxHp;
                 this._playerData.focus = this._playerData.maxFocus;
                 this._chat('Você descansa na vila e {{heal:recupera todas as suas energias}}!', 'heal');
                 EventBus.emit('player-hp-change', { player: this._playerData });
@@ -366,12 +441,10 @@ export class WorldScene extends Phaser.Scene {
         this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
         Sound.portal();
 
-        // ── Portal visual effect ─────────────────────────────────────────────
         const px = this._player.sprite.x;
         const py = this._player.sprite.y;
         this._spawnPortalEffect(px, py, nextArea);
 
-        // Fade to black after brief effect display, then load the new area
         this.time.delayedCall(220, () => {
             this.cameras.main.fade(480, 0, 0, 0, false, (_cam, progress) => {
                 if (progress < 1) return;
@@ -384,8 +457,8 @@ export class WorldScene extends Phaser.Scene {
                 SaveSystem.autoSave(this._playerData);
 
                 this._loadArea(nextArea);
-                EventBus.emit('area-changed',    { areaId: nextArea });
-                EventBus.emit('minimap-update',  { mapMgr: this._mapManager, player: this._playerData });
+                EventBus.emit('area-changed',   { areaId: nextArea });
+                EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 
                 this._transitioning = false;
                 this._paused        = false;

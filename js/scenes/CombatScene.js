@@ -17,14 +17,18 @@ export class CombatScene extends Phaser.Scene {
         this._instanceId   = data.instanceId;
         this._monsterHp    = data.monster.maxHp;
         this._streak       = 0;
+        this._maxStreak    = 0;
         this._recentIds    = [];
         this._currentQ     = null;
         this._answerLock   = false;
         this._numericValue = '';
+        this._relicEffect  = null;
     }
 
     create() {
         this._player = JSON.parse(JSON.stringify(this.registry.get('player')));
+        const relicId = this._player.equipment?.relic;
+        this._relicEffect = (relicId && ITEMS[relicId]?.passiveEffect) ? ITEMS[relicId].passiveEffect : null;
         this._buildUI();
         this._nextQuestion();
         Sound.combatStart();
@@ -609,6 +613,7 @@ export class CombatScene extends Phaser.Scene {
 
         if (correct) {
             this._streak++;
+            if (this._streak > this._maxStreak) this._maxStreak = this._streak;
             mastery.correct++;
             mastery.wrongIds = mastery.wrongIds.filter(id => id !== q.id);
 
@@ -622,9 +627,16 @@ export class CombatScene extends Phaser.Scene {
             this._player._weaponElement = weaponInfo?.element || 'normal';
 
             const result = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, this._streak, weaponInfo);
-            this._monsterHp = Math.max(0, this._monsterHp - result.damage);
+
+            // Relic: damage boost on correct answer
+            let finalDmgToMonster = result.damage;
+            if (this._relicEffect?.type === 'damage_boost_correct') {
+                finalDmgToMonster = Math.floor(finalDmgToMonster * (1 + this._relicEffect.value));
+            }
+
+            this._monsterHp = Math.max(0, this._monsterHp - finalDmgToMonster);
             this._updateMonsterBar();
-            this._spawnDamageNumber(this._monsterPanelCenter, result.damage, result.isCrit ? '#ff88cc' : '#ff5555', result.isCrit);
+            this._spawnDamageNumber(this._monsterPanelCenter, finalDmgToMonster, result.isCrit ? '#ff88cc' : '#ff5555', result.isCrit);
             this._flashTarget('monster', result.advantage === 'super' ? 0xffaa00 : 0xff3333);
 
             if (result.isCrit) Sound.critical(); else Sound.hit();
@@ -633,8 +645,9 @@ export class CombatScene extends Phaser.Scene {
                 this._spawnElementalBanner(result.advantage, result.multiplier);
             }
 
-            let msg = `Correto! Dano: ${result.damage}`;
+            let msg = `Correto! Dano: ${finalDmgToMonster}`;
             if (result.isCrit) msg += ' [CRÍTICO!]';
+            if (this._relicEffect?.type === 'damage_boost_correct') msg += ' [🔥RELÍQUIA]';
             if (result.distribution === 'uniform') msg += ' (Instável!)';
             else if (weaponInfo) msg += ' (Consistente)';
 
@@ -643,6 +656,14 @@ export class CombatScene extends Phaser.Scene {
             if (this._streak > 1) {
                 this._streakTxt.setText(`${this._streak}× STREAK!`);
                 Sound.streak(this._streak);
+            }
+
+            // Relic: focus regen on correct answer
+            if (this._relicEffect?.type === 'focus_regen_on_correct') {
+                const regen = this._relicEffect.value;
+                this._player.focus = Math.min(this._player.maxFocus, this._player.focus + regen);
+                this._updatePlayerBars();
+                this._spawnDamageNumber(this._playerPanelCenter, `+${regen}F`, '#88aaff', false);
             }
 
             if (q.explanation) this._explTxt.setText(`Explicação: ${q.explanation}`);
@@ -660,10 +681,17 @@ export class CombatScene extends Phaser.Scene {
 
             let finalDamage = result.damage;
             let statusLabel = null;
+            let relicBlocked = false;
             if (!result.dodged) {
-                const mod = StatusEffectSystem.modifyDamage(this._player, result.damage);
-                finalDamage = mod.damage;
-                statusLabel = mod.label;
+                // Relic: chance to block all damage on wrong answer
+                if (this._relicEffect?.type === 'damage_block_chance' && Math.random() < this._relicEffect.value) {
+                    relicBlocked = true;
+                    finalDamage  = 0;
+                } else {
+                    const mod = StatusEffectSystem.modifyDamage(this._player, result.damage);
+                    finalDamage = mod.damage;
+                    statusLabel = mod.label;
+                }
             }
 
             this._player.hp = Math.max(0, this._player.hp - finalDamage);
@@ -678,6 +706,10 @@ export class CombatScene extends Phaser.Scene {
                 Sound.dodge();
                 this._showFeedback('Errado! Mas você ESQUIVOU o ataque!', '#88ccff');
                 this._spawnDamageNumber(this._playerPanelCenter, 'ESQUIVA', '#88ccff', false);
+            } else if (relicBlocked) {
+                Sound.dodge();
+                this._showFeedback('Errado! A Relíquia ABSORVEU o dano!', '#aaddff');
+                this._spawnDamageNumber(this._playerPanelCenter, 'BLOQUEIO', '#aaddff', false);
             } else {
                 Sound.wrong();
                 this.time.delayedCall(120, () => Sound.damage());
@@ -845,15 +877,17 @@ export class CombatScene extends Phaser.Scene {
             this._explTxt.setText('Nenhuma dica disponível para esta questão.');
             return;
         }
-        if (this._player.focus < 10) {
+        const hintCost = this._relicEffect?.type === 'free_hints' ? 0 : 10;
+        if (this._player.focus < hintCost) {
             this._explTxt.setText('Foco insuficiente para dica! (Necessário: 10)');
             return;
         }
-        this._player.focus -= 10;
+        this._player.focus -= hintCost;
         this._updatePlayerBars();
         EventBus.emit('player-hp-change', { player: this._player });
         Sound.hint();
-        this._explTxt.setText(`Dica: ${this._currentQ.hint}`);
+        const suffix = hintCost === 0 ? ' [Prisma da Clareza]' : '';
+        this._explTxt.setText(`Dica: ${this._currentQ.hint}${suffix}`);
     }
 
     _flee() {
@@ -879,7 +913,18 @@ export class CombatScene extends Phaser.Scene {
 
         if (outcome === 'win') {
             const isElite = this._monsterDef.name.startsWith('Elite');
-            xpGained = awardXP(this._player, this._monsterDef.xpReward);
+            const baseXpReward = this._relicEffect?.type === 'xp_multiplier'
+                ? Math.floor(this._monsterDef.xpReward * this._relicEffect.value)
+                : this._monsterDef.xpReward;
+            xpGained = awardXP(this._player, baseXpReward);
+
+            // Relic: streak_xp_double — if best streak hit threshold, double the XP
+            if (this._relicEffect?.type === 'streak_xp_double' && this._maxStreak >= this._relicEffect.value) {
+                const bonusXp = xpGained;
+                xpGained += bonusXp;
+                awardXP(this._player, bonusXp);
+                EventBus.emit('chat', { msg: `{{level:COROA DAS TREVAS!}} Streak de ${this._maxStreak}+ acertos — XP dobrado!`, type: 'levelup' });
+            }
             
             // Base gold
             goldGained = this._monsterDef.goldReward || 0;

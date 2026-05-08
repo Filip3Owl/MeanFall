@@ -252,6 +252,58 @@ export const ITEMS = {
         bonuses: { strength: 8, intelligence: 8, agility: 8, vitality: 8, maxHp: 50, maxFocus: 30 },
         value: 6000, icon: 'item_amulet',
     },
+
+    // ─── RELÍQUIAS DOS CHEFES ─────────────────────────────────────────────────
+    // Itens únicos dropados apenas por chefes. Não podem ser vendidos.
+    // Cada um muda fundamentalmente a mecânica de combate.
+    relic_wind: {
+        id: 'relic_wind', name: 'Essência do Vento', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'focus_regen_on_correct', value: 3 },
+        description: 'Cada resposta correta recupera 3 Foco.',
+        flavor: 'O último sopro do Arauto Eterno, cristalizado pela estatística.',
+        icon: 'item_ring',
+    },
+    relic_earth: {
+        id: 'relic_earth', name: 'Cristal da Mediana', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'xp_multiplier', value: 1.5 },
+        description: '+50% de XP em todos os combates.',
+        flavor: 'A pedra-coração do Colossus, que nunca mente sobre a maioria.',
+        icon: 'item_ring',
+    },
+    relic_light: {
+        id: 'relic_light', name: 'Prisma da Clareza', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'free_hints', value: true },
+        description: 'Dicas custam 0 Foco.',
+        flavor: 'O cristal do Prism Celestial refrata toda dúvida em clareza.',
+        icon: 'item_ring',
+    },
+    relic_fire: {
+        id: 'relic_fire', name: 'Chama Perpétua', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'damage_boost_correct', value: 0.8 },
+        description: 'Respostas corretas causam +80% dano ao monstro.',
+        flavor: 'O coração da Grande Fênix, que nunca deixa de queimar.',
+        icon: 'item_ring',
+    },
+    relic_water: {
+        id: 'relic_water', name: 'Orbe das Marés', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'damage_block_chance', value: 0.30 },
+        description: '30% de chance de anular completamente o dano de um erro.',
+        flavor: 'A escama do Leviatã Profundo, mais dura que qualquer aço.',
+        icon: 'item_ring',
+    },
+    relic_shadow: {
+        id: 'relic_shadow', name: 'Coroa das Trevas', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'streak_xp_double', value: 4 },
+        description: 'Acertar 4 seguidas em um combate dobra o XP final.',
+        flavor: 'A coroa do Rei das Sombras, forjada com XP de almas consumidas.',
+        icon: 'item_ring',
+    },
 };
 
 // Drop tables: 'guaranteed' always drops; 'chance' rolls independently.
@@ -295,12 +347,13 @@ export const DROP_TABLES = {
     alpha_vampire:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'blade_of_inference', chance: 0.025}, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'talisman_of_legends', chance: 0.015}],
 
     // ── Bosses (loot garantido por ser o chefe de área) ───────────────────────
-    boss_village:   [{ itemId: 'mage_hat',           guaranteed: true }, { itemId: 'crown_of_insight',      chance: 0.12 }, { itemId: 'ring_of_focus',        chance: 0.08 }],
-    boss_meadows:   [{ itemId: 'plate_armor',         guaranteed: true }, { itemId: 'dragonscale_mail',      chance: 0.10 }, { itemId: 'shield_of_inference',  chance: 0.15 }],
-    boss_forest:    [{ itemId: 'ring_of_focus',       guaranteed: true }, { itemId: 'stats_amulet',          chance: 0.18 }, { itemId: 'specialist_armor',     chance: 0.08 }],
-    boss_plains:    [{ itemId: 'sword_of_probability',guaranteed: true }, { itemId: 'specialist_armor',      chance: 0.12 }, { itemId: 'bulwark_of_distribution',chance:0.08}],
-    boss_mountains: [{ itemId: 'dragonscale_mail',    guaranteed: true }, { itemId: 'blade_of_sigma',        chance: 0.08 }, { itemId: 'legendary_robe',       chance: 0.05 }, { itemId: 'ring_of_mastery', chance: 0.15 }],
-    boss_dungeon:   [{ itemId: 'blade_of_inference',  guaranteed: true }, { itemId: 'arcane_talisman',       chance: 0.12 }, { itemId: 'staff_of_the_oracle',  chance: 0.10 }, { itemId: 'crown_of_archmage', chance: 0.20 }],
+    // Relíquia única: chance baixíssima (~1-2.5%), mas muda o gameplay.
+    boss_village:   [{ itemId: 'mage_hat',           guaranteed: true }, { itemId: 'crown_of_insight',       chance: 0.12 }, { itemId: 'ring_of_focus',         chance: 0.08 }, { itemId: 'relic_wind',  chance: 0.025 }],
+    boss_meadows:   [{ itemId: 'plate_armor',         guaranteed: true }, { itemId: 'dragonscale_mail',       chance: 0.10 }, { itemId: 'shield_of_inference',   chance: 0.15 }, { itemId: 'relic_earth', chance: 0.020 }],
+    boss_forest:    [{ itemId: 'ring_of_focus',       guaranteed: true }, { itemId: 'stats_amulet',           chance: 0.18 }, { itemId: 'specialist_armor',      chance: 0.08 }, { itemId: 'relic_light', chance: 0.020 }],
+    boss_plains:    [{ itemId: 'sword_of_probability',guaranteed: true }, { itemId: 'specialist_armor',       chance: 0.12 }, { itemId: 'bulwark_of_distribution',chance:0.08  }, { itemId: 'relic_fire',  chance: 0.020 }],
+    boss_mountains: [{ itemId: 'dragonscale_mail',    guaranteed: true }, { itemId: 'blade_of_sigma',         chance: 0.08 }, { itemId: 'legendary_robe',        chance: 0.05 }, { itemId: 'ring_of_mastery', chance: 0.15 }, { itemId: 'relic_water',  chance: 0.015 }],
+    boss_dungeon:   [{ itemId: 'blade_of_inference',  guaranteed: true }, { itemId: 'arcane_talisman',        chance: 0.12 }, { itemId: 'staff_of_the_oracle',   chance: 0.10 }, { itemId: 'crown_of_archmage', chance: 0.20 }, { itemId: 'relic_shadow', chance: 0.010 }],
 };
 
 export const RARITY_COLORS = {
