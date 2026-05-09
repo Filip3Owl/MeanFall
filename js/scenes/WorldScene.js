@@ -605,6 +605,9 @@ export class WorldScene extends Phaser.Scene {
 
         if (playerData) {
             Object.assign(this._playerData, playerData);
+            if (this._player) {
+                Object.assign(this._player, playerData);
+            }
             this.registry.set('player', this._playerData);
         }
 
@@ -861,7 +864,12 @@ export class WorldScene extends Phaser.Scene {
     resumeFromOverlay() {
         this._paused = false;
         const updated = this.registry.get('player');
-        if (updated) Object.assign(this._playerData, updated);
+        if (updated) {
+            Object.assign(this._playerData, updated);
+            if (this._player) {
+                Object.assign(this._player, updated);
+            }
+        }
     }
 
     // ── Elemental Aura Visual Effect ──────────────────────────────────────────
