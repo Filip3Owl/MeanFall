@@ -126,7 +126,7 @@ export class MapManager {
         const rows = this.mapData?.tiles;
         if (!rows) return;
         const areaId = playerData.currentArea;
-        const discovered = playerData.discoveredTiles[areaId] || {};
+        const discovered = (playerData.discoveredTiles || {})[areaId] || {};
         
         const COLS = rows[0].length;
         const ROWS = rows.length;

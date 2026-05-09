@@ -51,6 +51,8 @@ export class WorldScene extends Phaser.Scene {
         this._transitioning = false;
 
         this._loadArea(this._playerData.currentArea);
+        const _sp = this._playerData.position;
+        this._revealTiles(_sp.x, _sp.y);
 
         this._cursors = this.input.keyboard.createCursorKeys();
         this._wasd    = this.input.keyboard.addKeys({
@@ -161,6 +163,7 @@ export class WorldScene extends Phaser.Scene {
         const moved = this._player.update(delta, this._cursors, this._wasd, this._mapManager);
         if (moved) {
             this._playerData.position = { ...moved };
+            this._revealTiles(moved.x, moved.y);
             this._checkTileInteractions(moved.x, moved.y);
             EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
             this._maybeNearPortalTutorial(moved.x, moved.y);
@@ -283,6 +286,20 @@ export class WorldScene extends Phaser.Scene {
             }
         }
         this._respawns = this._respawns.filter(r => !ready.includes(r));
+    }
+
+    // ── Fog of war ────────────────────────────────────────────────────────────
+
+    _revealTiles(cx, cy, radius = 3) {
+        const area = this._playerData.currentArea;
+        if (!this._playerData.discoveredTiles) this._playerData.discoveredTiles = {};
+        if (!this._playerData.discoveredTiles[area]) this._playerData.discoveredTiles[area] = {};
+        const map = this._playerData.discoveredTiles[area];
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                map[`${cx + dx},${cy + dy}`] = true;
+            }
+        }
     }
 
     // ── Tile interactions ─────────────────────────────────────────────────────
@@ -468,6 +485,7 @@ export class WorldScene extends Phaser.Scene {
                 SaveSystem.autoSave(this._playerData);
 
                 this._loadArea(nextArea);
+                this._revealTiles(exit.targetSpawn.x, exit.targetSpawn.y);
                 EventBus.emit('area-changed',   { areaId: nextArea });
                 EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 

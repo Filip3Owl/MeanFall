@@ -177,6 +177,7 @@ export const PLAYER_DEFAULTS = {
         shadow: { level: 1, xp: 0, totalCorrect: 0 },
         normal: { level: 1, xp: 0, totalCorrect: 0 },
     },
+    discoveredTiles: {},
     defeatedMonsters: {},
     openedChests: {},
     availableStatPoints: 0,
