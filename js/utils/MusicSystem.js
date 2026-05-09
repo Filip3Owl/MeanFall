@@ -176,6 +176,25 @@ class MusicEngine {
         }
     }
 
+    // Fever mode: boost volume + speed up the current track by ~20%
+    setFever(active) {
+        if (!this._ctx || !this._master) return;
+        const now = this._ctx.currentTime;
+        if (active) {
+            this._master.gain.setTargetAtTime(0.38, now, 0.35);
+            if (this._track && !this._feverOrigBpm) {
+                this._feverOrigBpm = this._track.bpm;
+                this._track = { ...this._track, bpm: Math.round(this._track.bpm * 1.22) };
+            }
+        } else {
+            this._master.gain.setTargetAtTime(this._volume, now, 0.5);
+            if (this._track && this._feverOrigBpm) {
+                this._track = { ...this._track, bpm: this._feverOrigBpm };
+                this._feverOrigBpm = null;
+            }
+        }
+    }
+
     // ── Internal: stop/crossfade ──────────────────────────────────────────────
 
     _halt(fade) {

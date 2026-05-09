@@ -34,6 +34,10 @@ export const CombatSystem = {
 
         raw = Math.floor(raw * distMult);
 
+        // Fever bonus: streak 5+ grants +40% damage
+        const isFever = streak >= 5;
+        if (isFever) raw = Math.floor(raw * 1.4);
+
         // Weapon element vs monster element
         const weaponElem = this._weaponElement(player);
         const matchup    = (ELEMENT_MATRIX[weaponElem] || {})[monster.element] ?? 1;
@@ -46,11 +50,12 @@ export const CombatSystem = {
 
         const damage = Math.max(1, raw - (monster.defense || 0));
         const advantage = matchup > 1.1 ? 'super' : matchup < 0.9 ? 'weak' : 'neutral';
-        return { 
-            damage, 
-            multiplier: matchup, 
-            isCrit, 
-            advantage, 
+        return {
+            damage,
+            multiplier: matchup,
+            isCrit,
+            isFever,
+            advantage,
             weaponElement: weaponElem,
             distribution: dist
         };

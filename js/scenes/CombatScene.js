@@ -8,6 +8,7 @@ import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js
 import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
 import EventBus                          from '../utils/EventBus.js';
 import { Sound }                         from '../utils/SoundSystem.js';
+import { Music }                         from '../utils/MusicSystem.js';
 
 export class CombatScene extends Phaser.Scene {
     constructor() { super('Combat'); }
@@ -663,8 +664,9 @@ export class CombatScene extends Phaser.Scene {
             }
 
             let msg = `Correto! Dano: ${finalDmgToMonster}`;
-            if (result.isCrit) msg += ' [CRÍTICO!]';
-            if (this._relicEffect?.type === 'damage_boost_correct') msg += ' [🔥RELÍQUIA]';
+            if (result.isCrit)  msg += ' [CRÍTICO!]';
+            if (result.isFever) msg += ' [🔥FERVURA]';
+            if (this._relicEffect?.type === 'damage_boost_correct') msg += ' [RELÍQUIA]';
             if (result.distribution === 'uniform') msg += ' (Instável!)';
             else if (weaponInfo) msg += ' (Consistente)';
 
@@ -867,19 +869,17 @@ export class CombatScene extends Phaser.Scene {
         this._feverFrame.clear();
 
         if (active) {
-            Sound.critical(); // Extra sound for fever start
+            Sound.critical();
+            Music.setFever(true);
             this.cameras.main.flash(400, 255, 215, 0, 0.2);
-            
-            // Draw initial frame
             this._renderFeverFrame();
-            
-            // Loop for flaming effect
             this._feverTimer = this.time.addEvent({
                 delay: 100,
                 loop: true,
                 callback: () => this._renderFeverFrame()
             });
         } else {
+            Music.setFever(false);
             if (this._feverTimer) this._feverTimer.remove();
         }
     }
@@ -1002,6 +1002,7 @@ export class CombatScene extends Phaser.Scene {
     // ─── COMBAT END ───────────────────────────────────────────────────────────
 
     _endCombat(outcome) {
+        Music.setFever(false);
         StatusEffectSystem.clear(this._player);
         let xpGained = 0;
         let goldGained = 0;
