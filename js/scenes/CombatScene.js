@@ -37,7 +37,7 @@ export class CombatScene extends Phaser.Scene {
         this.cameras.main.fadeIn(300, 0, 0, 0);
 
         if (this._monsterSprite) {
-            const finalScale = this._monsterDef.isBoss ? 3.5 : 2.5;
+            const finalScale = this._monsterDef.isBoss ? 2.6 : 2.5;
             this._monsterSprite.setScale(0).setAlpha(0);
             this.tweens.add({
                 targets: this._monsterSprite,
