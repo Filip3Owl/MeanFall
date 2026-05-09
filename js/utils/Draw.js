@@ -193,6 +193,48 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_rug', S, S);
 
+    // FIREPLACE (tile 20)
+    tile(g, g => {
+        g.fillStyle(0x555566); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x333344); g.fillRect(2, 2, S-4, S-4);
+        g.fillStyle(0x888899); g.fillRect(2, 5, S-4, 4);     // mantle shelf
+        g.fillStyle(0xaaaabc); g.fillRect(2, 5, S-4, 1);     // mantle highlight
+        g.fillStyle(0x0a0a0e); g.fillRect(7, 9, 18, 16);     // firebox
+        g.fillStyle(0xff4400); g.fillRect(9, 18, 14, 5);     // embers
+        g.fillStyle(0xff7700); g.fillRect(10, 13, 12, 7);    // flame
+        g.fillStyle(0xff9900); g.fillRect(12, 10, 8, 5);     // flame mid
+        g.fillStyle(0xffdd00); g.fillRect(14, 9,  4, 3);     // tip
+        g.fillStyle(0x555566); g.fillRect(4, S-5, S-8, 4);   // hearth base
+    });
+    g.generateTexture('tile_fireplace', S, S);
+
+    // BED (tile 21)
+    tile(g, g => {
+        g.fillStyle(0x4a2d18); g.fillRect(2, 2, S-4, S-4);   // frame
+        g.fillStyle(0x7a4c2a); g.fillRect(2, 2, S-4, 5);     // headboard
+        g.fillStyle(0x7a4c2a); g.fillRect(2, S-7, S-4, 5);   // footboard
+        g.fillStyle(0x3a5f8a); g.fillRect(4, 7, S-8, S-14);  // blanket
+        g.fillStyle(0x4d7ab5); g.fillRect(4, 7, S-8, 2);     // blanket fold
+        g.fillStyle(0xeeeedd); g.fillRect(6, 8, S-12, 5);    // pillow
+        g.fillStyle(0xffffff, 0.4); g.fillRect(7, 9, 4, 3);  // pillow sheen
+    });
+    g.generateTexture('tile_bed', S, S);
+
+    // PLANT (tile 22)
+    tile(g, g => {
+        g.fillStyle(0x885522); g.fillRect(11, 20, 10, 9);    // pot body
+        g.fillStyle(0x663311); g.fillRect(9,  22, 14, 7);    // pot sides
+        g.fillStyle(0xaa7744); g.fillRect(9,  20, 14, 2);    // pot rim
+        g.fillStyle(0x2d1a08); g.fillRect(11, 20, 10, 3);    // soil
+        g.fillStyle(0x228822); g.fillRect(14, 10, 4, 12);    // stem
+        g.fillStyle(0x2d9e2d); g.fillRect(7,  6,  10, 8);   // left leaf
+        g.fillStyle(0x2d9e2d); g.fillRect(15, 8,  10, 7);   // right leaf
+        g.fillStyle(0x44cc44); g.fillRect(9,  4,  7,  6);   // top leaf L
+        g.fillStyle(0x44cc44); g.fillRect(16, 5,  6,  5);   // top leaf R
+        g.fillStyle(0x66dd66); g.fillRect(11, 3,  5,  4);   // highlight
+    });
+    g.generateTexture('tile_plant', S, S);
+
     tile(g, g => {
         g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
         g.fillStyle(COLORS.PORTAL);
