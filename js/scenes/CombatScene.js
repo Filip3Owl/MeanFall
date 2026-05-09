@@ -584,6 +584,7 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _onKeyDown(event) {
+        if (this.scene.isActive('Scratchpad')) return;
         if (!this._currentQ || this._currentQ.type !== 'fill_numeric' || this._answerLock) return;
         if (event.key === 'Enter')     { this._submitNumeric(); return; }
         if (event.key === 'Backspace') { this._numericValue = this._numericValue.slice(0, -1); }
