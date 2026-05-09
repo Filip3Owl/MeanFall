@@ -158,41 +158,6 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_fence', S, S);
 
-    // BOOKSHELF: Small books
-    tile(g, g => {
-        g.fillStyle(0x4a2d18); g.fillRect(0, 0, S, S); // wood
-        const colors = [0xcc2222, 0x2266ff, 0x228822, 0xeeeeee, 0xffaa00];
-        for (let row = 0; row < 2; row++) {
-            const by = 4 + row * 12;
-            g.fillStyle(0x2d1a08); g.fillRect(2, by, S-4, 8); // shelf void
-            for (let i = 0; i < 5; i++) {
-                g.fillStyle(colors[Math.floor(Math.random()*colors.length)]);
-                g.fillRect(4 + i * 5, by + 1, 4, 7);
-            }
-        }
-    });
-    g.generateTexture('tile_bookshelf', S, S);
-
-    // TABLE: Plain wood
-    tile(g, g => {
-        g.fillStyle(0x5c3a1e); g.fillRect(2, 2, S-4, S-4);
-        g.fillStyle(0x7a4c2a); g.fillRect(4, 4, S-8, S-8);
-        g.fillStyle(0x4a2d18, 0.6); g.fillRect(2, 2, S-4, 2);
-    });
-    g.generateTexture('tile_table', S, S);
-
-    // RUG: Ornate pattern
-    tile(g, g => {
-        g.fillStyle(0x882222); g.fillRect(0, 0, S, S);
-        g.fillStyle(0xaa7711, 0.4);
-        g.fillRect(4, 4, S-8, S-8);
-        g.fillStyle(0x882222); g.fillRect(8, 8, S-16, S-16);
-        // Fringe
-        g.fillStyle(0xaa7711, 0.6);
-        for(let i=0; i<S; i+=4) { g.fillRect(i, 0, 2, 2); g.fillRect(i, S-2, 2, 2); }
-    });
-    g.generateTexture('tile_rug', S, S);
-
     // FIREPLACE (tile 20)
     tile(g, g => {
         g.fillStyle(0x555566); g.fillRect(0, 0, S, S);
@@ -234,6 +199,18 @@ export function generateTextures(scene) {
         g.fillStyle(0x66dd66); g.fillRect(11, 3,  5,  4);   // highlight
     });
     g.generateTexture('tile_plant', S, S);
+
+    // DOOR EXIT (tile 23) — arched passage back to overworld
+    tile(g, g => {
+        g.fillStyle(0x555566); g.fillRect(0, 0, S, S);           // wall
+        g.fillStyle(0x333344); g.fillRect(2, 2, S-4, S-4);       // wall depth
+        g.fillStyle(0x0a0808); g.fillRect(10, 4, 12, 24);         // archway void
+        g.fillStyle(0x6b452e); g.fillRect(8, 22, 16, 6);          // door panel
+        g.fillStyle(0x4a2d18); g.fillRect(8, 22, 16, 2);          // panel top shadow
+        g.fillStyle(0xd4af37); g.fillRect(18, 26, 2, 2);           // knob
+        g.fillStyle(0x777788, 0.5); g.fillRect(10, 2, 12, 3);     // arch capstone
+    });
+    g.generateTexture('tile_door_exit', S, S);
 
     tile(g, g => {
         g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
@@ -608,83 +585,6 @@ export function generateTextures(scene) {
         }
     });
     g.generateTexture('tile_rug', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
-        g.fillStyle(COLORS.PORTAL);
-        g.fillRect(8, 2, 16, 28);
-        g.fillRect(2, 8, 28, 16);
-        g.fillStyle(0xcc88ff, 0.7);
-        g.fillRect(10, 4, 12, 24); g.fillRect(4, 10, 24, 12);
-        g.fillStyle(0xffffff, 0.4); g.fillRect(13, 7, 6, 18);
-    });
-    g.generateTexture('tile_portal', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.CHEST); g.fillRect(4, 10, 24, 18);
-        g.fillStyle(0x5a4008); g.fillRect(4, 10, 24, 4);
-        g.fillStyle(0xffd700); g.fillRect(13, 16, 6, 6);
-        g.fillStyle(0x8b6914, 0.5); g.fillRect(4, 10, 24, 1);
-    });
-    g.generateTexture('tile_chest', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.SAND); g.fillRect(0, 0, S, S);
-        g.fillStyle(0xc49040, 0.4);
-        g.fillRect(3, 5, 5, 3); g.fillRect(14, 15, 6, 3); g.fillRect(22, 7, 4, 5);
-        g.fillStyle(0xe8c060, 0.3); g.fillRect(8, 20, 8, 3);
-    });
-    g.generateTexture('tile_sand', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.DARK_GRASS); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x1a4a22, 0.6);
-        g.fillRect(4, 8, 5, 3); g.fillRect(16, 18, 4, 5); g.fillRect(22, 6, 6, 3);
-        g.fillStyle(0x3d7040, 0.3); g.fillRect(10, 25, 5, 3);
-    });
-    g.generateTexture('tile_dark_grass', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.MOUNTAIN); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x888899, 0.5);
-        g.fillRect(0, 20, S, S - 20);
-        g.fillStyle(0x444455);
-        g.fillTriangle(16, 2, 2, 28, 30, 28);
-        g.fillStyle(0xaaaacc, 0.4); g.fillRect(14, 4, 6, 8);
-    });
-    g.generateTexture('tile_mountain', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.SNOW); g.fillRect(0, 0, S, S);
-        g.fillStyle(0xccccdd, 0.6);
-        g.fillRect(4, 8, 8, 4); g.fillRect(18, 16, 6, 6); g.fillRect(10, 24, 10, 4);
-        g.fillStyle(0xffffff, 0.3); g.fillRect(2, 2, S - 4, 4);
-    });
-    g.generateTexture('tile_snow', S, S);
-
-    tile(g, g => {
-        g.fillStyle(COLORS.CAVE); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x3a3344, 0.5);
-        g.fillRect(2, 2, S - 4, S - 4);
-        g.fillStyle(0x1a1122, 0.4);
-        g.fillRect(4, 12, 10, 8); g.fillRect(18, 5, 8, 10);
-    });
-    g.generateTexture('tile_cave', S, S);
-
-    // Wall Shadow
-    tile(g, g => {
-        g.fillStyle(0x000000, 0.25);
-        g.fillRect(0, 0, S, S / 2);
-    });
-    g.generateTexture('tile_wall_shadow', S, S);
-
-    // Entity Shadow (Universal oval)
-    tile(g, g => {
-        g.fillStyle(0x000000, 0.35);
-        g.fillEllipse(S/2, S/2, S*0.8, S*0.4);
-    });
-    g.generateTexture('entity_shadow', S, S);
-
 
     g.destroy();
 }
