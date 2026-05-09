@@ -75,12 +75,17 @@ export class WorldScene extends Phaser.Scene {
         TutorialSystem.init(this._playerData);
         CombatSystem.refreshWeaponElement(this._playerData, ITEMS);
 
-        EventBus.on('combat-end',       this._onCombatEnd.bind(this));
-        EventBus.on('player-level-up',  this._onLevelUp.bind(this));
-        EventBus.on('element-xp-change', () => this._updateElementalAura());
-        EventBus.on('bounty-complete',  ({ slot }) => {
+        this._onCombatEndBound = this._onCombatEnd.bind(this);
+        this._onLevelUpBound = this._onLevelUp.bind(this);
+        this._onElementXpChangeBound = () => this._updateElementalAura();
+        this._onBountyCompleteBound = ({ slot }) => {
             this._chat(`{{accent:BÔNUS COMPLETO:}} ${slot.label} — abra o diário (Q) para coletar!`, 'xp');
-        });
+        };
+
+        EventBus.on('combat-end',       this._onCombatEndBound);
+        EventBus.on('player-level-up',  this._onLevelUpBound);
+        EventBus.on('element-xp-change', this._onElementXpChangeBound);
+        EventBus.on('bounty-complete',  this._onBountyCompleteBound);
 
         this._syncTimer  = this.time.addEvent({ delay: 5000, loop: true, callback: this._autoSync, callbackScope: this });
         this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
