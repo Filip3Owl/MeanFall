@@ -588,7 +588,11 @@ export class CombatScene extends Phaser.Scene {
         if (!this._currentQ || this._currentQ.type !== 'fill_numeric' || this._answerLock) return;
         if (event.key === 'Enter')     { this._submitNumeric(); return; }
         if (event.key === 'Backspace') { this._numericValue = this._numericValue.slice(0, -1); }
-        else if (/^[-0-9.,]$/.test(event.key)) { this._numericValue += event.key; }
+        else if (/^[-0-9.,]$/.test(event.key)) {
+            const ch = (event.key === ',') ? '.' : event.key;
+            if ((ch === '.') && this._numericValue.includes('.')) return;
+            this._numericValue += ch;
+        }
         this._numDisp.setText(this._numericValue);
         this._numCursor.setX(14 + this._numDisp.width + 2);
     }
