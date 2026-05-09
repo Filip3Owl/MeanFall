@@ -389,20 +389,26 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _buildDifficultyPills(y) {
         const diffIds = Object.keys(DIFFICULTIES);
-        const pillW   = Math.floor((OPT_W - 4 * 4) / 5);
-        const pillH   = 32;
+        const cols = 2;
+        const gap  = 6;
+        const pillW = Math.floor((OPT_W - 12 - gap) / cols);
+        const pillH = 28;
         this._diffPills = {};
         const objs = [];
 
         diffIds.forEach((id, i) => {
             const diff = DIFFICULTIES[id];
-            const px   = OPT_L + i * (pillW + 4);
+            const row  = Math.floor(i / cols);
+            const colIdx = i % cols;
+            const px   = OPT_L + 4 + colIdx * (pillW + gap);
+            const py   = y + row * (pillH + gap);
             const col  = parseInt(diff.color.replace('#', ''), 16);
-            const pill = this.add.rectangle(px, y, pillW, pillH, 0x08061a, 1)
+            
+            const pill = this.add.rectangle(px, py, pillW, pillH, 0x08061a, 1)
                 .setOrigin(0, 0).setStrokeStyle(1, col, 0.35)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => this._selectDiff(id));
-            const tx = this.add.text(px + pillW/2, y + pillH/2, diff.name, {
+            const tx = this.add.text(px + pillW/2, py + pillH/2, diff.name, {
                 fontSize: '11px', color: diff.color, fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0.5);
             objs.push(pill, tx);
@@ -410,7 +416,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         });
 
         this._sc_add(objs);
-        return y + pillH;
+        return y + Math.ceil(diffIds.length / cols) * (pillH + gap);
     }
 
     // ── Confirm button (fixed, outside scroll) ─────────────────────────────────
