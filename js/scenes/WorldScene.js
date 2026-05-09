@@ -151,7 +151,8 @@ export class WorldScene extends Phaser.Scene {
         // (without this, the old area's fog state persists until first movement).
         this._fogManager?.update(this._playerData);
 
-        Music.play(areaId);
+        const musicKey = areaId.includes('house') ? 'home' : areaId;
+        Music.play(musicKey);
     }
 
     // ── Update loop ───────────────────────────────────────────────────────────

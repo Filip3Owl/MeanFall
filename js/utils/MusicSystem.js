@@ -87,6 +87,17 @@ const TRACKS = {
         melodyDur:  0.45,    // staccato — punchy palm-mute feel
         perc:       { kick: [0, 4], snare: [2, 6] },           // classic rock 4/4 beat (8-beat cycle)
     },
+    // ── Interior / Home: soft, slow, safe ──────────────────────────────────────
+    home: {
+        bpm: 70,
+        pad:       [53, 57, 60, 64],                          // Fmaj7: F3 A3 C4 E4
+        bass:      [41, 48, 41, 48],                          // F2 C3
+        melody:    [72, 72, 71, 69, 67, 65, 67, 64],          // C5 C5 B4 A4 G4 F4 G4 E4
+        padWave:    'triangle',
+        melodyWave: 'sine',
+        melodyPeak: 0.04,
+        bassPeak:   0.06,
+    },
 };
 
 // ─── Engine ───────────────────────────────────────────────────────────────────
