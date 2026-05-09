@@ -123,12 +123,11 @@
 
     <script type="module" src="js/main.js?v=0.9.1"></script>
     <script>
-    /* Auto-scale the game canvas to fill the available container space.
+    /* Auto-scale the game canvas to fit the available container space.
      * CSS transform is used so Phaser's logical coordinate system (544×480)
-     * is unaffected — getBoundingClientRect() reflects the transform, so
-     * Phaser's input remapping stays correct automatically.
-     * Scale is uncapped so the map fills the container both when shrinking
-     * (small viewports) and growing (large viewports with empty space). */
+     * is unaffected. For sharpness (pixel art), integer multipliers (1×, 2×, 3×)
+     * are used when upscaling. Fractional scale is only used when the viewport
+     * is too small to show the canvas at 1×. */
     (function () {
         var ticking = false;
         function rescale() {
@@ -139,8 +138,16 @@
                 var outer = document.getElementById('game-canvas-container');
                 var gc    = document.getElementById('game-container');
                 if (!outer || !gc) return;
-                var s = Math.min(outer.clientWidth / 544, outer.clientHeight / 480);
-                gc.style.transform       = 'scale(' + s.toFixed(4) + ')';
+                var aw = outer.clientWidth, ah = outer.clientHeight;
+                var s;
+                if (aw >= 544 && ah >= 480) {
+                    // Upscale: use largest integer multiplier that fits
+                    s = Math.max(1, Math.min(Math.floor(aw / 544), Math.floor(ah / 480)));
+                } else {
+                    // Must shrink: fractional unavoidable, keep as precise as possible
+                    s = Math.min(aw / 544, ah / 480);
+                }
+                gc.style.transform       = (Math.abs(s - 1) > 0.001) ? 'scale(' + s + ')' : '';
                 gc.style.transformOrigin = 'center center';
             });
         }

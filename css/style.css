@@ -171,15 +171,21 @@ body {
     border-radius: 3px;
     overflow: hidden;
     transform-origin: center center;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges; /* Firefox */
+    image-rendering: -webkit-optimize-contrast; /* Safari */
+    image-rendering: crisp-edges;               /* Firefox */
+    image-rendering: pixelated;                 /* Chrome / standard */
     box-shadow:
         0 0 0 1px var(--border),
         0 0 24px rgba(0, 0, 0, 0.9),
         0 0 60px rgba(60, 30, 120, 0.18),
         0 0 100px rgba(0, 0, 0, 0.5);
 }
-#game-container canvas { display: block; image-rendering: pixelated; }
+#game-container canvas {
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
 
 /* ─── PANEL SECTIONS / CARDS ──────────────────────────────────────────── */
 .panel-section {
