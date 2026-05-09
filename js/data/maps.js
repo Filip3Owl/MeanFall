@@ -23,6 +23,9 @@ export const MAP_DATA = {
         spawn: { x: 3, y: 7 },
         exits: [
             { x: 5, y: 13, targetArea: 'meadows', targetSpawn: { x: 8, y: 1 } },
+            { x: 3, y: 4,  targetArea: 'village_house_elder', targetSpawn: { x: 8, y: 12 } },
+            { x: 11, y: 4, targetArea: 'village_house_scholar', targetSpawn: { x: 8, y: 12 } },
+            { x: 4, y: 11, targetArea: 'village_house_merchant', targetSpawn: { x: 8, y: 12 } },
         ],
         monsters: [
             { monsterId: 'air_wisp',     instanceId: 'v_m1', x: 14, y: 5  },
@@ -304,6 +307,94 @@ export const MAP_DATA = {
                 'A Distorção o corrompeu. Agora ele inverte os testes: faz p > α parecer prova de normalidade. Faz Erro Tipo II parecer prudência. Faz inação parecer sabedoria.',
                 'Para derrotá-lo: p menor que α significa rejeitar H₀ — rejeitar a ilusão de normalidade que ele projeta. Erro Tipo I é rejeitar H₀ verdadeira — o falso alarme. Erro Tipo II é não rejeitar H₀ falsa — a hesitação fatal.',
                 'Há um destino inscrito na Curva para você. Mas o destino, como toda hipótese, precisa ser testado. Vá. E não hesite quando o p-valor for pequeno.',
+            ]},
+        ],
+    },
+
+    village_house_elder: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,17,17,17,17,1,1,1,1,1,1,17,17,17,1,3],
+            [3,1,17,17,17,17,1,18,18,1,1,1,17,17,17,1,3],
+            [3,1,1,1,1,1,1,18,18,1,1,1,1,1,1,1,3],
+            [3,1,1,19,19,19,1,1,1,1,1,19,19,19,1,1,3],
+            [3,1,1,19,19,19,1,1,1,1,1,19,19,19,1,1,3],
+            [3,1,1,19,19,19,1,1,1,1,1,19,19,19,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,3,3,3,3,3,3,3,6,3,3,3,3,3,3,3,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 8, y: 12 },
+        exits: [
+            { x: 8, y: 13, targetArea: 'village', targetSpawn: { x: 3, y: 5 }, isBack: true },
+        ],
+        npcs: [
+            { npcId: 'elder', role: 'quest', x: 8, y: 4, dialog: [
+                'Bem-vindo ao meu humilde refúgio, aprendiz. Sinta-se em casa.',
+                'Aqui guardo os registros originais da Sociedade, antes da Distorção corromper as bibliotecas.',
+            ]},
+        ],
+    },
+
+    village_house_scholar: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,17,17,17,17,17,17,17,17,17,17,17,17,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,18,18,1,1,1,1,18,18,1,1,1,1,3],
+            [3,1,1,1,18,18,1,1,1,1,18,18,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,3,3,3,3,3,3,3,6,3,3,3,3,3,3,3,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 8, y: 12 },
+        exits: [
+            { x: 8, y: 13, targetArea: 'village', targetSpawn: { x: 11, y: 5 }, isBack: true },
+        ],
+        npcs: [
+            { npcId: 'scholar', role: 'quest', x: 4, y: 5, dialog: [
+                'Shhh! Estou tentando organizar estes tomos. A Distorção os embaralhou de forma não-linear!',
+            ]},
+        ],
+    },
+
+    village_house_merchant: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,7,7,7,1,1,1,1,1,1,7,7,7,1,1,3],
+            [3,1,7,7,7,1,1,1,1,1,1,7,7,7,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,18,18,18,18,18,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+            [3,3,3,3,3,3,3,3,6,3,3,3,3,3,3,3,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 8, y: 12 },
+        exits: [
+            { x: 8, y: 13, targetArea: 'village', targetSpawn: { x: 4, y: 12 }, isBack: true },
+        ],
+        npcs: [
+            { npcId: 'merchant', role: 'shop', x: 6, y: 8, dialog: [
+                'Meu estoque é guardado com segurança aqui. Preços justos... na medida do possível.',
             ]},
         ],
     },

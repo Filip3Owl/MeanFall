@@ -66,6 +66,9 @@ export const AREA_INFO = {
     plains:    { displayName: 'Planicies da Probabilidade', topic: 'Probabilidade Basica',    bgColor: 0x2e2010 },
     mountains: { displayName: 'Montanhas da Distribuicao',  topic: 'Distribuicao Normal',     bgColor: 0x1a1a1e },
     dungeon:   { displayName: 'Calabouco da Inferencia',    topic: 'Testes de Hipotese',      bgColor: 0x0e0a0a },
+    village_house_elder:    { displayName: 'Casa da Anciã',    topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
+    village_house_scholar:  { displayName: 'Casa do Estudioso', topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
+    village_house_merchant: { displayName: 'Casa do Mercador',  topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
 };
 
 export const AREA_UNLOCK = {
