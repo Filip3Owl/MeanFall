@@ -171,6 +171,8 @@ body {
     border-radius: 3px;
     overflow: hidden;
     transform-origin: center center;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges; /* Firefox */
     box-shadow:
         0 0 0 1px var(--border),
         0 0 24px rgba(0, 0, 0, 0.9),

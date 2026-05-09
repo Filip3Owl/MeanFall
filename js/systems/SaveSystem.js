@@ -47,8 +47,8 @@ export const SaveSystem = {
     },
 
     _serialize(player) {
-        // Strip any non-serializable fields
-        const { scene, sprite, ...rest } = player;
+        if (player.toData) return player.toData();
+        const { scene, sprite, shadow, ...rest } = player;
         return rest;
     },
 };

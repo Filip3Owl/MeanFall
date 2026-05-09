@@ -89,7 +89,6 @@ export class WorldScene extends Phaser.Scene {
         this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
 
         this._updateElementalAura();
-        this._fogManager.update(this._playerData);
         EventBus.emit('area-changed', { areaId: this._playerData.currentArea });
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 
@@ -147,6 +146,10 @@ export class WorldScene extends Phaser.Scene {
         cam.stopFollow();
         cam.setZoom(1);
         cam.setScroll(0, 0);
+
+        // Redraw fog immediately so the new area is correctly revealed
+        // (without this, the old area's fog state persists until first movement).
+        this._fogManager?.update(this._playerData);
 
         Music.play(areaId);
     }
@@ -590,7 +593,7 @@ export class WorldScene extends Phaser.Scene {
             
             // Reset camera immediately behind the overlay — map is always
             // 544×480 = canvas size, so scroll (0,0) is always correct.
-            this.cameras.main.zoomTo(1, 0);
+            this.cameras.main.setZoom(1);
             this.cameras.main.setScroll(0, 0);
         });
     }
@@ -845,7 +848,12 @@ export class WorldScene extends Phaser.Scene {
         return map[npcId] || npcId;
     }
 
-    _autoSync() { this.registry.set('player', this._playerData); }
+    _autoSync() { 
+        if (this._player) {
+            Object.assign(this._playerData, this._player.toData());
+        }
+        this.registry.set('player', this._playerData); 
+    }
 
     _chat(msg, type) { EventBus.emit('chat', { msg, type }); }
 
@@ -925,9 +933,10 @@ export class WorldScene extends Phaser.Scene {
     shutdown() {
         this._rematchOverlay?.destroy();
         this._rematchOverlay = null;
-        EventBus.off('combat-end', this._onCombatEnd);
-        EventBus.off('player-level-up', this._onLevelUp);
-        EventBus.off('bounty-complete');
+        EventBus.off('combat-end',       this._onCombatEndBound);
+        EventBus.off('player-level-up',  this._onLevelUpBound);
+        EventBus.off('element-xp-change', this._onElementXpChangeBound);
+        EventBus.off('bounty-complete',  this._onBountyCompleteBound);
         this._syncTimer?.remove();
         this._regenTimer?.remove();
     }
