@@ -207,6 +207,23 @@ class SoundEngine {
         });
     }
 
+    // Hover sobre item de lista — blip curtíssimo e bem suave
+    hover() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 680, 'sine', t, 0.028, 0.032);
+        });
+    }
+
+    // Seleção de item — dois ticks ascendentes, mais afirmativo que click
+    select() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 820,  'sine', t,        0.055, 0.045);
+            this._tone(ctx, dest, 1080, 'sine', t + 0.04, 0.065, 0.055);
+        });
+    }
+
     // Item consumed (potion / consumable)
     useItem() {
         this._play((ctx, dest) => {

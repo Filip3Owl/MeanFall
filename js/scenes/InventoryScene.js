@@ -198,13 +198,14 @@ export class InventoryScene extends Phaser.Scene {
                     .setOrigin(0, 0).setInteractive()
                     .on('pointerover', () => {
                         if (!isSel) bg.setFillStyle(0x1a1100);
+                        Sound.hover();
                         this._showDetail(filtIdx, false);
                     })
                     .on('pointerout', () => {
                         if (this._selectedIdx !== filtIdx) bg.setFillStyle(0x111111);
                         this._restoreDetail();
                     })
-                    .on('pointerdown', () => this._selectItem(filtIdx));
+                    .on('pointerdown', () => { Sound.select(); this._selectItem(filtIdx); });
 
                 const icon = this.add.image(LIST_X + 14, y + ROW_H / 2, item.icon || 'item_potion_red')
                     .setScale(0.65).setOrigin(0.5, 0.5);
