@@ -123,10 +123,12 @@
 
     <script type="module" src="js/main.js?v=0.9.1"></script>
     <script>
-    /* Auto-scale the game canvas to fit the available viewport space.
+    /* Auto-scale the game canvas to fill the available container space.
      * CSS transform is used so Phaser's logical coordinate system (544×480)
      * is unaffected — getBoundingClientRect() reflects the transform, so
-     * Phaser's input remapping stays correct automatically. */
+     * Phaser's input remapping stays correct automatically.
+     * Scale is uncapped so the map fills the container both when shrinking
+     * (small viewports) and growing (large viewports with empty space). */
     (function () {
         var ticking = false;
         function rescale() {
@@ -137,8 +139,8 @@
                 var outer = document.getElementById('game-canvas-container');
                 var gc    = document.getElementById('game-container');
                 if (!outer || !gc) return;
-                var s = Math.min(1, outer.clientWidth / 544, outer.clientHeight / 480);
-                gc.style.transform       = s < 0.999 ? 'scale(' + s.toFixed(4) + ')' : '';
+                var s = Math.min(outer.clientWidth / 544, outer.clientHeight / 480);
+                gc.style.transform       = 'scale(' + s.toFixed(4) + ')';
                 gc.style.transformOrigin = 'center center';
             });
         }
