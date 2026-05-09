@@ -114,6 +114,10 @@ export class CombatScene extends Phaser.Scene {
         this._buildQuestionBox(eColor, eHex, eTextHex, isElite);
         this._buildBottomBar(eColor, eHex, isElite);
 
+        // ── Juice Overlays ───────────────────────────────────────────────
+        this._juiceCorrect = this.add.rectangle(0, 0, W, H, 0xffd700, 0).setOrigin(0, 0).setDepth(200);
+        this._juiceWrong = this.add.rectangle(0, 0, W, H, 0x445588, 0).setOrigin(0, 0).setDepth(200);
+
         this.input.keyboard.on('keydown', this._onKeyDown.bind(this));
     }
 
@@ -622,6 +626,10 @@ export class CombatScene extends Phaser.Scene {
             mastery.correct++;
             mastery.wrongIds = mastery.wrongIds.filter(id => id !== q.id);
 
+            // JUICE: Correct flash
+            this._juiceCorrect.setAlpha(0.2);
+            this.tweens.add({ targets: this._juiceCorrect, alpha: 0, duration: 400 });
+
             // Award Elemental XP based on topic
             const elementId = TOPIC_TO_ELEMENT[q.topic] || 'normal';
             awardElementalXP(this._player, elementId, 15);
@@ -681,6 +689,11 @@ export class CombatScene extends Phaser.Scene {
             this._streak = 0;
             this._streakTxt.setText('');
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
+
+            // JUICE: Wrong flash (cold/danger)
+            this._juiceWrong.setAlpha(0.35);
+            this.tweens.add({ targets: this._juiceWrong, alpha: 0, duration: 600 });
+            this.cameras.main.shake(300, 0.015); // Extra heavy shake for wrong answer
 
             const result = CombatSystem.calcMonsterDamage(this._monsterDef, this._player);
 

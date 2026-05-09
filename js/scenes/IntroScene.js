@@ -99,7 +99,7 @@ export class IntroScene extends Phaser.Scene {
     _buildPermanentUI() {
         // ESC-to-skip label — fades in after the first second
         const skipLbl = this.add.text(W - 14, 14, 'ESC — PULAR', {
-            fontSize: '9px', color: '#252240', fontFamily: 'Courier New', letterSpacing: 1,
+            fontSize: '10px', color: '#ff4444', fontFamily: 'Courier New', letterSpacing: 1, fontStyle: 'bold'
         }).setOrigin(1, 0).setDepth(20).setAlpha(0);
         this.tweens.add({ targets: skipLbl, alpha: 1, duration: 600, delay: 2000 });
 
@@ -113,8 +113,8 @@ export class IntroScene extends Phaser.Scene {
         }
 
         // "SPACE to continue" hint, shown during prologue slides
-        this._spaceHint = this.add.text(W / 2, H - 30, 'ESPACO  para continuar', {
-            fontSize: '9px', color: '#201e38', fontFamily: 'Courier New',
+        this._spaceHint = this.add.text(W / 2, H - 30, 'ESPAÇO  para continuar', {
+            fontSize: '10px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5, 1).setDepth(20).setAlpha(0);
     }
 
@@ -168,8 +168,8 @@ export class IntroScene extends Phaser.Scene {
         this.tweens.add({ targets: verTx, alpha: 1, duration: 600, delay: 2800 });
 
         // "SPACE to begin" hint (title-specific, not _spaceHint)
-        const beginHint = this.add.text(W / 2, H - 32, 'ESPACO  para comecar', {
-            fontSize: '9px', color: '#252040', fontFamily: 'Courier New',
+        const beginHint = this.add.text(W / 2, H - 32, 'ESPAÇO  para começar', {
+            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5, 1).setAlpha(0).setDepth(20);
         this.tweens.add({ targets: beginHint, alpha: 1, duration: 500, delay: 3000 });
 

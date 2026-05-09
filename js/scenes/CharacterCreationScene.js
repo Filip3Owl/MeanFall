@@ -330,7 +330,7 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _buildClassCards(y) {
         const cardW = Math.floor((OPT_W - 12) / 3);
-        const cardH = 90;
+        const cardH = 95; // Slightly taller for more breathing room
         this._classCards = [];
         const objs = [];
 
@@ -348,10 +348,10 @@ export class CharacterCreationScene extends Phaser.Scene {
             const mx = cx + cardW / 2;
             objs.push(
                 bg,
-                this.add.text(mx, y + 17, cls.icon,            { fontSize: '20px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
-                this.add.text(mx, y + 38, cls.name.toUpperCase(), { fontSize: '11px', color: '#e8e0d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1 }).setOrigin(0.5),
-                this.add.text(mx, y + 54, cls.stats,            { fontSize: '10px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
-                this.add.text(mx, y + 70, cls.lore,             { fontSize: '10px', color: '#555577', fontFamily: 'Courier New', align: 'center', wordWrap: { width: cardW - 8 } }).setOrigin(0.5),
+                this.add.text(mx, y + 15, cls.icon,            { fontSize: '18px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
+                this.add.text(mx, y + 34, cls.name.toUpperCase(), { fontSize: '10px', color: '#e8e0d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1 }).setOrigin(0.5),
+                this.add.text(mx, y + 50, cls.stats,            { fontSize: '9px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5),
+                this.add.text(mx, y + 72, cls.lore,             { fontSize: '10px', color: '#777799', fontFamily: 'Courier New', align: 'center', wordWrap: { width: cardW - 6 }, lineSpacing: -2 }).setOrigin(0.5),
             );
             this._classCards.push({ id: cls.id, bg, color: cls.color, dark: cls.dark });
         });
@@ -362,7 +362,7 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _buildTrajectoryRow(y) {
         const pillW = Math.floor((OPT_W - 12) / 3);
-        const pillH = 40;
+        const pillH = 44; // Slightly taller
         this._trajPills = {};
         const objs = [];
 
@@ -374,10 +374,10 @@ export class CharacterCreationScene extends Phaser.Scene {
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => this._selectTrajectory(traj.id));
             const nameTx = this.add.text(px + pillW/2, y + 15, traj.name, {
-                fontSize: '13px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold',
+                fontSize: '11px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0.5);
             const statTx = this.add.text(px + pillW/2, y + 30, traj.stats, {
-                fontSize: '10px', color: '#555577', fontFamily: 'Courier New',
+                fontSize: '9px', color: '#666688', fontFamily: 'Courier New', fontStyle: 'bold'
             }).setOrigin(0.5);
             objs.push(pill, nameTx, statTx);
             this._trajPills[traj.id] = { pill, nameTx, statTx, color: traj.color, dark: traj.dark };
