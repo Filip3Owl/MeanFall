@@ -53,7 +53,8 @@ export class MapManager {
                 const noise = Math.sin(seed); 
                 const chance = (noise + 1) / 2;
 
-                if (chance > 0.75) {
+                const isIndoor = this.areaId?.includes('_house_') || this.areaId?.includes('_inn') || this.areaId?.includes('_shop');
+                if (!isIndoor && chance > 0.75) {
                     let decoTex = null;
                     if (tileId === 0 || tileId === 9) { // Grass
                         if (chance > 0.96) decoTex = 'deco_flower_red';

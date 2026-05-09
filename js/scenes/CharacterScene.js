@@ -2,6 +2,7 @@ import { spendStatPoint, xpToNext, masteryPercent } from '../systems/XPSystem.js
 import { ITEMS }      from '../data/items.js';
 import { AREA_INFO }  from '../constants.js';
 import EventBus       from '../utils/EventBus.js';
+import { Sound }      from '../utils/SoundSystem.js';
 
 export class CharacterScene extends Phaser.Scene {
     constructor() { super('Character'); }
@@ -31,7 +32,9 @@ export class CharacterScene extends Phaser.Scene {
 
         // Close button
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
-            .setInteractive().on('pointerdown', () => this._close());
+            .setInteractive()
+            .on('pointerover',  () => Sound.hover())
+            .on('pointerdown',  () => { Sound.click(); this._close(); });
         this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
         // Name + level
@@ -95,9 +98,9 @@ export class CharacterScene extends Phaser.Scene {
 
             const btn = this.add.rectangle(426, y, 56, 18, 0x1a1a33, 1).setOrigin(0, 0)
                 .setInteractive()
-                .on('pointerover', () => btn.setFillStyle(0x2a2a55))
+                .on('pointerover', () => { btn.setFillStyle(0x2a2a55); Sound.hover(); })
                 .on('pointerout',  () => btn.setFillStyle(0x1a1a33))
-                .on('pointerdown', () => this._spendPoint(key));
+                .on('pointerdown', () => { Sound.select(); this._spendPoint(key); });
             this.add.text(454, y + 9, '+1', { fontSize: '16px', color: '#aaaaff', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
             this._plusBtns[key] = btn;
         });

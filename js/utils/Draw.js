@@ -541,6 +541,15 @@ export function generateTextures(scene) {
     });
     g.generateTexture('deco_ice_crystal', 32, 32);
 
+    // Snow Mound (Snow)
+    tile(g, g => {
+        px(g, 0xddeeff, 6, 18, 20, 8);   // base
+        px(g, 0xeef6ff, 8, 14, 16, 6);   // dome
+        px(g, 0xffffff, 10, 12, 12, 4);  // highlight
+        px(g, 0xffffff, 13, 11, 6, 2);   // tip
+    });
+    g.generateTexture('deco_snow_mound', 32, 32);
+
     // BOOKSHELF: Professional version with depth and varied books
     tile(g, g => {
         const wood = 0x4a2d18, darkWood = 0x2d1a08, highlight = 0x6b452e;
