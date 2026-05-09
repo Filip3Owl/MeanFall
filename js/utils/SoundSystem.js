@@ -14,7 +14,10 @@ class SoundEngine {
         try {
             this._ctx    = new (window.AudioContext || window.webkitAudioContext)();
             this._master = this._ctx.createGain();
-            this._master.gain.value = this._vol;
+            this._master.gain.value          = this._vol;
+            this._master.channelCount        = 2;
+            this._master.channelCountMode    = 'explicit';
+            this._master.channelInterpretation = 'speakers';
             this._master.connect(this._ctx.destination);
         } catch {
             this._enabled = false;
@@ -51,9 +54,11 @@ class SoundEngine {
     // White noise burst (for impacts / hits)
     _noise(ctx, dest, at, dur, cutoff = 800, peak = 0.2) {
         const size = Math.ceil(ctx.sampleRate * dur);
-        const buf  = ctx.createBuffer(1, size, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+        const buf  = ctx.createBuffer(2, size, ctx.sampleRate); // stereo — evita upmix só no L
+        for (let ch = 0; ch < 2; ch++) {
+            const data = buf.getChannelData(ch);
+            for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+        }
         const src  = ctx.createBufferSource();
         src.buffer = buf;
         const filt = ctx.createBiquadFilter();
