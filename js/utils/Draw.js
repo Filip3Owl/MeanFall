@@ -499,6 +499,371 @@ export function generateTextures(scene) {
     });
     g.generateTexture('deco_ice_crystal', 32, 32);
 
+    // BOOKSHELF: Professional version with depth and varied books
+    tile(g, g => {
+        const wood = 0x4a2d18, darkWood = 0x2d1a08, highlight = 0x6b452e;
+        g.fillStyle(wood); g.fillRect(0, 0, S, S);
+        // Wood grain
+        g.fillStyle(highlight, 0.3); g.fillRect(2, 4, 1, 24); g.fillRect(S-3, 6, 1, 22);
+        
+        const colors = [0xcc2222, 0x2266ff, 0x228822, 0xdddddd, 0xffaa00, 0x777777];
+        for (let row = 0; row < 2; row++) {
+            const by = 4 + row * 13;
+            g.fillStyle(darkWood); g.fillRect(2, by, S-4, 9); // Shelf niche
+            // Shelf shadow
+            g.fillStyle(0x000000, 0.3); g.fillRect(2, by, S-4, 2);
+            for (let i = 0; i < 6; i++) {
+                const h = 5 + Math.random() * 3;
+                g.fillStyle(colors[Math.floor(Math.random()*colors.length)]);
+                g.fillRect(4 + i * 4, by + (9 - h), 3, h);
+                // Book spine highlight
+                g.fillStyle(0xffffff, 0.15); g.fillRect(4 + i * 4, by + (9 - h), 1, h);
+            }
+            // Shelf board
+            g.fillStyle(wood); g.fillRect(2, by + 9, S-4, 2);
+            g.fillStyle(highlight, 0.4); g.fillRect(2, by + 9, S-4, 1);
+        }
+    });
+    g.generateTexture('tile_bookshelf', S, S);
+
+    // TABLE: Detailed wood and beveled edges
+    tile(g, g => {
+        const wood = 0x5c3a1e, dark = 0x3d2810, light = 0x7a4c2a;
+        g.fillStyle(dark); g.fillRect(2, 6, S-4, S-8); // side depth
+        g.fillStyle(wood); g.fillRect(2, 4, S-4, S-10); // top surface
+        // Wood grain / planks
+        g.fillStyle(dark, 0.2); 
+        g.fillRect(8, 4, 1, S-10); g.fillRect(16, 4, 1, S-10); g.fillRect(24, 4, 1, S-10);
+        // Bevel highlight
+        g.fillStyle(light, 0.5); g.fillRect(2, 4, S-4, 1); g.fillRect(2, 4, 1, S-10);
+    });
+    g.generateTexture('tile_table', S, S);
+
+    // RUG: Ornate pattern with fabric texture
+    tile(g, g => {
+        const base = 0x882222, accent = 0xaa7711, shadow = 0x661111;
+        g.fillStyle(base); g.fillRect(0, 0, S, S);
+        // Border
+        g.fillStyle(accent, 0.4); g.fillRect(3, 3, S-6, S-6);
+        g.fillStyle(base); g.fillRect(5, 5, S-10, S-10);
+        // Center pattern
+        g.fillStyle(accent, 0.3);
+        g.fillRect(S/2 - 4, S/2 - 4, 8, 8);
+        g.fillStyle(shadow, 0.5);
+        g.fillRect(S/2 - 1, 5, 2, S-10); g.fillRect(5, S/2 - 1, S-10, 2);
+        // Fringe (detailed)
+        for(let i=0; i<S; i+=3) { 
+            g.fillStyle(accent, 0.7); g.fillRect(i, 0, 1, 2); g.fillRect(i, S-2, 1, 2); 
+        }
+    });
+    g.generateTexture('tile_rug', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
+        g.fillStyle(COLORS.PORTAL);
+        g.fillRect(8, 2, 16, 28);
+        g.fillRect(2, 8, 28, 16);
+        g.fillStyle(0xcc88ff, 0.7);
+        g.fillRect(10, 4, 12, 24); g.fillRect(4, 10, 24, 12);
+        g.fillStyle(0xffffff, 0.4); g.fillRect(13, 7, 6, 18);
+    });
+    g.generateTexture('tile_portal', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.CHEST); g.fillRect(4, 10, 24, 18);
+        g.fillStyle(0x5a4008); g.fillRect(4, 10, 24, 4);
+        g.fillStyle(0xffd700); g.fillRect(13, 16, 6, 6);
+        g.fillStyle(0x8b6914, 0.5); g.fillRect(4, 10, 24, 1);
+    });
+    g.generateTexture('tile_chest', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.SAND); g.fillRect(0, 0, S, S);
+        g.fillStyle(0xc49040, 0.4);
+        g.fillRect(3, 5, 5, 3); g.fillRect(14, 15, 6, 3); g.fillRect(22, 7, 4, 5);
+        g.fillStyle(0xe8c060, 0.3); g.fillRect(8, 20, 8, 3);
+    });
+    g.generateTexture('tile_sand', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.DARK_GRASS); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x1a4a22, 0.6);
+        g.fillRect(4, 8, 5, 3); g.fillRect(16, 18, 4, 5); g.fillRect(22, 6, 6, 3);
+        g.fillStyle(0x3d7040, 0.3); g.fillRect(10, 25, 5, 3);
+    });
+    g.generateTexture('tile_dark_grass', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.MOUNTAIN); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x888899, 0.5);
+        g.fillRect(0, 20, S, S - 20);
+        g.fillStyle(0x444455);
+        g.fillTriangle(16, 2, 2, 28, 30, 28);
+        g.fillStyle(0xaaaacc, 0.4); g.fillRect(14, 4, 6, 8);
+    });
+    g.generateTexture('tile_mountain', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.SNOW); g.fillRect(0, 0, S, S);
+        g.fillStyle(0xccccdd, 0.6);
+        g.fillRect(4, 8, 8, 4); g.fillRect(18, 16, 6, 6); g.fillRect(10, 24, 10, 4);
+        g.fillStyle(0xffffff, 0.3); g.fillRect(2, 2, S - 4, 4);
+    });
+    g.generateTexture('tile_snow', S, S);
+
+    tile(g, g => {
+        g.fillStyle(COLORS.CAVE); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x3a3344, 0.5);
+        g.fillRect(2, 2, S - 4, S - 4);
+        g.fillStyle(0x1a1122, 0.4);
+        g.fillRect(4, 12, 10, 8); g.fillRect(18, 5, 8, 10);
+    });
+    g.generateTexture('tile_cave', S, S);
+
+    // Wall Shadow
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.25);
+        g.fillRect(0, 0, S, S / 2);
+    });
+    g.generateTexture('tile_wall_shadow', S, S);
+
+    // Entity Shadow (Universal oval)
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.35);
+        g.fillEllipse(S/2, S/2, S*0.8, S*0.4);
+    });
+    g.generateTexture('entity_shadow', S, S);
+
+    // ─── SPRITES ────────────────────────────────────────────────────────────
+    // Default player sprite (24×32) — overridden later by buildPlayerSprite()
+    buildPlayerSprite(scene, { gender: 'male', skin: 'light', hair: 'brown', robe: 'blue' });
+
+    // Elemental monster sprites
+    drawAirSprite   (g, 22, 24, 'sprite_air_wisp',         0xaaccff, 'small');
+    drawAirSprite   (g, 26, 30, 'sprite_air_sylph',        0xddeeff, 'tall');
+    drawEarthSprite (g, 30, 30, 'sprite_earth_golem',      0x886633, 'block');
+    drawEarthSprite (g, 24, 30, 'sprite_earth_dryad',      0x44773a, 'tree');
+    drawLightSprite (g, 22, 22, 'sprite_light_spark',      0xffee88, 'small');
+    drawLightSprite (g, 28, 30, 'sprite_light_prism',      0xffffcc, 'crystal');
+    drawFireSprite  (g, 26, 28, 'sprite_fire_phoenix',     0xff6622, 'bird');
+    drawFireSprite  (g, 30, 24, 'sprite_fire_salamander',  0xcc2200, 'lizard');
+    drawWaterSprite (g, 30, 22, 'sprite_water_serpent',    0x3388ff, 'wave');
+    drawWaterSprite (g, 32, 30, 'sprite_water_leviathan',  0x114488, 'beast');
+    drawShadowSprite(g, 26, 32, 'sprite_shadow_specter',   0x6633aa, 'wraith');
+    drawShadowSprite(g, 28, 32, 'sprite_shadow_lich',      0x331155, 'lich');
+
+    // ── Novos monstros (12 adicionais) ─────────────────────────────────────
+    drawAirSprite   (g, 20, 22, 'sprite_data_imp',          0x99aabb, 'small');
+    drawAirSprite   (g, 24, 28, 'sprite_type_specter',      0xccddee, 'tall');
+    drawEarthSprite (g, 24, 26, 'sprite_mean_gnome',        0x7a6040, 'block');
+    drawEarthSprite (g, 28, 32, 'sprite_mode_treant',       0x357030, 'tree');
+    drawLightSprite (g, 22, 22, 'sprite_std_wisp',          0xaaddff, 'small');
+    drawLightSprite (g, 26, 28, 'sprite_range_crystal',     0xddeeff, 'crystal');
+    drawFireSprite  (g, 22, 24, 'sprite_prob_imp',          0xff8833, 'lizard');
+    drawFireSprite  (g, 28, 28, 'sprite_bayes_harpy',       0xdd3311, 'bird');
+    drawWaterSprite (g, 28, 22, 'sprite_binomial_crab',     0x2266cc, 'wave');
+    drawWaterSprite (g, 30, 28, 'sprite_poisson_jellyfish', 0x6699dd, 'beast');
+    drawShadowSprite(g, 24, 30, 'sprite_type_ii_shade',     0x884488, 'wraith');
+    drawShadowSprite(g, 26, 32, 'sprite_alpha_vampire',     0x440022, 'lich');
+
+    // ── Boss sprites (um por área) ───────────────────────────────────────────
+    drawAirSprite   (g, 36, 40, 'sprite_boss_village',   0xddeeff, 'tall');
+    drawEarthSprite (g, 38, 42, 'sprite_boss_meadows',   0x886633, 'block');
+    drawLightSprite (g, 40, 44, 'sprite_boss_forest',    0x88ddee, 'crystal');
+    drawFireSprite  (g, 42, 46, 'sprite_boss_plains',    0xff6622, 'bird');
+    drawWaterSprite (g, 44, 48, 'sprite_boss_mountains', 0x3388ff, 'beast');
+    drawShadowSprite(g, 46, 50, 'sprite_boss_dungeon',   0x6633aa, 'lich');
+
+    drawNPCSprites(g);
+    drawElementIcons(g);
+
+    // ─── ITEM ICONS (24×24) ────────────────────────────────────────────────
+    
+    // Potions
+    const drawPotion = (key, color) => {
+        g.clear();
+        const dark = shade(color, 0.4);
+        const light = shade(color, 1.5);
+        px(g, 0x6b452e, 10, 3, 4, 3);   // cork
+        px(g, dark,      7, 6, 10, 13); // bottle outline
+        px(g, color,     8, 7, 8, 11);  // liquid
+        px(g, light,     9, 8, 3, 4);   // sparkle
+        g.generateTexture(key, 24, 24);
+    };
+    drawPotion('item_potion_red', 0xcc2222);
+    drawPotion('item_potion_blue', 0x2244cc);
+
+    // Scroll
+    g.clear();
+    px(g, 0x5c3a1e, 3, 6, 18, 12);  // backing
+    px(g, 0xf0d8a0, 4, 7, 16, 10);  // paper
+    px(g, 0xc8a060, 4, 7, 1, 10);   // left roll
+    px(g, 0xc8a060, 19, 7, 1, 10);  // right roll
+    px(g, 0x8b5c2e, 10, 8, 4, 1);   // seal
+    g.generateTexture('item_scroll', 24, 24);
+
+    // Helm: Silver bucket
+    g.clear();
+    px(g, 0x999999, 6, 4, 12, 14); // helmet body
+    px(g, 0xbbbbbb, 8, 5, 8, 4);   // top highlight
+    px(g, 0x222222, 7, 10, 10, 2); // visor slit
+    px(g, 0x777777, 6, 17, 12, 1); // bottom edge
+    g.generateTexture('item_helm', 24, 24);
+
+    // Armor: Chestplate
+    g.clear();
+    px(g, 0x999999, 4, 6, 16, 12); // main body
+    px(g, 0xbbbbbb, 6, 7, 12, 3);  // top light
+    px(g, 0x777777, 4, 6, 1, 12);  // left edge shadow
+    px(g, 0x777777, 19, 6, 1, 12); // right edge shadow
+    px(g, 0x999999, 2, 6, 4, 4);   // shoulder left
+    px(g, 0x999999, 18, 6, 4, 4);  // shoulder right
+    g.generateTexture('item_armor', 24, 24);
+
+    // Legs: Greaves
+    g.clear();
+    px(g, 0x999999, 6, 4, 5, 16);  // left leg
+    px(g, 0x999999, 13, 4, 5, 16); // right leg
+    px(g, 0xbbbbbb, 7, 5, 3, 10);  // highlights
+    px(g, 0xbbbbbb, 14, 5, 3, 10);
+    px(g, 0x777777, 6, 4, 12, 2);  // waist top
+    g.generateTexture('item_legs', 24, 24);
+
+    // Boots: Leather
+    g.clear();
+    px(g, 0x5a3a1e, 4, 10, 6, 10); // left boot
+    px(g, 0x5a3a1e, 4, 17, 10, 3); // left sole
+    px(g, 0x5a3a1e, 14, 10, 6, 10); // right boot
+    px(g, 0x5a3a1e, 14, 17, 10, 3); // right sole
+    px(g, 0x7a4a2a, 5, 11, 3, 4);  // highlights
+    px(g, 0x7a4a2a, 15, 11, 3, 4);
+    g.generateTexture('item_boots', 24, 24);
+
+    // Sword: Vertical
+    g.clear();
+    px(g, 0xaaaaaa, 11, 2, 2, 14); // blade
+    px(g, 0xcccccc, 11, 2, 1, 14); // blade light
+    px(g, 0xd4af37, 8, 16, 8, 2);  // guard
+    px(g, 0x5a3a1e, 11, 18, 2, 4); // hilt
+    g.generateTexture('item_sword', 24, 24);
+
+    // Staff
+    g.clear();
+    px(g, 0x5a3a1e, 11, 4, 2, 18); // pole
+    px(g, 0x3388ff, 10, 2, 4, 4);  // gem
+    px(g, 0x88ccff, 11, 3, 2, 2);  // gem light
+    g.generateTexture('item_staff', 24, 24);
+
+    // Shield
+    g.clear();
+    px(g, 0x5a3a1e, 4, 4, 16, 16); // wood
+    px(g, 0x999999, 4, 4, 16, 2);  // top iron
+    px(g, 0x999999, 4, 18, 16, 2); // bottom iron
+    px(g, 0x999999, 4, 4, 2, 16);  // left iron
+    px(g, 0x999999, 18, 4, 2, 16); // right iron
+    px(g, 0xbbbbbb, 11, 11, 2, 2); // center stud
+    g.generateTexture('item_shield', 24, 24);
+
+    // Ring
+    g.clear();
+    px(g, 0xd4af37, 8, 10, 8, 8);  // outer ring
+    px(g, 0x000000, 10, 12, 4, 4); // inner hole
+    px(g, 0xff4444, 11, 9, 2, 2);  // gem
+    g.generateTexture('item_ring', 24, 24);
+
+    // Amulet
+    g.clear();
+    px(g, 0xcccccc, 7, 4, 10, 1);  // top chain
+    px(g, 0xcccccc, 6, 5, 1, 6);   // side chain L
+    px(g, 0xcccccc, 17, 5, 1, 6);  // side chain R
+    px(g, 0xcccccc, 8, 11, 8, 1);  // bottom chain V
+    px(g, 0x33ccff, 10, 12, 4, 6); // pendant
+    px(g, 0xffffff, 11, 13, 2, 2); // sparkle
+    g.generateTexture('item_amulet', 24, 24);
+
+    // ─── MAP DECORATIONS (32×32) ───────────────────────────────────────────
+    
+    // Flowers
+    const drawFlower = (key, color) => {
+        g.clear();
+        px(g, 0x2d6a35, 15, 20, 2, 10); // stem
+        px(g, 0x3d8b3d, 12, 22, 3, 2);  // leaf L
+        px(g, 0x3d8b3d, 17, 24, 3, 2);  // leaf R
+        px(g, color, 13, 14, 6, 6);     // petals
+        px(g, 0xffd700, 15, 16, 2, 2);  // center
+        g.generateTexture(key, 32, 32);
+    };
+    drawFlower('deco_flower_red',   0xcc2222);
+    drawFlower('deco_flower_blue',  0x2266ff);
+    drawFlower('deco_flower_white', 0xeeeeee);
+
+    // Rocks
+    tile(g, g => {
+        px(g, 0x555555, 10, 20, 12, 8);  // base
+        px(g, 0x777777, 12, 21, 8, 6);   // mid
+        px(g, 0x999999, 14, 22, 4, 2);   // highlight
+    });
+    g.generateTexture('deco_rock_small', 32, 32);
+
+    tile(g, g => {
+        px(g, 0x444444, 6, 15, 20, 14);  // shadow/base
+        px(g, 0x666666, 8, 16, 16, 12);  // body
+        px(g, 0x888888, 10, 18, 10, 6);  // mid
+        px(g, 0xaaaaaa, 12, 19, 4, 2);   // top
+    });
+    g.generateTexture('deco_rock_large', 32, 32);
+
+    // Grass Tuft
+    tile(g, g => {
+        g.fillStyle(0x5aab64);
+        g.fillRect(10, 22, 2, 8);
+        g.fillRect(15, 18, 2, 12);
+        g.fillRect(20, 24, 2, 6);
+        g.fillRect(12, 25, 8, 1); // connector
+    });
+    g.generateTexture('deco_grass_tuft', 32, 32);
+
+    // Bones (Dungeon)
+    tile(g, g => {
+        px(g, 0xddccaa, 12, 14, 8, 4);   // skull
+        px(g, 0x000000, 14, 15, 1, 1);   // eye L
+        px(g, 0x000000, 17, 15, 1, 1);   // eye R
+        px(g, 0xddccaa, 8, 20, 16, 2);   // long bone
+        px(g, 0xccbbaa, 8, 19, 2, 4);    // bone end L
+        px(g, 0xccbbaa, 22, 19, 2, 4);   // bone end R
+    });
+    g.generateTexture('deco_bones', 32, 32);
+
+    // Cracks (Walls/Stone)
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.4);
+        g.fillRect(10, 5, 2, 10);
+        g.fillRect(11, 12, 8, 2);
+        g.fillRect(18, 10, 2, 15);
+        g.fillRect(5, 13, 10, 1);
+    });
+    g.generateTexture('deco_cracks', 32, 32);
+
+    // Cacti (Sand)
+    tile(g, g => {
+        px(g, 0x2a5a22, 13, 10, 6, 20);  // main trunk
+        px(g, 0x2a5a22, 8, 15, 5, 4);    // arm L
+        px(g, 0x2a5a22, 8, 11, 3, 4);    // arm L up
+        px(g, 0x2a5a22, 19, 18, 5, 4);   // arm R
+        px(g, 0x2a5a22, 21, 14, 3, 4);   // arm R up
+        px(g, 0x1f4a18, 14, 11, 1, 18);  // shadow line
+    });
+    g.generateTexture('deco_cactus', 32, 32);
+
+    // Ice Crystals (Snow)
+    tile(g, g => {
+        px(g, 0x88ccff, 12, 12, 8, 8);   // center
+        px(g, 0xccf0ff, 14, 8, 4, 16);   // vertical
+        px(g, 0xccf0ff, 8, 14, 16, 4);   // horizontal
+        px(g, 0xffffff, 15, 15, 2, 2);   // sparkle
+    });
+    g.generateTexture('deco_ice_crystal', 32, 32);
+
     // Snow Mound
     tile(g, g => {
         px(g, 0xeeeeff, 8, 22, 16, 6);   // body
@@ -507,39 +872,72 @@ export function generateTextures(scene) {
     });
     g.generateTexture('deco_snow_mound', 32, 32);
 
-    // FIREPLACE (Indoor)
+    // FIREPLACE (Indoor) Professional Version
     tile(g, g => {
-        g.fillStyle(0x444444); g.fillRect(2, 4, S-4, S-4); // stone base
-        g.fillStyle(0x1a1a1a); g.fillRect(6, 12, S-12, S-16); // hearth
-        // Embers
-        g.fillStyle(0xff4400); g.fillRect(8, 22, 16, 4);
-        g.fillStyle(0xffaa00, 0.7); g.fillRect(10, 20, 12, 2);
+        const base = 0x444444, dark = 0x222222, light = 0x666666;
+        g.fillStyle(base); g.fillRect(0, 4, S, S-4); // Main stone structure
+        // Stone blocks pattern
+        g.fillStyle(dark, 0.4); 
+        g.fillRect(4, 8, 10, 6); g.fillRect(18, 8, 10, 6);
+        g.fillRect(2, 16, 8, 6); g.fillRect(22, 16, 8, 6);
+        // Hearth void
+        g.fillStyle(0x0a0a0a); g.fillRect(8, 12, S-16, S-12);
+        // Embers and fire (layered)
+        g.fillStyle(0xcc2200); g.fillRect(10, 24, 12, 4);
+        g.fillStyle(0xff8800, 0.8); g.fillRect(12, 20, 8, 6);
+        g.fillStyle(0xffcc00, 0.6); g.fillRect(14, 18, 4, 4);
+        // Top mantle
+        g.fillStyle(0x5c3a1e); g.fillRect(0, 2, S, 4);
+        g.fillStyle(0x7a4c2a, 0.5); g.fillRect(0, 2, S, 1);
     });
     g.generateTexture('tile_fireplace', S, S);
 
-    // BED (Indoor)
+    // BED (Indoor) Professional Version
     tile(g, g => {
-        g.fillStyle(0x5c3a1e); g.fillRect(2, 4, S-4, S-8); // wood frame
-        g.fillStyle(0x2244cc); g.fillRect(4, 12, S-8, S-16); // blanket
-        g.fillStyle(0xeeeeee); g.fillRect(4, 6, S-8, 6); // pillow
+        const wood = 0x5c3a1e, blanket = 0x2244cc, pillow = 0xeeeeee;
+        g.fillStyle(wood); g.fillRect(2, 6, S-4, S-8); // Frame
+        // Mattress/Sheet
+        g.fillStyle(0x3355dd); g.fillRect(4, 10, S-8, S-14);
+        // Blanket with fold
+        g.fillStyle(blanket); g.fillRect(4, 14, S-8, S-18);
+        g.fillStyle(0x1a3a99); g.fillRect(4, 14, S-8, 2); // Fold shadow
+        // Pillow with depth
+        g.fillStyle(pillow); g.fillRect(6, 6, S-12, 6);
+        g.fillStyle(0xcccccc); g.fillRect(6, 11, S-12, 1); // Pillow shadow
+        // Bedposts
+        g.fillStyle(wood); g.fillRect(0, 4, 3, 28); g.fillRect(S-3, 4, 3, 28);
+        g.fillStyle(0x7a4c2a, 0.6); g.fillRect(0, 4, 1, 28);
     });
     g.generateTexture('tile_bed', S, S);
 
-    // POTTED PLANT (Indoor)
+    // POTTED PLANT (Indoor) Professional Version
     tile(g, g => {
-        g.fillStyle(0x8b4513); g.fillRect(10, 20, 12, 10); // pot
-        g.fillStyle(0x2d6a35); g.fillRect(8, 4, 16, 16); // leaves
-        g.fillStyle(0x3d8b3d, 0.6); g.fillRect(10, 6, 12, 12);
+        const pot = 0x8b4513, leaf = 0x2d6a35, darkLeaf = 0x1f4a18;
+        // Pot with highlight
+        g.fillStyle(pot); g.fillRect(10, 20, 12, 10);
+        g.fillStyle(shade(pot, 1.4), 0.5); g.fillRect(11, 21, 3, 8); // rim light
+        g.fillStyle(shade(pot, 0.6), 0.5); g.fillRect(19, 21, 2, 8); // shadow
+        // Leaves (layered for volume)
+        g.fillStyle(darkLeaf); g.fillRect(6, 8, 20, 12);
+        g.fillStyle(leaf); g.fillRect(8, 4, 16, 14);
+        g.fillStyle(shade(leaf, 1.3), 0.4); g.fillRect(12, 6, 8, 6); // top light
     });
     g.generateTexture('tile_plant', S, S);
 
-    // INTERIOR EXIT DOOR
+    // INTERIOR EXIT DOOR (Professional panels)
     tile(g, g => {
-        g.fillStyle(0x2d1a08); g.fillRect(0, 0, S, S); // dark frame
-        g.fillStyle(0x5c3a1e); g.fillRect(4, 4, S-8, S-4); // door panel
-        g.fillStyle(0xd4af37); g.fillRect(S-10, 16, 3, 3); // knob
-        // Light under door
-        g.fillStyle(0xffd700, 0.2); g.fillRect(4, S-4, S-8, 4);
+        const wood = 0x5c3a1e, frame = 0x2d1a08, knob = 0xd4af37;
+        g.fillStyle(frame); g.fillRect(0, 0, S, S);
+        g.fillStyle(wood); g.fillRect(4, 4, S-8, S-4);
+        // Panels
+        g.fillStyle(frame, 0.3);
+        g.fillRect(8, 8, 6, 8); g.fillRect(18, 8, 6, 8);
+        g.fillRect(8, 20, 6, 10); g.fillRect(18, 20, 6, 10);
+        // Highlights
+        g.fillStyle(0x7a4c2a, 0.4); g.fillRect(4, 4, 1, S-4);
+        // Knob
+        g.fillStyle(knob); g.fillRect(S-10, 18, 4, 4);
+        g.fillStyle(0xffffff, 0.5); g.fillRect(S-10, 18, 1, 1);
     });
     g.generateTexture('tile_door_exit', S, S);
 
