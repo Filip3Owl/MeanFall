@@ -11,7 +11,6 @@ import { ShopSystem } from '../systems/ShopSystem.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { TutorialSystem } from '../systems/TutorialSystem.js';
-import { FogManager } from '../systems/FogManager.js';
 import { ITEMS } from '../data/items.js';
 import { MONSTERS } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
@@ -27,7 +26,6 @@ export class WorldScene extends Phaser.Scene {
         this._playerData = this.registry.get('player') || JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
         
         // Ensure new systems have data even on old saves
-        if (!this._playerData.discoveredTiles) this._playerData.discoveredTiles = {};
         if (!this._playerData.elementalMastery) {
             this._playerData.elementalMastery = JSON.parse(JSON.stringify(PLAYER_DEFAULTS.elementalMastery));
         }
@@ -44,7 +42,6 @@ export class WorldScene extends Phaser.Scene {
         if (this._playerData.appearance) buildPlayerSprite(this, this._playerData.appearance);
 
         this._mapManager = new MapManager(this);
-        this._fogManager = new FogManager(this);
         this._monsters   = [];
         this._npcs       = [];
         this._npcIcons   = this.add.group();
@@ -147,10 +144,6 @@ export class WorldScene extends Phaser.Scene {
         cam.setZoom(1);
         cam.setScroll(0, 0);
 
-        // Redraw fog immediately so the new area is correctly revealed
-        // (without this, the old area's fog state persists until first movement).
-        this._fogManager?.update(this._playerData);
-
         const musicKey = areaId.includes('house') ? 'home' : areaId;
         Music.play(musicKey);
     }
@@ -163,7 +156,6 @@ export class WorldScene extends Phaser.Scene {
         const moved = this._player.update(delta, this._cursors, this._wasd, this._mapManager);
         if (moved) {
             this._playerData.position = { ...moved };
-            this._fogManager.update(this._playerData);
             this._checkTileInteractions(moved.x, moved.y);
             EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
             this._maybeNearPortalTutorial(moved.x, moved.y);

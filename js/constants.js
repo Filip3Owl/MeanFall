@@ -187,7 +187,6 @@ export const PLAYER_DEFAULTS = {
     questLog: {},
     questStats: { kills: {}, killsByArea: {}, killsByElement: {} },
     bookLibrary: {},
-    discoveredTiles: {}, // areaId -> { "x,y": true }
     pendingItemAlert: false, // set when new item drops; cleared on inventory open
 };
 
