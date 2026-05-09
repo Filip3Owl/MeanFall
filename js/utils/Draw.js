@@ -507,6 +507,42 @@ export function generateTextures(scene) {
     });
     g.generateTexture('deco_snow_mound', 32, 32);
 
+    // FIREPLACE (Indoor)
+    tile(g, g => {
+        g.fillStyle(0x444444); g.fillRect(2, 4, S-4, S-4); // stone base
+        g.fillStyle(0x1a1a1a); g.fillRect(6, 12, S-12, S-16); // hearth
+        // Embers
+        g.fillStyle(0xff4400); g.fillRect(8, 22, 16, 4);
+        g.fillStyle(0xffaa00, 0.7); g.fillRect(10, 20, 12, 2);
+    });
+    g.generateTexture('tile_fireplace', S, S);
+
+    // BED (Indoor)
+    tile(g, g => {
+        g.fillStyle(0x5c3a1e); g.fillRect(2, 4, S-4, S-8); // wood frame
+        g.fillStyle(0x2244cc); g.fillRect(4, 12, S-8, S-16); // blanket
+        g.fillStyle(0xeeeeee); g.fillRect(4, 6, S-8, 6); // pillow
+    });
+    g.generateTexture('tile_bed', S, S);
+
+    // POTTED PLANT (Indoor)
+    tile(g, g => {
+        g.fillStyle(0x8b4513); g.fillRect(10, 20, 12, 10); // pot
+        g.fillStyle(0x2d6a35); g.fillRect(8, 4, 16, 16); // leaves
+        g.fillStyle(0x3d8b3d, 0.6); g.fillRect(10, 6, 12, 12);
+    });
+    g.generateTexture('tile_plant', S, S);
+
+    // INTERIOR EXIT DOOR
+    tile(g, g => {
+        g.fillStyle(0x2d1a08); g.fillRect(0, 0, S, S); // dark frame
+        g.fillStyle(0x5c3a1e); g.fillRect(4, 4, S-8, S-4); // door panel
+        g.fillStyle(0xd4af37); g.fillRect(S-10, 16, 3, 3); // knob
+        // Light under door
+        g.fillStyle(0xffd700, 0.2); g.fillRect(4, S-4, S-8, 4);
+    });
+    g.generateTexture('tile_door_exit', S, S);
+
     g.destroy();
 }
 
@@ -1296,4 +1332,8 @@ export const TILE_TEXTURE_MAP = {
     17: 'tile_bookshelf',
     18: 'tile_table',
     19: 'tile_rug',
+    20: 'tile_fireplace',
+    21: 'tile_bed',
+    22: 'tile_plant',
+    23: 'tile_door_exit',
 };

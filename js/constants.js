@@ -25,6 +25,10 @@ export const TILES = {
     BOOKSHELF:  17,
     TABLE:      18,
     RUG:        19,
+    FIREPLACE:  20,
+    BED:        21,
+    PLANT:      22,
+    DOOR_EXIT:  23,
 };
 
 export const TILE_WALKABLE = {
@@ -48,6 +52,10 @@ export const TILE_WALKABLE = {
     17: false,// bookshelf
     18: false,// table
     19: true, // rug
+    20: false,// fireplace
+    21: false,// bed
+    22: false,// plant
+    23: true, // door exit
 };
 
 export const AREAS = {
