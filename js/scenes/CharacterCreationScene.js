@@ -430,19 +430,23 @@ export class CharacterCreationScene extends Phaser.Scene {
         sep.lineStyle(1, 0xd4af37, 0.22);
         sep.lineBetween(OPT_L, SCROLL_BOT, OPT_R, SCROLL_BOT);
 
-        const btn = this.add.rectangle(bx, by, bw, bh, 0x081508, 1)
+        this._confirmBtn = this.add.rectangle(bx, by, bw, bh, 0x081508, 1)
             .setOrigin(0, 0).setDepth(5).setStrokeStyle(1, 0x44cc55, 0.65)
             .setInteractive({ useHandCursor: true })
-            .on('pointerover', () => btn.setFillStyle(0x122012))
-            .on('pointerout',  () => btn.setFillStyle(0x081508))
+            .on('pointerover', () => { if (this._name.trim()) this._confirmBtn.setFillStyle(0x122012); })
+            .on('pointerout',  () => { if (this._name.trim()) this._confirmBtn.setFillStyle(0x081508); })
             .on('pointerdown', () => this._confirm());
 
         const shimmer = this.add.rectangle(bx, by, 0, bh, 0xffffff, 0.04).setOrigin(0, 0).setDepth(5);
         this.tweens.add({ targets: shimmer, width: bw, duration: 2000, delay: 500, ease: 'Quad.Out' });
 
-        this.add.text(bx + bw / 2, by + bh / 2, '⚔   COMEÇAR JORNADA   ⚔', {
+        this._confirmTx = this.add.text(bx + bw / 2, by + bh / 2, '⚔   COMEÇAR JORNADA   ⚔', {
             fontSize: '14px', color: '#55ee77', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
         }).setOrigin(0.5).setDepth(6);
+
+        this._nameWarning = this.add.text(bx + bw / 2, by - 12, 'Digite um nome para continuar', {
+            fontSize: '10px', color: '#ff5555', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5).setDepth(6).setVisible(false);
     }
 
     // ── Scroll ─────────────────────────────────────────────────────────────────
@@ -524,6 +528,17 @@ export class CharacterCreationScene extends Phaser.Scene {
         const display = this._name + (this._nameActive && this._nameCursor ? '|' : '');
         this._nameText.setText(display);
         this._namePreview.setText(this._name.trim() || 'Aventureiro');
+        this._refreshConfirmBtn();
+    }
+
+    _refreshConfirmBtn() {
+        if (!this._confirmBtn) return;
+        const hasName = this._name.trim().length > 0;
+        
+        this._confirmBtn.setAlpha(hasName ? 1 : 0.3);
+        this._confirmTx.setAlpha(hasName ? 1 : 0.3);
+        this._confirmBtn.input.enabled = hasName;
+        this._nameWarning.setVisible(!hasName);
     }
 
     _refreshSwatches() {
