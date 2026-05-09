@@ -2,74 +2,286 @@ import { STORY } from '../data/lore.js';
 import { layoutRichText } from '../utils/RichText.js';
 
 /**
- * IntroScene — animated prologue text. Plays once before character creation
- * on a brand-new game.
+ * IntroScene — cinematic paginated prologue.
+ * Title card → 7 prologue slides (one line each, SPACE advances) → CharacterCreation.
+ * ESC skips straight to CharacterCreation at any point.
  */
+
+const W = 544, H = 480;
+const LINES = STORY.prologueLines;
+
 export class IntroScene extends Phaser.Scene {
     constructor() { super('Intro'); }
 
     create() {
-        const W = this.scale.width, H = this.scale.height;
+        this._page      = -1;    // -1 = title card, 0‥N-1 = prologue slides
+        this._busy      = false;
+        this._done      = false;
+        this._content   = [];    // game objects belonging to the current page
+        this._autoTimer = null;
 
-        // Dark void background with stars
-        this.add.rectangle(0, 0, W, H, 0x040208).setOrigin(0, 0);
-        for (let i = 0; i < 80; i++) {
-            const x = Math.random() * W;
-            const y = Math.random() * H;
-            const s = Math.random() * 1.4 + 0.4;
-            const star = this.add.rectangle(x, y, s, s, 0xffffff, Math.random() * 0.7 + 0.2);
-            this.tweens.add({ targets: star, alpha: 0.1, duration: 1200 + Math.random() * 1800, yoyo: true, repeat: -1 });
-        }
+        this._buildAtmosphere();
+        this._buildPermanentUI();
+        this._showTitle();
 
-        // Title
-        this.add.text(W / 2, 50, STORY.title.toUpperCase(), {
-            fontSize: '24px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
-        }).setOrigin(0.5, 0);
-        this.add.text(W / 2, 80, STORY.subtitle, {
-            fontSize: '11px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
-        }).setOrigin(0.5, 0);
-
-        // Prologue lines fade-in sequentially with rich coloring
-        const lines = STORY.prologueLines;
-        let cursorY = 120;
-
-        lines.forEach((line, i) => {
-            const result = layoutRichText(this, 30, cursorY, line, {
-                fontSize: '11px', wrapWidth: W - 60, lineHeight: 16, baseColor: '#ddccaa',
-            });
-            // Center each block of text
-            const usedHeight = result.height;
-            this.tweens.add({
-                targets: result.objects, alpha: { from: 0, to: 1 },
-                duration: 1200, delay: i * 1100,
-            });
-            cursorY += usedHeight + 6;
-        });
-
-        // Skip / Continue button
-        const totalDelay = lines.length * 1100 + 500;
-        this._continueBtn = this.add.rectangle(W / 2, H - 40, 220, 32, 0x1a3a1a, 1)
-            .setStrokeStyle(1, 0x44cc44).setInteractive()
-            .on('pointerover', () => this._continueBtn.setFillStyle(0x2a5a2a))
-            .on('pointerout',  () => this._continueBtn.setFillStyle(0x1a3a1a))
-            .on('pointerdown', () => this._next())
-            .setAlpha(0);
-        this._continueTx = this.add.text(W / 2, H - 40, 'CONTINUAR', {
-            fontSize: '13px', color: '#88ff88', fontFamily: 'Courier New', fontStyle: 'bold',
-        }).setOrigin(0.5, 0.5).setAlpha(0);
-
-        this.tweens.add({ targets: [this._continueBtn, this._continueTx], alpha: 1, duration: 600, delay: totalDelay });
-
-        // Skip text
-        const skipTx = this.add.text(W - 10, 10, 'ESPAÇO/ESC para pular', {
-            fontSize: '10px', color: '#666666', fontFamily: 'Courier New',
-        }).setOrigin(1, 0).setDepth(10);
-
-        this.input.keyboard.on('keydown-SPACE', () => this._next());
-        this.input.keyboard.on('keydown-ESC',   () => this._next());
+        this.input.keyboard.on('keydown-SPACE', () => this._advance());
+        this.input.keyboard.on('keydown-ENTER', () => this._advance());
+        this.input.keyboard.on('keydown-ESC',   () => this._finish());
     }
 
-    _next() {
-        this.scene.start('CharacterCreation');
+    // ── Atmosphere (permanent — survives page changes) ─────────────────────
+
+    _buildAtmosphere() {
+        // Deep void background
+        this.add.rectangle(0, 0, W, H, 0x020108).setOrigin(0);
+
+        // Nebula glow blobs (large, very transparent, pulsing)
+        for (const [nx, ny, nr, nc, na] of [
+            [W * 0.22, H * 0.30, 155, 0x3a0088, 0.055],
+            [W * 0.78, H * 0.68, 125, 0x002266, 0.045],
+            [W * 0.50, H * 0.52, 195, 0x440022, 0.035],
+        ]) {
+            const g = this.add.graphics();
+            g.fillStyle(nc, na);
+            g.fillCircle(nx, ny, nr);
+            this.tweens.add({
+                targets: g, alpha: { from: 0.55, to: 1.25 },
+                duration: 3500 + Math.random() * 3000, yoyo: true, repeat: -1,
+                delay: Math.random() * 2000,
+            });
+        }
+
+        // Stars — three layers: tiny/faint, small/medium, larger/bright
+        for (const [count, sMin, sMax, aMin, aMax, dMin, dMax] of [
+            [105, 0.4, 1.0, 0.10, 0.45,  700, 1800],
+            [ 44, 1.0, 1.5, 0.35, 0.80, 1200, 3200],
+            [ 14, 1.5, 2.5, 0.55, 1.00, 2000, 5500],
+        ]) {
+            for (let i = 0; i < count; i++) {
+                const x   = Math.random() * W;
+                const y   = Math.random() * H;
+                const s   = sMin + Math.random() * (sMax - sMin);
+                const a   = aMin + Math.random() * (aMax - aMin);
+                const dur = dMin + Math.random() * (dMax - dMin);
+                const star = this.add.rectangle(x, y, s, s, 0xffffff, a);
+                this.tweens.add({
+                    targets: star, alpha: aMin * 0.15,
+                    duration: dur, yoyo: true, repeat: -1, delay: Math.random() * dur,
+                });
+            }
+        }
+
+        // Vignette — dark circles at each corner to frame the scene
+        const vg = this.add.graphics().setDepth(1);
+        vg.fillStyle(0x000000, 0.75);
+        for (const [cx, cy] of [[0,0],[W,0],[0,H],[W,H]]) vg.fillCircle(cx, cy, 230);
+
+        // Slow-drifting micro-particles (colored dust)
+        const PCOLS = [0xd4af37, 0x7755ff, 0x4488ff, 0xff6644, 0x44ffbb];
+        for (let i = 0; i < 14; i++) {
+            const px  = 50 + Math.random() * (W - 100);
+            const py  = 80 + Math.random() * (H - 160);
+            const ps  = 0.7 + Math.random() * 1.4;
+            const pc  = PCOLS[i % PCOLS.length];
+            const dur = 5000 + Math.random() * 6000;
+            const p   = this.add.rectangle(px, py, ps, ps, pc, 0).setDepth(2);
+            this.tweens.add({
+                targets: p, y: py - 90 - Math.random() * 80,
+                alpha: { from: 0, to: 0.55 },
+                duration: dur, delay: Math.random() * 4000,
+                yoyo: true, repeat: -1,
+            });
+        }
+    }
+
+    // ── Permanent UI (always visible) ──────────────────────────────────────
+
+    _buildPermanentUI() {
+        // ESC-to-skip label — fades in after the first second
+        const skipLbl = this.add.text(W - 14, 14, 'ESC — PULAR', {
+            fontSize: '9px', color: '#252240', fontFamily: 'Courier New', letterSpacing: 1,
+        }).setOrigin(1, 0).setDepth(20).setAlpha(0);
+        this.tweens.add({ targets: skipLbl, alpha: 1, duration: 600, delay: 2000 });
+
+        // Progress dots — one per prologue line
+        this._dots = [];
+        const dotSpacing = 14;
+        const dotX0 = (W - LINES.length * dotSpacing + dotSpacing) / 2;
+        for (let i = 0; i < LINES.length; i++) {
+            const d = this.add.circle(dotX0 + i * dotSpacing, H - 16, 3, 0x141228, 1).setDepth(20);
+            this._dots.push(d);
+        }
+
+        // "SPACE to continue" hint, shown during prologue slides
+        this._spaceHint = this.add.text(W / 2, H - 30, 'ESPACO  para continuar', {
+            fontSize: '9px', color: '#201e38', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 1).setDepth(20).setAlpha(0);
+    }
+
+    _setDots(activeIdx) {
+        this._dots.forEach((d, i) => {
+            if (i === activeIdx) { d.setFillStyle(0xd4af37); d.setRadius(4.5); }
+            else if (i < activeIdx) { d.setFillStyle(0x4a4070); d.setRadius(3); }
+            else { d.setFillStyle(0x141228); d.setRadius(3); }
+        });
+    }
+
+    // ── Title card ─────────────────────────────────────────────────────────
+
+    _showTitle() {
+        this._page = -1;
+        this._clearContent();
+
+        // Radial glow behind the main title
+        const glow = this.add.circle(W / 2, H * 0.31, 100, 0xd4af37, 0).setDepth(3);
+        this.tweens.add({ targets: glow, alpha: 0.09, duration: 2400, delay: 400, ease: 'Quad.In' });
+
+        // "MeanFall" — rises up with a fade
+        const gameTitle = this.add.text(W / 2, H * 0.20, 'MeanFall', {
+            fontSize: '38px', color: '#f5c842', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: gameTitle, alpha: 1, y: H * 0.25, duration: 1500, ease: 'Quad.Out', delay: 300 });
+
+        // Story name
+        const storyTitle = this.add.text(W / 2, H * 0.39, STORY.title.toUpperCase(), {
+            fontSize: '13px', color: '#c9a832', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 4,
+        }).setOrigin(0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: storyTitle, alpha: 1, duration: 900, delay: 1100 });
+
+        // Horizontal rule sweeps outward from center
+        const ruleY = Math.floor(H * 0.465);
+        const rL = this.add.rectangle(W / 2, ruleY, 0, 1, 0xd4af37, 0.55).setOrigin(1, 0.5).setDepth(4);
+        const rR = this.add.rectangle(W / 2, ruleY, 0, 1, 0xd4af37, 0.55).setOrigin(0, 0.5).setDepth(4);
+        this.tweens.add({ targets: rL, width: 192, duration: 700, delay: 1800, ease: 'Quad.Out' });
+        this.tweens.add({ targets: rR, width: 192, duration: 700, delay: 1800, ease: 'Quad.Out' });
+
+        // Subtitle
+        const subtitle = this.add.text(W / 2, H * 0.51, STORY.subtitle, {
+            fontSize: '12px', color: '#7060a0', fontFamily: 'Courier New', fontStyle: 'italic',
+        }).setOrigin(0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: subtitle, alpha: 0.9, duration: 800, delay: 2200 });
+
+        // Beta / version tag
+        const verTx = this.add.text(W / 2, H * 0.595, 'B E T A  ·  v 0 . 9 . 0', {
+            fontSize: '8px', color: '#2a2748', fontFamily: 'Courier New', letterSpacing: 2,
+        }).setOrigin(0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: verTx, alpha: 1, duration: 600, delay: 2800 });
+
+        // "SPACE to begin" hint (title-specific, not _spaceHint)
+        const beginHint = this.add.text(W / 2, H - 32, 'ESPACO  para comecar', {
+            fontSize: '9px', color: '#252040', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 1).setAlpha(0).setDepth(20);
+        this.tweens.add({ targets: beginHint, alpha: 1, duration: 500, delay: 3000 });
+
+        this._content = [glow, gameTitle, storyTitle, rL, rR, subtitle, verTx, beginHint];
+
+        // Auto-advance after 4.6 s if the player hasn't pressed anything
+        this._autoTimer = this.time.delayedCall(4600, () => {
+            if (!this._done && !this._busy && this._page === -1) this._advance();
+        });
+    }
+
+    // ── Prologue slides ────────────────────────────────────────────────────
+
+    _showLine(idx) {
+        this._page = idx;
+        this._clearContent();
+        this._setDots(idx);
+
+        // Header label (left)
+        const hdr = this.add.text(22, 22, '— PRÓLOGO —', {
+            fontSize: '9px', color: '#26234a', fontFamily: 'Courier New', letterSpacing: 3,
+        }).setOrigin(0, 0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: hdr, alpha: 1, duration: 500 });
+
+        // Line counter (right)
+        const ctr = this.add.text(W - 22, 22, `${idx + 1} / ${LINES.length}`, {
+            fontSize: '9px', color: '#26234a', fontFamily: 'Courier New',
+        }).setOrigin(1, 0.5).setAlpha(0).setDepth(4);
+        this.tweens.add({ targets: ctr, alpha: 1, duration: 500 });
+
+        // Top rule
+        const tRule = this.add.graphics().setDepth(4).setAlpha(0);
+        tRule.lineStyle(1, 0x1c1a36, 1);
+        tRule.lineBetween(22, 32, W - 22, 32);
+        this.tweens.add({ targets: tRule, alpha: 1, duration: 500 });
+
+        // Bottom rule
+        const bRule = this.add.graphics().setDepth(4).setAlpha(0);
+        bRule.lineStyle(1, 0x1c1a36, 1);
+        bRule.lineBetween(22, H - 42, W - 22, H - 42);
+        this.tweens.add({ targets: bRule, alpha: 1, duration: 500 });
+
+        // Rich prologue text — lay out at y=0 so we can measure, then center
+        const MARGIN = 52;
+        const rich = layoutRichText(this, MARGIN, 0, LINES[idx], {
+            fontSize: '12px', wrapWidth: W - MARGIN * 2, lineHeight: 18, baseColor: '#d0c4a8',
+        });
+
+        // Vertically center the text block between the two rules
+        const availTop = 40, availBot = 50;
+        const textTopY = Math.floor((H - availTop - availBot - rich.height) / 2) + availTop;
+        rich.objects.forEach(obj => { obj.y += textTopY; obj.setAlpha(0).setDepth(4); });
+        this.tweens.add({ targets: rich.objects, alpha: 1, duration: 700, delay: 120, ease: 'Quad.Out' });
+
+        // Accent decoration: small vertical bar on the left of the text
+        const accent = this.add.rectangle(MARGIN - 14, textTopY + rich.height / 2, 2, rich.height + 6, 0xd4af37, 0).setOrigin(0.5).setDepth(4);
+        this.tweens.add({ targets: accent, alpha: 0.45, duration: 600, delay: 300 });
+
+        this._content = [hdr, ctr, tRule, bRule, accent, ...rich.objects];
+
+        // Reveal the space-to-continue hint after the text has appeared
+        this.tweens.add({ targets: this._spaceHint, alpha: 1, duration: 400, delay: 900 });
+    }
+
+    // ── Content lifecycle ──────────────────────────────────────────────────
+
+    _clearContent() {
+        this._autoTimer?.remove();
+        this._autoTimer = null;
+        this._spaceHint?.setAlpha(0);
+        for (const obj of this._content) {
+            try { this.tweens.killTweensOf(obj); obj.destroy(); } catch (_) {}
+        }
+        this._content = [];
+    }
+
+    // ── Navigation ─────────────────────────────────────────────────────────
+
+    _advance() {
+        if (this._done || this._busy) return;
+        this._busy = true;
+        this._autoTimer?.remove();
+        this._autoTimer = null;
+
+        // Freeze any in-progress fade-in tweens before fading out
+        this._content.forEach(obj => this.tweens.killTweensOf(obj));
+        this._spaceHint?.setAlpha(0);
+
+        const next = this._page + 1;
+        this.tweens.add({
+            targets: this._content,
+            alpha: 0,
+            duration: 280,
+            ease: 'Quad.In',
+            onComplete: () => {
+                this._busy = false;
+                if (next < LINES.length) {
+                    this._showLine(next);
+                } else {
+                    this._finish();
+                }
+            },
+        });
+    }
+
+    _finish() {
+        if (this._done) return;
+        this._done = true;
+        this._autoTimer?.remove();
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.start('CharacterCreation');
+        });
     }
 }
