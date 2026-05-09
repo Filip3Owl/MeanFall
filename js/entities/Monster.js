@@ -37,14 +37,28 @@ export class Monster {
         this.sprite = scene.add.image(px, py, key).setDepth(4);
         if (this.isElite) {
             this.sprite.setScale(1.3);
-            this.sprite.setTint(0xffd700); // Golden tint
-            // Add pulse effect for elite
+            this.sprite.setTint(0xffaa22); // More vibrant orange-gold tint
+            
+            // Pulsating Aura
+            const auraColor = ELEMENTS[this.def.element]?.color || 0xffd700;
+            this.aura = scene.add.circle(px, py, 16, auraColor, 0.25).setDepth(3);
             scene.tweens.add({
-                targets: this.sprite,
-                alpha: 0.7,
-                duration: 800,
+                targets: this.aura,
+                alpha: 0.1,
+                scale: 1.5,
+                duration: 1200,
                 yoyo: true,
                 repeat: -1
+            });
+
+            // Sprite pulse
+            scene.tweens.add({
+                targets: this.sprite,
+                scale: 1.4,
+                duration: 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
             });
         }
 
@@ -70,8 +84,10 @@ export class Monster {
 
     _refreshLabels() {
         const cx = this.tileX * TILE_SIZE + TILE_SIZE / 2;
+        const cy = this.tileY * TILE_SIZE + TILE_SIZE / 2;
         const top = this.tileY * TILE_SIZE - 8;
         if (this._nameLabel) this._nameLabel.setPosition(cx, top);
+        if (this.aura) this.aura.setPosition(cx, cy);
         this._drawHpBar();
     }
 
@@ -122,6 +138,7 @@ export class Monster {
     destroy() {
         this.sprite.destroy();
         this.shadow.destroy();
+        this.aura?.destroy();
         this._hpBar.destroy();
         this._nameLabel?.destroy();
     }
