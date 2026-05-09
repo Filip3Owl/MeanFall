@@ -4,12 +4,16 @@ import { PLAYER_DEFAULTS, DIFFICULTIES } from '../constants.js';
 
 const W = 544, H = 480;
 
-const PREV_CX = 86;
-const DIV_X   = 172;
-const OPT_L   = DIV_X + 10;
-const OPT_R   = W - 6;
-const OPT_W   = OPT_R - OPT_L;   // 356
-const OPT_CX  = OPT_L + OPT_W / 2; // 360
+const PREV_CX   = 86;
+const DIV_X     = 172;
+const OPT_L     = DIV_X + 10;
+const OPT_R     = W - 6;
+const OPT_W     = OPT_R - OPT_L;
+const OPT_CX    = OPT_L + OPT_W / 2;
+
+const SCROLL_TOP = 42;
+const SCROLL_BOT = H - 52;
+const SCROLL_H   = SCROLL_BOT - SCROLL_TOP; // 386
 
 const CLASSES = [
     {
@@ -37,29 +41,33 @@ const CLASSES = [
 
 const TRAJECTORIES = [
     { id: 'autodidact', name: 'Autodidata', color: 0x88aaff, dark: 0x0c1228,
-      stats: 'VIT +2',  apply: d => { d.vitality += 2; } },
+      stats: 'VIT +2',       apply: d => { d.vitality += 2; } },
     { id: 'academic',   name: 'Acadêmico',  color: 0xffcc44, dark: 0x1e1608,
-      stats: 'INT+1 FOR+1', apply: d => { d.intelligence += 1; d.strength += 1; } },
+      stats: 'INT+1 FOR+1',  apply: d => { d.intelligence += 1; d.strength += 1; } },
     { id: 'practical',  name: 'Prático',    color: 0x44ee88, dark: 0x0a1e14,
-      stats: 'AGI+1 VIT+1', apply: d => { d.agility += 1; d.vitality += 1; } },
+      stats: 'AGI+1 VIT+1',  apply: d => { d.agility += 1; d.vitality += 1; } },
 ];
 
 export class CharacterCreationScene extends Phaser.Scene {
     constructor() { super('CharacterCreation'); }
 
     create() {
-        this._appearance  = { ...APPEARANCE_DEFAULTS };
-        this._difficulty  = 'medium';
-        this._class       = 'mage';
-        this._trajectory  = 'autodidact';
-        this._name        = '';
-        this._nameCursor  = true;
-        this._nameActive  = true;
+        this._appearance = { ...APPEARANCE_DEFAULTS };
+        this._difficulty = 'medium';
+        this._class      = 'mage';
+        this._trajectory = 'autodidact';
+        this._name       = '';
+        this._nameCursor = true;
+        this._nameActive = true;
+        this._scrollY    = 0;
+        this._maxScroll  = 0;
+        this._contentH   = 0;
 
         this._buildAtmosphere();
         this._buildHeader();
         this._buildLeftPanel();
-        this._buildRightPanel();
+        this._buildScrollPanel();
+        this._buildConfirmBtn();
         this._refreshAll();
 
         this.time.addEvent({ delay: 530, loop: true, callback: () => {
@@ -68,6 +76,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         }});
 
         this.input.keyboard.on('keydown', this._onKey.bind(this));
+        this.input.on('wheel', this._onWheel.bind(this));
         this.cameras.main.fadeIn(450, 0, 0, 0);
     }
 
@@ -97,7 +106,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         this.add.text(W / 2, 18, 'CRIAR PERSONAGEM', {
             fontSize: '17px', color: '#d4af37', fontFamily: 'Courier New',
             fontStyle: 'bold', letterSpacing: 4,
-        }).setOrigin(0.5, 0.5).setDepth(4);
+        }).setOrigin(0.5).setDepth(4);
         const hg = this.add.graphics().setDepth(3);
         hg.lineStyle(1, 0xd4af37, 0.3);
         hg.lineBetween(10, 34, W - 10, 34);
@@ -106,10 +115,6 @@ export class CharacterCreationScene extends Phaser.Scene {
     // ── Left preview panel ─────────────────────────────────────────────────────
 
     _buildLeftPanel() {
-        const dg = this.add.graphics().setDepth(2);
-        dg.lineStyle(1, 0xd4af37, 0.18);
-        dg.lineBetween(DIV_X, 38, DIV_X, H - 10);
-
         const FW = 108, FH = 138, FY = 126;
         this.add.rectangle(PREV_CX, FY, FW, FH, 0x060412, 1).setDepth(2).setStrokeStyle(1, 0xd4af37, 0.5);
 
@@ -170,199 +175,254 @@ export class CharacterCreationScene extends Phaser.Scene {
 
         this._diffBadge = this.add.text(PREV_CX, H - 22, '', {
             fontSize: '10px', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
-        }).setOrigin(0.5, 0.5).setDepth(3);
+        }).setOrigin(0.5).setDepth(3);
     }
 
-    // ── Right options panel ────────────────────────────────────────────────────
+    // ── Scrollable right panel ─────────────────────────────────────────────────
 
-    _buildRightPanel() {
-        let y = 42;
+    _buildScrollPanel() {
+        // Vertical divider (world space, not in container)
+        const dg = this.add.graphics().setDepth(2);
+        dg.lineStyle(1, 0xd4af37, 0.18);
+        dg.lineBetween(DIV_X, 38, DIV_X, H - 10);
+
+        // Geometry mask — clips container to the scroll area in world space
+        const maskGfx = this.make.graphics({ add: false });
+        maskGfx.fillStyle(0xffffff, 1);
+        maskGfx.fillRect(OPT_L, SCROLL_TOP, OPT_W - 6, SCROLL_H);
+        const mask = maskGfx.createGeometryMask();
+
+        // Container: x=0 (world x = local x), y=SCROLL_TOP (local y=0 = top of scroll area)
+        this._sc = this.add.container(0, SCROLL_TOP).setDepth(3);
+        this._sc.setMask(mask);
+
+        let y = 8;
 
         y = this._section(y, 'IDENTIDADE');
-        y = this._buildNameRow(y) + 4;
-        y = this._buildGenderRow(y) + 6;
+        y = this._buildNameRow(y) + 10;
+        y = this._buildGenderRow(y) + 14;
 
         y = this._section(y, 'APARÊNCIA');
-        y = this._buildSwatchRow(y, 'PELE',   SKIN_TONES,  'skin') + 3;
-        y = this._buildSwatchRow(y, 'CABELO', HAIR_COLORS, 'hair') + 3;
-        y = this._buildSwatchRow(y, 'TÚNICA', ROBE_COLORS, 'robe') + 6;
+        y = this._buildSwatchRow(y, 'PELE',   SKIN_TONES,  'skin') + 6;
+        y = this._buildSwatchRow(y, 'CABELO', HAIR_COLORS, 'hair') + 6;
+        y = this._buildSwatchRow(y, 'TÚNICA', ROBE_COLORS, 'robe') + 14;
 
         y = this._section(y, 'CLASSE');
-        y = this._buildClassCards(y) + 6;
+        y = this._buildClassCards(y) + 14;
 
         y = this._section(y, 'TRAJETÓRIA');
-        y = this._buildTrajectoryRow(y) + 6;
+        y = this._buildTrajectoryRow(y) + 14;
 
         y = this._section(y, 'DIFICULDADE');
-        this._buildDifficultyRow(y);
-        y += 32;
-        this._diffDesc = this.add.text(OPT_CX, y, '', {
-            fontSize: '10px', color: '#8888aa', fontFamily: 'Courier New',
-            align: 'center', wordWrap: { width: OPT_W - 4 },
-        }).setOrigin(0.5, 0).setDepth(3);
+        y = this._buildDifficultyPills(y) + 8;
 
-        this._buildConfirmBtn();
+        this._diffDesc = this.add.text(OPT_CX, y, '', {
+            fontSize: '12px', color: '#8888aa', fontFamily: 'Courier New',
+            align: 'center', wordWrap: { width: OPT_W - 16 },
+        }).setOrigin(0.5, 0);
+        this._sc.add(this._diffDesc);
+        y += 52;
+
+        this._contentH  = y + 10;
+        this._maxScroll = Math.max(0, this._contentH - SCROLL_H);
+
+        // Scrollbar track
+        const sbX = OPT_R - 3;
+        this.add.rectangle(sbX, SCROLL_TOP, 3, SCROLL_H, 0x141228, 1)
+            .setOrigin(0.5, 0).setDepth(4);
+        this._sbThumb = this.add.rectangle(sbX, SCROLL_TOP, 3, 40, 0x4a4070, 0.85)
+            .setOrigin(0.5, 0).setDepth(5);
+        this._updateScrollbar();
     }
+
+    // All _section / _build* methods add children to this._sc
+    _sc_add(...objs) { this._sc.add(objs.flat()); }
 
     _section(y, label) {
         const HALF = 52;
-        const g = this.add.graphics().setDepth(3);
+        const g = this.add.graphics();
         g.lineStyle(1, 0xd4af37, 0.18);
         g.lineBetween(OPT_L, y, OPT_CX - HALF, y);
-        g.lineBetween(OPT_CX + HALF, y, OPT_R, y);
-        this.add.text(OPT_CX, y, label, {
-            fontSize: '10px', color: '#8a6c28', fontFamily: 'Courier New',
+        g.lineBetween(OPT_CX + HALF, y, OPT_R - 8, y);
+        const tx = this.add.text(OPT_CX, y, label, {
+            fontSize: '11px', color: '#8a6c28', fontFamily: 'Courier New',
             fontStyle: 'bold', letterSpacing: 3,
-        }).setOrigin(0.5, 0.5).setDepth(4);
-        return y + 15;
+        }).setOrigin(0.5);
+        this._sc_add(g, tx);
+        return y + 18;
     }
 
     _buildNameRow(y) {
-        this.add.text(OPT_L, y, 'NOME', {
-            fontSize: '11px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
-        }).setOrigin(0, 0.5).setDepth(3);
+        const lbl = this.add.text(OPT_L + 4, y, 'NOME', {
+            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+        }).setOrigin(0, 0.5);
 
-        const inX = OPT_L + 42, inW = OPT_W - 44;
-        this._inputBg = this.add.rectangle(inX, y, inW, 22, 0x07041a, 1)
-            .setOrigin(0, 0.5).setDepth(3).setStrokeStyle(1, 0xd4af37, 0.6);
-        this._nameText = this.add.text(inX + 6, y, '', {
-            fontSize: '13px', color: '#f0e8d0', fontFamily: 'Courier New',
-        }).setOrigin(0, 0.5).setDepth(4);
+        const inX = OPT_L + 54, inW = OPT_W - 62;
+        this._inputBg = this.add.rectangle(inX, y, inW, 28, 0x07041a, 1)
+            .setOrigin(0, 0.5).setStrokeStyle(1, 0xd4af37, 0.6);
+        this._nameText = this.add.text(inX + 7, y, '', {
+            fontSize: '14px', color: '#f0e8d0', fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5);
 
         this._inputBg.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => { this._nameActive = true; });
-        return y + 26;
+
+        this._sc_add(lbl, this._inputBg, this._nameText);
+        return y + 32;
     }
 
     _buildGenderRow(y) {
-        this.add.text(OPT_L, y, 'GÊNERO', {
-            fontSize: '11px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
-        }).setOrigin(0, 0.5).setDepth(3);
+        const lbl = this.add.text(OPT_L + 4, y, 'GÊNERO', {
+            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+        }).setOrigin(0, 0.5);
 
         this._genderTx = this.add.text(OPT_CX, y, '', {
-            fontSize: '13px', color: '#f0e8d0', fontFamily: 'Courier New', fontStyle: 'bold',
-        }).setOrigin(0.5, 0.5).setDepth(4);
+            fontSize: '14px', color: '#f0e8d0', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5);
 
-        const arrowStyle = { fontSize: '16px', color: '#6655cc', fontFamily: 'Courier New', fontStyle: 'bold' };
-        const makeArrow = (ax, label, cb) => {
-            const btn = this.add.rectangle(ax, y, 22, 20, 0x0d0a1e, 1)
-                .setOrigin(0.5, 0.5).setDepth(3).setStrokeStyle(1, 0x4433aa, 0.5)
+        const arrowStyle = { fontSize: '18px', color: '#6655cc', fontFamily: 'Courier New', fontStyle: 'bold' };
+        const objs = [lbl, this._genderTx];
+        const makeArrow = (ax, arrow, cb) => {
+            const btn = this.add.rectangle(ax, y, 26, 26, 0x0d0a1e, 1)
+                .setOrigin(0.5).setStrokeStyle(1, 0x4433aa, 0.5)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerover', () => btn.setFillStyle(0x1a1630))
                 .on('pointerout',  () => btn.setFillStyle(0x0d0a1e))
                 .on('pointerdown', cb);
-            this.add.text(ax, y, label, arrowStyle).setOrigin(0.5, 0.5).setDepth(4);
+            objs.push(btn, this.add.text(ax, y, arrow, arrowStyle).setOrigin(0.5));
         };
-        makeArrow(OPT_L + 54, '‹', () => this._cycle('gender', GENDERS, -1));
-        makeArrow(OPT_R - 5,  '›', () => this._cycle('gender', GENDERS, +1));
-        return y + 22;
+        makeArrow(OPT_L + 62, '‹', () => this._cycle('gender', GENDERS, -1));
+        makeArrow(OPT_R - 10, '›', () => this._cycle('gender', GENDERS, +1));
+        this._sc_add(objs);
+        return y + 28;
     }
 
     _buildSwatchRow(y, label, list, field) {
-        this.add.text(OPT_L, y, label, {
-            fontSize: '11px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
-        }).setOrigin(0, 0.5).setDepth(3);
+        const lbl = this.add.text(OPT_L + 4, y, label, {
+            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+        }).setOrigin(0, 0.5);
 
-        const labelW = label === 'PELE' ? 36 : 52;
-        const SW = 15, GAP = 4;
-        const swStart = OPT_L + labelW + 4;
+        const labelW = label === 'PELE' ? 42 : 62;
+        const SW = 18, GAP = 5;
+        const swStart = OPT_L + labelW + 6;
+        const objs = [lbl];
+
         const swatches = list.map((item, i) => {
-            const sx = swStart + i * (SW + GAP);
-            const sq = this.add.rectangle(sx, y, SW, SW, item.hex, 1)
-                .setOrigin(0, 0.5).setDepth(3).setInteractive({ useHandCursor: true })
+            const cx = swStart + i * (SW + GAP) + SW / 2;
+            const sq = this.add.rectangle(cx, y, SW, SW, item.hex, 1)
+                .setOrigin(0.5).setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => {
                     this._appearance[field] = item.id;
                     this._refreshSprite();
                     this._refreshSwatches();
                 });
-            const ring = this.add.rectangle(sx + SW / 2, y, SW + 4, SW + 4, 0, 0)
-                .setOrigin(0.5, 0.5).setDepth(2.5).setStrokeStyle(1.5, 0xd4af37, 0);
+            const ring = this.add.rectangle(cx, y, SW + 4, SW + 4, 0, 0)
+                .setOrigin(0.5).setStrokeStyle(2, 0xd4af37, 0);
+            objs.push(sq, ring);
             return { item, sq, ring, field };
         });
+
         if (!this._allSwatches) this._allSwatches = [];
         this._allSwatches.push(...swatches);
-        return y + 19;
+        this._sc_add(objs);
+        return y + SW + 8;
     }
 
     _buildClassCards(y) {
-        const cardW = Math.floor((OPT_W - 8) / 3);
-        const cardH = 70;
+        const cardW = Math.floor((OPT_W - 12) / 3);
+        const cardH = 90;
         this._classCards = [];
+        const objs = [];
+
         CLASSES.forEach((cls, i) => {
-            const cx = OPT_L + i * (cardW + 4);
-            const hexStr = '#' + cls.color.toString(16).padStart(6, '0');
+            const cx = OPT_L + i * (cardW + 6);
+            const hex = '#' + cls.color.toString(16).padStart(6, '0');
 
             const bg = this.add.rectangle(cx, y, cardW, cardH, cls.dark, 1)
-                .setOrigin(0, 0).setDepth(3).setStrokeStyle(1, cls.color, 0.4)
+                .setOrigin(0, 0).setStrokeStyle(1, cls.color, 0.4)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerover', () => { if (this._class !== cls.id) bg.setFillStyle(cls.dark + 0x060408); })
                 .on('pointerout',  () => { if (this._class !== cls.id) bg.setFillStyle(cls.dark); })
                 .on('pointerdown', () => this._selectClass(cls.id));
 
-            this.add.text(cx + cardW / 2, y + 14, cls.icon, {
-                fontSize: '17px', color: hexStr, fontFamily: 'Courier New',
-            }).setOrigin(0.5, 0.5).setDepth(4);
-            this.add.text(cx + cardW / 2, y + 30, cls.name.toUpperCase(), {
-                fontSize: '10px', color: '#e8e0d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
-            }).setOrigin(0.5, 0.5).setDepth(4);
-            this.add.text(cx + cardW / 2, y + 44, cls.stats, {
-                fontSize: '10px', color: hexStr, fontFamily: 'Courier New',
-            }).setOrigin(0.5, 0.5).setDepth(4);
-            this.add.text(cx + cardW / 2, y + 59, cls.lore, {
-                fontSize: '9px', color: '#555577', fontFamily: 'Courier New',
-                align: 'center', wordWrap: { width: cardW - 4 },
-            }).setOrigin(0.5, 0.5).setDepth(4);
-
+            const mx = cx + cardW / 2;
+            objs.push(
+                bg,
+                this.add.text(mx, y + 17, cls.icon,            { fontSize: '20px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
+                this.add.text(mx, y + 38, cls.name.toUpperCase(), { fontSize: '11px', color: '#e8e0d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1 }).setOrigin(0.5),
+                this.add.text(mx, y + 54, cls.stats,            { fontSize: '10px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
+                this.add.text(mx, y + 70, cls.lore,             { fontSize: '10px', color: '#555577', fontFamily: 'Courier New', align: 'center', wordWrap: { width: cardW - 8 } }).setOrigin(0.5),
+            );
             this._classCards.push({ id: cls.id, bg, color: cls.color, dark: cls.dark });
         });
+
+        this._sc_add(objs);
         return y + cardH;
     }
 
     _buildTrajectoryRow(y) {
-        const pillW = Math.floor((OPT_W - 8) / 3);
-        const pillH = 28;
+        const pillW = Math.floor((OPT_W - 12) / 3);
+        const pillH = 40;
         this._trajPills = {};
+        const objs = [];
+
         TRAJECTORIES.forEach((traj, i) => {
-            const px = OPT_L + i * (pillW + 4);
-            const hexStr = '#' + traj.color.toString(16).padStart(6, '0');
+            const px  = OPT_L + i * (pillW + 6);
+            const hex = '#' + traj.color.toString(16).padStart(6, '0');
             const pill = this.add.rectangle(px, y, pillW, pillH, traj.dark, 1)
-                .setOrigin(0, 0).setDepth(3).setStrokeStyle(1, traj.color, 0.35)
+                .setOrigin(0, 0).setStrokeStyle(1, traj.color, 0.35)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => this._selectTrajectory(traj.id));
-            const nameTx = this.add.text(px + pillW / 2, y + 10, traj.name, {
-                fontSize: '11px', color: hexStr, fontFamily: 'Courier New', fontStyle: 'bold',
-            }).setOrigin(0.5, 0.5).setDepth(4);
-            const statTx = this.add.text(px + pillW / 2, y + 21, traj.stats, {
-                fontSize: '9px', color: '#555577', fontFamily: 'Courier New',
-            }).setOrigin(0.5, 0.5).setDepth(4);
+            const nameTx = this.add.text(px + pillW/2, y + 15, traj.name, {
+                fontSize: '13px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5);
+            const statTx = this.add.text(px + pillW/2, y + 30, traj.stats, {
+                fontSize: '10px', color: '#555577', fontFamily: 'Courier New',
+            }).setOrigin(0.5);
+            objs.push(pill, nameTx, statTx);
             this._trajPills[traj.id] = { pill, nameTx, statTx, color: traj.color, dark: traj.dark };
         });
+
+        this._sc_add(objs);
         return y + pillH;
     }
 
-    _buildDifficultyRow(y) {
+    _buildDifficultyPills(y) {
         const diffIds = Object.keys(DIFFICULTIES);
         const pillW   = Math.floor((OPT_W - 4 * 4) / 5);
-        const pillH   = 26;
+        const pillH   = 32;
         this._diffPills = {};
+        const objs = [];
+
         diffIds.forEach((id, i) => {
-            const diff   = DIFFICULTIES[id];
-            const px     = OPT_L + i * (pillW + 4);
-            const col    = parseInt(diff.color.replace('#', ''), 16);
-            const pill   = this.add.rectangle(px, y, pillW, pillH, 0x08061a, 1)
-                .setOrigin(0, 0).setDepth(3).setStrokeStyle(1, col, 0.35)
+            const diff = DIFFICULTIES[id];
+            const px   = OPT_L + i * (pillW + 4);
+            const col  = parseInt(diff.color.replace('#', ''), 16);
+            const pill = this.add.rectangle(px, y, pillW, pillH, 0x08061a, 1)
+                .setOrigin(0, 0).setStrokeStyle(1, col, 0.35)
                 .setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => this._selectDiff(id));
-            const tx = this.add.text(px + pillW / 2, y + pillH / 2, diff.name, {
-                fontSize: '10px', color: diff.color, fontFamily: 'Courier New', fontStyle: 'bold',
-            }).setOrigin(0.5, 0.5).setDepth(4);
+            const tx = this.add.text(px + pillW/2, y + pillH/2, diff.name, {
+                fontSize: '11px', color: diff.color, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5);
+            objs.push(pill, tx);
             this._diffPills[id] = { pill, tx, col };
         });
+
+        this._sc_add(objs);
+        return y + pillH;
     }
 
+    // ── Confirm button (fixed, outside scroll) ─────────────────────────────────
+
     _buildConfirmBtn() {
-        const bh = 36, bw = OPT_W;
-        const bx = OPT_L, by = H - 44;
+        const bh = 36, bw = OPT_W - 6;
+        const bx = OPT_L;
+        const by = SCROLL_BOT + Math.floor((H - SCROLL_BOT - bh) / 2);
+
+        const sep = this.add.graphics().setDepth(4);
+        sep.lineStyle(1, 0xd4af37, 0.22);
+        sep.lineBetween(OPT_L, SCROLL_BOT, OPT_R, SCROLL_BOT);
 
         const btn = this.add.rectangle(bx, by, bw, bh, 0x081508, 1)
             .setOrigin(0, 0).setDepth(5).setStrokeStyle(1, 0x44cc55, 0.65)
@@ -375,9 +435,28 @@ export class CharacterCreationScene extends Phaser.Scene {
         this.tweens.add({ targets: shimmer, width: bw, duration: 2000, delay: 500, ease: 'Quad.Out' });
 
         this.add.text(bx + bw / 2, by + bh / 2, '⚔   COMEÇAR JORNADA   ⚔', {
-            fontSize: '14px', color: '#55ee77', fontFamily: 'Courier New',
-            fontStyle: 'bold', letterSpacing: 1,
-        }).setOrigin(0.5, 0.5).setDepth(6);
+            fontSize: '14px', color: '#55ee77', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
+        }).setOrigin(0.5).setDepth(6);
+    }
+
+    // ── Scroll ─────────────────────────────────────────────────────────────────
+
+    _onWheel(pointer, _go, _dx, deltaY) {
+        if (pointer.x < OPT_L || pointer.x > OPT_R) return;
+        if (pointer.y < SCROLL_TOP || pointer.y > SCROLL_BOT) return;
+        this._scrollY = Phaser.Math.Clamp(this._scrollY - deltaY * 0.6, -this._maxScroll, 0);
+        this._sc.setY(SCROLL_TOP + this._scrollY);
+        this._updateScrollbar();
+    }
+
+    _updateScrollbar() {
+        if (!this._sbThumb) return;
+        if (this._maxScroll <= 0) { this._sbThumb.setAlpha(0); return; }
+        this._sbThumb.setAlpha(0.85);
+        const thumbH = Math.max(24, Math.round((SCROLL_H / this._contentH) * SCROLL_H));
+        const frac   = (-this._scrollY) / this._maxScroll;
+        this._sbThumb.setY(SCROLL_TOP + Math.round(frac * (SCROLL_H - thumbH)));
+        this._sbThumb.setDisplaySize(3, thumbH);
     }
 
     // ── Selection handlers ─────────────────────────────────────────────────────
@@ -409,7 +488,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         this._refreshTexts();
     }
 
-    // ── Refresh methods ────────────────────────────────────────────────────────
+    // ── Refresh ────────────────────────────────────────────────────────────────
 
     _refreshAll() {
         this._refreshSprite();
@@ -445,7 +524,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         if (!this._allSwatches) return;
         for (const { item, sq, ring, field } of this._allSwatches) {
             const active = this._appearance[field] === item.id;
-            ring.setStrokeStyle(1.5, 0xd4af37, active ? 1 : 0);
+            ring.setStrokeStyle(2, 0xd4af37, active ? 1 : 0);
             sq.setAlpha(active ? 1 : 0.45);
         }
     }
@@ -497,21 +576,20 @@ export class CharacterCreationScene extends Phaser.Scene {
         if (traj?.id === 'practical')  { sim.agility += 1; sim.vitality += 1; }
 
         const map = { str: sim.strength, int: sim.intelligence, agi: sim.agility, vit: sim.vitality };
-        const maxVal = 10;
         Object.entries(map).forEach(([key, val]) => {
             const bar = this._statBars[key];
             if (!bar) return;
-            this.tweens.add({ targets: bar.fill, width: Math.floor(bar.barW * Math.min(val / maxVal, 1)), duration: 200, ease: 'Quad.Out' });
+            this.tweens.add({ targets: bar.fill, width: Math.floor(bar.barW * Math.min(val / 10, 1)), duration: 200, ease: 'Quad.Out' });
         });
     }
 
     _refreshPreview() {
         const cls = CLASSES.find(c => c.id === this._class);
-        const hexStr = cls ? '#' + cls.color.toString(16).padStart(6, '0') : '#aaaaaa';
-        if (this._classBadge) this._classBadge.setText(cls?.name?.toUpperCase() || '').setColor(hexStr);
+        const hex = cls ? '#' + cls.color.toString(16).padStart(6, '0') : '#aaaaaa';
+        if (this._classBadge) this._classBadge.setText(cls?.name?.toUpperCase() || '').setColor(hex);
     }
 
-    // ── Keyboard input ─────────────────────────────────────────────────────────
+    // ── Keyboard ───────────────────────────────────────────────────────────────
 
     _onKey(event) {
         if (!this._nameActive) return;
@@ -519,11 +597,9 @@ export class CharacterCreationScene extends Phaser.Scene {
         if (k === 'Backspace') {
             this._name = this._name.slice(0, -1);
         } else if (k === 'Enter') {
-            this._confirm();
-            return;
+            this._confirm(); return;
         } else if (k === 'Tab') {
-            this._cycle('gender', GENDERS, +1);
-            return;
+            this._cycle('gender', GENDERS, +1); return;
         } else if (k.length === 1 && this._name.length < 16) {
             this._name += k;
         }
