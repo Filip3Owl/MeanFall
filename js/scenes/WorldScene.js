@@ -310,9 +310,10 @@ export class WorldScene extends Phaser.Scene {
 
     _tryPortal(exit) {
         const nextArea = exit.targetArea;
+        const isHouse  = nextArea.includes('house');
 
-        // Back portals bypass all lock/boss checks — always allowed
-        if (!exit.isBack) {
+        // Back portals and House interiors bypass all lock/boss checks
+        if (!exit.isBack && !isHouse) {
             const unlock = AREA_UNLOCK[nextArea];
             if (unlock) {
                 const player  = this._playerData;
