@@ -684,13 +684,17 @@ export class WorldScene extends Phaser.Scene {
             EventBus.emit('player-hp-change', { player: this._playerData });
 
         } else if (outcome === 'loss') {
-            this._playerData.hp = Math.floor(this._playerData.maxHp * 0.5);
-            this._playerData.position = { ...this._playerData.lastSafePosition };
-            this._playerData.currentArea = this._playerData.lastSafeArea;
-            this.registry.set('player', this._playerData);
-            this._chat('{{bad:Você foi derrotado!}} Recuperando as energias em um local seguro...', 'combat-hit');
-            this._loadArea(this._playerData.currentArea);
-            EventBus.emit('player-hp-change', { player: this._playerData });
+            const respawnData = {
+                ...this._playerData,
+                hp: Math.floor(this._playerData.maxHp * 0.5),
+                position: { ...this._playerData.lastSafePosition },
+                currentArea: this._playerData.lastSafeArea,
+            };
+            this.registry.set('player', respawnData);
+            Music.stop();
+            this.scene.stop('UI');
+            this.scene.start('GameOver', { playerData: respawnData });
+            return;
         }
 
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
