@@ -118,6 +118,10 @@ export class CombatScene extends Phaser.Scene {
         this._juiceCorrect = this.add.rectangle(0, 0, W, H, 0xffd700, 0).setOrigin(0, 0).setDepth(200);
         this._juiceWrong = this.add.rectangle(0, 0, W, H, 0x445588, 0).setOrigin(0, 0).setDepth(200);
 
+        // ── Fever Mode Visuals ───────────────────────────────────────────
+        this._feverFrame = this.add.graphics().setDepth(150);
+        this._feverActive = false;
+
         this.input.keyboard.on('keydown', this._onKeyDown.bind(this));
     }
 
@@ -669,6 +673,12 @@ export class CombatScene extends Phaser.Scene {
             if (this._streak > 1) {
                 this._streakTxt.setText(`${this._streak}× STREAK!`);
                 Sound.streak(this._streak);
+                
+                // Fever Mode Activation (5+ streak)
+                if (this._streak >= 5) {
+                    this._updateFeverMode(true);
+                    this._spawnFeverText();
+                }
             }
 
             // Relic: focus regen on correct answer
@@ -688,6 +698,7 @@ export class CombatScene extends Phaser.Scene {
         } else {
             this._streak = 0;
             this._streakTxt.setText('');
+            this._updateFeverMode(false); // DEACTIVATE FEVER ON WRONG
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
 
             // JUICE: Wrong flash (cold/danger)
@@ -848,6 +859,75 @@ export class CombatScene extends Phaser.Scene {
         });
     }
 
+    // ─── FEVER MODE ───────────────────────────────────────────────────────────
+
+    _updateFeverMode(active) {
+        if (this._feverActive === active) return;
+        this._feverActive = active;
+        this._feverFrame.clear();
+
+        if (active) {
+            Sound.critical(); // Extra sound for fever start
+            this.cameras.main.flash(400, 255, 215, 0, 0.2);
+            
+            // Draw initial frame
+            this._renderFeverFrame();
+            
+            // Loop for flaming effect
+            this._feverTimer = this.time.addEvent({
+                delay: 100,
+                loop: true,
+                callback: () => this._renderFeverFrame()
+            });
+        } else {
+            if (this._feverTimer) this._feverTimer.remove();
+        }
+    }
+
+    _renderFeverFrame() {
+        const W = 544, H = 480;
+        const g = this._feverFrame;
+        g.clear();
+        
+        const colors = [0xffd700, 0xff8800, 0xff3300];
+        const thickness = 3 + Math.random() * 2;
+        
+        colors.forEach((col, i) => {
+            const offset = i * 2;
+            g.lineStyle(thickness, col, 0.4 - i * 0.1);
+            g.strokeRect(offset, offset, W - offset * 2, H - offset * 2);
+        });
+    }
+
+    _spawnFeverText() {
+        const W = 544;
+        const txt = this.add.text(W / 2, 140, '🔥 MODO FERVURA ATIVO 🔥', {
+            fontSize: '22px', color: '#ffcc00', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#ff3300', strokeThickness: 6
+        }).setOrigin(0.5).setDepth(160).setScale(0);
+
+        this.tweens.add({
+            targets: txt,
+            scale: 1.2,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: txt,
+                    y: 110,
+                    alpha: 0,
+                    delay: 800,
+                    duration: 500,
+                    onComplete: () => txt.destroy()
+                });
+            }
+        });
+
+        this.addMsg('COMBO! Modo Fervura ativado: Bônus de XP e Ouro!', 'levelup');
+    }
+
+    addMsg(msg, type) { EventBus.emit('chat', { msg, type }); }
+
     // ─── BAR RENDERING ────────────────────────────────────────────────────────
 
     _drawBar(g, x, y, w, h, pct, baseColor, dangerColor) {
@@ -931,9 +1011,15 @@ export class CombatScene extends Phaser.Scene {
 
         if (outcome === 'win') {
             const isElite = this._monsterDef.name.startsWith('Elite');
-            const baseXpReward = this._relicEffect?.type === 'xp_multiplier'
+            let baseXpReward = this._relicEffect?.type === 'xp_multiplier'
                 ? Math.floor(this._monsterDef.xpReward * this._relicEffect.value)
                 : this._monsterDef.xpReward;
+            
+            // FEVER BONUS: +50% XP if fever was active at least once or based on max streak
+            if (this._maxStreak >= 5) {
+                baseXpReward = Math.floor(baseXpReward * 1.5);
+            }
+
             xpGained = awardXP(this._player, baseXpReward);
 
             // Relic: streak_xp_double — if best streak hit threshold, double the XP
@@ -946,6 +1032,11 @@ export class CombatScene extends Phaser.Scene {
             
             // Base gold
             goldGained = this._monsterDef.goldReward || 0;
+
+            // FEVER BONUS: +50% Gold
+            if (this._maxStreak >= 5) {
+                goldGained = Math.floor(goldGained * 1.5);
+            }
             
             // STREAK BONUS: 20% extra gold per streak point above 2
             if (this._streak >= 3) {
@@ -1015,66 +1106,104 @@ export class CombatScene extends Phaser.Scene {
         const px2 = (W - panelW) / 2;
         const py2 = (H - panelH) / 2;
 
-        this.add.rectangle(px2, py2, panelW, panelH, 0x0d0a03, 1).setOrigin(0, 0).setDepth(101);
-        this.add.rectangle(px2, py2, panelW, panelH, 0xffd700, 0).setOrigin(0, 0).setStrokeStyle(2, 0xffd700).setDepth(101);
+        const panel = this.add.rectangle(px2, py2, panelW, panelH, 0x0d0a03, 1).setOrigin(0, 0).setDepth(101);
+        panel.setStrokeStyle(2, 0xffd700);
 
-        this.add.text(W / 2, py2 + 12, 'VITÓRIA!', {
-            fontSize: '18px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
-        }).setOrigin(0.5, 0).setDepth(102);
+        const title = this.add.text(W / 2, py2 + 12, 'VITÓRIA!', {
+            fontSize: '22px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4
+        }).setOrigin(0.5, 0).setDepth(102).setScale(0);
+        this.tweens.add({ targets: title, scale: 1, duration: 400, ease: 'Back.easeOut' });
 
-        this.add.text(W / 2, py2 + 38, `+${xp} XP    +${gold} Ouro`, {
+        const stats = this.add.text(W / 2, py2 + 38, `+${xp} XP    +${gold} Ouro`, {
             fontSize: '14px', color: '#ffaa44', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0).setDepth(102);
+        }).setOrigin(0.5, 0).setDepth(102).setAlpha(0);
+        this.tweens.add({ targets: stats, alpha: 1, y: py2 + 42, duration: 300, delay: 300 });
 
-        this.add.text(W / 2, py2 + 60, 'ITENS OBTIDOS:', {
-            fontSize: '12px', color: '#888888', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0).setDepth(102);
+        const itemHeader = this.add.text(W / 2, py2 + 62, 'ITENS OBTIDOS:', {
+            fontSize: '11px', color: '#888888', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0).setDepth(102).setAlpha(0);
+        this.tweens.add({ targets: itemHeader, alpha: 1, duration: 300, delay: 500 });
 
         let rowIdx = 0;
-        lootIds.slice(0, 7 - bookIds.length).forEach((itemId) => {
-            const item = ITEMS[itemId];
-            if (!item) return;
-            const color = RARITY_COLORS[item.rarity] || '#cccccc';
-            const yLine = py2 + 78 + rowIdx * 22;
-            this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0).setDepth(102);
-            this.add.image(px2 + 32, yLine + 9, item.icon || 'item_potion_red').setScale(0.6).setDepth(102);
-            this.add.text(px2 + 46, yLine + 9, item.name, {
-                fontSize: '13px', color, fontFamily: 'Courier New',
-            }).setOrigin(0, 0.5).setDepth(102);
-            this.add.text(px2 + panelW - 28, yLine + 9, (item.rarity || 'common').toUpperCase(), {
-                fontSize: '11px', color: '#666666', fontFamily: 'Courier New',
-            }).setOrigin(1, 0.5).setDepth(102);
-            rowIdx++;
-        });
+        const itemsToProcess = [
+            ...lootIds.slice(0, 7 - bookIds.length).map(id => ({ type: 'item', id })),
+            ...bookIds.slice(0, 7).map(id => ({ type: 'book', id }))
+        ].slice(0, 7);
 
-        // Book drops with importance badges
-        bookIds.slice(0, 7 - rowIdx).forEach((bookId) => {
-            const book = BOOKS[bookId];
-            if (!book) return;
-            const imp = BOOK_IMPORTANCE[book.importance] || BOOK_IMPORTANCE.normal;
-            const yLine = py2 + 78 + rowIdx * 22;
-            this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0x1a1108, 1).setOrigin(0, 0).setDepth(102);
-            this.add.text(px2 + 28, yLine + 9, `[Livro] ${book.title}`, {
-                fontSize: '12px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold',
-            }).setOrigin(0, 0.5).setDepth(102);
-            this.add.text(px2 + panelW - 28, yLine + 9, imp.name.toUpperCase(), {
-                fontSize: '11px', color: imp.hex, fontFamily: 'Courier New',
-            }).setOrigin(1, 0.5).setDepth(102);
+        itemsToProcess.forEach((entry, i) => {
+            const yLine = py2 + 82 + rowIdx * 22;
+            const container = this.add.container(px2 + 20, yLine).setDepth(102).setAlpha(0);
+            
+            if (entry.type === 'item') {
+                const item = ITEMS[entry.id];
+                if (!item) return;
+                const colorHex = RARITY_COLORS[item.rarity] || '#cccccc';
+                const isRare = item.rarity === 'legendary' || item.rarity === 'epic';
+
+                const bg = this.add.rectangle(0, 0, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0);
+                if (isRare) bg.setStrokeStyle(1, parseInt(colorHex.replace('#',''), 16), 0.5);
+
+                const icon = this.add.image(12, 9, item.icon || 'item_potion_red').setScale(0.6);
+                const name = this.add.text(26, 9, item.name, {
+                    fontSize: '12px', color: colorHex, fontFamily: 'Courier New', fontStyle: isRare ? 'bold' : 'normal'
+                }).setOrigin(0, 0.5);
+                const rarityTxt = this.add.text(panelW - 48, 9, (item.rarity || 'common').toUpperCase(), {
+                    fontSize: '10px', color: '#666666', fontFamily: 'Courier New'
+                }).setOrigin(1, 0.5);
+
+                container.add([bg, icon, name, rarityTxt]);
+
+                // JACKPOT EFFECT for Rare Items
+                if (isRare) {
+                    this.time.delayedCall(700 + i * 150, () => {
+                        Sound.critical();
+                        const flash = this.add.rectangle(px2 + 20, yLine, panelW - 40, 18, 0xffffff, 0.4)
+                            .setOrigin(0, 0).setDepth(103);
+                        this.tweens.add({ targets: flash, alpha: 0, duration: 400, onComplete: () => flash.destroy() });
+                        this.tweens.add({ targets: container, scale: 1.05, duration: 100, yoyo: true });
+                    });
+                }
+            } else {
+                const book = BOOKS[entry.id];
+                if (!book) return;
+                const imp = BOOK_IMPORTANCE[book.importance] || BOOK_IMPORTANCE.normal;
+                const bg = this.add.rectangle(0, 0, panelW - 40, 18, 0x1a1108, 1).setOrigin(0, 0);
+                const name = this.add.text(8, 9, `[Livro] ${book.title}`, {
+                    fontSize: '11px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold'
+                }).setOrigin(0, 0.5);
+                const impTxt = this.add.text(panelW - 48, 9, imp.name.toUpperCase(), {
+                    fontSize: '10px', color: imp.hex, fontFamily: 'Courier New'
+                }).setOrigin(1, 0.5);
+                container.add([bg, name, impTxt]);
+            }
+
+            this.tweens.add({
+                targets: container,
+                alpha: 1,
+                x: px2 + 20,
+                duration: 300,
+                delay: 600 + i * 150,
+                ease: 'Cubic.Out'
+            });
+
             rowIdx++;
         });
 
         const btnY = py2 + panelH - 36;
         const btnBg = this.add.rectangle(W / 2 - 60, btnY, 120, 28, 0x1a3a1a, 1).setOrigin(0, 0).setDepth(102)
-            .setInteractive()
+            .setAlpha(0).setInteractive()
             .on('pointerover', () => btnBg.setFillStyle(0x2a5a2a))
             .on('pointerout',  () => btnBg.setFillStyle(0x1a3a1a))
             .on('pointerdown', () => onContinue());
-        this.add.text(W / 2, btnY + 14, 'CONTINUAR', {
+        const btnTx = this.add.text(W / 2, btnY + 14, 'CONTINUAR', {
             fontSize: '14px', color: '#88ff88', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0.5).setDepth(102);
+        }).setOrigin(0.5, 0.5).setDepth(102).setAlpha(0);
 
-        // Auto-continue after 6s as fallback
-        this.time.delayedCall(6000, () => onContinue());
+        this.tweens.add({ targets: [btnBg, btnTx], alpha: 1, duration: 500, delay: 1500 });
+
+        // Auto-continue after 8s as fallback
+        this.time.delayedCall(8000, () => onContinue());
     }
 
     shutdown() {
