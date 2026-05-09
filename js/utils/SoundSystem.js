@@ -255,6 +255,16 @@ class SoundEngine {
         });
     }
 
+    // Door opening (creak + mechanical click)
+    door() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._noise(ctx, dest, t, 0.22, 250, 0.10);             // creak (wood friction)
+            this._tone(ctx, dest, 120, 'sawtooth', t, 0.18, 0.08, 90); // wood body resonance
+            this._tone(ctx, dest, 880, 'sine', t + 0.18, 0.06, 0.08);  // latch click
+        });
+    }
+
     // ── Settings ──────────────────────────────────────────────────────────────
 
     toggle() {

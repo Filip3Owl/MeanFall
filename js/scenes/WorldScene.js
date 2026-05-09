@@ -313,6 +313,9 @@ export class WorldScene extends Phaser.Scene {
         const nextArea = exit.targetArea;
         const isHouse  = nextArea.includes('house');
 
+        // Play door sound for house entries
+        if (isHouse) Sound.door();
+
         // Back portals and House interiors bypass all lock/boss checks
         if (!exit.isBack && !isHouse) {
             const unlock = AREA_UNLOCK[nextArea];
@@ -443,6 +446,11 @@ export class WorldScene extends Phaser.Scene {
         if (this._transitioning) return;
         this._transitioning = true;
         this._paused = true;
+
+        // Play door sound when exiting a house back to main world
+        if (this._playerData.currentArea.includes('house')) {
+            Sound.door();
+        }
 
         this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
         Sound.portal();
