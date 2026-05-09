@@ -62,7 +62,7 @@ export const QUESTIONS = {
             conceptTags: ['barras', 'categórico'],
         },
         {
-            id: 'dt_006', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_006', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'O termômetro mágico de cristal marca 36,7°C. Que tipo de dado é a temperatura?',
             options: ['Discreto', 'Contínuo', 'Nominal', 'Ordinal'],
@@ -72,7 +72,7 @@ export const QUESTIONS = {
             conceptTags: ['contínuo'],
         },
         {
-            id: 'dt_007', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_007', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Diferença entre dados DISCRETOS e CONTÍNUOS:',
             options: [
@@ -87,7 +87,7 @@ export const QUESTIONS = {
             conceptTags: ['discreto', 'contínuo'],
         },
         {
-            id: 'dt_008', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_008', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Qual variável é DISCRETA?',
             options: ['Volume da poção em ml', 'Tempo de combate em segundos', 'Número de dragões avistados', 'Altura do mago em metros'],
@@ -97,7 +97,7 @@ export const QUESTIONS = {
             conceptTags: ['discreto'],
         },
         {
-            id: 'dt_009', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_009', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'A guilda aplica uma pesquisa: "Quão satisfeito você está? Péssimo / Ruim / Regular / Bom / Ótimo". Que tipo de dado é gerado?',
             options: ['Nominal', 'Ordinal', 'Discreto', 'Contínuo'],
@@ -107,7 +107,7 @@ export const QUESTIONS = {
             conceptTags: ['ordinal', 'Likert'],
         },
         {
-            id: 'dt_010', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_010', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Você quer comparar: classe do herói (mago/guerreiro/ladino) com dano causado (pontos). Qual tipo de gráfico melhor mostra esta relação?',
             options: ['Box plot ou barras agrupadas', 'Histograma simples', 'Gráfico de pizza', 'Linha de tempo'],
@@ -127,7 +127,7 @@ export const QUESTIONS = {
             conceptTags: ['nominal', 'binária'],
         },
         {
-            id: 'dt_012', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_012', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'A Ordem dos Estatísticos mediu o nível de corrupção de cada região em escala 0,0 a 100,0. Que tipo de dado é?',
             options: ['Categórico', 'Discreto', 'Contínuo', 'Ordinal'],
@@ -167,7 +167,7 @@ export const QUESTIONS = {
             conceptTags: ['nominal'],
         },
         {
-            id: 'dt_016', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_016', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'O Arquivista registra a temperatura das tochas do calabouço: 198,5°C, 350,2°C, 447,9°C. Que tipo de dado é temperatura?',
             options: ['Qualitativo nominal', 'Qualitativo ordinal', 'Quantitativo contínuo', 'Quantitativo discreto'],
@@ -242,7 +242,7 @@ export const QUESTIONS = {
             conceptTags: ['contínuo', 'lore'],
         },
         {
-            id: 'dt_023', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_023', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'A Ordem dos Estatísticos classifica o perigo da Distorção em uma região como Baixo, Médio ou Alto. Qual é a escala deste dado?',
             options: ['Nominal', 'Ordinal', 'Intervalar', 'De Razão'],
@@ -272,7 +272,7 @@ export const QUESTIONS = {
             conceptTags: ['discreto', 'lore'],
         },
         {
-            id: 'dt_026', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_026', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'O Oráculo da Vila analisa duas variáveis: "Nível de Mana" (0-1000) e "Elemento Principal" (Fogo/Água/Terra). Elas são, respectivamente:',
             options: ['Contínua e Nominal', 'Discreta e Ordinal', 'Nominal e Contínua', 'Contínua e Ordinal'],
@@ -282,7 +282,7 @@ export const QUESTIONS = {
             conceptTags: ['contínuo', 'nominal', 'lore'],
         },
         {
-            id: 'dt_027', topic: 'data_types', area: 'village', difficulty: 'easy',
+            id: 'dt_027', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'true_false',
             questionText: 'V ou F: O CEP de uma cidade é um dado QUANTITATIVO porque é formado por números.',
             options: ['Verdadeiro', 'Falso'],
@@ -292,7 +292,7 @@ export const QUESTIONS = {
             conceptTags: ['nominal'],
         },
         {
-            id: 'dt_028', topic: 'data_types', area: 'village', difficulty: 'easy',
+            id: 'dt_028', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Qual das variáveis abaixo é QUALITATIVA ORDINAL?',
             options: [
@@ -307,7 +307,7 @@ export const QUESTIONS = {
             conceptTags: ['ordinal'],
         },
         {
-            id: 'dt_029', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_029', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'O número de jogadores em um servidor MMORPG a cada hora é um dado:',
             options: ['Contínuo', 'Nominal', 'Discreto', 'Ordinal'],
@@ -317,7 +317,7 @@ export const QUESTIONS = {
             conceptTags: ['discreto'],
         },
         {
-            id: 'dt_030', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_030', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Para exibir a distribuição de tempo de combate (dado contínuo), o gráfico correto é:',
             options: ['Gráfico de pizza', 'Gráfico de barras', 'Histograma', 'Diagrama de caule-e-folhas'],
@@ -327,7 +327,7 @@ export const QUESTIONS = {
             conceptTags: ['histograma', 'contínuo'],
         },
         {
-            id: 'dt_031', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_031', topic: 'data_types', area: 'village', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'A guilda registra o "elemento do monstro" como: Fogo=1, Água=2, Terra=3, Ar=4. Esses números são:',
             options: [
@@ -382,7 +382,7 @@ export const QUESTIONS = {
             conceptTags: ['contínuo'],
         },
         {
-            id: 'dt_035', topic: 'data_types', area: 'village', difficulty: 'medium',
+            id: 'dt_035', topic: 'data_types', area: 'village', difficulty: 'hard',
             type: 'true_false',
             questionText: 'V ou F: Dados ordinais permitem calcular a média aritmética de forma completamente válida.',
             options: ['Verdadeiro', 'Falso'],
@@ -392,7 +392,7 @@ export const QUESTIONS = {
             conceptTags: ['ordinal', 'média'],
         },
         {
-            id: 'dt_036', topic: 'data_types', area: 'village', difficulty: 'hard',
+            id: 'dt_036', topic: 'data_types', area: 'village', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'O dano de um feitiço é medido em "nível de intensidade mágica": 1-Fraco, 2-Moderado, 3-Forte, 4-Devastador. Qual medida de tendência central é mais adequada?',
             options: ['Média aritmética', 'Mediana ou moda', 'Desvio padrão', 'Variância'],
@@ -430,10 +430,10 @@ export const QUESTIONS = {
         {
             id: 'mmm_003', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
             type: 'multiple_choice',
-            questionText: 'Sua mochila contém 7 poções de raridades: [comum, comum, raro, raro, raro, épico, comum]. Qual é a MODA?',
+            questionText: 'Sua mochila contém 7 poções de raridades: [comum, raro, raro, raro, raro, épico, comum]. Qual é a MODA?',
             options: ['comum', 'raro', 'épico', 'não há moda'],
             correctAnswer: 'raro',
-            explanation: 'Comum aparece 3 vezes; raro aparece 3 vezes... espera, conte de novo: comum=3, raro=3, épico=1. Há empate? Recontando o conjunto fornecido: [comum, comum, raro, raro, raro, épico, comum] tem comum=3, raro=3, épico=1. Tecnicamente bimodal, mas se forçarmos uma resposta única, "raro" aparece com a mesma frequência.',
+            explanation: 'raro aparece 4 vezes, comum 2 vezes, épico 1 vez. O mais frequente é a moda.',
             hint: 'O valor mais frequente.',
             conceptTags: ['moda'],
         },
@@ -491,7 +491,7 @@ export const QUESTIONS = {
             conceptTags: ['outlier', 'média'],
         },
         {
-            id: 'mmm_009', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
+            id: 'mmm_009', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Itens do baú: [2, 2, 4, 6, 8, 8, 8]. Qual é a MODA?',
             options: ['2', '4', '6', '8'],
@@ -501,7 +501,7 @@ export const QUESTIONS = {
             conceptTags: ['moda'],
         },
         {
-            id: 'mmm_010', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_010', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'fill_numeric',
             questionText: 'A guilda paga em ouro: [1500, 1800, 2000, 2200, 15000]. Qual é a MÉDIA paga?',
             correctAnswer: 4500, tolerance: 1,
@@ -510,7 +510,7 @@ export const QUESTIONS = {
             conceptTags: ['média', 'outlier'],
         },
         {
-            id: 'mmm_011', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_011', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Com pagamentos [1500, 1800, 2000, 2200, 15000], que medida representa MELHOR o ganho típico?',
             options: ['Média (4500)', 'Mediana (2000)', 'Moda (não há)', 'Amplitude (13500)'],
@@ -520,7 +520,7 @@ export const QUESTIONS = {
             conceptTags: ['robustez'],
         },
         {
-            id: 'mmm_012', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_012', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Em 6 batalhas, seus tempos (em segundos) foram: [12, 18, 15, 20, 17, 14]. Calcule a MÉDIA.',
             correctAnswer: 16, tolerance: 0.05,
@@ -538,7 +538,7 @@ export const QUESTIONS = {
             conceptTags: ['mediana'],
         },
         {
-            id: 'mmm_014', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
+            id: 'mmm_014', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'O ferreiro vendeu 6 espadas de prata por: [80, 100, 90, 110, 100, 100] gemas. Qual é a MODA?',
             correctAnswer: 100, tolerance: 0,
@@ -619,7 +619,7 @@ export const QUESTIONS = {
             conceptTags: ['moda', 'lore'],
         },
         {
-            id: 'mmm_022', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
+            id: 'mmm_022', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Nos Prados sem Centro, você encontrou 5 poções de mana. Seus volumes em ml são: 40, 60, 50, 70, 80. Qual é a MÉDIA de volume?',
             correctAnswer: 60, tolerance: 0,
@@ -628,7 +628,7 @@ export const QUESTIONS = {
             conceptTags: ['média', 'lore'],
         },
         {
-            id: 'mmm_023', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_023', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'fill_numeric',
             questionText: 'Um grupo de 6 Golems tem os seguintes pesos em toneladas: 2, 5, 3, 8, 4, 10. Qual é a MEDIANA de peso do grupo?',
             correctAnswer: 4.5, tolerance: 0,
@@ -637,7 +637,7 @@ export const QUESTIONS = {
             conceptTags: ['mediana', 'lore'],
         },
         {
-            id: 'mmm_024', topic: 'mean_median_mode', area: 'meadows', difficulty: 'easy',
+            id: 'mmm_024', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'A Distorção afetou os drops. Você abriu 5 baús e encontrou [1, 1, 1, 1, 100] gemas. Qual medida de centro foi MAIS alterada pelo baú de 100 gemas?',
             options: ['Média', 'Mediana', 'Moda', 'Nenhuma'],
@@ -714,7 +714,7 @@ export const QUESTIONS = {
             conceptTags: ['moda', 'bimodal'],
         },
         {
-            id: 'mmm_032', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_032', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'fill_numeric',
             questionText: 'A média de XP de 4 heróis é 50. Um 5º herói entra com 100 de XP. Qual a nova média?',
             correctAnswer: 60, tolerance: 0,
@@ -723,7 +723,7 @@ export const QUESTIONS = {
             conceptTags: ['média', 'atualização'],
         },
         {
-            id: 'mmm_033', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
+            id: 'mmm_033', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Distribuição de recompensas de missão: [5, 5, 5, 100, 200, 500]. A mediana é preferível à média porque:',
             options: [
@@ -820,7 +820,7 @@ export const QUESTIONS = {
             conceptTags: ['variância'],
         },
         {
-            id: 'spr_006', topic: 'spread', area: 'forest', difficulty: 'medium',
+            id: 'spr_006', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Para os mesmos danos [2,4,4,4,5,5,7,9] (variância = 4), qual o DESVIO PADRÃO POPULACIONAL?',
             correctAnswer: 2, tolerance: 0.05,
@@ -829,7 +829,7 @@ export const QUESTIONS = {
             conceptTags: ['desvio padrão'],
         },
         {
-            id: 'spr_007', topic: 'spread', area: 'forest', difficulty: 'medium',
+            id: 'spr_007', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Você ganhou +5 de FOR e seu dano em todos os golpes aumentou em 5 pontos. O que acontece com o DESVIO PADRÃO do dano?',
             options: ['Aumenta em 5', 'Diminui em 5', 'Permanece igual', 'Multiplica por 5'],
@@ -926,7 +926,7 @@ export const QUESTIONS = {
             conceptTags: ['desvio padrão', 'consistência'],
         },
         {
-            id: 'spr_016', topic: 'spread', area: 'forest', difficulty: 'medium',
+            id: 'spr_016', topic: 'spread', area: 'forest', difficulty: 'hard',
             type: 'true_false',
             questionText: 'V ou F: A variância AMOSTRAL usa (n−1) no denominador para ser um estimador não-enviesado da variância populacional.',
             options: ['Verdadeiro', 'Falso'],
@@ -946,7 +946,7 @@ export const QUESTIONS = {
             conceptTags: ['transformações', 'escala'],
         },
         {
-            id: 'spr_018', topic: 'spread', area: 'forest', difficulty: 'medium',
+            id: 'spr_018', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Os danos dos 5 últimos ataques foram: [6, 8, 8, 8, 10]. Qual é a AMPLITUDE desse conjunto?',
             correctAnswer: 4, tolerance: 0,
@@ -955,7 +955,7 @@ export const QUESTIONS = {
             conceptTags: ['amplitude'],
         },
         {
-            id: 'spr_019', topic: 'spread', area: 'forest', difficulty: 'hard',
+            id: 'spr_019', topic: 'spread', area: 'forest', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'A Distorção elevou o σ dos danos de todos os monstros de 5 para 50. O que isso indica sobre as batalhas?',
             options: [
@@ -994,7 +994,7 @@ export const QUESTIONS = {
             conceptTags: ['variância', 'lore'],
         },
         {
-            id: 'spr_023', topic: 'spread', area: 'forest', difficulty: 'hard',
+            id: 'spr_023', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Um grupo de 5 Specters tem variância de HP igual a 16. Qual é o DESVIO PADRÃO de HP desse grupo?',
             correctAnswer: 4, tolerance: 0,
@@ -1071,7 +1071,7 @@ export const QUESTIONS = {
             conceptTags: ['desvio padrão', 'consistência'],
         },
         {
-            id: 'spr_031', topic: 'spread', area: 'forest', difficulty: 'medium',
+            id: 'spr_031', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'O que representa o 1º QUARTIL (Q1) dos danos de um monstro?',
             options: [
@@ -1096,7 +1096,7 @@ export const QUESTIONS = {
             conceptTags: ['IQR', 'outlier', 'Tukey'],
         },
         {
-            id: 'spr_033', topic: 'spread', area: 'forest', difficulty: 'hard',
+            id: 'spr_033', topic: 'spread', area: 'forest', difficulty: 'medium',
             type: 'true_false',
             questionText: 'V ou F: A amplitude (máximo − mínimo) é uma medida robusta de dispersão.',
             options: ['Verdadeiro', 'Falso'],
@@ -1116,7 +1116,7 @@ export const QUESTIONS = {
             conceptTags: ['box plot', 'mediana'],
         },
         {
-            id: 'spr_035', topic: 'spread', area: 'forest', difficulty: 'hard',
+            id: 'spr_035', topic: 'spread', area: 'forest', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Ao adicionar uma constante K a todos os valores de um conjunto, o que acontece com o desvio padrão?',
             options: [
@@ -1212,7 +1212,7 @@ export const QUESTIONS = {
             conceptTags: ['condicional'],
         },
         {
-            id: 'prob_009', topic: 'probability', area: 'plains', difficulty: 'medium',
+            id: 'prob_009', topic: 'probability', area: 'plains', difficulty: 'easy',
             type: 'multiple_choice',
             questionText: 'Um evento IMPOSSÍVEL tem probabilidade:',
             options: ['0', '0,5', '1', '−1'],
@@ -1222,7 +1222,7 @@ export const QUESTIONS = {
             conceptTags: ['axiomas'],
         },
         {
-            id: 'prob_010', topic: 'probability', area: 'plains', difficulty: 'medium',
+            id: 'prob_010', topic: 'probability', area: 'plains', difficulty: 'easy',
             type: 'fill_numeric',
             questionText: 'Você joga 2 dados. Qual a probabilidade de a SOMA ser 7?',
             correctAnswer: 0.1667, tolerance: 0.005,
@@ -1240,7 +1240,7 @@ export const QUESTIONS = {
             conceptTags: ['complementar'],
         },
         {
-            id: 'prob_012', topic: 'probability', area: 'plains', difficulty: 'hard',
+            id: 'prob_012', topic: 'probability', area: 'plains', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'P(A|B) significa:',
             options: [
@@ -1399,7 +1399,7 @@ export const QUESTIONS = {
             conceptTags: ['probabilidade clássica'],
         },
         {
-            id: 'prob_028', topic: 'probability', area: 'plains', difficulty: 'easy',
+            id: 'prob_028', topic: 'probability', area: 'plains', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'Eventos MUTUAMENTE EXCLUSIVOS são aqueles que:',
             options: [
@@ -1452,38 +1452,31 @@ export const QUESTIONS = {
             conceptTags: ['sem reposição', 'probabilidade condicional'],
         },
         {
-            id: 'prob_033', topic: 'probability', area: 'plains', difficulty: 'hard',
-            type: 'multiple_choice',
-            questionText: 'P(B|A) significa:',
-            options: [
-                'A probabilidade de B multiplicada por A',
-                'A probabilidade de B dado que A já ocorreu',
-                'A probabilidade de A dado que B ocorreu',
-                'A probabilidade de A ou B',
-            ],
-            correctAnswer: 'A probabilidade de B dado que A já ocorreu',
-            explanation: 'Probabilidade condicional P(B|A) = P(A ∩ B) / P(A).',
-            hint: 'O símbolo "|" se lê "dado que".',
-            conceptTags: ['probabilidade condicional'],
+            id: 'prob_033', topic: 'probability', area: 'plains', difficulty: 'medium',
+            type: 'fill_numeric',
+            questionText: 'P(A) = 0,4 e P(B|A) = 0,5. Qual é P(A E B)?',
+            correctAnswer: 0.2, tolerance: 0.01,
+            explanation: 'P(A ∩ B) = P(B|A) × P(A) = 0,5 × 0,4 = 0,2.',
+            hint: 'P(A ∩ B) = P(B|A) × P(A).',
+            conceptTags: ['probabilidade condicional', 'regra da multiplicação'],
         },
         {
             id: 'prob_034', topic: 'probability', area: 'plains', difficulty: 'easy',
-            type: 'multiple_choice',
-            questionText: 'Qual é a probabilidade de um evento IMPOSSÍVEL?',
-            options: ['1', '0,5', '0', 'Depende do contexto'],
-            correctAnswer: '0',
-            explanation: 'Evento impossível nunca ocorre, então P = 0.',
-            hint: 'O que nunca acontece tem qual probabilidade?',
-            conceptTags: ['espaço amostral'],
+            type: 'fill_numeric',
+            questionText: 'Se P(A) = 0,35, qual é a probabilidade de A NÃO ocorrer?',
+            correctAnswer: 0.65, tolerance: 0.01,
+            explanation: 'P(Aᶜ) = 1 − P(A) = 1 − 0,35 = 0,65.',
+            hint: 'A probabilidade do complemento = 1 menos a probabilidade do evento.',
+            conceptTags: ['complemento'],
         },
         {
             id: 'prob_035', topic: 'probability', area: 'plains', difficulty: 'medium',
             type: 'fill_numeric',
-            questionText: 'Você lança dois dados. Qual a probabilidade de a SOMA ser 7?',
-            correctAnswer: 0.167, tolerance: 0.01,
-            explanation: 'Pares que somam 7: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1) = 6 de 36. P = 6/36 ≈ 0,167.',
-            hint: 'Conte quantos pares (d1,d2) somam 7 entre os 36 possíveis.',
-            conceptTags: ['espaço amostral', 'combinação'],
+            questionText: 'Num baralho de 20 cartas: 8 de Fogo, 7 de Água, 5 de Terra. Você tira 1 carta. Qual P(Fogo OU Água)?',
+            correctAnswer: 0.75, tolerance: 0.01,
+            explanation: 'São mutuamente exclusivos: P(F ∪ A) = 8/20 + 7/20 = 15/20 = 0,75.',
+            hint: 'Eventos mutuamente exclusivos: some as probabilidades.',
+            conceptTags: ['adição', 'mutuamente exclusivos'],
         },
     ],
 
@@ -2210,7 +2203,7 @@ export const QUESTIONS = {
             conceptTags: ['p-valor', 'alfa'],
         },
         {
-            id: 'inf_030', topic: 'inference', area: 'dungeon', difficulty: 'medium',
+            id: 'inf_030', topic: 'inference', area: 'dungeon', difficulty: 'hard',
             type: 'multiple_choice',
             questionText: 'Um intervalo de confiança 95% para o dano médio de uma espada é [42, 58]. O que isso significa?',
             options: [
@@ -2235,7 +2228,7 @@ export const QUESTIONS = {
             conceptTags: ['teste t', 'comparação de médias'],
         },
         {
-            id: 'inf_032', topic: 'inference', area: 'dungeon', difficulty: 'hard',
+            id: 'inf_032', topic: 'inference', area: 'dungeon', difficulty: 'medium',
             type: 'multiple_choice',
             questionText: 'O que é o Erro Tipo I em um teste de hipóteses?',
             options: [
@@ -2250,7 +2243,7 @@ export const QUESTIONS = {
             conceptTags: ['Erro Tipo I', 'alfa'],
         },
         {
-            id: 'inf_033', topic: 'inference', area: 'dungeon', difficulty: 'medium',
+            id: 'inf_033', topic: 'inference', area: 'dungeon', difficulty: 'hard',
             type: 'true_false',
             questionText: 'V ou F: Um resultado estatisticamente significativo (p < 0,05) sempre indica um efeito importante na prática.',
             options: ['Verdadeiro', 'Falso'],
