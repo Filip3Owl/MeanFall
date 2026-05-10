@@ -1,4 +1,5 @@
-const KEY = 'statquest_save_v1';
+const KEY      = 'statquest_save_v1';
+const AUTO_KEY = 'statquest_autosave_v1';
 
 export const SaveSystem = {
 
@@ -38,12 +39,38 @@ export const SaveSystem = {
         localStorage.setItem(KEY, JSON.stringify(slots));
     },
 
+    // Writes to a dedicated auto-slot, never touches manual save slots.
     autoSave(playerData) {
-        this.save(0, playerData);
+        try {
+            const data = {
+                ...this._serialize(playerData),
+                saveTimestamp: new Date().toISOString(),
+                version: '1.0.0',
+                isAuto: true,
+            };
+            localStorage.setItem(AUTO_KEY, JSON.stringify(data));
+            return true;
+        } catch {
+            return false;
+        }
+    },
+
+    loadAuto() {
+        try {
+            const raw = localStorage.getItem(AUTO_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    },
+
+    // Returns all saves (manual + auto) as a flat array for menu use.
+    loadAllIncludingAuto() {
+        return [...this.loadAll(), this.loadAuto()].filter(Boolean);
     },
 
     hasAnySave() {
-        return this.loadAll().some(s => s !== null);
+        return this.loadAll().some(s => s !== null) || this.loadAuto() !== null;
     },
 
     _serialize(player) {

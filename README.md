@@ -1,5 +1,7 @@
 # MeanFall
 
+![MeanFall Banner](icon/banner.svg)
+
 > **RPG educacional de estatística — jogue em [meanfall.pro](https://www.meanfall.pro)**
 
 Um RPG top-down que ensina estatística através de exploração tile-based, combate por turnos e um sistema elemental completo. O jogador responde questões de estatística para causar dano, coleta loot elemental, completa missões e progride por seis regiões temáticas — cada uma ligada a um tópico diferente de estatística.
@@ -29,43 +31,50 @@ Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step
 
 ## Funcionalidades
 
-- **52+ questões de estatística** em seis tópicos, balanceadas em fácil, médio e difícil, todas ambientadas no mundo do RPG
-- **24 monstros** (2 por área + variantes Elite com 15% de chance de spawn, 2× HP e 3× ouro)
-- **Três tipos de questão** — múltipla escolha, verdadeiro/falso e resposta numérica
-- **Combate por turnos** com dano escalado por atributos, matchup elemental, críticos e streak bonus
-- **Seleção adaptativa** — 60% das perguntas são biasadas para questões previamente erradas
-- **Progressão por maestria** — portais para regiões avançadas exigem nível e % de maestria
-- **Sistema de inventário e equipamentos** com slots (cabeça, peito, pernas, pés, mãos, anel, amuleto)
-- **Sistema de missões** — 7 missões com rastreamento automático e diário acessível com `Q`
-- **Sistema de livros/codex** — 14 tomos in-world dropáveis com 5 níveis de importância e bônus permanentes
-- **Mercadores e lojas** — 3 NPCs em regiões diferentes com catálogos tier-appropriate
-- **Calculadora + Bloco de Notas** arrastáveis durante o combate (tecla `N`), com salvamento em LocalStorage
-- **Fog of War** com exploração progressiva por região
-- **Respawn de monstros** a cada 20 segundos
-- **Sistema de save** em 3 slots via LocalStorage com auto-save
-- **Texturas procedurais** — todos os sprites são gerados em runtime, sem imagens externas
-- **Sistema elemental passivo** com maestria elemental, ícones procedurais e aura do jogador
+- **210+ questões de estatística** ambientadas no mundo do RPG (poções, monstros, loot, alquimia), balanceadas em fácil, médio e difícil.
+- **30 monstros únicos** com variantes **Elite** (15% de chance de spawn, 2× HP e 3× ouro, aura visual única).
+- **Três tipos de questão** — múltipla escolha, verdadeiro/falso e resposta numérica com tolerância decimal.
+- **Combate por turnos tático** onde o dano escala com seus atributos (INT, STR), streak bonus de acertos e matchups elementais.
+- **Aprendizado Adaptativo** — o motor de perguntas prioriza tópicos onde o jogador tem menor taxa de acerto (60% de viés para erros).
+- **Sistema de RPG Completo**:
+    - **Inventário e Equipamentos**: 7 slots (cabeça, peito, pernas, pés, mãos, anel, amuleto).
+    - **Árvore de Habilidades**: Melhore sua eficiência em combate e bônus de ouro/XP.
+    - **Missões (Quests)**: 7 missões principais com rastreamento no diário (`Q`).
+    - **Codex e Biblioteca**: 18 tomos in-world que concedem bônus permanentes e expandem o lore.
+    - **Economia**: 3 mercadores com catálogos que evoluem com seu nível.
+- **Utilitários In-Game**: Calculadora e Bloco de Notas arrastáveis (`N`) que persistem entre sessões.
+- **Exploração e Mundo**: Fog of War progressivo, minimapa em tempo real e transições suaves entre áreas.
+- **Tecnologia**: Salvamento automático em LocalStorage (3 slots) e **Texturas Procedurais** (todos os sprites e tiles são gerados via código em runtime, resultando em um carregamento instantâneo).
+
+---
+
+## Combate e Aprendizado
+
+Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você causa não depende apenas da sua espada, mas da sua precisão estatística:
+
+- **Bônus de Streak**: Acertar sequências de perguntas aumenta exponencialmente o dano base.
+- **Matchup Elemental**: Use o elemento certo contra o monstro (ex: Fogo contra Terra) para um multiplicador de 1.5×.
+- **Dicas de Foco**: Gastar pontos de **Foco** permite visualizar uma dica teórica para a questão.
+- **Feedback Detalhado**: Errar uma pergunta mostra uma explicação contextualizada no lore do jogo (ex: por que o peso de um dragão é um dado contínuo e não discreto).
 
 ---
 
 ## Interface de Combate
 
-- Painel do monstro com sprite, aura elemental, barra de HP com marcações a 25/50/75%, flavor text e badge de nível/elemento
-- Painel do jogador com barras de HP e Foco com tick marks e pulso de perigo
-- Caixa de pergunta com frame ornamental, badges A/B/C/D, feedback de resposta com animação
-- Barra inferior com botões **DICA** (−10 Foco), **NOTAS/CALC** e **FUGIR**
-- Números de dano flutuantes, flash de tela e shake ao receber dano
-- Cores de texto garantidas legíveis em todos os elementos (usa `accent` do elemento, sempre mais claro que a cor base)
+- Painel do monstro com sprite procedural, aura elemental, barra de HP dinâmica e badges de elite.
+- Painel do jogador com monitoramento de HP, Foco e progresso de XP.
+- Caixa de diálogo ornamental com suporte a **RichText** para fórmulas matemáticas.
+- Ferramentas de apoio integradas (Calculadora/Notas) para resolução de problemas complexos.
 
 ---
 
 ## Stack Tecnológica
 
-- **Phaser 3.60.0** (via CDN)
-- **JavaScript ES Modules** (sem bundler, sem transpilação)
-- **HTML5 Canvas** para viewport do jogo e minimapa
-- **CSS3** com custom properties
-- **LocalStorage** para persistência
+- **Phaser 3.60.0** (Engine de jogo via CDN)
+- **JavaScript ES Modules** (Arquitetura moderna sem necessidade de build/npm)
+- **HTML5 Canvas** (Viewport e Minimapa)
+- **CSS3** (Interface UI com variáveis dinâmicas)
+- **LocalStorage** (Persistência de saves e notas)
 
 ---
 
@@ -77,64 +86,31 @@ Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step
 ├── css/
 │   └── style.css
 ├── icon/
-│   └── meanfallfav.png
+│   ├── meanfallfav.png     Favicon
+│   └── banner.svg          Arte do banner (SVG)
 └── js/
-    ├── main.js
-    ├── constants.js
-    ├── data/
-    │   ├── questions.js        52+ questões por tópico
-    │   ├── maps.js             6 mapas tile-based completos
-    │   ├── monsters.js         24 monstros com atributos e drops
-    │   ├── items.js            Itens em 5 raridades e 6 elementos
-    │   ├── quests.js           7 missões com cadeia de progressão
-    │   ├── shops.js            3 catálogos de mercador
-    │   └── books.js            14 tomos com 5 níveis de importância
-    ├── systems/
-    │   ├── CombatSystem.js
-    │   ├── QuestionEngine.js
-    │   ├── XPSystem.js
-    │   ├── SaveSystem.js
-    │   ├── MapManager.js
-    │   ├── QuestSystem.js
-    │   ├── ShopSystem.js
-    │   ├── BookSystem.js
-    │   ├── SkillSystem.js
-    │   ├── TutorialSystem.js
-    │   └── FogManager.js
-    ├── scenes/
-    │   ├── BootScene.js
-    │   ├── MainMenuScene.js
-    │   ├── WorldScene.js
-    │   ├── UIScene.js
-    │   ├── CombatScene.js
-    │   ├── InventoryScene.js
-    │   ├── CharacterScene.js
-    │   ├── ShopScene.js
-    │   ├── QuestScene.js
-    │   ├── BookScene.js
-    │   ├── DialogScene.js
-    │   └── ScratchpadScene.js  Calculadora + Notas arrastáveis
-    ├── entities/
-    │   ├── Player.js
-    │   ├── Monster.js          Sistema Elite (15% chance de spawn)
-    │   └── NPC.js
-    └── utils/
-        ├── EventBus.js
-        ├── Draw.js             Sprites procedurais por elemento
-        └── RichText.js         Sistema de markup {{tag:valor}}
+    ├── main.js             Ponto de entrada
+    ├── constants.js        Configurações globais e matrizes
+    ├── data/               Banco de dados (questões, monstros, itens, etc.)
+    ├── systems/            Lógica de jogo (Combate, Quest, Save, etc.)
+    ├── scenes/             Cenas do Phaser (Mundo, Combate, Inventário)
+    ├── entities/           Classes base (Player, Monster, NPC)
+    └── utils/              Helpers (Desenho procedural, EventBus)
 ```
 
 ---
 
 ## Rodar Localmente
 
-O projeto usa ES modules e precisa ser servido via HTTP — abrir `index.html` direto pelo `file://` falha com erro CORS.
+O projeto usa ES modules e precisa ser servido via HTTP.
 
 ```bash
+# Com Python
 python3 -m http.server 8080
-```
 
-Abrir `http://localhost:8080` em qualquer browser moderno.
+# Com Node (servidor estático qualquer)
+npx serve .
+```
 
 ---
 
@@ -142,17 +118,17 @@ Abrir `http://localhost:8080` em qualquer browser moderno.
 
 | Tecla | Ação |
 |---|---|
-| WASD / Setas | Mover jogador |
-| Espaço | Falar com NPC / abrir loja |
-| I | Inventário |
-| C | Ficha do personagem |
-| Q | Diário de missões |
-| B | Biblioteca de livros |
-| K | Habilidades |
-| L | Compêndio elemental |
-| N | Calculadora + Bloco de notas (durante combate) |
-| F5 | Salvar jogo |
-| ESC | Fechar qualquer modal |
+| **WASD / Setas** | Mover jogador |
+| **Espaço** | Interagir / Conversar |
+| **I** | Abrir Inventário |
+| **C** | Atributos do Personagem |
+| **Q** | Diário de Missões |
+| **B** | Biblioteca de Livros |
+| **K** | Árvore de Habilidades |
+| **L** | Compêndio Elemental |
+| **N** | Calculadora + Notas (Combate) |
+| **F5** | Salvar Jogo |
+| **ESC** | Fechar Modais / Menu |
 
 ---
 
@@ -163,43 +139,14 @@ Base              = floor(10 + level × 1.5 + INT × 0.5 + STR × 0.3 + min(stre
 Elemento          = ELEMENT_MATRIX[arma][monstro]   (0.75 / 1.0 / 1.5)
 Crítico           = min(0.05 + AGI × 0.01, 0.30) → ×1.6 de dano
 Dano do jogador   = max(1, floor(Base × Elemento × Crítico) − defesa do monstro)
-Dano do monstro   = max(1, ataque − floor(AGI × 0.3))
-Esquiva           = AGI × 1%
-XP ganho          = floor(xpReward × (1 + INT × 0.02))
 ```
-
----
-
-## Matriz Elemental
-
-| Atacante → Defensor | Fogo | Terra | Água | Gelo | Trevas | Normal |
-|---|---|---|---|---|---|---|
-| Fogo | 1.0 | **1.5** | 0.75 | **1.5** | 1.0 | 1.0 |
-| Terra | 0.75 | 1.0 | **1.5** | 1.0 | **1.5** | 1.0 |
-| Água | **1.5** | 0.75 | 1.0 | 0.75 | 1.0 | 1.0 |
-| Gelo | 0.75 | 1.0 | **1.5** | 1.0 | 0.75 | 1.0 |
-| Trevas | 1.0 | 0.75 | 1.0 | **1.5** | 1.0 | **1.5** |
-| Normal | 1.0 | 1.0 | 1.0 | 1.0 | 0.75 | 1.0 |
-
----
-
-## Raridades
-
-| Raridade | Cor | Multiplicador de Valor | Poder |
-|---|---|---|---|
-| Comum | Cinza | ×1.0 | ×1.0 |
-| Incomum | Verde | ×2.0 | ×1.4 |
-| Raro | Azul | ×4.0 | ×1.8 |
-| Épico | Roxo | ×8.0 | ×2.5 |
-| Lendário | Laranja | ×16.0 | ×3.5 |
 
 ---
 
 ## Créditos
 
 Desenvolvido por **Filipe Rangel**.
-
-Feito com [Phaser 3](https://phaser.io). Currículo de estatística e design do jogo originais.
+Currículo de estatística e game design originais.
 
 ---
 

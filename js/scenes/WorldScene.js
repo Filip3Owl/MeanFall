@@ -89,8 +89,9 @@ export class WorldScene extends Phaser.Scene {
         EventBus.on('element-xp-change', this._onElementXpChangeBound);
         EventBus.on('bounty-complete',  this._onBountyCompleteBound);
 
-        this._syncTimer  = this.time.addEvent({ delay: 5000, loop: true, callback: this._autoSync, callbackScope: this });
-        this._regenTimer = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
+        this._syncTimer      = this.time.addEvent({ delay: 5000,   loop: true, callback: this._autoSync,     callbackScope: this });
+        this._regenTimer     = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
+        this._periodicSaveTimer = this.time.addEvent({ delay: 180000, loop: true, callback: this._periodicSave, callbackScope: this });
 
         this._updateElementalAura();
         EventBus.emit('area-changed', { areaId: this._playerData.currentArea });
@@ -199,7 +200,7 @@ export class WorldScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this._nKey)) this._openOverlay('Scratchpad');
         if (Phaser.Input.Keyboard.JustDown(this._f5Key)) {
             SaveSystem.autoSave(this._playerData);
-            this._chat('Jogo salvo!', 'system');
+            EventBus.emit('autosave');
         }
 
         this._processRespawns(time);
@@ -880,11 +881,18 @@ export class WorldScene extends Phaser.Scene {
         return map[npcId] || npcId;
     }
 
-    _autoSync() { 
+    _autoSync() {
         if (this._player) {
             Object.assign(this._playerData, this._player.toData());
         }
-        this.registry.set('player', this._playerData); 
+        this.registry.set('player', this._playerData);
+    }
+
+    _periodicSave() {
+        if (this._playerData) {
+            SaveSystem.autoSave(this._playerData);
+            EventBus.emit('autosave');
+        }
     }
 
     _chat(msg, type) { EventBus.emit('chat', { msg, type }); }
