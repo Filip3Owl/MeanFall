@@ -31,20 +31,24 @@ Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step
 
 ## Funcionalidades
 
-- **210+ questões de estatística** ambientadas no mundo do RPG (poções, monstros, loot, alquimia), balanceadas em fácil, médio e difícil.
+- **207 questões de estatística** ambientadas no mundo do RPG (poções, monstros, loot, alquimia), balanceadas em fácil, médio e difícil.
 - **30 monstros únicos** com variantes **Elite** (15% de chance de spawn, 2× HP e 3× ouro, aura visual única).
 - **Três tipos de questão** — múltipla escolha, verdadeiro/falso e resposta numérica com tolerância decimal.
 - **Combate por turnos tático** onde o dano escala com seus atributos (INT, STR), streak bonus de acertos e matchups elementais.
+- **Fever Mode**: acertar 5 questões seguidas entra em Fever Mode — +40% de dano e música intensificada.
+- **Efeitos de Status Elementais**: cada elemento aplica um debuff único ao errar (queimadura, congelamento, maldição, etc.).
 - **Aprendizado Adaptativo** — o motor de perguntas prioriza tópicos onde o jogador tem menor taxa de acerto (60% de viés para erros).
 - **Sistema de RPG Completo**:
-    - **Inventário e Equipamentos**: 7 slots (cabeça, peito, pernas, pés, mãos, anel, amuleto).
-    - **Árvore de Habilidades**: Melhore sua eficiência em combate e bônus de ouro/XP.
+    - **Inventário e Equipamentos**: 7 slots (cabeça, peito, pernas, pés, mãos, anel, amuleto) com 48 itens.
+    - **Árvore de Habilidades**: 13 habilidades passivas que melhoram eficiência em combate e bônus de ouro/XP.
     - **Missões (Quests)**: 7 missões principais com rastreamento no diário (`Q`).
+    - **Bounties Diárias**: objetivos rotativos por área que renovam a cada dia.
     - **Codex e Biblioteca**: 18 tomos in-world que concedem bônus permanentes e expandem o lore.
-    - **Economia**: 3 mercadores com catálogos que evoluem com seu nível.
+    - **Economia**: 3 mercadores com catálogos por área.
+- **Mimics e Inferência**: na Dungeon, baús podem ser Mimics — ative o teste de hipótese (p-valor) antes de abrir.
 - **Utilitários In-Game**: Calculadora e Bloco de Notas arrastáveis (`N`) que persistem entre sessões.
-- **Exploração e Mundo**: Fog of War progressivo, minimapa em tempo real e transições suaves entre áreas.
-- **Tecnologia**: Salvamento automático em LocalStorage (3 slots) e **Texturas Procedurais** (todos os sprites e tiles são gerados via código em runtime, resultando em um carregamento instantâneo).
+- **Exploração e Mundo**: mapa completamente visível, minimapa em tempo real, interiores de casas com música própria.
+- **Tecnologia**: salvamento automático em LocalStorage (3 slots) e **Texturas Procedurais** — todos os sprites, tiles e efeitos são gerados via código em runtime, resultando em carregamento instantâneo sem assets externos.
 
 ---
 
@@ -89,13 +93,64 @@ Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você caus
 │   ├── meanfallfav.png     Favicon
 │   └── banner.svg          Arte do banner (SVG)
 └── js/
-    ├── main.js             Ponto de entrada
-    ├── constants.js        Configurações globais e matrizes
-    ├── data/               Banco de dados (questões, monstros, itens, etc.)
-    ├── systems/            Lógica de jogo (Combate, Quest, Save, etc.)
-    ├── scenes/             Cenas do Phaser (Mundo, Combate, Inventário)
-    ├── entities/           Classes base (Player, Monster, NPC)
-    └── utils/              Helpers (Desenho procedural, EventBus)
+    ├── main.js             Ponto de entrada do Phaser
+    ├── constants.js        Configurações globais, XP table, matrix elemental
+    ├── data/
+    │   ├── questions.js    207 questões em 6 tópicos e 3 dificuldades
+    │   ├── monsters.js     30 monstros com stats, elemento e comportamento
+    │   ├── items.js        48 itens (equipamentos e consumíveis)
+    │   ├── maps.js         6 mapas tile-based
+    │   ├── quests.js       7 missões principais
+    │   ├── skills.js       13 habilidades passivas
+    │   ├── books.js        18 tomos da biblioteca in-world
+    │   ├── shops.js        3 mercadores com estoques por área
+    │   ├── bounties.js     Pools de bounties diárias por área
+    │   ├── lore.js         Lore expandido do mundo
+    │   └── appearance.js   Aparências para criação de personagem
+    ├── systems/
+    │   ├── CombatSystem.js       Dano, itens, drops
+    │   ├── QuestionEngine.js     Seleção adaptativa de questões
+    │   ├── QuestionGenerator.js  Geração procedural de questões numéricas
+    │   ├── XPSystem.js           Level up, atributos, mastery
+    │   ├── SaveSystem.js         Save/load (3 slots + autosave)
+    │   ├── MapManager.js         Renderização de mapa e minimapa
+    │   ├── QuestSystem.js        Rastreamento de missões
+    │   ├── BountySystem.js       Bounties diárias rotativas
+    │   ├── ShopSystem.js         Economia e mercadores
+    │   ├── SkillSystem.js        Árvore de habilidades
+    │   ├── BookSystem.js         Biblioteca e bônus permanentes
+    │   ├── InferenceSystem.js    Testes de hipótese para Mimics
+    │   ├── StatusEffectSystem.js Efeitos elementais em combate
+    │   └── TutorialSystem.js     Tutorial guiado
+    ├── scenes/
+    │   ├── BootScene.js          Gera texturas procedurais
+    │   ├── IntroScene.js         Intro com lore
+    │   ├── MainMenuScene.js      Menu e slots de save
+    │   ├── CharacterCreationScene.js  Criação de personagem
+    │   ├── WorldScene.js         Exploração, NPCs, portais
+    │   ├── UIScene.js            HUD DOM (HP, Focus, XP, chat)
+    │   ├── CombatScene.js        Combate por turnos + questões
+    │   ├── GameOverScene.js      Tela de morte com estatísticas
+    │   ├── InventoryScene.js     Inventário e equipamentos
+    │   ├── CharacterScene.js     Atributos e gasto de pontos
+    │   ├── QuestScene.js         Diário de missões
+    │   ├── SkillScene.js         Árvore de habilidades
+    │   ├── ShopScene.js          Loja de mercadores
+    │   ├── BookScene.js          Leitura de tomos
+    │   ├── CompendiumScene.js    Codex elemental
+    │   ├── InferenceScene.js     Mini-jogo de teste de hipótese
+    │   ├── DialogScene.js        Diálogos com NPCs
+    │   └── ScratchpadScene.js    Calculadora e notas (arrastáveis)
+    ├── entities/
+    │   ├── Player.js       Sprite, movimento, vitals
+    │   ├── Monster.js      Sprite, IA de patrulha/chase, Elite
+    │   └── NPC.js          Sprite, diálogos, interação
+    └── utils/
+        ├── Draw.js         Geração procedural de todas as texturas
+        ├── EventBus.js     Pub/sub de eventos entre sistemas
+        ├── MusicSystem.js  Música procedural via Web Audio API
+        ├── SoundSystem.js  Efeitos sonoros procedurais
+        └── RichText.js     Texto colorido inline em combate
 ```
 
 ---
