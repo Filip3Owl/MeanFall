@@ -180,6 +180,17 @@ export class CharacterCreationScene extends Phaser.Scene {
             this._statBars[key] = { fill, barW, color };
         });
 
+        const vitalsG = this.add.graphics().setDepth(2);
+        vitalsG.lineStyle(1, 0xd4af37, 0.1);
+        vitalsG.lineBetween(16, sbY0 + 80, DIV_X - 10, sbY0 + 80);
+
+        this._hpTx = this.add.text(sbX, sbY0 + 92, '', {
+            fontSize: '10px', color: '#cc4444', fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5).setDepth(3);
+        this._focusTx = this.add.text(sbX, sbY0 + 108, '', {
+            fontSize: '10px', color: '#4488cc', fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5).setDepth(3);
+
         this._diffBadge = this.add.text(PREV_CX, H - 22, '', {
             fontSize: '10px', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
         }).setOrigin(0.5).setDepth(3);
@@ -609,6 +620,11 @@ export class CharacterCreationScene extends Phaser.Scene {
             if (!bar) return;
             this.tweens.add({ targets: bar.fill, width: Math.floor(bar.barW * Math.min(val / 10, 1)), duration: 200, ease: 'Quad.Out' });
         });
+
+        const hp    = PLAYER_DEFAULTS.maxHp    + (cls?.id === 'warrior' ? 20 : 0);
+        const focus = PLAYER_DEFAULTS.maxFocus  + (cls?.id === 'mage'    ? 15 : 0);
+        if (this._hpTx)    this._hpTx.setText(`HP    ${String(hp).padStart(3, ' ')}`);
+        if (this._focusTx) this._focusTx.setText(`FOCO  ${String(focus).padStart(3, ' ')}`);
     }
 
     _refreshPreview() {
