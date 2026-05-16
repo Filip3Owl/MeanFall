@@ -11,6 +11,7 @@ export class ScratchpadScene extends Phaser.Scene {
         this._notesText    = localStorage.getItem('meanfall_notes') || '';
         this._notesFocused = false;
         this._notesCursor  = true;
+        this._notesScroll  = 0;
         this._calcGroup    = [];
         this._notesGroup   = [];
 
@@ -203,6 +204,24 @@ export class ScratchpadScene extends Phaser.Scene {
             .setStrokeStyle(1, 0x252040, 1).setInteractive({ useHandCursor: true });
         notesBg.on('pointerdown', () => { this._notesFocused = true; });
 
+        // Wheel scroll
+        notesBg.on('wheel', (pointer, deltaX, deltaY, deltaZ) => {
+            if (this._activeTab !== 'notes') return;
+            const lines = this._notesText.split('\n');
+            const MAX = 18;
+            if (lines.length <= MAX) return;
+
+            if (deltaY > 0) this._notesScroll++;
+            else this._notesScroll--;
+
+            this._notesScroll = Phaser.Math.Clamp(this._notesScroll, 0, lines.length - MAX);
+            this._renderNotes();
+        });
+
+        // Scroll indicators
+        this._scrollUp = this.add.text(W - 20, topY + 5, '▲', { fontSize: '10px', color: '#4d3899' }).setOrigin(0.5).setAlpha(0);
+        this._scrollDn = this.add.text(W - 20, topY + areaH - 15, '▼', { fontSize: '10px', color: '#4d3899' }).setOrigin(0.5).setAlpha(0);
+
         // Watermark label
         const watermark = this.add.text(W - 14, topY + areaH - 10, 'NOTAS', {
             fontSize: '8px', color: '#1c1830', fontFamily: 'Courier New', fontStyle: 'bold',
@@ -211,7 +230,7 @@ export class ScratchpadScene extends Phaser.Scene {
         // Text display
         this._notesTxt = this.add.text(12, topY + 6, '', {
             fontSize: '12px', color: '#c8c0e8', fontFamily: 'Courier New',
-            wordWrap: { width: W - 28 }, lineSpacing: 3,
+            wordWrap: { width: W - 32 }, lineSpacing: 3,
         }).setOrigin(0);
 
         // Bottom separator
@@ -239,9 +258,15 @@ export class ScratchpadScene extends Phaser.Scene {
         }).setOrigin(0.5);
         clearBg.on('pointerover', () => clearBg.setFillStyle(0x1e0e0e));
         clearBg.on('pointerout',  () => clearBg.setFillStyle(0x100708));
-        clearBg.on('pointerdown', () => { this._notesText = ''; this._renderNotes(); });
+        clearBg.on('pointerdown', () => { 
+            if (confirm('Limpar todas as notas?')) {
+                this._notesText = ''; 
+                this._notesScroll = 0;
+                this._renderNotes(); 
+            }
+        });
 
-        this._notesGroup.push(notesBg, watermark, this._notesTxt, sep, saveBg, saveTx, clearBg, clearTx);
+        this._notesGroup.push(notesBg, this._scrollUp, this._scrollDn, watermark, this._notesTxt, sep, saveBg, saveTx, clearBg, clearTx);
         this._notesGroup.forEach(o => this._container.add(o));
     }
 
@@ -260,7 +285,12 @@ export class ScratchpadScene extends Phaser.Scene {
         this._notesTabBg.setFillStyle(!calcOn ? 0x17112e : 0x0b0914);
         this._notesTabTx.setColor(!calcOn ? '#bb99ff' : '#5f4d99');
 
-        if (tab === 'notes') this._renderNotes();
+        if (tab === 'notes') {
+            const lines = this._notesText.split('\n');
+            const MAX = 18;
+            this._notesScroll = Math.max(0, lines.length - MAX);
+            this._renderNotes();
+        }
     }
 
     // ─── NOTES RENDER ─────────────────────────────────────────────────────────
@@ -268,11 +298,28 @@ export class ScratchpadScene extends Phaser.Scene {
     _renderNotes() {
         const MAX   = 18;
         const lines = this._notesText.split('\n');
-        const vis   = lines.slice(-MAX);
+        
+        // Clamp scroll
+        this._notesScroll = Phaser.Math.Clamp(this._notesScroll, 0, Math.max(0, lines.length - MAX));
+
+        const vis = lines.slice(this._notesScroll, this._notesScroll + MAX);
+        
+        // Handle cursor if we are at the last visible page and the cursor is at the end
         if (this._notesFocused && this._notesCursor) {
-            vis[vis.length - 1] += '|';
+            const lastLineIdx = lines.length - 1;
+            const visibleLastLineIdx = this._notesScroll + vis.length - 1;
+            if (visibleLastLineIdx === lastLineIdx) {
+                vis[vis.length - 1] += '|';
+            }
         }
+        
         this._notesTxt.setText(vis.join('\n'));
+
+        // Update scroll indicators
+        if (this._scrollUp) {
+            this._scrollUp.setAlpha(this._notesScroll > 0 ? 1 : 0);
+            this._scrollDn.setAlpha(this._notesScroll < lines.length - MAX ? 1 : 0);
+        }
     }
 
     _saveNotes() {
@@ -321,6 +368,8 @@ export class ScratchpadScene extends Phaser.Scene {
     }
 
     _handleNotesKey(key) {
+        const oldLines = this._notesText.split('\n').length;
+        
         if (key === 'Backspace') {
             this._notesText = this._notesText.slice(0,-1);
         } else if (key === 'Enter') {
@@ -330,7 +379,19 @@ export class ScratchpadScene extends Phaser.Scene {
         } else if (key.length === 1) {
             this._notesText += key;
         }
+
+        const newLines = this._notesText.split('\n').length;
+        const MAX = 18;
+        
+        // If we added a line or are typing at the end, ensure we see the bottom
+        if (newLines > MAX) {
+            this._notesScroll = newLines - MAX;
+        }
+
         this._renderNotes();
+        
+        // Simple auto-save to localStorage
+        localStorage.setItem('meanfall_notes', this._notesText);
     }
 
     // ─── CALCULATOR LOGIC ─────────────────────────────────────────────────────
