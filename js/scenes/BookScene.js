@@ -102,20 +102,20 @@ export class BookScene extends Phaser.Scene {
         for (let i = 0; i < owned.length; i++) {
             const entry = owned[i];
             const imp   = BOOK_IMPORTANCE[entry.book.importance] || BOOK_IMPORTANCE.normal;
-            const y     = 66 + i * 28;
+            const y     = 62 + i * 20;
 
-            const bg = this.add.rectangle(18, y, 212, 24, 0x111111, 1).setOrigin(0, 0).setInteractive()
+            const bg = this.add.rectangle(18, y, 212, 19, 0x111111, 1).setOrigin(0, 0).setInteractive()
                 .on('pointerover', () => { if (this._selected !== i) bg.setFillStyle(0x1a1a22); })
                 .on('pointerout',  () => { if (this._selected !== i) bg.setFillStyle(0x111111); })
                 .on('pointerdown', () => this._selectIdx(i));
 
-            const tx = this.add.text(24, y + 6, entry.book.title, {
-                fontSize: '16px', color: imp.hex, fontFamily: 'Courier New', wordWrap: { width: 168 },
+            const tx = this.add.text(24, y + 3, entry.book.title, {
+                fontSize: '13px', color: imp.hex, fontFamily: 'Courier New', wordWrap: { width: 148 },
             }).setOrigin(0, 0);
 
-            const tagText = entry.read ? '[LIDO]' : `[${imp.name.toUpperCase()}]`;
-            const tag = this.add.text(226, y + 18, tagText, {
-                fontSize: '17px', color: entry.read ? '#666666' : imp.hex, fontFamily: 'Courier New',
+            const tagText = entry.read ? '✓' : imp.name[0].toUpperCase();
+            const tag = this.add.text(226, y + 10, tagText, {
+                fontSize: '12px', color: entry.read ? '#555555' : imp.hex, fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
             this._rows.push({ bg, tx, tag, idx: i, bookId: entry.id });
