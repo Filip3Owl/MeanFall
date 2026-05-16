@@ -561,7 +561,23 @@ export class CharacterCreationScene extends Phaser.Scene {
         buildPlayerSprite(this, this._appearance);
         this._previewSprite.setTexture('sprite_player');
         const cls = CLASSES.find(c => c.id === this._class);
-        if (cls) this._previewAura.setFillStyle(cls.color, 0.13);
+        if (cls) this._tweenAuraColor(cls.color);
+    }
+
+    _tweenAuraColor(toColor) {
+        if (this._auraColorTween) this._auraColorTween.stop();
+        const from = Phaser.Display.Color.IntegerToColor(this._auraColor ?? toColor);
+        const to   = Phaser.Display.Color.IntegerToColor(toColor);
+        this._auraColor = toColor;
+        this._auraColorTween = this.tweens.addCounter({
+            from: 0, to: 100, duration: 350,
+            onUpdate: tw => {
+                const v = tw.getValue();
+                const c = Phaser.Display.Color.Interpolate.ColorWithColor(from, to, 100, v);
+                this._previewAura.setFillStyle(Phaser.Display.Color.GetColor(c.r, c.g, c.b), 0.13);
+            },
+            onComplete: () => { this._auraColorTween = null; },
+        });
     }
 
     _refreshTexts() {
