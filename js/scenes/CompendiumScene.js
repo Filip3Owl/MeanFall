@@ -269,7 +269,7 @@ export class CompendiumScene extends Phaser.Scene {
                         fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
                     }).setOrigin(1, 0).setInteractive({ useHandCursor: true })
                         .on('pointerdown', () => {
-                            this._scrollPx = Math.max(0, this._scrollPx - 30);
+                            this._scrollPx = Math.max(0, this._scrollPx - 60);
                             this._renderTopicContent(topic);
                         }));
             }
@@ -279,7 +279,7 @@ export class CompendiumScene extends Phaser.Scene {
                         fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
                     }).setOrigin(1, 0).setInteractive({ useHandCursor: true })
                         .on('pointerdown', () => {
-                            this._scrollPx = Math.min(maxScroll, this._scrollPx + 30);
+                            this._scrollPx = Math.min(maxScroll, this._scrollPx + 60);
                             this._renderTopicContent(topic);
                         }));
             }
@@ -288,7 +288,7 @@ export class CompendiumScene extends Phaser.Scene {
         // Mouse wheel scroll
         this.input.off('wheel'); // remove previous listener
         this.input.on('wheel', (_ptr, _objs, _dx, dy) => {
-            this._scrollPx = Math.max(0, Math.min(maxScroll, (this._scrollPx || 0) + dy * 0.5));
+            this._scrollPx = Math.max(0, Math.min(maxScroll, (this._scrollPx || 0) + dy * 1.0));
             this._renderTopicContent(topic);
         });
     }
