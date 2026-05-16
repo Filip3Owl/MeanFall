@@ -239,7 +239,7 @@ export class CharacterCreationScene extends Phaser.Scene {
             align: 'center', wordWrap: { width: OPT_W - 16 },
         }).setOrigin(0.5, 0);
         this._sc.add(this._diffDesc);
-        y += 52;
+        y += 68;
 
         this._contentH  = y + 10;
         this._maxScroll = Math.max(0, this._contentH - SCROLL_H);
@@ -598,7 +598,9 @@ export class CharacterCreationScene extends Phaser.Scene {
             tx.setAlpha(active ? 1 : 0.45);
         });
         const diff = DIFFICULTIES[this._difficulty];
-        if (this._diffDesc) this._diffDesc.setText(diff.desc);
+        const fmt  = v => (v === 1.0 ? '×1.0' : (v > 1 ? `×${v.toFixed(1)}` : `×${v.toFixed(1)}`));
+        const statsLine = `Dano: ${fmt(diff.monsterDamage)} · HP: ${fmt(diff.monsterHp)} · Recomp: ${fmt(diff.rewardMult)}`;
+        if (this._diffDesc) this._diffDesc.setText(`${diff.desc}\n${statsLine}`);
         if (this._diffBadge) this._diffBadge.setText(diff.name.toUpperCase()).setColor(diff.color);
     }
 
