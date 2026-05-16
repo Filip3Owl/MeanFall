@@ -51,12 +51,24 @@ export class IntroScene extends Phaser.Scene {
             });
         }
 
-        // Stars — three layers: tiny/faint, small/medium, larger/bright
-        for (const [count, sMin, sMax, aMin, aMax, dMin, dMax] of [
-            [105, 0.4, 1.0, 0.10, 0.45,  700, 1800],
-            [ 44, 1.0, 1.5, 0.35, 0.80, 1200, 3200],
-            [ 14, 1.5, 2.5, 0.55, 1.00, 2000, 5500],
-        ]) {
+        // Stars — three layers for parallax
+        this._parallaxLayers = [];
+        const starConfigs = [
+            [105, 0.4, 1.0, 0.10, 0.45,  700, 1800], // Back (slowest)
+            [ 44, 1.0, 1.5, 0.35, 0.80, 1200, 3200], // Mid
+            [ 14, 1.5, 2.5, 0.55, 1.00, 2000, 5500], // Front (fastest)
+        ];
+
+        starConfigs.forEach((config, layerIdx) => {
+            const [count, sMin, sMax, aMin, aMax, dMin, dMax] = config;
+            const container = this.add.container(0, 0);
+            this._parallaxLayers.push({
+                container,
+                factor: (layerIdx + 1) * 0.35,
+                baseX: 0,
+                baseY: 0
+            });
+
             for (let i = 0; i < count; i++) {
                 const x   = Math.random() * W;
                 const y   = Math.random() * H;
@@ -64,12 +76,13 @@ export class IntroScene extends Phaser.Scene {
                 const a   = aMin + Math.random() * (aMax - aMin);
                 const dur = dMin + Math.random() * (dMax - dMin);
                 const star = this.add.rectangle(x, y, s, s, 0xffffff, a);
+                container.add(star);
                 this.tweens.add({
                     targets: star, alpha: aMin * 0.15,
                     duration: dur, yoyo: true, repeat: -1, delay: Math.random() * dur,
                 });
             }
-        }
+        });
 
         // Vignette — dark circles at each corner to frame the scene
         const vg = this.add.graphics().setDepth(1);
@@ -92,6 +105,29 @@ export class IntroScene extends Phaser.Scene {
                 yoyo: true, repeat: -1,
             });
         }
+    }
+
+    update(time) {
+        if (this._done) return;
+
+        // Pointer-based parallax
+        const pointer = this.input.activePointer;
+        // Normalize pointer position from -1 to 1
+        const nx = (pointer.x - W / 2) / (W / 2);
+        const ny = (pointer.y - H / 2) / (H / 2);
+
+        // Autonomous drift (subtle sine movement)
+        const driftX = Math.sin(time * 0.0005) * 2;
+        const driftY = Math.cos(time * 0.0007) * 2;
+
+        this._parallaxLayers.forEach(layer => {
+            const targetX = -nx * 10 * layer.factor + driftX * layer.factor;
+            const targetY = -ny * 10 * layer.factor + driftY * layer.factor;
+
+            // Smooth interpolation
+            layer.container.x += (targetX - layer.container.x) * 0.05;
+            layer.container.y += (targetY - layer.container.y) * 0.05;
+        });
     }
 
     // ── Permanent UI (always visible) ──────────────────────────────────────
