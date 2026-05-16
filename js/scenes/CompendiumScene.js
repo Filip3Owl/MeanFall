@@ -76,8 +76,12 @@ export class CompendiumScene extends Phaser.Scene {
                 fontSize: '13px', color: readCnt > 0 ? '#aaaaaa' : '#444444', fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
 
-            const cntTx = this.add.text(x + SIDEBAR_W - 10, ty + 13, `${readCnt}/${total}`, {
-                fontSize: '11px', color: readCnt > 0 ? '#666633' : '#333333', fontFamily: 'Courier New',
+            const complete = total > 0 && readCnt === total;
+            const cntTx = this.add.text(x + SIDEBAR_W - 10, ty + 13,
+                complete ? '✓' : `${readCnt}/${total}`, {
+                fontSize: complete ? '14px' : '11px',
+                color: complete ? '#ffd700' : (readCnt > 0 ? '#666633' : '#333333'),
+                fontFamily: 'Courier New', fontStyle: complete ? 'bold' : 'normal',
             }).setOrigin(1, 0.5);
 
             bg.on('pointerover', () => {
