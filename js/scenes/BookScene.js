@@ -185,8 +185,9 @@ export class BookScene extends Phaser.Scene {
         }
         if (result.firstRead) {
             const imp = result.importance;
+            const BONUS_LABELS = { intelligence: 'Inteligência', maxFocus: 'Foco Máx' };
             const bonusStr = imp.bonus
-                ? ' · ' + Object.entries(imp.bonus).map(([k, v]) => `+${v} ${k}`).join(', ')
+                ? ' · ' + Object.entries(imp.bonus).map(([k, v]) => `+${v} ${BONUS_LABELS[k] || k}`).join(', ')
                 : '';
             this._readMsg.setColor('#88ff88').setText(`Lição absorvida! +${imp.xp} XP${bonusStr}`);
             this.registry.set('player', this._player);
