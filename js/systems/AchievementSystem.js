@@ -12,6 +12,10 @@ export const AchievementSystem = {
         if (s.longestStreak     === undefined) s.longestStreak     = 0;
         if (s.bountiesCompleted === undefined) s.bountiesCompleted = 0;
         if (s.perfectCombats    === undefined) s.perfectCombats    = 0;
+        // Migrate from questStats if totalKills not yet tracked here
+        if (s.totalKills === undefined) {
+            s.totalKills = Object.values(player.questStats?.kills || {}).reduce((a, b) => a + b, 0);
+        }
     },
 
     // Check all achievements and unlock any newly earned ones.
@@ -39,8 +43,9 @@ export const AchievementSystem = {
             player.stats.longestStreak = maxStreak;
         }
         if (outcome === 'win') {
-            if (isElite)  player.stats.eliteKills  = (player.stats.eliteKills  || 0) + 1;
-            if (isMimic)  player.stats.mimicKills   = (player.stats.mimicKills   || 0) + 1;
+            player.stats.totalKills = (player.stats.totalKills || 0) + 1;
+            if (isElite)    player.stats.eliteKills    = (player.stats.eliteKills    || 0) + 1;
+            if (isMimic)    player.stats.mimicKills    = (player.stats.mimicKills    || 0) + 1;
             if (allCorrect) player.stats.perfectCombats = (player.stats.perfectCombats || 0) + 1;
         }
     },

@@ -5,7 +5,7 @@
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const totalKills   = p => Object.values(p.questStats?.kills  || {}).reduce((a, b) => a + b, 0);
+const totalKills   = p => p.stats?.totalKills || 0;
 const totalCorrect = p => Object.values(p.mastery            || {}).reduce((a, m) => a + (m.correct  || 0), 0);
 const booksRead    = p => Object.values(p.bookLibrary        || {}).filter(e => e.read).length;
 const questsClaimed= p => Object.values(p.questLog          || {}).filter(s => s === 'claimed').length;
