@@ -1,6 +1,7 @@
 import { BookSystem } from '../systems/BookSystem.js';
 import { BOOKS, BOOK_IMPORTANCE } from '../data/books.js';
 import EventBus from '../utils/EventBus.js';
+import { AchievementSystem } from '../systems/AchievementSystem.js';
 
 /**
  * BookScene — library/reader.
@@ -192,6 +193,7 @@ export class BookScene extends Phaser.Scene {
             this._readMsg.setColor('#88ff88').setText(`Lição absorvida! +${imp.xp} XP${bonusStr}`);
             this.registry.set('player', this._player);
             EventBus.emit('chat', { msg: `Estudou "${result.book.title}" (+${imp.xp} XP${bonusStr})`, type: 'levelup' });
+            AchievementSystem.check(this._player);
         }
         this._selectIdx(this._selected);
         this._renderList();
