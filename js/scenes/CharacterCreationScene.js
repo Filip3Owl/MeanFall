@@ -265,6 +265,12 @@ export class CharacterCreationScene extends Phaser.Scene {
             .setOrigin(0.5, 0).setDepth(4);
         this._sbThumb = this.add.rectangle(sbX, SCROLL_TOP, 3, 40, 0x4a4070, 0.85)
             .setOrigin(0.5, 0).setDepth(5);
+
+        this._scrollHint = this.add.text(OPT_CX, SCROLL_BOT - 14, '▼ role para mais', {
+            fontSize: '10px', color: '#555577', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 1).setDepth(6).setVisible(false);
+        this.tweens.add({ targets: this._scrollHint, alpha: { from: 0.3, to: 1 }, duration: 800, yoyo: true, repeat: -1 });
+
         this._updateScrollbar();
     }
 
@@ -494,12 +500,18 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _updateScrollbar() {
         if (!this._sbThumb) return;
-        if (this._maxScroll <= 0) { this._sbThumb.setAlpha(0); return; }
+        if (this._maxScroll <= 0) { this._sbThumb.setAlpha(0); this._updateScrollHint(); return; }
         this._sbThumb.setAlpha(0.85);
         const thumbH = Math.max(24, Math.round((SCROLL_H / this._contentH) * SCROLL_H));
         const frac   = (-this._scrollY) / this._maxScroll;
         this._sbThumb.setY(SCROLL_TOP + Math.round(frac * (SCROLL_H - thumbH)));
         this._sbThumb.setDisplaySize(3, thumbH);
+        this._updateScrollHint();
+    }
+
+    _updateScrollHint() {
+        if (!this._scrollHint) return;
+        this._scrollHint.setVisible(this._maxScroll > 0 && this._scrollY > -this._maxScroll);
     }
 
     // ── Selection handlers ─────────────────────────────────────────────────────
