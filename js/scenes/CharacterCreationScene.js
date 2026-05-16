@@ -20,6 +20,7 @@ const CLASSES = [
         id: 'mage', name: 'Mago', icon: '✦',
         color: 0x6644ff, dark: 0x100a28,
         stats: 'INT +3 · Foco +15',
+        bonus: '+3 INT · +15 FOCO',
         lore: 'Domina teoria e fórmulas',
         apply: d => { d.intelligence += 3; d.maxFocus += 15; d.focus = d.maxFocus; },
     },
@@ -27,6 +28,7 @@ const CLASSES = [
         id: 'warrior', name: 'Guerreiro', icon: '⚔',
         color: 0xff5533, dark: 0x28100a,
         stats: 'FOR +3 · HP +20',
+        bonus: '+3 FOR · +20 HP',
         lore: 'Resiste em combates longos',
         apply: d => { d.strength += 3; d.maxHp += 20; d.hp = d.maxHp; },
     },
@@ -34,6 +36,7 @@ const CLASSES = [
         id: 'explorer', name: 'Explorador', icon: '◈',
         color: 0x33cc66, dark: 0x0a2814,
         stats: 'AGI +3 · Bônus Fuga',
+        bonus: '+3 AGI · FUGA',
         lore: 'Aprende rápido no campo',
         apply: d => { d.agility += 3; },
     },
@@ -153,18 +156,22 @@ export class CharacterCreationScene extends Phaser.Scene {
             fontSize: '11px', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
         }).setOrigin(0.5, 0).setDepth(3);
 
-        this._trajBadge = this.add.text(PREV_CX, FY + FH/2 + 44, '', {
+        this._classBonusTx = this.add.text(PREV_CX, FY + FH/2 + 39, '', {
+            fontSize: '9px', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0).setDepth(3);
+
+        this._trajBadge = this.add.text(PREV_CX, FY + FH/2 + 54, '', {
             fontSize: '10px', color: '#666688', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(3);
 
-        this._trajLoreTx = this.add.text(PREV_CX, FY + FH/2 + 54, '', {
+        this._trajLoreTx = this.add.text(PREV_CX, FY + FH/2 + 64, '', {
             fontSize: '9px', color: '#444466', fontFamily: 'Courier New',
             align: 'center', wordWrap: { width: DIV_X - 16 },
         }).setOrigin(0.5, 0).setDepth(3);
 
         const sg = this.add.graphics().setDepth(2);
         sg.lineStyle(1, 0xd4af37, 0.12);
-        sg.lineBetween(16, FY + FH/2 + 70, DIV_X - 10, FY + FH/2 + 70);
+        sg.lineBetween(16, FY + FH/2 + 80, DIV_X - 10, FY + FH/2 + 80);
 
         const STATS_DEF = [
             { key: 'str', label: 'FOR', color: 0xff5533 },
@@ -172,7 +179,7 @@ export class CharacterCreationScene extends Phaser.Scene {
             { key: 'agi', label: 'AGI', color: 0x33cc66 },
             { key: 'vit', label: 'VIT', color: 0xffbb33 },
         ];
-        const sbY0 = FY + FH/2 + 78;
+        const sbY0 = FY + FH/2 + 88;
         const sbX  = 12;
         const barW = 90;
         this._statBars = {};
@@ -641,7 +648,8 @@ export class CharacterCreationScene extends Phaser.Scene {
     _refreshPreview() {
         const cls = CLASSES.find(c => c.id === this._class);
         const hex = cls ? '#' + cls.color.toString(16).padStart(6, '0') : '#aaaaaa';
-        if (this._classBadge) this._classBadge.setText(cls?.name?.toUpperCase() || '').setColor(hex);
+        if (this._classBadge)    this._classBadge.setText(cls?.name?.toUpperCase() || '').setColor(hex);
+        if (this._classBonusTx)  this._classBonusTx.setText(cls?.bonus || '').setColor(hex);
     }
 
     // ── Keyboard ───────────────────────────────────────────────────────────────
