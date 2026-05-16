@@ -720,10 +720,18 @@ export class CharacterCreationScene extends Phaser.Scene {
         if (traj) traj.apply(data);
 
         this.registry.set('player', data);
-        this.cameras.main.fadeOut(450, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start('World');
-            this.scene.launch('UI');
+
+        this.tweens.add({
+            targets: [this._confirmBtn, this._confirmTx],
+            scaleX: 1.05, scaleY: 1.05,
+            duration: 100, yoyo: true, ease: 'Quad.Out',
+            onComplete: () => {
+                this.cameras.main.fadeOut(450, 0, 0, 0);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('World');
+                    this.scene.launch('UI');
+                });
+            },
         });
     }
 }
