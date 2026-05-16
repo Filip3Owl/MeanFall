@@ -59,14 +59,12 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('player-level-up',      ({ player }) => {
             this._updateAll(player);
             this.addMsg(`NIVEL ACIMA! Agora és nível ${player.level}!`, 'levelup');
+            if (player.availableStatPoints > 0) this._showStatPointPopup(player);
         });
         EventBus.on('player-stats-changed', ({ player }) => this._updateStats(player));
         EventBus.on('area-changed',         ({ areaId }) => this._updateArea(areaId));
         EventBus.on('chat',                 ({ msg, type }) => this.addMsg(msg, type));
         EventBus.on('minimap-update',       ({ mapMgr, player }) => this._updateMinimap(mapMgr, player));
-        EventBus.on('player-level-up',      ({ player }) => {
-            if (player.availableStatPoints > 0) this._showStatPointPopup(player);
-        });
 
         // Action button alerts
         EventBus.on('item-alert',  () => this._setAlert('btnInv', true));
