@@ -91,6 +91,8 @@ export const ACHIEVEMENTS = {
         description: 'Derrote seu primeiro Mímico.',
         icon: '⊙',
         category: 'combat',
+        secret: true,
+        rarity: 'rare',
         check: p => (p.stats?.mimicKills || 0) >= 1,
     },
     mimic_slayer: {
@@ -100,6 +102,8 @@ export const ACHIEVEMENTS = {
         icon: '⊙',
         category: 'combat',
         xpReward: 150,
+        secret: true,
+        rarity: 'rare',
         check: p => (p.stats?.mimicKills || 0) >= 5,
     },
 
@@ -119,6 +123,8 @@ export const ACHIEVEMENTS = {
         icon: '♦',
         category: 'combat',
         xpReward: 150,
+        secret: true,
+        rarity: 'rare',
         check: p => (p.stats?.perfectCombats || 0) >= 10,
     },
 
@@ -146,6 +152,8 @@ export const ACHIEVEMENTS = {
         icon: '⚡',
         category: 'combat',
         xpReward: 200,
+        secret: true,
+        rarity: 'legendary',
         check: p => (p.stats?.longestStreak || 0) >= 15,
     },
 
