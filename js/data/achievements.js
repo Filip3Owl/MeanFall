@@ -52,6 +52,7 @@ export const ACHIEVEMENTS = {
         description: 'Derrote 50 monstros.',
         icon: '☠',
         category: 'combat',
+        xpReward: 100,
         check: p => totalKills(p) >= 50,
     },
     kills_100: {
@@ -60,6 +61,7 @@ export const ACHIEVEMENTS = {
         description: 'Derrote 100 monstros.',
         icon: '★',
         category: 'combat',
+        xpReward: 200,
         check: p => totalKills(p) >= 100,
     },
 
@@ -78,6 +80,7 @@ export const ACHIEVEMENTS = {
         description: 'Derrote 10 monstros Elite.',
         icon: '★',
         category: 'combat',
+        xpReward: 150,
         check: p => (p.stats?.eliteKills || 0) >= 10,
     },
 
@@ -96,6 +99,7 @@ export const ACHIEVEMENTS = {
         description: 'Derrote 5 Mímicos.',
         icon: '⊙',
         category: 'combat',
+        xpReward: 150,
         check: p => (p.stats?.mimicKills || 0) >= 5,
     },
 
@@ -114,6 +118,7 @@ export const ACHIEVEMENTS = {
         description: 'Obtenha 10 combates perfeitos.',
         icon: '♦',
         category: 'combat',
+        xpReward: 150,
         check: p => (p.stats?.perfectCombats || 0) >= 10,
     },
 
@@ -140,6 +145,7 @@ export const ACHIEVEMENTS = {
         description: 'Alcance um streak de 15 acertos consecutivos em um combate.',
         icon: '⚡',
         category: 'combat',
+        xpReward: 200,
         check: p => (p.stats?.longestStreak || 0) >= 15,
     },
 
@@ -166,6 +172,7 @@ export const ACHIEVEMENTS = {
         description: 'Acerte 500 questões de estatística.',
         icon: '★',
         category: 'knowledge',
+        xpReward: 300,
         check: p => totalCorrect(p) >= 500,
     },
 
@@ -224,6 +231,7 @@ export const ACHIEVEMENTS = {
         description: 'Atinja 80% de maestria em todas as 6 áreas.',
         icon: '★',
         category: 'mastery',
+        xpReward: 500,
         check: p => ['village', 'meadows', 'forest', 'plains', 'mountains', 'dungeon']
             .every(a => masteryPct(p, a) >= 80),
     },
@@ -313,6 +321,7 @@ export const ACHIEVEMENTS = {
         description: 'Complete todas as 7 missões principais.',
         icon: '★',
         category: 'quests',
+        xpReward: 250,
         check: p => questsClaimed(p) >= 7,
     },
 
@@ -330,6 +339,7 @@ export const ACHIEVEMENTS = {
         name: 'Erudito',
         description: 'Leia 9 tomos da biblioteca.',
         icon: '♜',
+        xpReward: 100,
         category: 'collection',
         check: p => booksRead(p) >= 9,
     },
@@ -339,6 +349,7 @@ export const ACHIEVEMENTS = {
         description: 'Leia todos os 18 tomos da biblioteca.',
         icon: '★',
         category: 'collection',
+        xpReward: 200,
         check: p => booksRead(p) >= 18,
     },
 
