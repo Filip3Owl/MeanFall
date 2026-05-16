@@ -41,11 +41,14 @@ const CLASSES = [
 
 const TRAJECTORIES = [
     { id: 'autodidact', name: 'Autodidata', color: 0x88aaff, dark: 0x0c1228,
-      stats: 'VIT +2',       apply: d => { d.vitality += 2; } },
+      stats: 'VIT +2',       lore: 'Forjado pela curiosidade,\nnão pela sala de aula.',
+      apply: d => { d.vitality += 2; } },
     { id: 'academic',   name: 'Acadêmico',  color: 0xffcc44, dark: 0x1e1608,
-      stats: 'INT+1 FOR+1',  apply: d => { d.intelligence += 1; d.strength += 1; } },
+      stats: 'INT+1 FOR+1',  lore: 'Disciplina e método\ncomo armas principais.',
+      apply: d => { d.intelligence += 1; d.strength += 1; } },
     { id: 'practical',  name: 'Prático',    color: 0x44ee88, dark: 0x0a1e14,
-      stats: 'AGI+1 VIT+1',  apply: d => { d.agility += 1; d.vitality += 1; } },
+      stats: 'AGI+1 VIT+1',  lore: 'Aprende fazendo,\nerra para acertar.',
+      apply: d => { d.agility += 1; d.vitality += 1; } },
 ];
 
 export class CharacterCreationScene extends Phaser.Scene {
@@ -154,9 +157,14 @@ export class CharacterCreationScene extends Phaser.Scene {
             fontSize: '10px', color: '#666688', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(3);
 
+        this._trajLoreTx = this.add.text(PREV_CX, FY + FH/2 + 54, '', {
+            fontSize: '9px', color: '#444466', fontFamily: 'Courier New',
+            align: 'center', wordWrap: { width: DIV_X - 16 },
+        }).setOrigin(0.5, 0).setDepth(3);
+
         const sg = this.add.graphics().setDepth(2);
         sg.lineStyle(1, 0xd4af37, 0.12);
-        sg.lineBetween(16, FY + FH/2 + 60, DIV_X - 10, FY + FH/2 + 60);
+        sg.lineBetween(16, FY + FH/2 + 70, DIV_X - 10, FY + FH/2 + 70);
 
         const STATS_DEF = [
             { key: 'str', label: 'FOR', color: 0xff5533 },
@@ -164,7 +172,7 @@ export class CharacterCreationScene extends Phaser.Scene {
             { key: 'agi', label: 'AGI', color: 0x33cc66 },
             { key: 'vit', label: 'VIT', color: 0xffbb33 },
         ];
-        const sbY0 = FY + FH/2 + 68;
+        const sbY0 = FY + FH/2 + 78;
         const sbX  = 12;
         const barW = 90;
         this._statBars = {};
@@ -586,7 +594,8 @@ export class CharacterCreationScene extends Phaser.Scene {
             nameTx.setAlpha(active ? 1 : 0.55);
         });
         const traj = TRAJECTORIES.find(t => t.id === this._trajectory);
-        if (this._trajBadge) this._trajBadge.setText(traj?.name || '');
+        if (this._trajBadge)    this._trajBadge.setText(traj?.name || '');
+        if (this._trajLoreTx)   this._trajLoreTx.setText(traj?.lore || '');
     }
 
     _refreshDiffPills() {
