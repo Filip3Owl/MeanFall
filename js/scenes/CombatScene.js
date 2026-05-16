@@ -19,6 +19,7 @@ export class CombatScene extends Phaser.Scene {
         this._monsterHp    = data.monster.maxHp;
         this._streak       = 0;
         this._maxStreak    = 0;
+        this._wrongCount   = 0;
         this._recentIds    = [];
         this._currentQ     = null;
         this._answerLock   = false;
@@ -699,6 +700,7 @@ export class CombatScene extends Phaser.Scene {
             }
         } else {
             this._streak = 0;
+            this._wrongCount++;
             this._streakTxt.setText('');
             this._updateFeverMode(false); // DEACTIVATE FEVER ON WRONG
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
@@ -1095,6 +1097,11 @@ export class CombatScene extends Phaser.Scene {
             xpGained,
             loot: lootNames,
             playerData: this._player,
+            maxStreak:    this._maxStreak,
+            allCorrect:   this._wrongCount === 0,
+            feverReached: this._maxStreak >= 5,
+            isElite:      this._monsterDef.name.startsWith('Elite'),
+            isMimic:      this._monsterDef.id === 'mimic',
         });
     }
 

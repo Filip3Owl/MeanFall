@@ -11,6 +11,7 @@ import { ShopSystem } from '../systems/ShopSystem.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { SkillSystem } from '../systems/SkillSystem.js';
 import { TutorialSystem } from '../systems/TutorialSystem.js';
+import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { ITEMS } from '../data/items.js';
 import { MONSTERS } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
@@ -82,6 +83,8 @@ export class WorldScene extends Phaser.Scene {
         this._onElementXpChangeBound = () => this._updateElementalAura();
         this._onBountyCompleteBound = ({ slot }) => {
             this._chat(`{{accent:BÔNUS COMPLETO:}} ${slot.label} — abra o diário (Q) para coletar!`, 'xp');
+            AchievementSystem.recordBounty(this._playerData);
+            AchievementSystem.check(this._playerData);
         };
 
         EventBus.on('combat-end',       this._onCombatEndBound);
@@ -626,7 +629,7 @@ export class WorldScene extends Phaser.Scene {
 
     // ── Combat result ─────────────────────────────────────────────────────────
 
-    _onCombatEnd({ outcome, instanceId, xpGained, loot, playerData }) {
+    _onCombatEnd({ outcome, instanceId, xpGained, loot, playerData, maxStreak = 0, allCorrect = false, feverReached = false, isElite = false, isMimic = false }) {
         this._paused = false;
 
         if (playerData) {
@@ -636,6 +639,9 @@ export class WorldScene extends Phaser.Scene {
             }
             this.registry.set('player', this._playerData);
         }
+
+        AchievementSystem.recordCombat(this._playerData, { outcome, maxStreak, allCorrect, isElite, isMimic });
+        AchievementSystem.check(this._playerData, { outcome, maxStreak, allCorrect, feverReached, isElite, isMimic });
 
         if (outcome === 'win') {
             const idx = this._monsters.findIndex(m => m.instanceId === instanceId);
@@ -705,7 +711,7 @@ export class WorldScene extends Phaser.Scene {
     _onLevelUp() {
         TutorialSystem.trigger(this._playerData, this, 'first_levelup');
         this._chat('{{level:SUBIU DE NÍVEL!}} Seus atributos aumentaram.', 'levelup');
-        // open skill picker if there are unlocked skills
+        AchievementSystem.check(this._playerData);
         this.time.delayedCall(600, () => this._maybeOpenSkill());
     }
 

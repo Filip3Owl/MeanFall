@@ -629,6 +629,55 @@ body {
 }
 .footer-credit { display: flex; align-items: center; gap: 5px; }
 
+/* ─── ACHIEVEMENT BANNER ─────────────────────────────────────────────── */
+#achievement-banner {
+    position: fixed;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #1a1400 0%, #2a1f00 100%);
+    border: 1px solid #d4af37;
+    border-radius: 4px;
+    padding: 10px 18px;
+    z-index: 9999;
+    min-width: 280px;
+    max-width: 420px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.8), 0 0 12px rgba(212,175,55,0.3);
+    transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: 'Courier New', monospace;
+    pointer-events: none;
+}
+#achievement-banner.ach-visible { top: 12px; }
+.ach-icon {
+    font-size: 22px;
+    color: #ffd700;
+    min-width: 28px;
+    text-align: center;
+}
+.ach-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.ach-title {
+    font-size: 9px;
+    color: #d4af37;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+.ach-name {
+    font-size: 14px;
+    color: #ffe88a;
+    font-weight: bold;
+}
+.ach-desc {
+    font-size: 11px;
+    color: #aaa;
+}
+
 /* ─── STAT POINT POPUP ───────────────────────────────────────────────── */
 #stat-point-popup {
     position: fixed;

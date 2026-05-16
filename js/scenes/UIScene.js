@@ -72,6 +72,7 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('item-alert',  () => this._setAlert('btnInv', true));
         EventBus.on('skill-alert', () => this._setAlert('btnSkill', true));
         EventBus.on('quest-complete', () => this._setAlert('btnQuest', true));
+        EventBus.on('achievement-unlocked', ({ achievement }) => this._showAchievementBanner(achievement));
     }
 
     _bindButtons() {
@@ -131,6 +132,48 @@ export class UIScene extends Phaser.Scene {
         if (!btn) return;
         if (on) btn.classList.add('alert');
         else    btn.classList.remove('alert');
+    }
+
+    _showAchievementBanner(ach) {
+        Sound.levelUp?.();
+
+        // Queue banners so they don't stack
+        if (!this._achQueue) this._achQueue = [];
+        this._achQueue.push(ach);
+        if (this._achQueue.length === 1) this._drainAchQueue();
+    }
+
+    _drainAchQueue() {
+        if (!this._achQueue?.length) return;
+        const ach = this._achQueue[0];
+
+        const banner = document.createElement('div');
+        banner.id = 'achievement-banner';
+        banner.innerHTML = `
+            <span class="ach-icon">${ach.icon}</span>
+            <span class="ach-body">
+                <span class="ach-title">CONQUISTA DESBLOQUEADA</span>
+                <span class="ach-name">${ach.name}</span>
+                <span class="ach-desc">${ach.description}</span>
+            </span>`;
+        document.body.appendChild(banner);
+
+        // Animate in
+        requestAnimationFrame(() => banner.classList.add('ach-visible'));
+
+        // Auto-dismiss after 3.5s
+        setTimeout(() => {
+            banner.classList.remove('ach-visible');
+            banner.addEventListener('transitionend', () => {
+                banner.remove();
+                this._achQueue.shift();
+                if (this._achQueue.length) {
+                    setTimeout(() => this._drainAchQueue(), 300);
+                }
+            }, { once: true });
+        }, 3500);
+
+        this.addMsg(`★ CONQUISTA: ${ach.name} — ${ach.description}`, 'levelup');
     }
 
     addMsg(text, type = '') {

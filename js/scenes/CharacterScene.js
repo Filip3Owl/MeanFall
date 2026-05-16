@@ -3,12 +3,16 @@ import { ITEMS }      from '../data/items.js';
 import { AREA_INFO }  from '../constants.js';
 import EventBus       from '../utils/EventBus.js';
 import { Sound }      from '../utils/SoundSystem.js';
+import { AchievementSystem } from '../systems/AchievementSystem.js';
+import { ACHIEVEMENT_CATEGORIES } from '../data/achievements.js';
 
 export class CharacterScene extends Phaser.Scene {
     constructor() { super('Character'); }
 
     create() {
-        this._player = JSON.parse(JSON.stringify(this.registry.get('player')));
+        this._player  = JSON.parse(JSON.stringify(this.registry.get('player')));
+        this._tab     = this.registry.get('charTab') || 'character';
+        this._achPage = this.registry.get('charAchPage') || 0;
         this._buildUI();
 
         const close = () => this._close();
@@ -26,10 +30,6 @@ export class CharacterScene extends Phaser.Scene {
         this.add.rectangle(10, 10, W - 20, H - 20, 0x0d0a03, 1).setOrigin(0, 0);
         this.add.rectangle(10, 10, W - 20, H - 20, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(1, 0xd4af37);
 
-        this.add.text(W / 2, 22, 'P E R S O N A G E M', {
-            fontSize: '17px', color: '#ffd700', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0);
-
         // Close button
         this.add.rectangle(504, 14, 22, 22, 0x330000, 1).setOrigin(0, 0)
             .setInteractive()
@@ -37,22 +37,116 @@ export class CharacterScene extends Phaser.Scene {
             .on('pointerdown',  () => { Sound.click(); this._close(); });
         this.add.text(515, 25, 'X', { fontSize: '15px', color: '#ff4444', fontFamily: 'Courier New' }).setOrigin(0.5, 0.5);
 
-        // Name + level
-        this.add.text(W / 2, 46, p.name || 'Aventureiro', {
-            fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0);
-        this.add.text(W / 2, 66, `Nível ${p.level}`, {
-            fontSize: '15px', color: '#888888', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0);
+        // Tab bar
+        const achTotal    = AchievementSystem.getAll(p).length;
+        const achUnlocked = AchievementSystem.count(p);
+        this._buildTabBar(W, achUnlocked, achTotal);
 
-        this._buildVitalsPanel();
-        this._buildAttributesPanel();
-        this._buildEquipmentPanel();
-        this._buildMasteryPanel();
+        if (this._tab === 'character') {
+            this.add.text(W / 2, 46, p.name || 'Aventureiro', {
+                fontSize: '16px', color: '#ffd700', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0);
+            this.add.text(W / 2, 64, `Nível ${p.level}`, {
+                fontSize: '14px', color: '#888888', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0);
+            this._buildVitalsPanel();
+            this._buildAttributesPanel();
+            this._buildEquipmentPanel();
+            this._buildMasteryPanel();
+        } else {
+            this._buildAchievementsPanel(W, H);
+        }
 
         this.add.text(W / 2, 458, 'C ou ESC para fechar', {
             fontSize: '16px', color: '#444444', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
+    }
+
+    _buildTabBar(W, unlocked, total) {
+        const tabs = [
+            { key: 'character',    label: 'PERSONAGEM' },
+            { key: 'achievements', label: `★ ${unlocked}/${total}` },
+        ];
+        tabs.forEach((tab, i) => {
+            const x       = 18 + i * 254;
+            const active  = this._tab === tab.key;
+            const bg      = this.add.rectangle(x, 14, 248, 24, active ? 0x2a1f00 : 0x0d0a03, 1)
+                .setOrigin(0, 0)
+                .setStrokeStyle(1, active ? 0xd4af37 : 0x333333);
+            this.add.text(x + 124, 26, tab.label, {
+                fontSize: '13px', color: active ? '#ffd700' : '#666666', fontFamily: 'Courier New', fontStyle: active ? 'bold' : 'normal',
+            }).setOrigin(0.5, 0.5);
+            if (!active) {
+                bg.setInteractive()
+                    .on('pointerover',  () => { bg.setFillStyle(0x1a1500); Sound.hover(); })
+                    .on('pointerout',   () => bg.setFillStyle(0x0d0a03))
+                    .on('pointerdown',  () => { Sound.click(); this._switchTab(tab.key); });
+            }
+        });
+    }
+
+    _switchTab(key, page = 0) {
+        this._tab = key;
+        this.registry.set('charTab', key);
+        this.registry.set('charAchPage', page);
+        this.scene.restart();
+    }
+
+    _buildAchievementsPanel(W, H) {
+        const all  = AchievementSystem.getAll(this._player);
+        const PER_PAGE = 18;
+        const pages = Math.ceil(all.length / PER_PAGE);
+        this._achPage = Math.min(this._achPage, pages - 1);
+        const slice = all.slice(this._achPage * PER_PAGE, (this._achPage + 1) * PER_PAGE);
+
+        // Category legend
+        let legendX = 18;
+        const legendY = 46;
+        for (const [key, cat] of Object.entries(ACHIEVEMENT_CATEGORIES)) {
+            this.add.text(legendX, legendY, `■ ${cat.label}`, { fontSize: '10px', color: cat.color, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            legendX += 76;
+        }
+
+        const COL  = 2;
+        const ROWS = Math.ceil(slice.length / COL);
+        const itemH = 22;
+        const startY = 68;
+
+        slice.forEach((ach, idx) => {
+            const col  = idx % COL;
+            const row  = Math.floor(idx / COL);
+            const x    = 18 + col * 258;
+            const y    = startY + row * itemH;
+            const cat  = ACHIEVEMENT_CATEGORIES[ach.category];
+            const color    = ach.unlocked ? (cat?.color || '#aaaaaa') : '#333333';
+            const nameCol  = ach.unlocked ? '#ffffff' : '#444444';
+
+            this.add.text(x, y + 2, ach.icon, { fontSize: '13px', color, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            this.add.text(x + 18, y + 2, ach.name, { fontSize: '13px', color: nameCol, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            if (ach.unlocked) {
+                this.add.text(x + 248, y + 2, '✓', { fontSize: '12px', color: '#44cc44', fontFamily: 'Courier New' }).setOrigin(1, 0);
+            }
+        });
+
+        // Pagination
+        if (pages > 1) {
+            const py = startY + ROWS * itemH + 8;
+            if (this._achPage > 0) {
+                const btn = this.add.text(80, py, '◄ Anterior', { fontSize: '14px', color: '#888888', fontFamily: 'Courier New' })
+                    .setOrigin(0.5, 0).setInteractive()
+                    .on('pointerover', () => btn.setColor('#ffffff'))
+                    .on('pointerout',  () => btn.setColor('#888888'))
+                    .on('pointerdown', () => this._switchTab('achievements', this._achPage - 1));
+            }
+            this.add.text(W / 2, py, `${this._achPage + 1} / ${pages}`, { fontSize: '14px', color: '#666666', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            if (this._achPage < pages - 1) {
+                const btn = this.add.text(W - 80, py, 'Próximo ►', { fontSize: '14px', color: '#888888', fontFamily: 'Courier New' })
+                    .setOrigin(0.5, 0).setInteractive()
+                    .on('pointerover', () => btn.setColor('#ffffff'))
+                    .on('pointerout',  () => btn.setColor('#888888'))
+                    .on('pointerdown', () => this._switchTab('achievements', this._achPage + 1));
+            }
+        }
     }
 
     _buildVitalsPanel() {
@@ -198,6 +292,8 @@ export class CharacterScene extends Phaser.Scene {
 
     _close() {
         this.registry.set('player', this._player);
+        this.registry.remove('charTab');
+        this.registry.remove('charAchPage');
         this.scene.stop('Character');
         const world = this.scene.get('World');
         if (world?.resumeFromOverlay) world.resumeFromOverlay();
