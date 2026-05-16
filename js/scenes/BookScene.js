@@ -24,6 +24,8 @@ export class BookScene extends Phaser.Scene {
         const close = () => this._close();
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', close);
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B).on('down', close);
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT).on('down',  () => this._prevPage());
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT).on('down', () => this._nextPage());
     }
 
     _buildUI() {
