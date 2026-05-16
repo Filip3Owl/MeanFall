@@ -50,6 +50,7 @@ export class CompendiumScene extends Phaser.Scene {
         this._renderEmptyState();
 
         this.input.keyboard.on('keydown-ESC', () => this._close());
+        this.input.keyboard.on('keydown-L',   () => this._close());
     }
 
     // ── Sidebar ───────────────────────────────────────────────────────────────
