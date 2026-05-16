@@ -677,6 +677,28 @@ body {
     font-size: 11px;
     color: #aaa;
 }
+.ach-rewards-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+.ach-reward {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.ach-reward.xp {
+    background: rgba(255, 153, 0, 0.15);
+    color: #ffaa22;
+    border: 1px solid rgba(255, 153, 0, 0.3);
+}
+.ach-reward.gold {
+    background: rgba(255, 215, 0, 0.15);
+    color: #ffd700;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
 
 /* ─── STAT POINT POPUP ───────────────────────────────────────────────── */
 #stat-point-popup {

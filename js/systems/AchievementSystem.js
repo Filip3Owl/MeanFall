@@ -31,7 +31,11 @@ export const AchievementSystem = {
                     player.achievements[ach.id] = new Date().toISOString();
                     unlocked.push(ach);
                     const xpEarned = ach.xpReward ? awardXP(player, ach.xpReward) : 0;
-                    EventBus.emit('achievement-unlocked', { achievement: ach, player, xpEarned });
+                    const goldEarned = ach.goldReward || 0;
+                    if (goldEarned > 0) {
+                        player.gold = (player.gold || 0) + goldEarned;
+                    }
+                    EventBus.emit('achievement-unlocked', { achievement: ach, player, xpEarned, goldEarned });
                 }
             } catch { /* guard against missing data mid-check */ }
         }

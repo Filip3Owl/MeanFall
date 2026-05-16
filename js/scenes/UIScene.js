@@ -144,21 +144,34 @@ export class UIScene extends Phaser.Scene {
 
     _drainAchQueue() {
         if (!this._achQueue?.length) return;
-        const ach = this._achQueue[0];
+        const data = this._achQueue[0];
+        const ach  = data.achievement;
+        const { xpEarned, goldEarned } = data;
 
         const cat    = ACHIEVEMENT_CATEGORIES[ach.category];
         const catColor = cat?.color || '#d4af37';
 
+        // Choose border color based on rarity if available
+        let borderColor = catColor;
+        if (ach.rarity === 'rare') borderColor = '#c0c0c0'; // Silver-ish
+        if (ach.rarity === 'legendary') borderColor = '#ffd700'; // Gold
+
         const banner = document.createElement('div');
         banner.id = 'achievement-banner';
-        banner.style.borderColor = catColor;
-        banner.style.boxShadow   = `0 4px 24px rgba(0,0,0,0.85), 0 0 18px ${catColor}55`;
+        banner.style.borderColor = borderColor;
+        banner.style.boxShadow   = `0 4px 24px rgba(0,0,0,0.85), 0 0 18px ${borderColor}55`;
+        
+        let rewardHtml = '';
+        if (xpEarned > 0) rewardHtml += `<span class="ach-reward xp">+${xpEarned} XP</span>`;
+        if (goldEarned > 0) rewardHtml += `<span class="ach-reward gold">+${goldEarned} Ouro</span>`;
+
         banner.innerHTML = `
-            <span class="ach-icon" style="color:${catColor}">${ach.icon}</span>
+            <span class="ach-icon" style="color:${borderColor}">${ach.icon}</span>
             <span class="ach-body">
-                <span class="ach-title" style="color:${catColor}">${cat?.label?.toUpperCase() || 'CONQUISTA'}</span>
+                <span class="ach-title" style="color:${borderColor}">${cat?.label?.toUpperCase() || 'CONQUISTA'}</span>
                 <span class="ach-name">${ach.name}</span>
                 <span class="ach-desc">${ach.description}</span>
+                ${rewardHtml ? `<div class="ach-rewards-row">${rewardHtml}</div>` : ''}
             </span>`;
         document.body.appendChild(banner);
 
