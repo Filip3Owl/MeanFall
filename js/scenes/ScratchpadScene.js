@@ -12,6 +12,7 @@ export class ScratchpadScene extends Phaser.Scene {
         this._notesFocused = false;
         this._notesCursor  = true;
         this._notesScroll  = 0;
+        this._cursorPos    = (localStorage.getItem('meanfall_notes') || '').length;
         this._calcGroup    = [];
         this._notesGroup   = [];
 
@@ -297,23 +298,38 @@ export class ScratchpadScene extends Phaser.Scene {
 
     _renderNotes() {
         const MAX   = 18;
-        const lines = this._notesText.split('\n');
+        const text  = this._notesText;
+        const pos   = this._cursorPos;
+        
+        // Split text into lines, but keep track of character indices
+        const lines = text.split('\n');
         
         // Clamp scroll
         this._notesScroll = Phaser.Math.Clamp(this._notesScroll, 0, Math.max(0, lines.length - MAX));
 
-        const vis = lines.slice(this._notesScroll, this._notesScroll + MAX);
+        const visibleLines = lines.slice(this._notesScroll, this._notesScroll + MAX);
         
-        // Handle cursor if we are at the last visible page and the cursor is at the end
+        // Insert cursor character for rendering
         if (this._notesFocused && this._notesCursor) {
-            const lastLineIdx = lines.length - 1;
-            const visibleLastLineIdx = this._notesScroll + vis.length - 1;
-            if (visibleLastLineIdx === lastLineIdx) {
-                vis[vis.length - 1] += '|';
+            let charAccum = 0;
+            for (let i = 0; i < this._notesScroll; i++) {
+                charAccum += lines[i].length + 1;
+            }
+
+            for (let i = 0; i < visibleLines.length; i++) {
+                const lineStart = charAccum;
+                const lineEnd   = charAccum + visibleLines[i].length;
+                
+                if (pos >= lineStart && pos <= lineEnd) {
+                    const linePos = pos - lineStart;
+                    visibleLines[i] = visibleLines[i].slice(0, linePos) + '|' + visibleLines[i].slice(linePos);
+                    break;
+                }
+                charAccum += lines[i].length + 1;
             }
         }
         
-        this._notesTxt.setText(vis.join('\n'));
+        this._notesTxt.setText(visibleLines.join('\n'));
 
         // Update scroll indicators
         if (this._scrollUp) {
@@ -368,30 +384,83 @@ export class ScratchpadScene extends Phaser.Scene {
     }
 
     _handleNotesKey(key) {
-        const oldLines = this._notesText.split('\n').length;
-        
-        if (key === 'Backspace') {
-            this._notesText = this._notesText.slice(0,-1);
+        const text = this._notesText;
+        const pos  = this._cursorPos;
+
+        if (key === 'ArrowLeft') {
+            this._cursorPos = Math.max(0, pos - 1);
+        } else if (key === 'ArrowRight') {
+            this._cursorPos = Math.min(text.length, pos + 1);
+        } else if (key === 'ArrowUp') {
+            this._moveCursorVertical(-1);
+        } else if (key === 'ArrowDown') {
+            this._moveCursorVertical(1);
+        } else if (key === 'Home') {
+            const lastLineBreak = text.lastIndexOf('\n', pos - 1);
+            this._cursorPos = lastLineBreak === -1 ? 0 : lastLineBreak + 1;
+        } else if (key === 'End') {
+            const nextLineBreak = text.indexOf('\n', pos);
+            this._cursorPos = nextLineBreak === -1 ? text.length : nextLineBreak;
+        } else if (key === 'Backspace') {
+            if (pos > 0) {
+                this._notesText = text.slice(0, pos - 1) + text.slice(pos);
+                this._cursorPos = pos - 1;
+            }
+        } else if (key === 'Delete') {
+            if (pos < text.length) {
+                this._notesText = text.slice(0, pos) + text.slice(pos + 1);
+            }
         } else if (key === 'Enter') {
-            this._notesText += '\n';
+            this._notesText = text.slice(0, pos) + '\n' + text.slice(pos);
+            this._cursorPos = pos + 1;
         } else if (key === 'Tab') {
-            this._notesText += '    ';
+            this._notesText = text.slice(0, pos) + '    ' + text.slice(pos);
+            this._cursorPos = pos + 4;
         } else if (key.length === 1) {
-            this._notesText += key;
+            this._notesText = text.slice(0, pos) + key + text.slice(pos);
+            this._cursorPos = pos + 1;
         }
 
-        const newLines = this._notesText.split('\n').length;
-        const MAX = 18;
-        
-        // If we added a line or are typing at the end, ensure we see the bottom
-        if (newLines > MAX) {
-            this._notesScroll = newLines - MAX;
-        }
-
+        this._syncScrollToCursor();
         this._renderNotes();
-        
-        // Simple auto-save to localStorage
         localStorage.setItem('meanfall_notes', this._notesText);
+    }
+
+    _moveCursorVertical(dir) {
+        const lines = this._notesText.split('\n');
+        let currentLine = 0, charAccum = 0;
+        
+        // Find current line and column
+        for (let i = 0; i < lines.length; i++) {
+            if (this._cursorPos <= charAccum + lines[i].length) {
+                currentLine = i;
+                break;
+            }
+            charAccum += lines[i].length + 1;
+        }
+        
+        const col = this._cursorPos - charAccum;
+        const targetLine = currentLine + dir;
+        
+        if (targetLine >= 0 && targetLine < lines.length) {
+            let newPos = 0;
+            for (let i = 0; i < targetLine; i++) {
+                newPos += lines[i].length + 1;
+            }
+            this._cursorPos = newPos + Math.min(col, lines[targetLine].length);
+        }
+    }
+
+    _syncScrollToCursor() {
+        const lines = this._notesText.slice(0, this._cursorPos).split('\n');
+        const currentLineIdx = lines.length - 1;
+        const MAX = 18;
+
+        if (currentLineIdx < this._notesScroll) {
+            this._notesScroll = currentLineIdx;
+        } else if (currentLineIdx >= this._notesScroll + MAX) {
+            this._notesScroll = currentLineIdx - MAX + 1;
+        }
     }
 
     // ─── CALCULATOR LOGIC ─────────────────────────────────────────────────────
