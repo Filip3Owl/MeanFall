@@ -350,12 +350,20 @@ export class ScratchpadScene extends Phaser.Scene {
     _onKeyDown(event) {
         const key = event.key;
 
-        if (key === 'Escape') { this._close(); return; }
+        // If typing in notes, we MUST block the event from reaching other scenes
+        // to prevent opening inventory (I), character (C), etc.
+        const isTyping = this._activeTab === 'notes' && this._notesFocused;
+
+        if (key === 'Escape') { 
+            this._close(); 
+            return; 
+        }
 
         // N closes scratchpad unless actively typing notes
         if (key === 'n' || key === 'N') {
-            if (this._activeTab === 'notes' && this._notesFocused) {
+            if (isTyping) {
                 this._handleNotesKey(key);
+                event.stopImmediatePropagation();
             } else {
                 this._close();
             }
@@ -366,6 +374,8 @@ export class ScratchpadScene extends Phaser.Scene {
             this._handleCalcKeyEvent(key);
         } else if (this._notesFocused) {
             this._handleNotesKey(key);
+            // Block propagation for ALL keys while typing notes
+            event.stopImmediatePropagation();
         }
     }
 
