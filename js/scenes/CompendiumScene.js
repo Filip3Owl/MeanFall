@@ -91,7 +91,7 @@ export class CompendiumScene extends Phaser.Scene {
         });
 
         // Total progress bar at sidebar bottom
-        const readAll  = (this._player.readBooks || []).length;
+        const readAll  = Object.values(this._player.bookLibrary || {}).filter(e => e.read).length;
         const totalAll = Object.keys(BOOKS).length;
         const pct = totalAll > 0 ? readAll / totalAll : 0;
 
@@ -106,8 +106,8 @@ export class CompendiumScene extends Phaser.Scene {
     }
 
     _readCountForTopic(topicId) {
-        const readBooks = this._player.readBooks || [];
-        return Object.values(BOOKS).filter(b => b.topic === topicId && readBooks.includes(b.id)).length;
+        const lib = this._player.bookLibrary || {};
+        return Object.values(BOOKS).filter(b => b.topic === topicId && lib[b.id]?.read).length;
     }
 
     _totalBooksForTopic(topicId) {
@@ -178,10 +178,10 @@ export class CompendiumScene extends Phaser.Scene {
         }).setOrigin(1, 0.5));
 
         // Build the full scrollable row list
-        const readBooks  = this._player.readBooks || [];
+        const lib        = this._player.bookLibrary || {};
         const topicBooks = Object.values(BOOKS).filter(b => b.topic === topic.id);
-        const unlocked   = topicBooks.filter(b => readBooks.includes(b.id));
-        const locked     = topicBooks.filter(b => !readBooks.includes(b.id));
+        const unlocked   = topicBooks.filter(b => lib[b.id]?.read);
+        const locked     = topicBooks.filter(b => !lib[b.id]?.read);
 
         // Virtual rows: { type: 'label'|'book'|'locked', data? }
         const rows = [];
