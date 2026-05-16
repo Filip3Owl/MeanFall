@@ -110,6 +110,13 @@ export class CharacterCreationScene extends Phaser.Scene {
         const hg = this.add.graphics().setDepth(3);
         hg.lineStyle(1, 0xd4af37, 0.3);
         hg.lineBetween(10, 34, W - 10, 34);
+
+        const backBtn = this.add.text(14, 18, '← MENU', {
+            fontSize: '12px', color: '#666655', fontFamily: 'Courier New',
+        }).setOrigin(0, 0.5).setDepth(6).setInteractive({ useHandCursor: true });
+        backBtn.on('pointerover', () => backBtn.setColor('#d4af37'));
+        backBtn.on('pointerout',  () => backBtn.setColor('#666655'));
+        backBtn.on('pointerdown', () => this._backToMenu());
     }
 
     // ── Left preview panel ─────────────────────────────────────────────────────
@@ -613,8 +620,9 @@ export class CharacterCreationScene extends Phaser.Scene {
     // ── Keyboard ───────────────────────────────────────────────────────────────
 
     _onKey(event) {
-        if (!this._nameActive) return;
         const k = event.key;
+        if (k === 'Escape') { this._backToMenu(); return; }
+        if (!this._nameActive) return;
         if (k === 'Backspace') {
             this._name = this._name.slice(0, -1);
         } else if (k === 'Enter') {
@@ -625,6 +633,11 @@ export class CharacterCreationScene extends Phaser.Scene {
             this._name += k;
         }
         this._renderName();
+    }
+
+    _backToMenu() {
+        this.cameras.main.fadeOut(350, 0, 0, 0);
+        this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('MainMenu'));
     }
 
     // ── Confirm ────────────────────────────────────────────────────────────────
