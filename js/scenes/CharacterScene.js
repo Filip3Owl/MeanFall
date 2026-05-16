@@ -107,24 +107,37 @@ export class CharacterScene extends Phaser.Scene {
             legendX += 76;
         }
 
-        const COL  = 2;
-        const ROWS = Math.ceil(slice.length / COL);
-        const itemH = 22;
+        const COL    = 2;
+        const ROWS   = Math.ceil(slice.length / COL);
+        const itemH  = 34;
+        const itemW  = 252;
         const startY = 68;
 
         slice.forEach((ach, idx) => {
-            const col  = idx % COL;
-            const row  = Math.floor(idx / COL);
-            const x    = 18 + col * 258;
-            const y    = startY + row * itemH;
-            const cat  = ACHIEVEMENT_CATEGORIES[ach.category];
-            const color    = ach.unlocked ? (cat?.color || '#aaaaaa') : '#333333';
-            const nameCol  = ach.unlocked ? '#ffffff' : '#444444';
+            const col = idx % COL;
+            const row = Math.floor(idx / COL);
+            const x   = 18 + col * 258;
+            const y   = startY + row * itemH;
+            const cat = ACHIEVEMENT_CATEGORIES[ach.category];
+            const catHex   = cat?.color || '#aaaaaa';
+            const catInt   = parseInt(catHex.replace('#', ''), 16);
 
-            this.add.text(x, y + 2, ach.icon, { fontSize: '13px', color, fontFamily: 'Courier New' }).setOrigin(0, 0);
-            this.add.text(x + 18, y + 2, ach.name, { fontSize: '13px', color: nameCol, fontFamily: 'Courier New' }).setOrigin(0, 0);
             if (ach.unlocked) {
-                this.add.text(x + 248, y + 2, '✓', { fontSize: '12px', color: '#44cc44', fontFamily: 'Courier New' }).setOrigin(1, 0);
+                this.add.rectangle(x, y, itemW, itemH - 2, catInt, 0.08).setOrigin(0, 0);
+                this.add.rectangle(x, y, 3, itemH - 2, catInt, 0.9).setOrigin(0, 0);
+            } else {
+                this.add.rectangle(x, y, itemW, itemH - 2, 0x111111, 1).setOrigin(0, 0);
+            }
+
+            const iconColor = ach.unlocked ? catHex : '#333333';
+            const nameColor = ach.unlocked ? '#ffffff' : '#444444';
+            const descColor = ach.unlocked ? '#888888' : '#333333';
+
+            this.add.text(x + 8,  y + 6,  ach.icon, { fontSize: '13px', color: iconColor, fontFamily: 'Courier New' }).setOrigin(0, 0);
+            this.add.text(x + 24, y + 5,  ach.name, { fontSize: '12px', color: nameColor, fontFamily: 'Courier New', fontStyle: ach.unlocked ? 'bold' : 'normal' }).setOrigin(0, 0);
+            this.add.text(x + 24, y + 19, ach.description, { fontSize: '10px', color: descColor, fontFamily: 'Courier New', wordWrap: { width: itemW - 34 } }).setOrigin(0, 0);
+            if (ach.unlocked) {
+                this.add.text(x + itemW - 2, y + 6, '✓', { fontSize: '11px', color: '#44cc44', fontFamily: 'Courier New' }).setOrigin(1, 0);
             }
         });
 

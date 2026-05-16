@@ -1,5 +1,6 @@
 import EventBus from '../utils/EventBus.js';
 import { AREA_INFO, ELEMENTS } from '../constants.js';
+import { ACHIEVEMENT_CATEGORIES } from '../data/achievements.js';
 import { Sound } from '../utils/SoundSystem.js';
 import { Music } from '../utils/MusicSystem.js';
 import { xpToNext, masteryPercent, xpToNextElement } from '../systems/XPSystem.js';
@@ -145,12 +146,17 @@ export class UIScene extends Phaser.Scene {
         if (!this._achQueue?.length) return;
         const ach = this._achQueue[0];
 
+        const cat    = ACHIEVEMENT_CATEGORIES[ach.category];
+        const catColor = cat?.color || '#d4af37';
+
         const banner = document.createElement('div');
         banner.id = 'achievement-banner';
+        banner.style.borderColor = catColor;
+        banner.style.boxShadow   = `0 4px 24px rgba(0,0,0,0.85), 0 0 18px ${catColor}55`;
         banner.innerHTML = `
-            <span class="ach-icon">${ach.icon}</span>
+            <span class="ach-icon" style="color:${catColor}">${ach.icon}</span>
             <span class="ach-body">
-                <span class="ach-title">CONQUISTA DESBLOQUEADA</span>
+                <span class="ach-title" style="color:${catColor}">${cat?.label?.toUpperCase() || 'CONQUISTA'}</span>
                 <span class="ach-name">${ach.name}</span>
                 <span class="ach-desc">${ach.description}</span>
             </span>`;
