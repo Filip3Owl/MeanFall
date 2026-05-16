@@ -618,7 +618,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         Object.entries(map).forEach(([key, val]) => {
             const bar = this._statBars[key];
             if (!bar) return;
-            this.tweens.add({ targets: bar.fill, width: Math.floor(bar.barW * Math.min(val / 10, 1)), duration: 200, ease: 'Quad.Out' });
+            this.tweens.add({ targets: bar.fill, width: Math.floor(bar.barW * Math.min(val / 9, 1)), duration: 200, ease: 'Quad.Out' });
         });
 
         const hp    = PLAYER_DEFAULTS.maxHp    + (cls?.id === 'warrior' ? 20 : 0);
