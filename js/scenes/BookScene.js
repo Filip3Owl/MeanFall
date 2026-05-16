@@ -21,6 +21,14 @@ export class BookScene extends Phaser.Scene {
         this._buildUI();
         this._renderList();
 
+        const pendingId = this.registry.get('pendingBookId');
+        if (pendingId) {
+            this.registry.remove('pendingBookId');
+            const owned = BookSystem.ownedBooks(this._player);
+            const idx = owned.findIndex(e => e.id === pendingId);
+            if (idx !== -1) this._selectIdx(idx);
+        }
+
         const close = () => this._close();
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', close);
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B).on('down', close);

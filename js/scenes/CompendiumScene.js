@@ -372,6 +372,17 @@ export class CompendiumScene extends Phaser.Scene {
             next.on('pointerdown', () => this._showBookDetail(book, idx + 1));
         }
 
+        // "Open in Library" button — only if player owns the book
+        const lib = this._player.bookLibrary || {};
+        if (lib[book.id]) {
+            const libraryBtn = add(this.add.text(panelX, panelY + PANEL_H - 28, '[ Abrir na Biblioteca ]', {
+                fontSize: '12px', color: '#88ccff', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0).setDepth(52).setInteractive({ useHandCursor: true }));
+            libraryBtn.on('pointerover', () => libraryBtn.setColor('#ffffff'));
+            libraryBtn.on('pointerout',  () => libraryBtn.setColor('#88ccff'));
+            libraryBtn.on('pointerdown', () => this._openInLibrary(book.id));
+        }
+
         // Close hint
         add(this.add.text(panelX, panelY + PANEL_H - 10, '[ Clique fora para fechar ]', {
             fontSize: '10px', color: '#333', fontFamily: 'Courier New',
@@ -381,6 +392,16 @@ export class CompendiumScene extends Phaser.Scene {
     _clearDetail() {
         this._detailObjs.forEach(o => o?.destroy());
         this._detailObjs = [];
+    }
+
+    _openInLibrary(bookId) {
+        this.registry.set('pendingBookId', bookId);
+        this.input.off('wheel');
+        this._clearContent();
+        this._clearDetail();
+        // Stop Compendium without resuming World — Book will resume it on close
+        this.scene.stop('Compendium');
+        this.scene.launch('Book');
     }
 
     // ── Close ─────────────────────────────────────────────────────────────────
