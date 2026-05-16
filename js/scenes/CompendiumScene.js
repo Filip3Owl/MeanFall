@@ -299,55 +299,83 @@ export class CompendiumScene extends Phaser.Scene {
 
     // ── Book detail overlay ───────────────────────────────────────────────────
 
-    _showBookDetail(book) {
+    _showBookDetail(book, pageIdx = 0) {
         this._clearDetail();
 
         const imp      = BOOK_IMPORTANCE[book.importance] || BOOK_IMPORTANCE.normal;
-        const allPages = book.pages || [];
+        const pages    = book.pages || [];
+        const total    = pages.length;
+        const idx      = Math.max(0, Math.min(pageIdx, total - 1));
 
         const add = obj => { this._detailObjs.push(obj); return obj; };
 
-        // Backdrop
-        add(this.add.rectangle(0, 0, W, H, 0x000000, 0.82).setOrigin(0).setDepth(50).setInteractive());
+        const PANEL_W = 420, PANEL_H = 320;
+        const panelX  = W / 2;
+        const panelY  = H / 2 - PANEL_H / 2;
 
-        // Panel
-        const panelH = Math.min(380, 80 + allPages.length * 60);
-        const panelY = H / 2 - panelH / 2;
-        add(this.add.rectangle(W / 2, panelY, 420, panelH, 0x0e0c06, 1)
+        // Backdrop — click closes
+        add(this.add.rectangle(0, 0, W, H, 0x000000, 0.82)
+            .setOrigin(0).setDepth(50).setInteractive()
+            .on('pointerdown', () => this._clearDetail()));
+
+        // Panel background
+        add(this.add.rectangle(panelX, panelY, PANEL_W, PANEL_H, 0x0e0c06, 1)
             .setStrokeStyle(2, imp.color).setDepth(51));
 
-        // Importance bar
-        add(this.add.rectangle(W / 2 - 210, panelY, 420, 4, imp.color, 0.7).setOrigin(0, 0).setDepth(52));
+        // Importance color bar at top
+        add(this.add.rectangle(panelX - PANEL_W / 2, panelY, PANEL_W, 4, imp.color, 0.7)
+            .setOrigin(0, 0).setDepth(52));
 
         // Title
-        add(this.add.text(W / 2, panelY + 20, book.title, {
+        add(this.add.text(panelX, panelY + 18, book.title, {
             fontSize: '14px', color: imp.hex, fontFamily: 'Courier New', fontStyle: 'bold',
             wordWrap: { width: 390 }, align: 'center',
         }).setOrigin(0.5, 0).setDepth(52));
 
-        if (book.author) {
-            add(this.add.text(W / 2, panelY + 38, `— ${book.author}`, {
-                fontSize: '11px', color: '#555', fontFamily: 'Courier New', fontStyle: 'italic',
+        // Author
+        add(this.add.text(panelX, panelY + 36, `— ${book.author || 'Autor desconhecido'}`, {
+            fontSize: '11px', color: '#555', fontFamily: 'Courier New', fontStyle: 'italic',
+        }).setOrigin(0.5, 0).setDepth(52));
+
+        // Divider
+        add(this.add.rectangle(panelX, panelY + 52, 380, 1, 0xd4af37, 0.2).setDepth(52));
+
+        // Page content
+        add(this.add.text(panelX - 190, panelY + 60, pages[idx] || '', {
+            fontSize: '12px', color: '#d4c8b0', fontFamily: 'Courier New',
+            wordWrap: { width: 388 }, lineSpacing: 4,
+        }).setOrigin(0, 0).setDepth(52));
+
+        // Page indicator
+        if (total > 1) {
+            add(this.add.text(panelX, panelY + PANEL_H - 44, `Página ${idx + 1} de ${total}`, {
+                fontSize: '11px', color: '#555', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0).setDepth(52));
         }
 
-        // Divider
-        add(this.add.rectangle(W / 2, panelY + 52, 380, 1, 0xd4af37, 0.2).setDepth(52));
+        // Prev / Next buttons
+        if (idx > 0) {
+            const prev = add(this.add.text(panelX - 100, panelY + PANEL_H - 28, '◄ ANTERIOR', {
+                fontSize: '12px', color: '#aaaaff', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0).setDepth(52).setInteractive({ useHandCursor: true }));
+            prev.on('pointerover', () => prev.setColor('#ffffff'));
+            prev.on('pointerout',  () => prev.setColor('#aaaaff'));
+            prev.on('pointerdown', () => this._showBookDetail(book, idx - 1));
+        }
 
-        // All pages concatenated (book summary view)
-        const content = allPages.join('\n\n');
-        add(this.add.text(W / 2 - 190, panelY + 60, content, {
-            fontSize: '12px', color: '#d4c8b0', fontFamily: 'Courier New',
-            wordWrap: { width: 388 }, lineSpacing: 3,
-        }).setOrigin(0).setDepth(52));
+        if (idx < total - 1) {
+            const next = add(this.add.text(panelX + 100, panelY + PANEL_H - 28, 'PRÓXIMO ►', {
+                fontSize: '12px', color: '#aaaaff', fontFamily: 'Courier New',
+            }).setOrigin(0.5, 0).setDepth(52).setInteractive({ useHandCursor: true }));
+            next.on('pointerover', () => next.setColor('#ffffff'));
+            next.on('pointerout',  () => next.setColor('#aaaaff'));
+            next.on('pointerdown', () => this._showBookDetail(book, idx + 1));
+        }
 
-        // Badge
-        add(this.add.text(W / 2, panelY + panelH - 22, `[ ${imp.name.toUpperCase()} ]  — Clique para fechar`, {
-            fontSize: '12px', color: '#666', fontFamily: 'Courier New',
-        }).setOrigin(0.5).setDepth(52));
-
-        // Close on any click
-        this._detailObjs[0].on('pointerdown', () => this._clearDetail());
+        // Close hint
+        add(this.add.text(panelX, panelY + PANEL_H - 10, '[ Clique fora para fechar ]', {
+            fontSize: '10px', color: '#333', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 1).setDepth(52));
     }
 
     _clearDetail() {
