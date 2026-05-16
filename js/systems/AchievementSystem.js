@@ -1,5 +1,6 @@
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import EventBus from '../utils/EventBus.js';
+import { awardXP } from './XPSystem.js';
 
 export const AchievementSystem = {
 
@@ -29,7 +30,8 @@ export const AchievementSystem = {
                 if (ach.check(player, ctx)) {
                     player.achievements[ach.id] = new Date().toISOString();
                     unlocked.push(ach);
-                    EventBus.emit('achievement-unlocked', { achievement: ach, player });
+                    const xpEarned = ach.xpReward ? awardXP(player, ach.xpReward) : 0;
+                    EventBus.emit('achievement-unlocked', { achievement: ach, player, xpEarned });
                 }
             } catch { /* guard against missing data mid-check */ }
         }
