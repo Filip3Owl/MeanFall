@@ -457,7 +457,6 @@ export class WorldScene extends Phaser.Scene {
                 this._chat('Você descansa na vila e {{heal:recupera todas as suas energias}}!', 'heal');
                 EventBus.emit('player-hp-change', { player: this._playerData });
                 this._player.syncSprite();
-                return;
             }
         }
 
