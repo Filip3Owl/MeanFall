@@ -178,8 +178,8 @@ export class CharacterCreationScene extends Phaser.Scene {
                 const cx = sx + i * (SW + GAP) + SW / 2;
                 const sq = this.add.rectangle(cx, y, SW, SW, item.hex).setInteractive({ useHandCursor: true })
                     .on('pointerdown', () => { this._appearance[field] = item.id; this._refreshSprite(); this._refreshSwatches(); });
-                const ring = this.add.rectangle(cx, y, SW + 5, SW + 5, 0).setStrokeStyle(2, 0xd4af37, 0);
-                c.add([sq, ring]);
+                const ring = this.add.rectangle(cx, y, SW + 5, SW + 5, 0, 0).setStrokeStyle(2, 0xd4af37, 0);
+                c.add([ring, sq]);
                 this._allSwatches.push({ item, sq, ring, field });
             });
         });
