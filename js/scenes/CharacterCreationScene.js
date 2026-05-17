@@ -10,6 +10,7 @@ const OPT_L     = DIV_X + 10;
 const OPT_R     = W - 6;
 const OPT_W     = OPT_R - OPT_L;
 const OPT_CX    = OPT_L + OPT_W / 2;
+const INNER_W   = OPT_W - 16; // usable card width, excludes scrollbar column
 
 const SCROLL_TOP = 42;
 const SCROLL_BOT = H - 52;
@@ -153,19 +154,19 @@ export class CharacterCreationScene extends Phaser.Scene {
         }).setOrigin(0.5, 0).setDepth(3);
 
         this._classBadge = this.add.text(PREV_CX, FY + FH/2 + 28, '', {
-            fontSize: '11px', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
+            fontSize: '12px', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
         }).setOrigin(0.5, 0).setDepth(3);
 
-        this._classBonusTx = this.add.text(PREV_CX, FY + FH/2 + 39, '', {
-            fontSize: '9px', fontFamily: 'Courier New', fontStyle: 'bold',
+        this._classBonusTx = this.add.text(PREV_CX, FY + FH/2 + 41, '', {
+            fontSize: '10px', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0).setDepth(3);
 
-        this._trajBadge = this.add.text(PREV_CX, FY + FH/2 + 54, '', {
-            fontSize: '10px', color: '#666688', fontFamily: 'Courier New',
+        this._trajBadge = this.add.text(PREV_CX, FY + FH/2 + 56, '', {
+            fontSize: '11px', color: '#9999bb', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0).setDepth(3);
 
-        this._trajLoreTx = this.add.text(PREV_CX, FY + FH/2 + 64, '', {
-            fontSize: '9px', color: '#444466', fontFamily: 'Courier New',
+        this._trajLoreTx = this.add.text(PREV_CX, FY + FH/2 + 68, '', {
+            fontSize: '10px', color: '#8888aa', fontFamily: 'Courier New',
             align: 'center', wordWrap: { width: DIV_X - 16 },
         }).setOrigin(0.5, 0).setDepth(3);
 
@@ -186,7 +187,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         STATS_DEF.forEach(({ key, label, color }, i) => {
             const sy = sbY0 + i * 22;
             this.add.text(sbX, sy, label, {
-                fontSize: '10px', color: '#555577', fontFamily: 'Courier New',
+                fontSize: '11px', color: '#aaaacc', fontFamily: 'Courier New',
             }).setOrigin(0, 0.5).setDepth(3);
             this.add.rectangle(sbX + 26, sy, barW, 6, 0x08061a, 1)
                 .setOrigin(0, 0.5).setDepth(2).setStrokeStyle(1, 0x181630, 1);
@@ -200,10 +201,10 @@ export class CharacterCreationScene extends Phaser.Scene {
         vitalsG.lineBetween(16, sbY0 + 80, DIV_X - 10, sbY0 + 80);
 
         this._hpTx = this.add.text(sbX, sbY0 + 92, '', {
-            fontSize: '10px', color: '#cc4444', fontFamily: 'Courier New',
+            fontSize: '11px', color: '#ee5555', fontFamily: 'Courier New',
         }).setOrigin(0, 0.5).setDepth(3);
         this._focusTx = this.add.text(sbX, sbY0 + 108, '', {
-            fontSize: '10px', color: '#4488cc', fontFamily: 'Courier New',
+            fontSize: '11px', color: '#55aaee', fontFamily: 'Courier New',
         }).setOrigin(0, 0.5).setDepth(3);
 
         this._diffBadge = this.add.text(PREV_CX, H - 22, '', {
@@ -222,7 +223,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         // Geometry mask — clips container to the scroll area in world space
         const maskGfx = this.make.graphics({ add: false });
         maskGfx.fillStyle(0xffffff, 1);
-        maskGfx.fillRect(OPT_L, SCROLL_TOP, OPT_W - 6, SCROLL_H);
+        maskGfx.fillRect(OPT_L, SCROLL_TOP, OPT_W - 3, SCROLL_H);
         const mask = maskGfx.createGeometryMask();
 
         // Container: x=0 (world x = local x), y=SCROLL_TOP (local y=0 = top of scroll area)
@@ -250,7 +251,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         y = this._buildDifficultyPills(y) + 8;
 
         this._diffDesc = this.add.text(OPT_CX, y, '', {
-            fontSize: '12px', color: '#8888aa', fontFamily: 'Courier New',
+            fontSize: '12px', color: '#aaaacc', fontFamily: 'Courier New',
             align: 'center', wordWrap: { width: OPT_W - 16 },
         }).setOrigin(0.5, 0);
         this._sc.add(this._diffDesc);
@@ -267,7 +268,7 @@ export class CharacterCreationScene extends Phaser.Scene {
             .setOrigin(0.5, 0).setDepth(5);
 
         this._scrollHint = this.add.text(OPT_CX, SCROLL_BOT - 14, '▼ role para mais', {
-            fontSize: '10px', color: '#555577', fontFamily: 'Courier New',
+            fontSize: '10px', color: '#8888bb', fontFamily: 'Courier New',
         }).setOrigin(0.5, 1).setDepth(6).setVisible(false);
         this.tweens.add({ targets: this._scrollHint, alpha: { from: 0.3, to: 1 }, duration: 800, yoyo: true, repeat: -1 });
 
@@ -284,7 +285,7 @@ export class CharacterCreationScene extends Phaser.Scene {
         g.lineBetween(OPT_L, y, OPT_CX - HALF, y);
         g.lineBetween(OPT_CX + HALF, y, OPT_R - 8, y);
         const tx = this.add.text(OPT_CX, y, label, {
-            fontSize: '11px', color: '#8a6c28', fontFamily: 'Courier New',
+            fontSize: '12px', color: '#c4922a', fontFamily: 'Courier New',
             fontStyle: 'bold', letterSpacing: 3,
         }).setOrigin(0.5);
         this._sc_add(g, tx);
@@ -293,7 +294,7 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _buildNameRow(y) {
         const lbl = this.add.text(OPT_L + 4, y, 'NOME', {
-            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+            fontSize: '13px', color: '#9999bb', fontFamily: 'Courier New', letterSpacing: 2,
         }).setOrigin(0, 0.5);
 
         const inX = OPT_L + 54, inW = OPT_W - 62;
@@ -312,7 +313,7 @@ export class CharacterCreationScene extends Phaser.Scene {
 
     _buildGenderRow(y) {
         const lbl = this.add.text(OPT_L + 4, y, 'GÊNERO', {
-            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+            fontSize: '13px', color: '#9999bb', fontFamily: 'Courier New', letterSpacing: 2,
         }).setOrigin(0, 0.5);
 
         this._genderTx = this.add.text(OPT_CX, y, '', {
@@ -331,14 +332,14 @@ export class CharacterCreationScene extends Phaser.Scene {
             objs.push(btn, this.add.text(ax, y, arrow, arrowStyle).setOrigin(0.5));
         };
         makeArrow(OPT_L + 62, '‹', () => this._cycle('gender', GENDERS, -1));
-        makeArrow(OPT_R - 10, '›', () => this._cycle('gender', GENDERS, +1));
+        makeArrow(OPT_R - 20, '›', () => this._cycle('gender', GENDERS, +1));
         this._sc_add(objs);
         return y + 28;
     }
 
     _buildSwatchRow(y, label, list, field) {
         const lbl = this.add.text(OPT_L + 4, y, label, {
-            fontSize: '13px', color: '#666688', fontFamily: 'Courier New', letterSpacing: 2,
+            fontSize: '13px', color: '#9999bb', fontFamily: 'Courier New', letterSpacing: 2,
         }).setOrigin(0, 0.5);
 
         const labelW = label === 'PELE' ? 42 : 62;
@@ -368,8 +369,8 @@ export class CharacterCreationScene extends Phaser.Scene {
     }
 
     _buildClassCards(y) {
-        const cardW = Math.floor((OPT_W - 12) / 3);
-        const cardH = 95; // Slightly taller for more breathing room
+        const cardW = Math.floor((INNER_W - 12) / 3);
+        const cardH = 100;
         this._classCards = [];
         const objs = [];
 
@@ -388,9 +389,9 @@ export class CharacterCreationScene extends Phaser.Scene {
             objs.push(
                 bg,
                 this.add.text(mx, y + 15, cls.icon,            { fontSize: '18px', color: hex, fontFamily: 'Courier New' }).setOrigin(0.5),
-                this.add.text(mx, y + 34, cls.name.toUpperCase(), { fontSize: '10px', color: '#e8e0d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1 }).setOrigin(0.5),
-                this.add.text(mx, y + 50, cls.stats,            { fontSize: '9px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5),
-                this.add.text(mx, y + 72, cls.lore,             { fontSize: '10px', color: '#777799', fontFamily: 'Courier New', align: 'center', wordWrap: { width: cardW - 6 }, lineSpacing: -2 }).setOrigin(0.5),
+                this.add.text(mx, y + 34, cls.name.toUpperCase(), { fontSize: '11px', color: '#f0e8d0', fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1 }).setOrigin(0.5),
+                this.add.text(mx, y + 51, cls.stats,              { fontSize: '10px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0.5),
+                this.add.text(mx, y + 72, cls.lore,               { fontSize: '10px', color: '#9999bb', fontFamily: 'Courier New', align: 'center', wordWrap: { width: cardW - 6 }, lineSpacing: -2 }).setOrigin(0.5),
             );
             this._classCards.push({ id: cls.id, bg, color: cls.color, dark: cls.dark });
         });
@@ -400,8 +401,8 @@ export class CharacterCreationScene extends Phaser.Scene {
     }
 
     _buildTrajectoryRow(y) {
-        const pillW = Math.floor((OPT_W - 12) / 3);
-        const pillH = 44; // Slightly taller
+        const pillW = Math.floor((INNER_W - 12) / 3);
+        const pillH = 44;
         this._trajPills = {};
         const objs = [];
 
@@ -416,7 +417,7 @@ export class CharacterCreationScene extends Phaser.Scene {
                 fontSize: '11px', color: hex, fontFamily: 'Courier New', fontStyle: 'bold',
             }).setOrigin(0.5);
             const statTx = this.add.text(px + pillW/2, y + 30, traj.stats, {
-                fontSize: '9px', color: '#666688', fontFamily: 'Courier New', fontStyle: 'bold'
+                fontSize: '10px', color: '#9999bb', fontFamily: 'Courier New', fontStyle: 'bold'
             }).setOrigin(0.5);
             objs.push(pill, nameTx, statTx);
             this._trajPills[traj.id] = { pill, nameTx, statTx, color: traj.color, dark: traj.dark };
