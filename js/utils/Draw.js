@@ -320,6 +320,14 @@ export function generateTextures(scene) {
     drawShadowSprite(g, 24, 30, 'sprite_type_ii_shade',     0x884488, 'wraith');
     drawShadowSprite(g, 26, 32, 'sprite_alpha_vampire',     0x440022, 'lich');
 
+    // ── Monstros hard (1 por área) ──────────────────────────────────────────
+    drawAirSprite   (g, 24, 30, 'sprite_scale_wraith',        0x8899cc, 'tall');
+    drawEarthSprite (g, 30, 34, 'sprite_outlier_titan',       0x5a3a1a, 'block');
+    drawLightSprite (g, 28, 32, 'sprite_iqr_revenant',        0x4488bb, 'crystal');
+    drawFireSprite  (g, 30, 30, 'sprite_conditional_chimera', 0xaa1100, 'bird');
+    drawWaterSprite (g, 34, 30, 'sprite_clt_kraken',          0x0d3366, 'beast');
+    drawShadowSprite(g, 30, 36, 'sprite_power_wraith',        0x220044, 'wraith');
+
     // ── Boss sprites (um por área) ───────────────────────────────────────────
     drawAirSprite   (g, 36, 40, 'sprite_boss_village',   0xddeeff, 'tall');
     drawEarthSprite (g, 38, 42, 'sprite_boss_meadows',   0x886633, 'block');
