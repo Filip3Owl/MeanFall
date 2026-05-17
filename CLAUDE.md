@@ -34,7 +34,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── EventBus.js      Pub/sub de eventos entre sistemas
     │   ├── Draw.js          Geração procedural de texturas (sprites, tiles, UI)
     │   ├── MusicSystem.js   Música procedural via Web Audio API (por área/estado)
-    │   ├── SoundSystem.js   Efeitos sonoros procedurais (hit, levelup, etc.)
+    │   ├── SoundSystem.js   Efeitos sonoros procedurais (hit, levelup, dialogTick, etc.)
     │   └── RichText.js      Renderização de texto colorido inline com markup {{tag:texto}}
     ├── systems/
     │   ├── CombatSystem.js        Cálculo de dano, itens, equipamentos, drops
@@ -68,7 +68,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── BookScene.js           Leitura de tomos da biblioteca
     │   ├── CompendiumScene.js     Codex elemental com informações de monstros
     │   ├── InferenceScene.js      Mini-jogo de teste de hipótese para Mimics
-    │   ├── DialogScene.js         Diálogos com NPCs com ciclos de texto
+    │   ├── DialogScene.js         Diálogos com NPCs: typewriter effect, retrato, paginação automática, branching choices
     │   └── ScratchpadScene.js     Calculadora + bloco de notas arrastáveis (persistem entre sessões)
     ├── entities/
     │   ├── Player.js      Sprite, movimento, vitals
@@ -171,6 +171,30 @@ Todos os sistemas se comunicam via `EventBus`. Eventos principais:
 - Tile: **32 × 32 px**
 - Grid: **17 colunas × 15 linhas**
 - Minimap: **180 × 180 px** (canvas separado no DOM)
+
+---
+
+## Sistema de Diálogo (DialogScene)
+
+`DialogScene` é lançada via `scene.launch('Dialog', data)` e aceita os seguintes parâmetros:
+
+| Parâmetro  | Tipo | Descrição |
+|------------|------|-----------|
+| `speaker`  | string | Nome exibido na tag acima da caixa |
+| `npcId`    | string | ID do NPC para selecionar o retrato (`sprite_npc_<npcId>`). Opcional — fallback por `role` |
+| `lines`    | string[] | Linhas de diálogo. Suporta markup `{{tag:valor}}`. Paginação automática: linhas longas são divididas em páginas de 4 linhas × 50 chars |
+| `role`     | string | `'quest'` / `'shop'` / `'lore'` — define cor da tag e retrato padrão |
+| `action`   | object | `{ label, kind }` — botão de ação na última linha (ex: abrir loja) |
+| `choices`  | object[] | `[{ label, onSelect }]` — exibe caixa de escolhas acima do diálogo na última linha; navegação com `↑↓`, confirmação com `SPACE`/`ENTER`, cancelar com `ESC` |
+| `onClose`  | fn | Callback ao fechar sem action/choice |
+| `onAction` | fn | Callback ao acionar o botão `action` |
+
+**Controles do jogador:**
+- `SPACE` / `ENTER` / clique: pula digitação → avança linha → confirma choice
+- `↑` / `↓`: navega choices
+- `ESC`: fecha (ou seleciona último choice quando choices visíveis)
+
+**Fluxo interno:** `_startTyping` (texto plano, char a char, com `Sound.dialogTick()`) → `_finishTyping` (renderiza tokens coloridos com fade) → `_showChoices` (se `choices` presente).
 
 ---
 

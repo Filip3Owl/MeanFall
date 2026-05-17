@@ -67,7 +67,7 @@ Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você caus
 
 - Painel do monstro com sprite procedural, aura elemental, barra de HP dinâmica e badges de elite.
 - Painel do jogador com monitoramento de HP, Foco e progresso de XP.
-- Caixa de diálogo ornamental com suporte a **RichText** para fórmulas matemáticas.
+- Caixa de diálogo estilo JRPG com **typewriter effect**, retrato do NPC, paginação automática de textos longos e suporte a **branching choices** (ramificações de diálogo).
 - Ferramentas de apoio integradas (Calculadora/Notas) para resolução de problemas complexos.
 
 ---
@@ -139,7 +139,7 @@ Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você caus
     │   ├── BookScene.js          Leitura de tomos
     │   ├── CompendiumScene.js    Codex elemental
     │   ├── InferenceScene.js     Mini-jogo de teste de hipótese
-    │   ├── DialogScene.js        Diálogos com NPCs
+    │   ├── DialogScene.js        Diálogos com NPCs — typewriter effect, retrato, paginação, branching choices
     │   └── ScratchpadScene.js    Calculadora e notas (arrastáveis)
     ├── entities/
     │   ├── Player.js       Sprite, movimento, vitals
