@@ -277,6 +277,14 @@ class SoundEngine {
         });
     }
 
+    // Typewriter tick for dialog typing — pitch varies slightly per call
+    dialogTick() {
+        this._play((ctx, dest) => {
+            const freq = 500 + (Math.random() * 80 - 40);
+            this._tone(ctx, dest, freq, 'square', ctx.currentTime, 0.018, 0.020);
+        });
+    }
+
     // Door opening (creak + mechanical click)
     door() {
         this._play((ctx, dest) => {

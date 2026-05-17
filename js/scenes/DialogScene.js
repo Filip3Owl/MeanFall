@@ -1,4 +1,5 @@
 import { RICH_COLORS } from '../utils/RichText.js';
+import { Sound } from '../utils/SoundSystem.js';
 
 // Highlight key terms in dialog text using Phaser BBCode-like tagging.
 // We can't use real BBCode without an extra plugin, so we render line in
@@ -137,6 +138,7 @@ export class DialogScene extends Phaser.Scene {
             callback: () => {
                 revealed = Math.min(revealed + 2, plain.length);
                 this._typingText.setText(plain.substring(0, revealed));
+                if (plain[revealed - 1] !== ' ') Sound.dialogTick();
                 if (revealed >= plain.length) {
                     this._typingTimer.remove();
                     this._typingTimer = null;
