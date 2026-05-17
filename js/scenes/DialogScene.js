@@ -45,6 +45,7 @@ export class DialogScene extends Phaser.Scene {
         this._onClose     = data.onClose || (() => {});
         this._action      = data.action  || null;     // { label, kind } or null
         this._onAction    = data.onAction || null;
+        this._choices     = data.choices  || null;    // [{ label, onSelect }] or null
         this._role        = data.role     || 'quest';
         this._idx            = 0;
         this._typingTimer    = null;
@@ -53,6 +54,9 @@ export class DialogScene extends Phaser.Scene {
         this._fullText       = '';
         this._actionTaken    = false;  // MUST reset: scene object is reused across launches
         this._autoCloseTimer = null;
+        this._choicesShowing = false;
+        this._choiceIdx      = 0;
+        this._choiceItems    = [];
     }
 
     create() {
@@ -101,7 +105,12 @@ export class DialogScene extends Phaser.Scene {
 
         this.input.keyboard.on('keydown-SPACE', () => this._advance());
         this.input.keyboard.on('keydown-ENTER', () => this._advance());
-        this.input.keyboard.on('keydown-ESC',   () => this._close());
+        this.input.keyboard.on('keydown-ESC',   () => {
+            if (this._choicesShowing) this._selectChoice(this._choices.length - 1);
+            else this._close();
+        });
+        this.input.keyboard.on('keydown-UP',   () => { if (this._choicesShowing) this._choiceNav(-1); });
+        this.input.keyboard.on('keydown-DOWN', () => { if (this._choicesShowing) this._choiceNav(+1); });
 
         this._renderLine();
     }
@@ -230,7 +239,10 @@ export class DialogScene extends Phaser.Scene {
         for (const t of this._lineTokens) t.setAlpha(0);
         this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 120 });
 
-        if (isLast && !this._action) {
+        if (isLast && this._choices) {
+            this._promptTx.setVisible(false);
+            this.time.delayedCall(180, () => this._showChoices());
+        } else if (isLast && !this._action) {
             this._promptTx.setVisible(false);
             this._autoCloseTimer = this.time.delayedCall(2000, () => this._close());
         } else {
@@ -273,10 +285,70 @@ export class DialogScene extends Phaser.Scene {
         if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
         if (this._typingText)  { this._typingText.destroy(); this._typingText = null; }
         this._isTyping = false;
+        this._choicesShowing = false;
+        this._choiceItems = [];
         this.children.getAll().forEach(c => c.destroy());
         this._lineTokens = [];
         this._shade = this._box = this._tagBg = this._tagTx = null;
         this._promptTx = this._pageTx = this._actionBtn = this._actionTx = null;
+    }
+
+    _showChoices() {
+        if (!this._choices || this._actionTaken) return;
+        this._choicesShowing = true;
+
+        const W    = this.scale.width;
+        const boxY = this.scale.height - 130;
+        const itemH = 26, padV = 6, boxW = 260;
+        const choiceBoxH = this._choices.length * itemH + padV * 2;
+        const cbX = W - 8 - boxW;
+        const cbY = boxY - choiceBoxH - 8;
+
+        this.add.rectangle(cbX, cbY, boxW, choiceBoxH, 0x0a0814, 1).setOrigin(0, 0).setAlpha(0)
+            .setDepth(20);
+        const frame = this.add.rectangle(cbX, cbY, boxW, choiceBoxH, 0xd4af37, 0)
+            .setOrigin(0, 0).setStrokeStyle(2, 0xd4af37).setAlpha(0).setDepth(20);
+        this.tweens.add({ targets: [frame], alpha: 1, duration: 160 });
+
+        this._choiceItems = this._choices.map((c, i) => {
+            const iy = cbY + padV + i * itemH;
+            const bg = this.add.rectangle(cbX + 2, iy, boxW - 4, itemH, 0xd4af37, 0)
+                .setOrigin(0, 0).setDepth(21).setInteractive()
+                .on('pointerover', () => { this._choiceIdx = i; this._updateChoiceHighlight(); })
+                .on('pointerdown', (p, lx, ly, ev) => { ev.stopPropagation(); this._selectChoice(i); });
+            const tx = this.add.text(cbX + 14, iy + itemH / 2, '', {
+                fontSize: '14px', color: '#aaaaaa', fontFamily: 'Courier New',
+            }).setOrigin(0, 0.5).setDepth(22).setAlpha(0);
+            this.tweens.add({ targets: tx, alpha: 1, duration: 160, delay: 60 + i * 40 });
+            return { bg, tx, label: c.label };
+        });
+
+        this._choiceIdx = 0;
+        this._updateChoiceHighlight();
+    }
+
+    _choiceNav(dir) {
+        this._choiceIdx = (this._choiceIdx + dir + this._choices.length) % this._choices.length;
+        this._updateChoiceHighlight();
+        Sound.click();
+    }
+
+    _updateChoiceHighlight() {
+        this._choiceItems.forEach(({ bg, tx, label }, i) => {
+            const sel = i === this._choiceIdx;
+            bg.setFillStyle(0xd4af37, sel ? 0.18 : 0);
+            tx.setColor(sel ? '#ffd700' : '#888888');
+            tx.setText((sel ? '▶ ' : '  ') + label);
+        });
+    }
+
+    _selectChoice(idx) {
+        if (!this._choicesShowing || this._actionTaken) return;
+        const fn = this._choices[idx]?.onSelect;
+        this._actionTaken = true;
+        this._destroyAll();
+        this.scene.stop('Dialog');
+        try { fn && fn(); } catch (e) {}
     }
 
     _tokenize(line) {
@@ -327,6 +399,7 @@ export class DialogScene extends Phaser.Scene {
 
     _advance() {
         if (this._actionTaken) return;
+        if (this._choicesShowing) { this._selectChoice(this._choiceIdx); return; }
         if (this._isTyping) { this._skipTyping(); return; }
         this._idx++;
         if (this._idx >= this._lines.length) this._close();
