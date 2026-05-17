@@ -2,7 +2,7 @@ import { CombatSystem }                from '../systems/CombatSystem.js';
 import { QuestionEngine }                from '../systems/QuestionEngine.js';
 import { awardXP, awardElementalXP }           from '../systems/XPSystem.js';
 import { BookSystem }                    from '../systems/BookSystem.js';
-import { ITEMS, DROP_TABLES, RARITY_COLORS } from '../data/items.js';
+import { ITEMS, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
 import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js';
 import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
@@ -1054,7 +1054,7 @@ export class CombatScene extends Phaser.Scene {
             // Roll loot multiple times for Elites (2x rolls)
             const rolls = isElite ? 2 : 1;
             for (let i = 0; i < rolls; i++) {
-                const batch = CombatSystem.rollDrops(this._monsterDef.id.replace('Elite ', ''), DROP_TABLES);
+                const batch = CombatSystem.rollDrops(this._monsterDef);
                 lootIds.push(...batch);
             }
 

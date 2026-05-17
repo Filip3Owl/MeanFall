@@ -23,6 +23,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 3,
         flavor: 'Pequeno espírito do ar que classifica tudo que encontra.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.18 }, { itemId: 'cloth_pants',  chance: 0.06 }, { itemId: 'copper_ring',  chance: 0.03 }],
     },
 
     air_sylph: {
@@ -43,6 +44,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 4,
         flavor: 'Espírito alado que ordena dados em escalas hierárquicas.',
+        lootTable: [{ itemId: 'focus_potion',  chance: 0.18 }, { itemId: 'leather_cap', chance: 0.06 }, { itemId: 'worn_boots',  chance: 0.05 }],
     },
 
     data_imp: {
@@ -63,6 +65,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 3,
         flavor: 'Pequeno trickster que embaralha tipos de dados por diversão.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.16 }, { itemId: 'worn_boots',  chance: 0.05 }, { itemId: 'copper_ring',  chance: 0.03 }],
     },
 
     type_specter: {
@@ -83,6 +86,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 4,
         flavor: 'Entidade translúcida que confunde escalas nominais com ordinais.',
+        lootTable: [{ itemId: 'focus_potion',  chance: 0.16 }, { itemId: 'cloth_pants', chance: 0.06 }, { itemId: 'leather_cap', chance: 0.04 }],
     },
 
     scale_wraith: {
@@ -103,6 +107,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Apagou a fronteira entre escala intervalar e razão. Sem zero absoluto, toda medida perde sentido.',
+        lootTable: [{ itemId: 'focus_potion',  chance: 0.20 }, { itemId: 'data_scroll', chance: 0.18 }, { itemId: 'mage_hat',    chance: 0.07 }, { itemId: 'ring_of_focus', chance: 0.04 }],
     },
 
     // ── PRADOS DAS MEDIDAS · ELEMENTO TERRA (Tendência Central) ──────────────
@@ -124,6 +129,7 @@ export const MONSTERS = {
         movePattern: 'static',
         detectionRadius: 2,
         flavor: 'Construído de pedra e equilíbrio. Equilibra valores em sua estrutura.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.18 }, { itemId: 'wooden_sword',  chance: 0.06 }, { itemId: 'wooden_shield',   chance: 0.05 }],
     },
 
     earth_dryad: {
@@ -144,6 +150,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 4,
         flavor: 'Guardiã do valor central. Sempre encontra o meio do caminho.',
+        lootTable: [{ itemId: 'data_scroll',   chance: 0.16 }, { itemId: 'leather_armor', chance: 0.06 }, { itemId: 'leather_cap',     chance: 0.04 }],
     },
 
     mean_gnome: {
@@ -164,6 +171,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 3,
         flavor: 'Gnomo caçador de médias. Soma tudo antes de atacar.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.17 }, { itemId: 'wooden_shield', chance: 0.05 }, { itemId: 'leather_greaves', chance: 0.04 }],
     },
 
     mode_treant: {
@@ -184,6 +192,7 @@ export const MONSTERS = {
         movePattern: 'static',
         detectionRadius: 3,
         flavor: 'Árvore-criatura que repete o valor mais frequente em seus galhos.',
+        lootTable: [{ itemId: 'data_scroll',   chance: 0.16 }, { itemId: 'leather_armor', chance: 0.05 }, { itemId: 'worn_boots',      chance: 0.04 }],
     },
 
     outlier_titan: {
@@ -204,6 +213,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Uma única observação sua colapsa qualquer tendência central. Engole médias e cospe outliers.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.20 }, { itemId: 'data_scroll',   chance: 0.18 }, { itemId: 'leather_armor',    chance: 0.07 }, { itemId: 'amulet_of_clarity', chance: 0.03 }],
     },
 
     // ── FLORESTA DA DISPERSÃO · ELEMENTO GELO (Dispersão) ────────────────────
@@ -225,6 +235,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 4,
         flavor: 'Luz errática que se dispersa rapidamente em todas as direções.',
+        lootTable: [{ itemId: 'focus_potion',  chance: 0.17 }, { itemId: 'mage_hat',          chance: 0.05 }, { itemId: 'leather_greaves',  chance: 0.04 }],
     },
 
     light_prism: {
@@ -245,6 +256,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Cristal vivo que decompõe dados em desvios de cor.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.17 }, { itemId: 'iron_blade',        chance: 0.04 }, { itemId: 'amulet_of_clarity', chance: 0.03 }],
     },
 
     std_wisp: {
@@ -265,6 +277,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 4,
         flavor: 'Luz errante que representa desvio padrão em cada tremulação.',
+        lootTable: [{ itemId: 'focus_potion',  chance: 0.16 }, { itemId: 'leather_greaves',  chance: 0.05 }, { itemId: 'mage_hat',          chance: 0.04 }],
     },
 
     range_crystal: {
@@ -285,6 +298,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Entidade cristalina que mede o alcance máximo-mínimo de dados.',
+        lootTable: [{ itemId: 'health_potion', chance: 0.17 }, { itemId: 'amulet_of_clarity', chance: 0.04 }, { itemId: 'iron_blade',        chance: 0.03 }],
     },
 
     iqr_revenant: {
@@ -305,6 +319,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Existe apenas entre Q1 e Q3. Outliers o tornam intangível — a dispersão é seu escudo.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.20 }, { itemId: 'iron_blade',        chance: 0.06 }, { itemId: 'amulet_of_clarity', chance: 0.06 }, { itemId: 'ring_of_focus', chance: 0.03 }],
     },
 
     // ── PLANÍCIES DA PROBABILIDADE · ELEMENTO FOGO (Probabilidade) ───────────
@@ -326,6 +341,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 5,
         flavor: 'Renasce com probabilidade calculada. Cada chama é um evento.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_shield',  chance: 0.05 }, { itemId: 'boots_agility',    chance: 0.04 }],
     },
 
     fire_salamander: {
@@ -346,6 +362,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Réptil flamejante. Seus movimentos seguem distribuições aleatórias.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_blade',   chance: 0.05 }, { itemId: 'chain_mail',       chance: 0.03 }],
     },
 
     prob_imp: {
@@ -366,6 +383,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 4,
         flavor: 'Criatura do acaso. Lança dados antes de cada movimento.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'boots_agility', chance: 0.05 }, { itemId: 'iron_shield',      chance: 0.04 }],
     },
 
     bayes_harpy: {
@@ -386,6 +404,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Rapace que atualiza probabilidades a cada batida de asa.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'chain_mail',   chance: 0.04 }, { itemId: 'iron_blade',       chance: 0.04 }],
     },
 
     conditional_chimera: {
@@ -406,6 +425,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Criatura de dois corpos: probabilidade anterior e posterior. Bayes a criou; a Distorção a libertou.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.20 }, { itemId: 'chain_mail',   chance: 0.06 }, { itemId: 'iron_blade',       chance: 0.05 }, { itemId: 'boots_agility', chance: 0.05 }, { itemId: 'ring_of_focus', chance: 0.04 }],
     },
 
     // ── MONTANHAS DA DISTRIBUIÇÃO · ELEMENTO ÁGUA (Distribuições) ────────────
@@ -427,6 +447,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 4,
         flavor: 'Corpo ondulado segue uma curva em forma de sino perfeita.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'amulet_of_clarity', chance: 0.05 }, { itemId: 'iron_shield',       chance: 0.04 }],
     },
 
     water_leviathan: {
@@ -447,6 +468,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Mede tudo em desvios padronizados. Seu olhar avalia z-scores.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'plate_armor',       chance: 0.03 }, { itemId: 'ring_of_focus',     chance: 0.03 }],
     },
 
     binomial_crab: {
@@ -467,6 +489,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 3,
         flavor: 'Crustáceo azul de duas pinças: sucesso ou fracasso. Binomial.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'iron_shield',       chance: 0.04 }, { itemId: 'amulet_of_clarity', chance: 0.03 }],
     },
 
     poisson_jellyfish: {
@@ -487,6 +510,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Medusa translúcida que ataca em surtos seguindo a distribuição de Poisson.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'ring_of_focus',     chance: 0.03 }, { itemId: 'plate_armor',       chance: 0.025 }],
     },
 
     clt_kraken: {
@@ -507,6 +531,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Manifesta-se quando n→∞. À medida que a amostra cresce, assume a forma da curva normal.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'plate_armor',       chance: 0.05 }, { itemId: 'ring_of_focus',     chance: 0.05 }, { itemId: 'stats_amulet', chance: 0.03 }],
     },
 
     // ── CALABOUÇO DA INFERÊNCIA · ELEMENTO TREVAS (Inferência) ───────────────
@@ -528,6 +553,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 5,
         flavor: 'Sussurra hipóteses nulas. Existe apenas até ser rejeitado.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'elemental_staff',    chance: 0.04 }, { itemId: 'stats_amulet',      chance: 0.02 }],
     },
 
     shadow_lich: {
@@ -548,6 +574,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 5,
         flavor: 'Lorde morto-vivo que mede toda existência em p-valores.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'blade_of_inference', chance: 0.015 }, { itemId: 'talisman_of_legends', chance: 0.012 }, { itemId: 'plate_armor', chance: 0.05 }, { itemId: 'stats_amulet', chance: 0.04 }],
     },
 
     type_ii_shade: {
@@ -568,6 +595,7 @@ export const MONSTERS = {
         movePattern: 'patrol',
         detectionRadius: 5,
         flavor: 'Sombra que representa hipóteses falsas não rejeitadas. Erro β.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'stats_amulet',       chance: 0.03 }, { itemId: 'elemental_staff',    chance: 0.03 }],
     },
 
     alpha_vampire: {
@@ -588,6 +616,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Ser imortal que define o nível de significância de cada combate. α.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'blade_of_inference', chance: 0.025 }, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'talisman_of_legends', chance: 0.015 }],
     },
 
     power_wraith: {
@@ -608,6 +637,7 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Personifica o poder do teste (1−β). Encontrá-lo prova que sua análise tinha força suficiente.',
+        lootTable: [{ itemId: 'greater_health_potion', chance: 0.20 }, { itemId: 'elemental_staff',    chance: 0.06 }, { itemId: 'stats_amulet',       chance: 0.05 }, { itemId: 'crown_of_archmage', chance: 0.03 }, { itemId: 'blade_of_inference', chance: 0.025 }, { itemId: 'talisman_of_legends', chance: 0.015 }],
     },
 
     // ── CHEFES DE ÁREA ───────────────────────────────────────────────────────
@@ -631,6 +661,7 @@ export const MONSTERS = {
         detectionRadius: 3,
         isBoss: true,
         flavor: 'Criou os tipos de dados originais. A Distorção o corrompeu — agora classifica tudo errado.',
+        lootTable: [{ itemId: 'mage_hat', guaranteed: true }, { itemId: 'crown_of_insight',     chance: 0.12 }, { itemId: 'ring_of_focus',         chance: 0.08 }, { itemId: 'relic_wind',  chance: 0.025 }],
     },
 
     boss_meadows: {
@@ -652,6 +683,7 @@ export const MONSTERS = {
         detectionRadius: 3,
         isBoss: true,
         flavor: 'Guardião do equilíbrio. Distorce outliers para destruir qualquer média calculada.',
+        lootTable: [{ itemId: 'plate_armor', guaranteed: true }, { itemId: 'dragonscale_mail',     chance: 0.10 }, { itemId: 'shield_of_inference',   chance: 0.15 }, { itemId: 'relic_earth', chance: 0.020 }],
     },
 
     boss_forest: {
@@ -673,6 +705,7 @@ export const MONSTERS = {
         detectionRadius: 3,
         isBoss: true,
         flavor: 'Fonte de toda dispersão da floresta. Seu desvio padrão é incalculável.',
+        lootTable: [{ itemId: 'ring_of_focus', guaranteed: true }, { itemId: 'stats_amulet',          chance: 0.18 }, { itemId: 'specialist_armor',      chance: 0.08 }, { itemId: 'relic_light', chance: 0.020 }],
     },
 
     boss_plains: {
@@ -694,6 +727,7 @@ export const MONSTERS = {
         detectionRadius: 3,
         isBoss: true,
         flavor: 'Corrompeu os axiomas de Kolmogorov. Em seu domínio, P(A) pode ser negativo.',
+        lootTable: [{ itemId: 'sword_of_probability', guaranteed: true }, { itemId: 'specialist_armor',      chance: 0.12 }, { itemId: 'bulwark_of_distribution', chance: 0.08 }, { itemId: 'relic_fire', chance: 0.020 }],
     },
 
     boss_mountains: {
@@ -715,6 +749,7 @@ export const MONSTERS = {
         detectionRadius: 3,
         isBoss: true,
         flavor: 'Encarna a distribuição normal perfeita. Nunca foi derrotado — ninguém acertou todas as questões.',
+        lootTable: [{ itemId: 'dragonscale_mail', guaranteed: true }, { itemId: 'blade_of_sigma',          chance: 0.08 }, { itemId: 'legendary_robe',        chance: 0.05 }, { itemId: 'ring_of_mastery', chance: 0.15 }, { itemId: 'relic_water', chance: 0.015 }],
     },
 
     boss_dungeon: {
@@ -736,5 +771,6 @@ export const MONSTERS = {
         detectionRadius: 4,
         isBoss: true,
         flavor: 'A Distorção feita forma. Criou a crise de replicabilidade. Rejeite sua hipótese nula ou morra tentando.',
+        lootTable: [{ itemId: 'blade_of_inference', guaranteed: true }, { itemId: 'arcane_talisman',        chance: 0.12 }, { itemId: 'staff_of_the_oracle',   chance: 0.10 }, { itemId: 'crown_of_archmage', chance: 0.20 }, { itemId: 'relic_shadow', chance: 0.010 }],
     },
 };

@@ -96,8 +96,8 @@ export const CombatSystem = {
 
     // ── Loot ──────────────────────────────────────────────────────────────────
 
-    rollDrops(monsterId, dropTables) {
-        const table = dropTables[monsterId] || [];
+    rollDrops(monster) {
+        const table = monster?.lootTable || [];
         return table
             .filter(entry => entry.guaranteed || Math.random() < (entry.chance ?? 0))
             .map(entry => entry.itemId);

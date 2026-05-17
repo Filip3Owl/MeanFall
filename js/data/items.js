@@ -306,56 +306,6 @@ export const ITEMS = {
     },
 };
 
-// Drop tables: 'guaranteed' always drops; 'chance' rolls independently.
-// Regular monsters: no guaranteed drops — consumable ~15%, equipment 2-7%.
-// Bosses: guaranteed rare+ loot as reward for the gate encounter.
-export const DROP_TABLES = {
-    // ── Vila ────────────────────────────────────────────────────────────────
-    air_wisp:          [{ itemId: 'health_potion',  chance: 0.18 }, { itemId: 'cloth_pants',  chance: 0.06 }, { itemId: 'copper_ring',   chance: 0.03 }],
-    air_sylph:         [{ itemId: 'focus_potion',   chance: 0.18 }, { itemId: 'leather_cap',  chance: 0.06 }, { itemId: 'worn_boots',    chance: 0.05 }],
-    data_imp:          [{ itemId: 'health_potion',  chance: 0.16 }, { itemId: 'worn_boots',   chance: 0.05 }, { itemId: 'copper_ring',   chance: 0.03 }],
-    type_specter:      [{ itemId: 'focus_potion',   chance: 0.16 }, { itemId: 'cloth_pants',  chance: 0.06 }, { itemId: 'leather_cap',   chance: 0.04 }],
-
-    // ── Prados ───────────────────────────────────────────────────────────────
-    earth_golem:       [{ itemId: 'health_potion',  chance: 0.18 }, { itemId: 'wooden_sword',     chance: 0.06 }, { itemId: 'wooden_shield',    chance: 0.05 }],
-    earth_dryad:       [{ itemId: 'data_scroll',    chance: 0.16 }, { itemId: 'leather_armor',    chance: 0.06 }, { itemId: 'leather_cap',      chance: 0.04 }],
-    mean_gnome:        [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'wooden_shield',    chance: 0.05 }, { itemId: 'leather_greaves',  chance: 0.04 }],
-    mode_treant:       [{ itemId: 'data_scroll',    chance: 0.16 }, { itemId: 'leather_armor',    chance: 0.05 }, { itemId: 'worn_boots',       chance: 0.04 }],
-
-    // ── Floresta ─────────────────────────────────────────────────────────────
-    light_spark:       [{ itemId: 'focus_potion',   chance: 0.17 }, { itemId: 'mage_hat',         chance: 0.05 }, { itemId: 'leather_greaves',  chance: 0.04 }],
-    light_prism:       [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'iron_blade',       chance: 0.04 }, { itemId: 'amulet_of_clarity',chance: 0.03 }],
-    std_wisp:          [{ itemId: 'focus_potion',   chance: 0.16 }, { itemId: 'leather_greaves',  chance: 0.05 }, { itemId: 'mage_hat',         chance: 0.04 }],
-    range_crystal:     [{ itemId: 'health_potion',  chance: 0.17 }, { itemId: 'amulet_of_clarity',chance: 0.04 }, { itemId: 'iron_blade',       chance: 0.03 }],
-
-    // ── Planícies ────────────────────────────────────────────────────────────
-    fire_phoenix:      [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_shield',  chance: 0.05 }, { itemId: 'boots_agility',    chance: 0.04 }],
-    fire_salamander:   [{ itemId: 'greater_health_potion', chance: 0.18 }, { itemId: 'iron_blade',   chance: 0.05 }, { itemId: 'chain_mail',       chance: 0.03 }],
-    prob_imp:          [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'boots_agility',chance: 0.05 }, { itemId: 'iron_shield',      chance: 0.04 }],
-    bayes_harpy:       [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'chain_mail',   chance: 0.04 }, { itemId: 'iron_blade',       chance: 0.04 }],
-
-    // ── Montanhas ────────────────────────────────────────────────────────────
-    water_serpent:     [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'amulet_of_clarity', chance: 0.05 }, { itemId: 'iron_shield',       chance: 0.04 }],
-    water_leviathan:   [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'plate_armor',       chance: 0.03 }, { itemId: 'ring_of_focus',     chance: 0.03 }],
-    binomial_crab:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'iron_shield',       chance: 0.04 }, { itemId: 'amulet_of_clarity', chance: 0.03 }],
-    poisson_jellyfish: [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'ring_of_focus',     chance: 0.03 }, { itemId: 'plate_armor',       chance: 0.025}],
-
-    // ── Calabouço ────────────────────────────────────────────────────────────
-    shadow_specter:    [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'elemental_staff',    chance: 0.04 }, { itemId: 'stats_amulet',      chance: 0.02 }],
-    shadow_lich:       [{ itemId: 'greater_health_potion', chance: 0.17 }, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'blade_of_inference', chance: 0.015}, { itemId: 'talisman_of_legends', chance: 0.012}, { itemId: 'plate_armor', chance: 0.05 }, { itemId: 'stats_amulet', chance: 0.04 }],
-    type_ii_shade:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'stats_amulet',       chance: 0.03 }, { itemId: 'elemental_staff',    chance: 0.03 }],
-    alpha_vampire:     [{ itemId: 'greater_health_potion', chance: 0.16 }, { itemId: 'blade_of_inference', chance: 0.025}, { itemId: 'crown_of_archmage',  chance: 0.02 }, { itemId: 'talisman_of_legends', chance: 0.015}],
-
-    // ── Bosses (loot garantido por ser o chefe de área) ───────────────────────
-    // Relíquia única: chance baixíssima (~1-2.5%), mas muda o gameplay.
-    boss_village:   [{ itemId: 'mage_hat',           guaranteed: true }, { itemId: 'crown_of_insight',       chance: 0.12 }, { itemId: 'ring_of_focus',         chance: 0.08 }, { itemId: 'relic_wind',  chance: 0.025 }],
-    boss_meadows:   [{ itemId: 'plate_armor',         guaranteed: true }, { itemId: 'dragonscale_mail',       chance: 0.10 }, { itemId: 'shield_of_inference',   chance: 0.15 }, { itemId: 'relic_earth', chance: 0.020 }],
-    boss_forest:    [{ itemId: 'ring_of_focus',       guaranteed: true }, { itemId: 'stats_amulet',           chance: 0.18 }, { itemId: 'specialist_armor',      chance: 0.08 }, { itemId: 'relic_light', chance: 0.020 }],
-    boss_plains:    [{ itemId: 'sword_of_probability',guaranteed: true }, { itemId: 'specialist_armor',       chance: 0.12 }, { itemId: 'bulwark_of_distribution',chance:0.08  }, { itemId: 'relic_fire',  chance: 0.020 }],
-    boss_mountains: [{ itemId: 'dragonscale_mail',    guaranteed: true }, { itemId: 'blade_of_sigma',         chance: 0.08 }, { itemId: 'legendary_robe',        chance: 0.05 }, { itemId: 'ring_of_mastery', chance: 0.15 }, { itemId: 'relic_water',  chance: 0.015 }],
-    boss_dungeon:   [{ itemId: 'blade_of_inference',  guaranteed: true }, { itemId: 'arcane_talisman',        chance: 0.12 }, { itemId: 'staff_of_the_oracle',   chance: 0.10 }, { itemId: 'crown_of_archmage', chance: 0.20 }, { itemId: 'relic_shadow', chance: 0.010 }],
-};
-
 export const RARITY_COLORS = {
     common:    '#aaaaaa',
     uncommon:  '#44cc44',
