@@ -40,6 +40,7 @@ export class DialogScene extends Phaser.Scene {
 
     init(data) {
         this._speaker     = data.speaker || 'NPC';
+        this._npcId       = data.npcId   || null;
         this._lines       = this._paginateLines(data.lines || []);
         this._onClose     = data.onClose || (() => {});
         this._action      = data.action  || null;     // { label, kind } or null
@@ -76,6 +77,10 @@ export class DialogScene extends Phaser.Scene {
             fontSize: '17px', color: '#ffffff', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
+        // NPC portrait (left side of box)
+        this._createPortrait(boxY);
+        this._textStartX = 64;
+
         // Body text container (tokens drawn dynamically by _renderTokens)
         this._lineTokens = [];
 
@@ -99,6 +104,23 @@ export class DialogScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-ESC',   () => this._close());
 
         this._renderLine();
+    }
+
+    _portraitKey() {
+        if (this._npcId && this.textures.exists(`sprite_npc_${this._npcId}`))
+            return `sprite_npc_${this._npcId}`;
+        if (this._role === 'shop')   return 'sprite_npc_shop';
+        if (this._role === 'lore')   return 'sprite_npc_scholar';
+        return 'sprite_npc';
+    }
+
+    _createPortrait(boxY) {
+        const px = 14, py = boxY + 10, pw = 40, ph = 48;
+        this.add.rectangle(px, py, pw, ph, 0x0a0814, 1).setOrigin(0, 0);
+        this.add.rectangle(px, py, pw, ph, 0xd4af37, 0).setOrigin(0, 0).setStrokeStyle(2, 0xd4af37);
+        const key = this._portraitKey();
+        this.add.image(px + pw / 2, py + ph / 2, key)
+            .setOrigin(0.5, 0.5).setScale(1.5).setDepth(10);
     }
 
     _paginateLines(lines) {
@@ -169,12 +191,12 @@ export class DialogScene extends Phaser.Scene {
         const plain = this._plainText(line);
         let revealed = 0;
 
-        const startX = 24;
+        const startX = this._textStartX;
         const startY = this.scale.height - 130 + 18;
 
         this._typingText = this.add.text(startX, startY, '', {
             fontSize: '15px', color: '#eeeedd', fontFamily: 'Courier New',
-            wordWrap: { width: this.scale.width - 50 },
+            wordWrap: { width: this.scale.width - startX - 26 },
         }).setOrigin(0, 0).setDepth(11);
 
         this._typingTimer = this.time.addEvent({
@@ -280,9 +302,9 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _renderTokens(tokens) {
-        const startX = 24;
+        const startX = this._textStartX;
         const startY = this.scale.height - 130 + 18;
-        const wrapWidth = this.scale.width - 50;
+        const wrapWidth = this.scale.width - startX - 26;
         let cx = 0, cy = 0;
         const lineHeight = 20;
 

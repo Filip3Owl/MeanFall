@@ -793,6 +793,7 @@ export class WorldScene extends Phaser.Scene {
         this._paused = true;
         this.scene.launch('Dialog', {
             speaker: this._displayName(npc.npcId),
+            npcId: npc.npcId,
             lines,
             role: npc.role || 'quest',
             action,
