@@ -992,5 +992,6 @@ export class WorldScene extends Phaser.Scene {
         EventBus.off('bounty-complete',  this._onBountyCompleteBound);
         this._syncTimer?.remove();
         this._regenTimer?.remove();
+        this._periodicSaveTimer?.remove();
     }
 }
