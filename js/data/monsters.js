@@ -85,6 +85,26 @@ export const MONSTERS = {
         flavor: 'Entidade translúcida que confunde escalas nominais com ordinais.',
     },
 
+    scale_wraith: {
+        id: 'scale_wraith',
+        name: 'Espectro das Escalas',
+        element: 'normal',
+        area: 'village',
+        level: 3,
+        maxHp: 90,
+        attackDamage: 35,
+        defense: 2,
+        xpReward: 120,
+        goldReward: 28,
+        questionTopic: 'data_types',
+        questionDifficulty: ['hard'],
+        color: 0x8899cc,
+        size: { w: 24, h: 30 },
+        movePattern: 'chase',
+        detectionRadius: 5,
+        flavor: 'Apagou a fronteira entre escala intervalar e razão. Sem zero absoluto, toda medida perde sentido.',
+    },
+
     // ── PRADOS DAS MEDIDAS · ELEMENTO TERRA (Tendência Central) ──────────────
     earth_golem: {
         id: 'earth_golem',
@@ -164,6 +184,26 @@ export const MONSTERS = {
         movePattern: 'static',
         detectionRadius: 3,
         flavor: 'Árvore-criatura que repete o valor mais frequente em seus galhos.',
+    },
+
+    outlier_titan: {
+        id: 'outlier_titan',
+        name: 'Titã do Outlier',
+        element: 'earth',
+        area: 'meadows',
+        level: 5,
+        maxHp: 115,
+        attackDamage: 45,
+        defense: 3,
+        xpReward: 160,
+        goldReward: 38,
+        questionTopic: 'mean_median_mode',
+        questionDifficulty: ['hard'],
+        color: 0x5a3a1a,
+        size: { w: 30, h: 34 },
+        movePattern: 'chase',
+        detectionRadius: 5,
+        flavor: 'Uma única observação sua colapsa qualquer tendência central. Engole médias e cospe outliers.',
     },
 
     // ── FLORESTA DA DISPERSÃO · ELEMENTO GELO (Dispersão) ────────────────────
@@ -247,6 +287,26 @@ export const MONSTERS = {
         flavor: 'Entidade cristalina que mede o alcance máximo-mínimo de dados.',
     },
 
+    iqr_revenant: {
+        id: 'iqr_revenant',
+        name: 'Revenente do IQR',
+        element: 'ice',
+        area: 'forest',
+        level: 8,
+        maxHp: 145,
+        attackDamage: 62,
+        defense: 4,
+        xpReward: 210,
+        goldReward: 50,
+        questionTopic: 'spread',
+        questionDifficulty: ['hard'],
+        color: 0x4488bb,
+        size: { w: 28, h: 32 },
+        movePattern: 'chase',
+        detectionRadius: 6,
+        flavor: 'Existe apenas entre Q1 e Q3. Outliers o tornam intangível — a dispersão é seu escudo.',
+    },
+
     // ── PLANÍCIES DA PROBABILIDADE · ELEMENTO FOGO (Probabilidade) ───────────
     fire_phoenix: {
         id: 'fire_phoenix',
@@ -326,6 +386,26 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Rapace que atualiza probabilidades a cada batida de asa.',
+    },
+
+    conditional_chimera: {
+        id: 'conditional_chimera',
+        name: 'Quimera Condicional',
+        element: 'fire',
+        area: 'plains',
+        level: 11,
+        maxHp: 175,
+        attackDamage: 72,
+        defense: 5,
+        xpReward: 280,
+        goldReward: 68,
+        questionTopic: 'probability',
+        questionDifficulty: ['hard'],
+        color: 0xaa1100,
+        size: { w: 30, h: 30 },
+        movePattern: 'chase',
+        detectionRadius: 6,
+        flavor: 'Criatura de dois corpos: probabilidade anterior e posterior. Bayes a criou; a Distorção a libertou.',
     },
 
     // ── MONTANHAS DA DISTRIBUIÇÃO · ELEMENTO ÁGUA (Distribuições) ────────────
@@ -409,6 +489,26 @@ export const MONSTERS = {
         flavor: 'Medusa translúcida que ataca em surtos seguindo a distribuição de Poisson.',
     },
 
+    clt_kraken: {
+        id: 'clt_kraken',
+        name: 'Kraken do TCL',
+        element: 'water',
+        area: 'mountains',
+        level: 13,
+        maxHp: 210,
+        attackDamage: 78,
+        defense: 5,
+        xpReward: 340,
+        goldReward: 82,
+        questionTopic: 'distributions',
+        questionDifficulty: ['hard'],
+        color: 0x0d3366,
+        size: { w: 34, h: 30 },
+        movePattern: 'chase',
+        detectionRadius: 6,
+        flavor: 'Manifesta-se quando n→∞. À medida que a amostra cresce, assume a forma da curva normal.',
+    },
+
     // ── CALABOUÇO DA INFERÊNCIA · ELEMENTO TREVAS (Inferência) ───────────────
     shadow_specter: {
         id: 'shadow_specter',
@@ -488,6 +588,26 @@ export const MONSTERS = {
         movePattern: 'chase',
         detectionRadius: 6,
         flavor: 'Ser imortal que define o nível de significância de cada combate. α.',
+    },
+
+    power_wraith: {
+        id: 'power_wraith',
+        name: 'Espectro do Poder',
+        element: 'shadow',
+        area: 'dungeon',
+        level: 19,
+        maxHp: 300,
+        attackDamage: 110,
+        defense: 8,
+        xpReward: 520,
+        goldReward: 140,
+        questionTopic: 'inference',
+        questionDifficulty: ['hard'],
+        color: 0x220044,
+        size: { w: 30, h: 36 },
+        movePattern: 'chase',
+        detectionRadius: 6,
+        flavor: 'Personifica o poder do teste (1−β). Encontrá-lo prova que sua análise tinha força suficiente.',
     },
 
     // ── CHEFES DE ÁREA ───────────────────────────────────────────────────────
