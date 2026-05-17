@@ -832,7 +832,12 @@ export class WorldScene extends Phaser.Scene {
     _openChest(x, y, instanceId) {
         this._playerData.openedChests[instanceId] = true;
         Sound.chest();
-        const gold = 20 + Math.floor(Math.random() * 30);
+        const CHEST_GOLD = {
+            village: [15, 20], meadows:   [30, 30], forest:  [55, 40],
+            plains:  [80, 50], mountains: [120, 70], dungeon: [180, 100],
+        };
+        const [base, spread] = CHEST_GOLD[this._playerData.currentArea] || [15, 20];
+        const gold = base + Math.floor(Math.random() * spread);
         this._playerData.gold += gold;
         this._chat(`Você abriu o baú e encontrou {{gold:${gold} moedas de ouro}}!`, 'loot');
         EventBus.emit('player-stats-changed', { player: this._playerData });
