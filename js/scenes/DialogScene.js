@@ -79,11 +79,15 @@ export class DialogScene extends Phaser.Scene {
         // Body text container (tokens drawn dynamically by _renderTokens)
         this._lineTokens = [];
 
-        // Continue prompt (blinking)
-        this._promptTx = this.add.text(W - 24, boxY + boxH - 18, '> Espaço / Clique', {
-            fontSize: '15px', color: '#aaaaaa', fontFamily: 'Courier New', fontStyle: 'italic',
-        }).setOrigin(1, 0.5);
-        this.tweens.add({ targets: this._promptTx, alpha: 0.3, duration: 700, yoyo: true, repeat: -1 });
+        // Continue prompt — ▼ bouncing triangle
+        const promptY = boxY + boxH - 16;
+        this._promptTx = this.add.text(W - 18, promptY, '▼', {
+            fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0.5);
+        this.tweens.add({
+            targets: this._promptTx, alpha: 0.15, y: promptY + 4,
+            duration: 480, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+        });
 
         // Page indicator
         this._pageTx = this.add.text(20, boxY + boxH - 18, '', {
@@ -164,11 +168,11 @@ export class DialogScene extends Phaser.Scene {
         for (const t of this._lineTokens) t.setAlpha(0);
         this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 120 });
 
-        this._promptTx.setVisible(true).setAlpha(1);
-
         if (isLast && !this._action) {
-            this._promptTx.setText('Fechando...');
+            this._promptTx.setVisible(false);
             this._autoCloseTimer = this.time.delayedCall(2000, () => this._close());
+        } else {
+            this._promptTx.setVisible(true).setAlpha(1);
         }
     }
 
