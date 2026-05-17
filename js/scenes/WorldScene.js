@@ -841,11 +841,21 @@ export class WorldScene extends Phaser.Scene {
 
     _triggerMimic(x, y, instanceId) {
         this._chat('{{bad:O BAÚ ERA UM MÍMICO!}}', 'combat-hit');
-        // Start combat with a special mimic monster
+        const MIMIC_TABLE = {
+            village:   { name: 'Mímico de Madeira',  maxHp:  70, attackDamage:  14, defense: 1, xpReward:  40, goldReward:  30, questionTopic: 'data_types',       questionDifficulty: ['easy']           },
+            meadows:   { name: 'Mímico de Pedra',    maxHp: 100, attackDamage:  24, defense: 2, xpReward:  75, goldReward:  55, questionTopic: 'mean_median_mode', questionDifficulty: ['easy', 'medium'] },
+            forest:    { name: 'Mímico de Cristal',  maxHp: 135, attackDamage:  38, defense: 3, xpReward: 120, goldReward:  85, questionTopic: 'spread',           questionDifficulty: ['medium']         },
+            plains:    { name: 'Mímico de Chamas',   maxHp: 170, attackDamage:  52, defense: 4, xpReward: 175, goldReward: 120, questionTopic: 'probability',      questionDifficulty: ['medium']         },
+            mountains: { name: 'Mímico Abissal',     maxHp: 220, attackDamage:  68, defense: 6, xpReward: 260, goldReward: 180, questionTopic: 'distributions',   questionDifficulty: ['medium', 'hard'] },
+            dungeon:   { name: 'Mímico das Trevas',  maxHp: 320, attackDamage: 100, defense: 9, xpReward: 420, goldReward: 300, questionTopic: 'inference',        questionDifficulty: ['hard']           },
+        };
+        const template = MIMIC_TABLE[this._playerData.currentArea] || MIMIC_TABLE.village;
         const mimicDef = {
-            id: 'mimic', name: 'Mímico de Madeira', level: this._playerData.level + 1,
-            maxHp: 80, hp: 80, attackDamage: 12, defense: 2, xpReward: 50, goldReward: 40,
-            element: 'shadow', questionTopic: 'inference', questionDifficulty: 'medium'
+            id: 'mimic',
+            level: this._playerData.level + 1,
+            element: 'shadow',
+            color: 0x8822aa,
+            ...template,
         };
         this._startCombat({ def: mimicDef, instanceId });
     }
