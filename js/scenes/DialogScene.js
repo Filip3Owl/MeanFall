@@ -46,6 +46,8 @@ export class DialogScene extends Phaser.Scene {
         this._role        = data.role     || 'quest';
         this._idx            = 0;
         this._typingTimer    = null;
+        this._typingText     = null;
+        this._isTyping       = false;
         this._fullText       = '';
         this._actionTaken    = false;  // MUST reset: scene object is reused across launches
         this._autoCloseTimer = null;
@@ -103,15 +105,64 @@ export class DialogScene extends Phaser.Scene {
         if (this._lineTokens) this._lineTokens.forEach(t => t.destroy());
         this._lineTokens = [];
 
-        const tokens = this._tokenize(line);
-        this._renderTokens(tokens);
-
-        for (const t of this._lineTokens) t.setAlpha(0);
-        this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 220 });
-
-        // On last line, show the action button (if any) or auto-close
         const isLast = this._idx === this._lines.length - 1;
         this._setActionButtonVisible(isLast && !!this._action);
+        this._promptTx.setVisible(false);
+
+        this._startTyping(line, isLast);
+    }
+
+    _plainText(line) {
+        return line.replace(/\{\{(\w+):([^}]+)\}\}/g, '$2');
+    }
+
+    _startTyping(line, isLast) {
+        if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
+        if (this._typingText)  { this._typingText.destroy(); this._typingText = null; }
+
+        this._isTyping = true;
+        const plain = this._plainText(line);
+        let revealed = 0;
+
+        const startX = 24;
+        const startY = this.scale.height - 130 + 18;
+
+        this._typingText = this.add.text(startX, startY, '', {
+            fontSize: '15px', color: '#eeeedd', fontFamily: 'Courier New',
+            wordWrap: { width: this.scale.width - 50 },
+        }).setOrigin(0, 0).setDepth(11);
+
+        this._typingTimer = this.time.addEvent({
+            delay: 30,
+            callback: () => {
+                revealed = Math.min(revealed + 2, plain.length);
+                this._typingText.setText(plain.substring(0, revealed));
+                if (revealed >= plain.length) {
+                    this._typingTimer.remove();
+                    this._typingTimer = null;
+                    this._finishTyping(line, isLast);
+                }
+            },
+            loop: true,
+        });
+    }
+
+    _skipTyping() {
+        if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
+        const isLast = this._idx === this._lines.length - 1;
+        this._finishTyping(this._fullText, isLast);
+    }
+
+    _finishTyping(line, isLast) {
+        this._isTyping = false;
+        if (this._typingText) { this._typingText.destroy(); this._typingText = null; }
+
+        const tokens = this._tokenize(line);
+        this._renderTokens(tokens);
+        for (const t of this._lineTokens) t.setAlpha(0);
+        this.tweens.add({ targets: this._lineTokens, alpha: 1, duration: 120 });
+
+        this._promptTx.setVisible(true).setAlpha(1);
 
         if (isLast && !this._action) {
             this._promptTx.setText('Fechando...');
@@ -151,6 +202,9 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _destroyAll() {
+        if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
+        if (this._typingText)  { this._typingText.destroy(); this._typingText = null; }
+        this._isTyping = false;
         this.children.getAll().forEach(c => c.destroy());
         this._lineTokens = [];
         this._shade = this._box = this._tagBg = this._tagTx = null;
@@ -205,6 +259,7 @@ export class DialogScene extends Phaser.Scene {
 
     _advance() {
         if (this._actionTaken) return;
+        if (this._isTyping) { this._skipTyping(); return; }
         this._idx++;
         if (this._idx >= this._lines.length) this._close();
         else this._renderLine();
