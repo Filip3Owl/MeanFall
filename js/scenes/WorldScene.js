@@ -1,4 +1,4 @@
-import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS } from '../constants.js';
+import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, AREA_BOSS, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS } from '../constants.js';
 import { MapManager } from '../systems/MapManager.js';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
@@ -355,13 +355,6 @@ export class WorldScene extends Phaser.Scene {
             }
 
             // Boss gate — each area's boss must be defeated before using the exit
-            const AREA_BOSS = {
-                village:   { monsterId: 'boss_village',   instanceId: 'v_boss'  },
-                meadows:   { monsterId: 'boss_meadows',   instanceId: 'me_boss' },
-                forest:    { monsterId: 'boss_forest',    instanceId: 'fo_boss' },
-                plains:    { monsterId: 'boss_plains',    instanceId: 'pl_boss' },
-                mountains: { monsterId: 'boss_mountains', instanceId: 'mo_boss' },
-            };
             const bossEntry = AREA_BOSS[this._playerData.currentArea];
             if (bossEntry) {
                 const defeated = this._playerData.defeatedMonsters || {};

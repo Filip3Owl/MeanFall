@@ -87,6 +87,15 @@ export const AREA_UNLOCK = {
     dungeon:   { minLevel: 15, masteryArea: 'mountains', masteryPct: 70 },
 };
 
+// Boss that must be defeated before leaving each area.
+export const AREA_BOSS = {
+    village:   { monsterId: 'boss_village',   instanceId: 'v_boss'  },
+    meadows:   { monsterId: 'boss_meadows',   instanceId: 'me_boss' },
+    forest:    { monsterId: 'boss_forest',    instanceId: 'fo_boss' },
+    plains:    { monsterId: 'boss_plains',    instanceId: 'pl_boss' },
+    mountains: { monsterId: 'boss_mountains', instanceId: 'mo_boss' },
+};
+
 export const COLORS = {
     GRASS:      0x3a7d44,
     STONE:      0x888888,
