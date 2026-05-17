@@ -663,9 +663,11 @@ export class WorldScene extends Phaser.Scene {
                 QuestSystem.recordKill(this._playerData, defDef);
                 BountySystem.recordKill(this._playerData, defDef);
                 if (!defDef.isBoss) {
+                    const weight = defDef.spawnWeight ?? 10;
+                    const respawnDelay = Math.round(RESPAWN_TIME * (10 / weight));
                     this._respawns.push({
                         instanceId, areaId: this._playerData.currentArea,
-                        respawnAt: this.time.now + RESPAWN_TIME,
+                        respawnAt: this.time.now + respawnDelay,
                     });
                 }
                 if (defDef.isBoss) {
