@@ -40,7 +40,7 @@ export class DialogScene extends Phaser.Scene {
 
     init(data) {
         this._speaker     = data.speaker || 'NPC';
-        this._lines       = data.lines   || [];
+        this._lines       = this._paginateLines(data.lines || []);
         this._onClose     = data.onClose || (() => {});
         this._action      = data.action  || null;     // { label, kind } or null
         this._onAction    = data.onAction || null;
@@ -99,6 +99,46 @@ export class DialogScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-ESC',   () => this._close());
 
         this._renderLine();
+    }
+
+    _paginateLines(lines) {
+        const CHARS_PER_LINE = 50; // Courier New 15px ~9px/char, wrap width 494px
+        const MAX_LINES      = 4;  // boxH 120 - padding 18 - footer 16 = 86px / 20px lineHeight
+        const result = [];
+
+        for (const raw of lines) {
+            for (const seg of raw.split('\n')) {
+                const plain    = seg.replace(/\{\{(\w+):([^}]+)\}\}/g, '$2');
+                const srcWords = seg.split(' ');
+                const pltWords = plain.split(' ');
+
+                let pageWords = [], lineChars = 0, lineCount = 1;
+
+                for (let i = 0; i < srcWords.length; i++) {
+                    const wLen = (pltWords[i] || '').length;
+                    const needed = lineChars > 0 ? 1 + wLen : wLen;
+
+                    if (lineChars > 0 && lineChars + needed > CHARS_PER_LINE) {
+                        lineCount++;
+                        lineChars = wLen;
+                        if (lineCount > MAX_LINES) {
+                            result.push(pageWords.join(' '));
+                            pageWords = [srcWords[i]];
+                            lineCount = 1;
+                            lineChars = wLen;
+                            continue;
+                        }
+                    } else {
+                        lineChars += needed;
+                    }
+                    pageWords.push(srcWords[i]);
+                }
+
+                if (pageWords.length > 0) result.push(pageWords.join(' '));
+            }
+        }
+
+        return result;
     }
 
     _renderLine() {
