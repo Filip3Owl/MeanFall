@@ -178,7 +178,7 @@ export class CharacterCreationScene extends Phaser.Scene {
                 const cx = sx + i * (SW + GAP) + SW / 2;
                 const sq = this.add.rectangle(cx, y, SW, SW, item.hex).setInteractive({ useHandCursor: true })
                     .on('pointerdown', () => { this._appearance[field] = item.id; this._refreshSprite(); this._refreshSwatches(); });
-                const ring = this.add.rectangle(cx, y, SW + 5, SW + 5, 0, 0).setStrokeStyle(2, 0xd4af37, 0);
+                const ring = this.add.rectangle(cx, y, SW + 6, SW + 6, 0, 0).setStrokeStyle(1, 0x556677, 0.5);
                 c.add([ring, sq]);
                 this._allSwatches.push({ item, sq, ring, field });
             });
@@ -324,8 +324,8 @@ export class CharacterCreationScene extends Phaser.Scene {
     _refreshSwatches() {
         for (const { item, sq, ring, field } of (this._allSwatches || [])) {
             const active = this._appearance[field] === item.id;
-            ring.setStrokeStyle(2, 0xd4af37, active ? 1 : 0);
-            sq.setAlpha(active ? 1 : 0.4);
+            ring.setStrokeStyle(active ? 2 : 1, active ? 0xd4af37 : 0x556677, active ? 1 : 0.5);
+            sq.setAlpha(active ? 1 : 0.7);
         }
     }
 
