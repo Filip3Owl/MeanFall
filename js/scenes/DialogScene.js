@@ -300,11 +300,11 @@ export class DialogScene extends Phaser.Scene {
         const cbX = W - 8 - boxW;
         const cbY = boxY - choiceBoxH - 8;
 
-        this.add.rectangle(cbX, cbY, boxW, choiceBoxH, 0x0a0814, 1).setOrigin(0, 0).setAlpha(0)
+        const bg = this.add.rectangle(cbX, cbY, boxW, choiceBoxH, 0x0a0814, 1).setOrigin(0, 0).setAlpha(0)
             .setDepth(20);
         const frame = this.add.rectangle(cbX, cbY, boxW, choiceBoxH, 0xd4af37, 0)
             .setOrigin(0, 0).setStrokeStyle(2, 0xd4af37).setAlpha(0).setDepth(20);
-        this.tweens.add({ targets: [frame], alpha: 1, duration: 160 });
+        this.tweens.add({ targets: [bg, frame], alpha: 1, duration: 160 });
 
         this._choiceItems = this._choices.map((c, i) => {
             const iy = cbY + padV + i * itemH;
