@@ -53,6 +53,7 @@ export class DialogScene extends Phaser.Scene {
         this._isTyping       = false;
         this._fullText       = '';
         this._actionTaken    = false;  // MUST reset: scene object is reused across launches
+        this._ready          = false;
         this._choicesShowing = false;
         this._choiceIdx      = 0;
         this._choiceItems    = [];
@@ -61,9 +62,10 @@ export class DialogScene extends Phaser.Scene {
     create() {
         const W = 544, H = 480;
 
-        // Translucent shade over world
-        this._shade = this.add.rectangle(0, 0, W, H, 0x000000, 0.45).setOrigin(0, 0).setInteractive()
+        // Translucent shade over world — fades in with box
+        this._shade = this.add.rectangle(0, 0, W, H, 0x000000, 0).setOrigin(0, 0).setInteractive()
             .on('pointerdown', () => this._advance());
+        this.tweens.add({ targets: this._shade, alpha: 0.45, duration: 140 });
 
         // Dialog box
         const boxY = H - 130;
@@ -87,11 +89,11 @@ export class DialogScene extends Phaser.Scene {
         // Body text container (tokens drawn dynamically by _renderTokens)
         this._lineTokens = [];
 
-        // Continue prompt — ▼ bouncing triangle
+        // Continue prompt — ▼ bouncing triangle (starts hidden; shown by _finishTyping)
         const promptY = boxY + boxH - 16;
         this._promptTx = this.add.text(W - 18, promptY, '▼', {
             fontSize: '14px', color: '#d4af37', fontFamily: 'Courier New',
-        }).setOrigin(0.5, 0.5);
+        }).setOrigin(0.5, 0.5).setVisible(false);
         this.tweens.add({
             targets: this._promptTx, alpha: 0.15, y: promptY + 4,
             duration: 480, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
@@ -102,6 +104,14 @@ export class DialogScene extends Phaser.Scene {
             fontSize: '15px', color: '#aaaaaa', fontFamily: 'Courier New',
         }).setOrigin(0, 0.5);
 
+        // Slide-up entrance: offset all box elements down, tween back to final position
+        const SLIDE = 64;
+        const boxEls = this.children.list.filter(c => c !== this._shade && c !== this._promptTx);
+        boxEls.forEach(el => { el.y += SLIDE; });
+        this.tweens.add({ targets: boxEls, y: `-=${SLIDE}`, duration: 140, ease: 'Cubic.easeOut',
+            onComplete: () => { this._ready = true; this._renderLine(); },
+        });
+
         this.input.keyboard.on('keydown-SPACE', () => this._advance());
         this.input.keyboard.on('keydown-ENTER', () => this._advance());
         this.input.keyboard.on('keydown-ESC',   () => {
@@ -110,8 +120,6 @@ export class DialogScene extends Phaser.Scene {
         });
         this.input.keyboard.on('keydown-UP',   () => { if (this._choicesShowing) this._choiceNav(-1); });
         this.input.keyboard.on('keydown-DOWN', () => { if (this._choicesShowing) this._choiceNav(+1); });
-
-        this._renderLine();
     }
 
     _portraitKey() {
@@ -394,7 +402,7 @@ export class DialogScene extends Phaser.Scene {
     }
 
     _advance() {
-        if (this._actionTaken) return;
+        if (!this._ready || this._actionTaken) return;
         if (this._choicesShowing) { this._selectChoice(this._choiceIdx); return; }
         if (this._isTyping) { this._skipTyping(); return; }
         this._idx++;
