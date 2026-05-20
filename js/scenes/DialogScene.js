@@ -53,7 +53,6 @@ export class DialogScene extends Phaser.Scene {
         this._isTyping       = false;
         this._fullText       = '';
         this._actionTaken    = false;  // MUST reset: scene object is reused across launches
-        this._autoCloseTimer = null;
         this._choicesShowing = false;
         this._choiceIdx      = 0;
         this._choiceItems    = [];
@@ -242,9 +241,6 @@ export class DialogScene extends Phaser.Scene {
         if (isLast && this._choices) {
             this._promptTx.setVisible(false);
             this.time.delayedCall(180, () => this._showChoices());
-        } else if (isLast && !this._action) {
-            this._promptTx.setVisible(false);
-            this._autoCloseTimer = this.time.delayedCall(2000, () => this._close());
         } else {
             this._promptTx.setVisible(true).setAlpha(1);
         }
@@ -409,7 +405,6 @@ export class DialogScene extends Phaser.Scene {
     _close() {
         if (this._actionTaken) return;
         this._actionTaken = true;
-        if (this._autoCloseTimer) { this._autoCloseTimer.remove(false); this._autoCloseTimer = null; }
         this._destroyAll();
         this.scene.stop('Dialog');
         try { this._onClose(); } catch (e) { /* swallow */ }
