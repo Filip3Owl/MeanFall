@@ -12,6 +12,18 @@ import { Sound } from '../utils/SoundSystem.js';
 const W = 544, H = 480;
 const LINES = STORY.prologueLines;
 
+// Element icon shown per slide — maps the narrative arc of the prologue:
+// world in order (normal) → distortion arrives (shadow) → hero rises (fire) → journey (earth) → destiny (water)
+const SLIDE_ELEMENTS = [
+    'icon_element_normal',  // 0 — "Há eras, o mundo seguia a Curva..."
+    'icon_element_normal',  // 1 — "A Sociedade dos Estatísticos..."
+    'icon_element_shadow',  // 2 — "Então veio a Distorção..."
+    'icon_element_shadow',  // 3 — "Os monstros, antes raros..."
+    'icon_element_fire',    // 4 — "Você é o último aprendiz..."
+    'icon_element_earth',   // 5 — "Cada criatura derrotada é uma equação resolvida..."
+    'icon_element_water',   // 6 — "O destino do mundo está na sua amostra..."
+];
+
 export class IntroScene extends Phaser.Scene {
     constructor() { super('Intro'); }
 
@@ -252,6 +264,11 @@ export class IntroScene extends Phaser.Scene {
         }).setOrigin(1, 0.5).setAlpha(0).setDepth(4);
         this.tweens.add({ targets: ctr, alpha: 1, duration: 500 });
 
+        // Element icon — top-right corner, fades in with the header
+        const elemIcon = this.add.image(W - 14, 6, SLIDE_ELEMENTS[idx])
+            .setOrigin(1, 0).setScale(0.58).setAlpha(0).setDepth(5);
+        this.tweens.add({ targets: elemIcon, alpha: 0.72, duration: 700, delay: 200 });
+
         // Top rule
         const tRule = this.add.graphics().setDepth(4).setAlpha(0);
         tRule.lineStyle(1, 0x1c1a36, 1);
@@ -279,7 +296,7 @@ export class IntroScene extends Phaser.Scene {
         const accent = this.add.rectangle(MARGIN - 14, textTopY + rich.height / 2, 2, rich.height + 6, 0xd4af37, 0).setOrigin(0.5).setDepth(4);
         this.tweens.add({ targets: accent, alpha: 0.45, duration: 600, delay: 300 });
 
-        this._content = [hdr, ctr, tRule, bRule, accent, ...rich.objects];
+        this._content = [hdr, ctr, elemIcon, tRule, bRule, accent, ...rich.objects];
 
         // Start typewriter — rich objects revealed only after typing finishes
         this._startTyping(LINES[idx], textTopY, rich.objects);
