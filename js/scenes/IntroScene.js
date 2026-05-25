@@ -16,11 +16,15 @@ export class IntroScene extends Phaser.Scene {
     constructor() { super('Intro'); }
 
     create() {
-        this._page      = -1;    // -1 = title card, 0‥N-1 = prologue slides
-        this._busy      = false;
-        this._done      = false;
-        this._content   = [];    // game objects belonging to the current page
-        this._autoTimer = null;
+        this._page        = -1;    // -1 = title card, 0‥N-1 = prologue slides
+        this._busy        = false;
+        this._done        = false;
+        this._content     = [];    // game objects belonging to the current page
+        this._autoTimer   = null;
+        this._isTyping    = false;
+        this._typingTimer = null;
+        this._typingText  = null;
+        this._richObjects = null;  // rich text objects waiting to be revealed
 
         this._buildAtmosphere();
         this._buildPermanentUI();
@@ -260,7 +264,7 @@ export class IntroScene extends Phaser.Scene {
         bRule.lineBetween(22, H - 42, W - 22, H - 42);
         this.tweens.add({ targets: bRule, alpha: 1, duration: 500 });
 
-        // Rich prologue text — lay out at y=0 so we can measure, then center
+        // Rich prologue text — lay out at y=0 to measure height, then center
         const MARGIN = 52;
         const rich = layoutRichText(this, MARGIN, 0, LINES[idx], {
             fontSize: '12px', wrapWidth: W - MARGIN * 2, lineHeight: 18, baseColor: '#d0c4a8',
@@ -270,7 +274,6 @@ export class IntroScene extends Phaser.Scene {
         const availTop = 40, availBot = 50;
         const textTopY = Math.floor((H - availTop - availBot - rich.height) / 2) + availTop;
         rich.objects.forEach(obj => { obj.y += textTopY; obj.setAlpha(0).setDepth(4); });
-        this.tweens.add({ targets: rich.objects, alpha: 1, duration: 700, delay: 120, ease: 'Quad.Out' });
 
         // Accent decoration: small vertical bar on the left of the text
         const accent = this.add.rectangle(MARGIN - 14, textTopY + rich.height / 2, 2, rich.height + 6, 0xd4af37, 0).setOrigin(0.5).setDepth(4);
@@ -278,8 +281,60 @@ export class IntroScene extends Phaser.Scene {
 
         this._content = [hdr, ctr, tRule, bRule, accent, ...rich.objects];
 
-        // Reveal the space-to-continue hint after the text has appeared
-        this.tweens.add({ targets: this._spaceHint, alpha: 1, duration: 400, delay: 900 });
+        // Start typewriter — rich objects revealed only after typing finishes
+        this._startTyping(LINES[idx], textTopY, rich.objects);
+    }
+
+    // ── Typewriter ─────────────────────────────────────────────────────────
+
+    _plainText(line) {
+        return line.replace(/\{\{(\w+):([^}]+)\}\}/g, '$2');
+    }
+
+    _startTyping(line, textTopY, richObjects) {
+        this._isTyping    = true;
+        this._richObjects = richObjects;
+        const MARGIN = 52;
+        const plain  = this._plainText(line);
+        let revealed = 0;
+
+        // Plain-text proxy rendered char by char at the same position as the rich layout
+        this._typingText = this.add.text(MARGIN, textTopY, '', {
+            fontSize: '12px', color: '#d0c4a8', fontFamily: 'Courier New',
+            wordWrap: { width: W - MARGIN * 2 }, lineSpacing: 6,
+        }).setOrigin(0, 0).setDepth(5);
+
+        this._typingTimer = this.time.addEvent({
+            delay: 28,
+            callback: () => {
+                revealed = Math.min(revealed + 1, plain.length);
+                this._typingText.setText(plain.substring(0, revealed));
+                if (plain[revealed - 1] !== ' ') Sound.dialogTick();
+                if (revealed >= plain.length) {
+                    this._typingTimer.remove();
+                    this._typingTimer = null;
+                    this._finishTyping();
+                }
+            },
+            loop: true,
+        });
+    }
+
+    _finishTyping() {
+        this._isTyping = false;
+        if (this._typingText) { this._typingText.destroy(); this._typingText = null; }
+        // Swap plain proxy for the colored rich text
+        if (this._richObjects) {
+            this.tweens.add({ targets: this._richObjects, alpha: 1, duration: 120 });
+        }
+        // Show space hint now that text is fully revealed
+        this.tweens.add({ targets: this._spaceHint, alpha: 1, duration: 400 });
+    }
+
+    _skipTyping() {
+        if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
+        if (this._typingText)  { this._typingText.destroy(); this._typingText = null; }
+        this._finishTyping();
     }
 
     // ── Content lifecycle ──────────────────────────────────────────────────
@@ -287,6 +342,11 @@ export class IntroScene extends Phaser.Scene {
     _clearContent() {
         this._autoTimer?.remove();
         this._autoTimer = null;
+        // Clean up any in-progress typewriter
+        if (this._typingTimer) { this._typingTimer.remove(); this._typingTimer = null; }
+        if (this._typingText)  { this._typingText.destroy(); this._typingText = null; }
+        this._isTyping    = false;
+        this._richObjects = null;
         this._spaceHint?.setAlpha(0);
         for (const obj of this._content) {
             try { this.tweens.killTweensOf(obj); obj.destroy(); } catch (_) {}
@@ -297,7 +357,16 @@ export class IntroScene extends Phaser.Scene {
     // ── Navigation ─────────────────────────────────────────────────────────
 
     _advance() {
-        if (this._done || this._busy) return;
+        if (this._done) return;
+
+        // If typewriter is running, skip to full text instead of advancing page
+        if (this._isTyping) {
+            Sound.click();
+            this._skipTyping();
+            return;
+        }
+
+        if (this._busy) return;
         this._busy = true;
         this._autoTimer?.remove();
         this._autoTimer = null;
