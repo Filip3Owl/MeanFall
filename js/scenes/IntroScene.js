@@ -42,10 +42,12 @@ export class IntroScene extends Phaser.Scene {
         this._buildPermanentUI();
         this._showTitle();
 
-        this.input.keyboard.on('keydown-SPACE', () => this._advance());
-        this.input.keyboard.on('keydown-ENTER', () => this._advance());
-        this.input.keyboard.on('keydown-ESC',   () => this._finish());
-        this.input.on('pointerdown',            () => this._advance());
+        this.input.keyboard.on('keydown-SPACE',     () => this._advance());
+        this.input.keyboard.on('keydown-ENTER',     () => this._advance());
+        this.input.keyboard.on('keydown-ESC',       () => this._finish());
+        this.input.keyboard.on('keydown-LEFT',      () => this._goBack());
+        this.input.keyboard.on('keydown-BACKSPACE', () => this._goBack());
+        this.input.on('pointerdown',                () => this._advance());
 
         // P1 — música ambiente
         Music.play('menu');
@@ -180,6 +182,11 @@ export class IntroScene extends Phaser.Scene {
         this._spaceHint = this.add.text(W / 2, H - 30, 'ESPAÇO  para continuar', {
             fontSize: '10px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold'
         }).setOrigin(0.5, 1).setDepth(20).setAlpha(0);
+
+        // "← BACK" hint, shown on prologue slides after text finishes
+        this._backHint = this.add.text(14, H - 30, '←  VOLTAR', {
+            fontSize: '10px', color: '#a090d0', fontFamily: 'Courier New', fontStyle: 'bold'
+        }).setOrigin(0, 1).setDepth(20).setAlpha(0);
     }
 
     _setDots(activeIdx) {
@@ -346,6 +353,10 @@ export class IntroScene extends Phaser.Scene {
         }
         // Show space hint now that text is fully revealed
         this.tweens.add({ targets: this._spaceHint, alpha: 1, duration: 400 });
+        // Show back hint on prologue slides (page ≥ 0)
+        if (this._page >= 0) {
+            this.tweens.add({ targets: this._backHint, alpha: 1, duration: 400 });
+        }
     }
 
     _skipTyping() {
@@ -365,6 +376,7 @@ export class IntroScene extends Phaser.Scene {
         this._isTyping    = false;
         this._richObjects = null;
         this._spaceHint?.setAlpha(0);
+        this._backHint?.setAlpha(0);
         for (const obj of this._content) {
             try { this.tweens.killTweensOf(obj); obj.destroy(); } catch (_) {}
         }
@@ -372,6 +384,33 @@ export class IntroScene extends Phaser.Scene {
     }
 
     // ── Navigation ─────────────────────────────────────────────────────────
+
+    _goBack() {
+        if (this._done || this._busy || this._isTyping) return;
+        if (this._page < 0) return; // nada antes do title card
+
+        this._busy = true;
+        Sound.click();
+        this._content.forEach(obj => this.tweens.killTweensOf(obj));
+        this._spaceHint?.setAlpha(0);
+        this._backHint?.setAlpha(0);
+
+        const prev = this._page - 1;
+        this.tweens.add({
+            targets: this._content,
+            alpha: 0,
+            duration: 280,
+            ease: 'Quad.In',
+            onComplete: () => {
+                this._busy = false;
+                if (prev < 0) {
+                    this._showTitle();   // slide 0 → volta ao title card
+                } else {
+                    this._showLine(prev);
+                }
+            },
+        });
+    }
 
     _advance() {
         if (this._done) return;
