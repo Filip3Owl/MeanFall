@@ -1,5 +1,7 @@
 import { STORY } from '../data/lore.js';
 import { layoutRichText } from '../utils/RichText.js';
+import { Music } from '../utils/MusicSystem.js';
+import { Sound } from '../utils/SoundSystem.js';
 
 /**
  * IntroScene — cinematic paginated prologue.
@@ -27,6 +29,16 @@ export class IntroScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-SPACE', () => this._advance());
         this.input.keyboard.on('keydown-ENTER', () => this._advance());
         this.input.keyboard.on('keydown-ESC',   () => this._finish());
+        this.input.on('pointerdown',            () => this._advance());
+
+        // P1 — música ambiente
+        Music.play('menu');
+
+        // P4 — cleanup ao fechar a cena
+        this.events.once('shutdown', () => {
+            this.tweens.killAll();
+            this.input.keyboard.removeAllListeners();
+        });
     }
 
     // ── Atmosphere (permanent — survives page changes) ─────────────────────
@@ -289,6 +301,7 @@ export class IntroScene extends Phaser.Scene {
         this._busy = true;
         this._autoTimer?.remove();
         this._autoTimer = null;
+        Sound.click();
 
         // Freeze any in-progress fade-in tweens before fading out
         this._content.forEach(obj => this.tweens.killTweensOf(obj));
@@ -315,6 +328,7 @@ export class IntroScene extends Phaser.Scene {
         if (this._done) return;
         this._done = true;
         this._autoTimer?.remove();
+        Music.stop();
         this.cameras.main.fadeOut(500, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.scene.start('CharacterCreation');
