@@ -81,6 +81,7 @@ export class WorldScene extends Phaser.Scene {
         this._onCombatEndBound = this._onCombatEnd.bind(this);
         this._onLevelUpBound = this._onLevelUp.bind(this);
         this._onElementXpChangeBound = () => this._updateElementalAura();
+        this._onQuestUpdateBound = () => this._updateQuestIcons();
         this._onBountyCompleteBound = ({ slot }) => {
             this._chat(`{{accent:BÔNUS COMPLETO:}} ${slot.label} — abra o diário (Q) para coletar!`, 'xp');
             AchievementSystem.recordBounty(this._playerData);
@@ -90,6 +91,7 @@ export class WorldScene extends Phaser.Scene {
         EventBus.on('combat-end',       this._onCombatEndBound);
         EventBus.on('player-level-up',  this._onLevelUpBound);
         EventBus.on('element-xp-change', this._onElementXpChangeBound);
+        EventBus.on('quest-update',     this._onQuestUpdateBound);
         EventBus.on('bounty-complete',  this._onBountyCompleteBound);
 
         this._syncTimer      = this.time.addEvent({ delay: 5000,   loop: true, callback: this._autoSync,     callbackScope: this });
@@ -146,6 +148,7 @@ export class WorldScene extends Phaser.Scene {
             icon.npcId = nd.id;
             this._npcIcons.add(icon);
         }
+        this._updateQuestIcons();
 
         // The map is always 544×480 (same as the canvas), so the correct
         // camera position is always scroll (0,0). Reset here to fix any
@@ -173,21 +176,6 @@ export class WorldScene extends Phaser.Scene {
             this._maybeNearPortalTutorial(moved.x, moved.y);
             this._maybeNearMerchantTutorial(moved.x, moved.y);
         }
-
-        // Update quest icons
-        this._npcIcons.getChildren().forEach(icon => {
-            const quests = QuestSystem.questsForNPC(this._playerData, icon.npcId);
-            const hasComplete = quests.some(q => q.status === 'complete');
-            const hasAvailable = quests.some(q => q.status === 'available');
-
-            if (hasComplete) {
-                icon.setText('?').setColor('#44ff88').setVisible(true);
-            } else if (hasAvailable) {
-                icon.setText('!').setColor('#ffd700').setVisible(true);
-            } else {
-                icon.setVisible(false);
-            }
-        });
 
         for (const m of this._monsters) m.update(delta, this._mapManager);
 
@@ -316,6 +304,21 @@ export class WorldScene extends Phaser.Scene {
         if (hit) this._startCombat(hit);
     }
 
+    _updateQuestIcons() {
+        this._npcIcons.getChildren().forEach(icon => {
+            const quests = QuestSystem.questsForNPC(this._playerData, icon.npcId);
+            const hasComplete = quests.some(q => q.status === 'complete');
+            const hasAvailable = quests.some(q => q.status === 'available');
+            if (hasComplete) {
+                icon.setText('?').setColor('#44ff88').setVisible(true);
+            } else if (hasAvailable) {
+                icon.setText('!').setColor('#ffd700').setVisible(true);
+            } else {
+                icon.setVisible(false);
+            }
+        });
+    }
+
     _maybeNearPortalTutorial(col, row) {
         const exits = this._mapManager.mapData?.exits || [];
         const close = exits.some(e => Math.abs(e.x - col) + Math.abs(e.y - row) <= 1);
@@ -417,6 +420,7 @@ export class WorldScene extends Phaser.Scene {
         yesBg.on('pointerover',  () => yesBg.setFillStyle(0x660f00));
         yesBg.on('pointerout',   () => yesBg.setFillStyle(0x3a0a00));
         yesBg.on('pointerdown',  () => {
+            this.input.keyboard.off('keydown', kbHandler);
             container.destroy();
             this._rematchOverlay = null;
             this._paused = false;
@@ -431,15 +435,35 @@ export class WorldScene extends Phaser.Scene {
         noBg.on('pointerover',  () => noBg.setFillStyle(0x222222));
         noBg.on('pointerout',   () => noBg.setFillStyle(0x0a0a0a));
         noBg.on('pointerdown',  () => {
+            this.input.keyboard.off('keydown', kbHandler);
             container.destroy();
             this._rematchOverlay = null;
             this._paused = false;
             this._doPortalTransition(exit);
         });
         container.add([noBg, noTx]);
+
+        container.add(this.add.text(cx, cy + 72, '[ESC] para avançar', {
+            fontSize: '10px', color: '#444444', fontFamily: 'Courier New',
+        }).setOrigin(0.5));
+
+        const kbHandler = (event) => {
+            if (event.key !== 'Escape') return;
+            this.input.keyboard.off('keydown', kbHandler);
+            if (!container.active) return;
+            container.destroy();
+            this._rematchOverlay = null;
+            this._paused = false;
+            this._doPortalTransition(exit);
+        };
+        this.input.keyboard.on('keydown', kbHandler);
     }
 
     _doPortalTransition(exit) {
+        if (this._transitioning) return;
+        this._transitioning = true;
+        this._paused = true;
+
         const nextArea = exit.targetArea;
 
         if (nextArea === 'village' && this._playerData.currentArea !== 'village') {
@@ -452,10 +476,6 @@ export class WorldScene extends Phaser.Scene {
                 this._player.syncSprite();
             }
         }
-
-        if (this._transitioning) return;
-        this._transitioning = true;
-        this._paused = true;
 
         // Play door sound when exiting a house back to main world
         if (this._playerData.currentArea.includes('house')) {
@@ -920,7 +940,9 @@ export class WorldScene extends Phaser.Scene {
         if (updated) {
             Object.assign(this._playerData, updated);
             if (this._player) {
-                Object.assign(this._player, updated);
+                // Only assign data fields — never Phaser internals (sprite, shadow, scene, etc.)
+                const { scene, sprite, shadow, _moveCooldown, _moveDelay, _facing, ...safe } = updated;
+                Object.assign(this._player, safe);
             }
         }
     }
@@ -997,6 +1019,7 @@ export class WorldScene extends Phaser.Scene {
         EventBus.off('combat-end',       this._onCombatEndBound);
         EventBus.off('player-level-up',  this._onLevelUpBound);
         EventBus.off('element-xp-change', this._onElementXpChangeBound);
+        EventBus.off('quest-update',     this._onQuestUpdateBound);
         EventBus.off('bounty-complete',  this._onBountyCompleteBound);
         this._syncTimer?.remove();
         this._regenTimer?.remove();
