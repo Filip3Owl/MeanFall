@@ -219,6 +219,12 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '11px', color: '#88ffaa', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5);
 
+        // HP / Focus bar labels
+        this.add.text(ix, PY + 50, 'HP', { fontSize: '11px', color: '#aa9988', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._pHpTxt = this.add.text(ix + 134, PY + 50, '', { fontSize: '11px', color: '#aaffbb', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
+        this.add.text(ix, PY + 78, 'FOC', { fontSize: '11px', color: '#7788aa', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
+        this._pFocTxt = this.add.text(ix + 134, PY + 78, '', { fontSize: '11px', color: '#aabbff', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
+
         // Streak text (top-right of whole panel row)
         this._streakTxt = this.add.text(PX + PW - 6, PY + 8, '', {
             fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
@@ -551,12 +557,14 @@ export class CombatScene extends Phaser.Scene {
                 tx.setY(by + 15).setText(options[i]).setVisible(true);
                 bg.removeAllListeners('pointerdown');
                 const answer = options[i];
+                this._aBtns[i]._answer = answer;
                 bg.on('pointerdown', () => { if (!this._answerLock) this._onAnswer(answer, bg); });
             } else {
                 bg.setVisible(false);
                 badge.setVisible(false);
                 badgeTx.setVisible(false);
                 tx.setVisible(false);
+                this._aBtns[i]._answer = null;
             }
         }
     }
@@ -595,7 +603,16 @@ export class CombatScene extends Phaser.Scene {
 
     _onKeyDown(event) {
         if (this.scene.isActive('Scratchpad')) return;
-        if (!this._currentQ || this._currentQ.type !== 'fill_numeric' || this._answerLock) return;
+        if (!this._currentQ || this._answerLock) return;
+
+        if (this._currentQ.type !== 'fill_numeric' && /^[1234]$/.test(event.key)) {
+            const idx = parseInt(event.key) - 1;
+            const btn = this._aBtns[idx];
+            if (btn?.bg.visible && btn._answer != null) this._onAnswer(btn._answer, btn.bg);
+            return;
+        }
+
+        if (this._currentQ.type !== 'fill_numeric') return;
         if (event.key === 'Enter')     { this._submitNumeric(); return; }
         if (event.key === 'Backspace') { this._numericValue = this._numericValue.slice(0, -1); }
         else if (/^[-0-9.,]$/.test(event.key)) {
@@ -963,7 +980,15 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _updatePlayerBars() {
-        this._pVitalsGfx.clear();
+        const p = this._player;
+        const g = this._pVitalsGfx;
+        g.clear();
+        const hpPct  = Math.max(0, p.hp / p.maxHp);
+        const focPct = Math.max(0, p.focus / p.maxFocus);
+        this._drawBar(g, 286, 95,  134, 11, hpPct,  0x22cc55, 0xff3333);
+        this._drawBar(g, 286, 123, 134, 11, focPct, 0x4488ff, 0x2244aa);
+        this._pHpTxt?.setText(`${p.hp}/${p.maxHp}`);
+        this._pFocTxt?.setText(`${p.focus}/${p.maxFocus}`);
     }
 
     // ─── ACTIONS ──────────────────────────────────────────────────────────────
@@ -991,14 +1016,51 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _flee() {
-        // Confirm flee with penalty warning
         const lost = Math.floor((this._player.xp || 0) * FLEE_XP_PENALTY);
-        const ok = window.confirm(`Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual (−${lost} XP). Continuar?`);
-        if (!ok) { this._answerLock = false; return; }
-        this._player.xp = Math.max(0, (this._player.xp || 0) - lost);
-        EventBus.emit('player-xp-change', { player: this._player });
-        EventBus.emit('chat', { msg: `Você fugiu e perdeu ${lost} XP.`, type: 'error' });
-        this._endCombat('flee');
+        this._showFleeConfirm(lost, () => {
+            this._player.xp = Math.max(0, (this._player.xp || 0) - lost);
+            EventBus.emit('player-xp-change', { player: this._player });
+            EventBus.emit('chat', { msg: `Você fugiu e perdeu ${lost} XP.`, type: 'error' });
+            this._endCombat('flee');
+        });
+    }
+
+    _showFleeConfirm(lost, onConfirm) {
+        const W = 544, H = 480;
+        this._answerLock = true;
+        const c = this.add.container(0, 0).setDepth(200);
+        c.add(this.add.rectangle(0, 0, W, H, 0x000000, 0.7).setOrigin(0, 0));
+        const pw = 320, ph = 148;
+        const px = (W - pw) / 2, py = (H - ph) / 2;
+        c.add(this.add.rectangle(px, py, pw, ph, 0x180808, 1).setOrigin(0, 0).setStrokeStyle(2, 0xaa3322, 0.8));
+        c.add(this.add.rectangle(px, py, pw, 3, 0xaa3322, 0.9).setOrigin(0, 0));
+        c.add(this.add.text(W / 2, py + 14, '⊗  CONFIRMAR FUGA', {
+            fontSize: '15px', color: '#ee6644', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 3,
+        }).setOrigin(0.5, 0));
+        c.add(this.add.text(W / 2, py + 44, `Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual\n−${lost} XP serão perdidos`, {
+            fontSize: '12px', color: '#ccaa99', fontFamily: 'Courier New', align: 'center',
+        }).setOrigin(0.5, 0));
+        const yesBg = this.add.rectangle(px + 20, py + 100, 128, 30, 0x2a0808, 1)
+            .setOrigin(0, 0).setStrokeStyle(1, 0xcc4433, 0.7).setInteractive()
+            .on('pointerover', () => yesBg.setFillStyle(0x3a1010))
+            .on('pointerout',  () => yesBg.setFillStyle(0x2a0808))
+            .on('pointerdown', () => { c.destroy(); onConfirm(); });
+        c.add([yesBg, this.add.text(px + 84, py + 115, '⊗  FUGIR', {
+            fontSize: '13px', color: '#ee5533', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5)]);
+        const noBg = this.add.rectangle(px + pw - 148, py + 100, 128, 30, 0x081808, 1)
+            .setOrigin(0, 0).setStrokeStyle(1, 0x33aa55, 0.7).setInteractive()
+            .on('pointerover', () => noBg.setFillStyle(0x102818))
+            .on('pointerout',  () => noBg.setFillStyle(0x081808))
+            .on('pointerdown', () => { c.destroy(); this._answerLock = false; });
+        c.add([noBg, this.add.text(px + pw - 84, py + 115, '✓  CONTINUAR', {
+            fontSize: '13px', color: '#55cc77', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5)]);
+        const escKey = (e) => {
+            if (e.key === 'Escape') { c.destroy(); this._answerLock = false; this.input.keyboard.off('keydown', escKey); }
+        };
+        this.input.keyboard.on('keydown', escKey);
     }
 
     // ─── COMBAT END ───────────────────────────────────────────────────────────
@@ -1198,20 +1260,33 @@ export class CombatScene extends Phaser.Scene {
             rowIdx++;
         });
 
+        let continued = false;
+        const safeContinue = () => { if (!continued) { continued = true; onContinue(); } };
+
         const btnY = py2 + panelH - 36;
         const btnBg = this.add.rectangle(W / 2 - 60, btnY, 120, 28, 0x1a3a1a, 1).setOrigin(0, 0).setDepth(102)
             .setAlpha(0).setInteractive()
             .on('pointerover', () => btnBg.setFillStyle(0x2a5a2a))
             .on('pointerout',  () => btnBg.setFillStyle(0x1a3a1a))
-            .on('pointerdown', () => onContinue());
-        const btnTx = this.add.text(W / 2, btnY + 14, 'CONTINUAR', {
-            fontSize: '14px', color: '#88ff88', fontFamily: 'Courier New',
+            .on('pointerdown', () => safeContinue());
+        const btnTx = this.add.text(W / 2, btnY + 14, 'CONTINUAR  [ENTER]', {
+            fontSize: '13px', color: '#88ff88', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0.5).setDepth(102).setAlpha(0);
 
         this.tweens.add({ targets: [btnBg, btnTx], alpha: 1, duration: 500, delay: 1500 });
 
+        this.time.delayedCall(1600, () => {
+            const handler = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    this.input.keyboard.off('keydown', handler);
+                    safeContinue();
+                }
+            };
+            this.input.keyboard.on('keydown', handler);
+        });
+
         // Auto-continue after 8s as fallback
-        this.time.delayedCall(8000, () => onContinue());
+        this.time.delayedCall(8000, () => safeContinue());
     }
 
     shutdown() {
