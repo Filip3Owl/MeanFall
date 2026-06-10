@@ -72,6 +72,7 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('skill-alert', () => this._setAlert('btnSkill', true));
         EventBus.on('quest-complete', () => this._setAlert('btnQuest', true));
         EventBus.on('achievement-unlocked', ({ achievement }) => this._showAchievementBanner(achievement));
+        EventBus.on('autosave', () => this._showAutosaveIndicator());
     }
 
     _bindButtons() {
@@ -126,6 +127,33 @@ export class UIScene extends Phaser.Scene {
         }
     }
 
+    _showAutosaveIndicator() {
+        let el = document.getElementById('autosave-indicator');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'autosave-indicator';
+            Object.assign(el.style, {
+                position: 'fixed', bottom: '12px', right: '12px',
+                padding: '4px 10px',
+                background: 'rgba(0,20,10,0.88)',
+                border: '1px solid #33aa55',
+                color: '#55dd88',
+                fontFamily: 'Courier New, monospace',
+                fontSize: '11px',
+                borderRadius: '3px',
+                opacity: '0',
+                transition: 'opacity 0.3s ease',
+                pointerEvents: 'none',
+                zIndex: '9999',
+            });
+            el.textContent = '✓ Salvo';
+            document.body.appendChild(el);
+        }
+        el.style.opacity = '1';
+        clearTimeout(this._autosaveTimer);
+        this._autosaveTimer = setTimeout(() => { el.style.opacity = '0'; }, 1500);
+    }
+
     _setAlert(btnKey, on) {
         const btn = this._els[btnKey];
         if (!btn) return;
@@ -144,9 +172,8 @@ export class UIScene extends Phaser.Scene {
 
     _drainAchQueue() {
         if (!this._achQueue?.length) return;
-        const data = this._achQueue[0];
-        const ach  = data.achievement;
-        const { xpEarned, goldEarned } = data;
+        const ach = this._achQueue[0];
+        const { xpEarned = 0, goldEarned = 0 } = ach;
 
         const cat    = ACHIEVEMENT_CATEGORIES[ach.category];
         const catColor = cat?.color || '#d4af37';
@@ -284,6 +311,15 @@ export class UIScene extends Phaser.Scene {
         }
     }
 
+    _getElementIconUrl(id) {
+        if (!this._elementIconUrls) this._elementIconUrls = {};
+        if (!this._elementIconUrls[id]) {
+            const canvas = this.textures.get(`icon_element_${id}`)?.getSourceImage?.();
+            this._elementIconUrls[id] = canvas ? canvas.toDataURL() : '';
+        }
+        return this._elementIconUrls[id];
+    }
+
     _updateElementalMastery(player) {
         player = player || this.registry.get('player');
         if (!player || !this._els.elementalList) return;
@@ -296,12 +332,7 @@ export class UIScene extends Phaser.Scene {
 
             const next = xpToNextElement(m.level);
             const pct = Math.min(100, (m.xp / next) * 100);
-            
-            // Get texture as data URL for DOM
-            const textureKey = `icon_element_${id}`;
-            const texture = this.textures.get(textureKey);
-            const canvas = texture.getSourceImage();
-            const iconUrl = canvas ? canvas.toDataURL() : '';
+            const iconUrl = this._getElementIconUrl(id);
 
             const div = document.createElement('div');
             div.className = 'element-mastery-item';
@@ -343,10 +374,10 @@ export class UIScene extends Phaser.Scene {
             document.body.appendChild(popup);
         }
 
-        popup.innerHTML = `<h3>NIVEL ACIMA! Distribua 1 ponto de atributo</h3>`;
+        popup.innerHTML = `<h3>NÍVEL ACIMA! Distribua 1 ponto de atributo</h3>`;
         const stats = [
-            ['strength', 'Forca (dano)'],
-            ['intelligence', 'Inteligencia (XP bonus)'],
+            ['strength', 'Força (dano)'],
+            ['intelligence', 'Inteligência (XP bônus)'],
             ['agility', 'Agilidade (esquiva)'],
             ['vitality', 'Vitalidade (HP)'],
         ];
