@@ -95,6 +95,19 @@ const TRACKS = {
         melodyDur:  0.45,    // staccato — punchy palm-mute feel
         perc:       { kick: [0, 4], snare: [2, 6] },           // classic rock 4/4 beat (8-beat cycle)
     },
+    // ── Profundezas: lento, dissonante, claustrofóbico ─────────────────────────
+    underground: {
+        bpm: 46,
+        ambience:  'drips',
+        pad:       [38, 44, 47, 53],                          // D2 Ab2 B2 F3 — trítonos empilhados
+        bass:      [26, 26, 25, 26],                          // D1 D1 C#1 D1 — pêndulo grave
+        melody:    [50, 53, 56, 50, 47, 50, 44, 47],          // D3 F3 Ab3... arrasto cromático
+        padWave:    'sawtooth',
+        melodyWave: 'triangle',
+        melodyPeak: 0.035,
+        bassPeak:   0.10,
+        melodyDur:  1.1,
+    },
     // ── Interior / Home: soft, slow, safe ──────────────────────────────────────
     home: {
         bpm: 70,

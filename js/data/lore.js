@@ -82,7 +82,33 @@ export const ANCIENT_SCROLLS = {
     'scroll_5': {
         title: 'A Maldição da Dimensionalidade',
         text: 'Muitos caminhos levam à perdição. Quanto mais perguntas você faz ao universo, mais fácil é encontrar respostas que não significam nada.'
-    }
+    },
+
+    // ── Pergaminhos das Profundezas — crípticos, apontam para os segredos ──
+    'scroll_depths_village': {
+        title: 'Diário do Coveiro',
+        text: 'Cavei este porão antes da Distorção. Escondi minha poupança atrás de uma parede no sul — marquei-a com uma {{accent:rachadura fina}} que só quem observa de perto enxerga. Se você toca a pedra e ela {{hint:respira}}, empurre.'
+    },
+    'scroll_depths_meadows': {
+        title: 'Nota Molhada',
+        text: 'A água aqui embaixo não vem da chuva. Vem de um veio que a Sociedade selou. Perto do teto do norte, uma parede foi erguida às pressas — {{accent:a argamassa dela chora}}. O que choram, escondem.'
+    },
+    'scroll_depths_forest': {
+        title: 'Última Fogueira',
+        text: 'Acampamos aqui na noite em que a Curva quebrou. T. desapareceu atrás de uma parede no coração da toca e nunca voltou. Juro que ouvi o {{bad:eco dos passos dele}} continuar... do outro lado da pedra rachada.'
+    },
+    'scroll_depths_plains': {
+        title: 'Aposta Perdida',
+        text: 'Vex me disse: aposto 100 moedas que você não acha o cofre da fornalha. P de encontrar? {{hint:1/36}}, ele riu. Mentira. É {{accent:1 para quem lê as paredes}} — a do norte tem uma cicatriz que não pertence a ela.'
+    },
+    'scroll_depths_mountains': {
+        title: 'Registro de Mergulho nº 7',
+        text: 'O abismo engole a luz e devolve segredos. Entre os lagos, uma parede soa {{accent:oca}} quando o gelo estala. A Sociedade selou ali o que não podia flutuar. Rejeite a hipótese de que toda parede é parede.'
+    },
+    'scroll_depths_dungeon': {
+        title: 'Confissão Rasgada',
+        text: 'Eu, Grão-Mestre, escondi nesta cripta a prova do meu erro. Atrás da {{bad:pedra que sangra rachaduras}}, ao sul, deixei o que restou. Se o Lich cair um dia, que encontrem — e que o p-valor me perdoe.'
+    },
 };
 
 export const TUTORIAL_TIPS = [

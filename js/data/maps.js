@@ -5,7 +5,7 @@ export const MAP_DATA = {
     village: {
         tiles: [
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-            [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
+            [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,3],
             [3,0,13,13,13,0,0,4,0,0,13,13,13,0,0,0,3],
             [3,0,14,3,14,0,0,0,0,0,14,3,14,0,0,0,3],
             [3,0,3,5,3,1,1,1,1,1,3,5,3,0,0,4,3],
@@ -26,6 +26,7 @@ export const MAP_DATA = {
             { x: 3, y: 4,  targetArea: 'village_house_elder', targetSpawn: { x: 8, y: 12 } },
             { x: 11, y: 4, targetArea: 'village_house_scholar', targetSpawn: { x: 8, y: 12 } },
             { x: 4, y: 11, targetArea: 'village_house_merchant', targetSpawn: { x: 8, y: 12 } },
+            { x: 15, y: 1, targetArea: 'village_depths', targetSpawn: { x: 1, y: 2 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'air_wisp',     instanceId: 'v_m1', x: 14, y: 5  },
@@ -79,7 +80,7 @@ export const MAP_DATA = {
             [3,0,4,0,0,1,0,0,0,0,0,1,0,0,4,0,3],
             [3,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,3],
             [3,0,0,4,0,1,1,1,1,1,1,1,0,4,0,0,3],
-            [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
+            [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,3],
             [3,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
@@ -87,6 +88,7 @@ export const MAP_DATA = {
         exits: [
             { x: 8, y: 13, targetArea: 'forest',  targetSpawn: { x: 8, y: 1 } },
             { x: 1, y: 1,  targetArea: 'village', targetSpawn: { x: 5, y: 12 }, isBack: true },
+            { x: 15, y: 12, targetArea: 'meadows_depths', targetSpawn: { x: 14, y: 13 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'earth_golem',   instanceId: 'me_m1',    x: 3,  y: 5  },
@@ -134,13 +136,14 @@ export const MAP_DATA = {
             [3,9,9,9,4,9,9,9,9,9,9,9,4,9,9,9,3],
             [3,9,4,9,9,9,4,4,9,4,4,9,9,9,4,9,3],
             [3,9,4,4,9,9,9,9,9,9,9,9,9,4,4,9,3],
-            [3,9,9,9,9,9,9,9,6,9,9,9,9,9,9,9,3],
+            [3,24,9,9,9,9,9,9,6,9,9,9,9,9,9,9,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
         spawn: { x: 8, y: 1 },
         exits: [
             { x: 8, y: 13, targetArea: 'plains',  targetSpawn: { x: 8, y: 1 } },
             { x: 1, y: 1,  targetArea: 'meadows', targetSpawn: { x: 8, y: 12 }, isBack: true },
+            { x: 1, y: 13, targetArea: 'forest_depths', targetSpawn: { x: 2, y: 13 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'light_spark',   instanceId: 'fo_m1',    x: 2,  y: 4  },
@@ -183,13 +186,14 @@ export const MAP_DATA = {
             [3,8,3,8,8,1,8,8,8,8,8,1,8,3,8,8,3],
             [3,8,8,8,8,1,1,1,1,1,1,1,8,8,8,8,3],
             [3,8,3,3,8,8,8,8,8,8,8,8,3,3,8,8,3],
-            [3,8,8,8,8,8,8,8,6,8,8,8,8,8,8,8,3],
+            [3,8,8,8,8,8,8,8,6,8,8,8,8,8,8,24,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
         spawn: { x: 8, y: 1 },
         exits: [
             { x: 8, y: 13, targetArea: 'mountains', targetSpawn: { x: 8, y: 1 } },
             { x: 1, y: 1,  targetArea: 'forest',    targetSpawn: { x: 8, y: 12 }, isBack: true },
+            { x: 15, y: 13, targetArea: 'plains_depths', targetSpawn: { x: 14, y: 13 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'fire_phoenix',       instanceId: 'pl_m1',    x: 3,  y: 5  },
@@ -236,7 +240,7 @@ export const MAP_DATA = {
             [3,11,11,11,11,1,11,11,11,11,11,1,11,11,11,11,3],
             [3,11,10,11,11,1,11,11,11,11,11,1,11,11,10,11,3],
             [3,11,11,11,11,1,1,1,11,1,1,1,11,11,11,11,3],
-            [3,11,10,10,11,11,11,11,11,11,11,11,10,10,11,11,3],
+            [3,24,10,10,11,11,11,11,11,11,11,11,10,10,11,11,3],
             [3,11,11,11,11,11,11,11,6,11,11,11,11,11,11,11,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
@@ -244,6 +248,7 @@ export const MAP_DATA = {
         exits: [
             { x: 8, y: 13, targetArea: 'dungeon',   targetSpawn: { x: 8, y: 1 } },
             { x: 1, y: 1,  targetArea: 'plains',    targetSpawn: { x: 8, y: 12 }, isBack: true },
+            { x: 1, y: 12, targetArea: 'mountains_depths', targetSpawn: { x: 2, y: 11 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'water_serpent',     instanceId: 'mo_m1',    x: 3,  y: 5  },
@@ -274,7 +279,7 @@ export const MAP_DATA = {
     dungeon: {
         tiles: [
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-            [3,6,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,6,12,12,12,12,12,12,12,12,12,12,12,12,24,12,3],
             [3,12,3,3,12,12,12,12,12,12,12,12,3,3,12,12,3],
             [3,12,3,12,12,1,1,1,12,1,1,1,12,3,12,12,3],
             [3,12,12,12,12,1,12,12,12,12,12,1,12,12,12,12,3],
@@ -292,6 +297,7 @@ export const MAP_DATA = {
         spawn: { x: 8, y: 1 },
         exits: [
             { x: 1, y: 1, targetArea: 'mountains', targetSpawn: { x: 8, y: 12 }, isBack: true },
+            { x: 14, y: 1, targetArea: 'dungeon_depths', targetSpawn: { x: 14, y: 1 }, isHole: true },
         ],
         monsters: [
             { monsterId: 'shadow_specter',  instanceId: 'du_m1',    x: 3,  y: 5  },
@@ -404,4 +410,220 @@ export const MAP_DATA = {
             ]},
         ],
     },
+
+    // ─── PROFUNDEZAS ─────────────────────────────────────────────────────────
+    // Subterrâneos acessados por buracos semi-escondidos na superfície.
+    // Escuros (visão limitada), com paredes secretas e tesouros.
+
+    village_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,25,3,12,12,12,12,12,12,12,12,12,3,12,12,12,3],
+            [3,12,3,12,12,12,3,3,3,3,3,12,3,12,3,3,3],
+            [3,12,3,12,12,12,12,12,12,12,12,12,3,12,12,12,3],
+            [3,12,3,12,12,12,12,12,12,12,12,12,12,12,3,12,3],
+            [3,12,3,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,12,3,12,3,12,3,3,3,12,12,12,12,12,3,12,3],
+            [3,12,12,12,12,12,3,12,12,12,12,12,3,12,12,12,3],
+            [3,3,3,12,3,3,3,3,3,3,3,3,3,12,3,3,3],
+            [3,12,12,12,12,12,12,3,7,3,3,12,12,12,3,12,3],
+            [3,12,3,12,3,12,12,3,12,3,3,12,3,3,3,12,3],
+            [3,12,3,12,12,12,12,3,26,3,3,12,3,7,12,12,3],
+            [3,12,3,3,3,3,3,12,12,12,3,12,3,3,3,12,3],
+            [3,12,12,12,12,12,12,12,3,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 1, y: 2 },
+        exits: [
+            { x: 1, y: 1, targetArea: 'village', targetSpawn: { x: 14, y: 1 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'air_sylph', instanceId: 'vd_m1', x: 15, y: 9 },
+            { monsterId: 'air_sylph', instanceId: 'vd_m2', x: 15, y: 13 },
+            { monsterId: 'type_specter', instanceId: 'vd_m3', x: 11, y: 12 },
+            { monsterId: 'type_specter', instanceId: 'vd_m4', x: 15, y: 1 },
+            { monsterId: 'data_imp', instanceId: 'vd_m5', x: 7, y: 12 },
+            { monsterId: 'scale_wraith', instanceId: 'vd_m6', x: 15, y: 5 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_village', x: 14, y: 11 },
+        ],
+    },
+
+    meadows_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,7,3,12,12,12,12,12,3,7,3,12,12,12,12,12,3],
+            [3,12,3,3,3,12,3,12,3,12,3,3,3,12,3,12,3],
+            [3,12,12,12,12,12,3,12,3,26,3,12,12,12,12,12,3],
+            [3,3,3,3,3,3,3,12,3,12,12,12,12,12,12,3,3],
+            [3,12,3,12,12,12,3,12,12,12,3,12,12,12,12,12,3],
+            [3,12,3,12,3,12,3,3,3,3,3,12,3,3,3,12,3],
+            [3,12,3,12,3,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,12,12,12,3,3,3,3,3,12,12,12,3,3,3,12,3],
+            [3,12,3,12,3,12,2,12,3,12,12,12,12,12,12,12,3],
+            [3,12,3,12,12,12,3,12,3,3,3,3,12,3,3,3,3],
+            [3,12,12,12,3,12,3,12,12,12,12,12,12,12,2,2,3],
+            [3,12,3,3,3,12,3,12,3,3,12,12,3,12,3,12,3],
+            [3,12,12,12,12,12,12,12,12,12,12,12,3,12,12,25,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 14, y: 13 },
+        exits: [
+            { x: 15, y: 13, targetArea: 'meadows', targetSpawn: { x: 15, y: 11 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'earth_dryad', instanceId: 'md_m1', x: 1, y: 2 },
+            { monsterId: 'earth_dryad', instanceId: 'md_m2', x: 4, y: 3 },
+            { monsterId: 'mode_treant', instanceId: 'md_m3', x: 1, y: 6 },
+            { monsterId: 'mode_treant', instanceId: 'md_m4', x: 6, y: 1 },
+            { monsterId: 'mean_gnome', instanceId: 'md_m5', x: 2, y: 11 },
+            { monsterId: 'outlier_titan', instanceId: 'md_m6', x: 3, y: 8 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_meadows', x: 1, y: 3 },
+        ],
+    },
+
+    forest_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,12,12,12,12,12,3,12,12,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,12,3,12,3,3,12,12,12,12,12,12,3],
+            [3,12,12,12,12,12,3,12,3,12,12,12,12,12,12,12,3],
+            [3,12,3,3,3,3,3,12,3,12,12,12,12,12,12,12,3],
+            [3,12,12,12,3,12,12,12,3,3,3,12,3,12,12,12,3],
+            [3,12,3,12,3,12,3,12,3,7,3,12,12,12,3,12,3],
+            [3,12,3,12,12,12,3,12,3,12,3,12,12,12,12,12,3],
+            [3,12,3,12,3,12,3,12,3,26,3,12,12,12,3,12,3],
+            [3,12,3,12,12,12,12,12,12,12,3,12,12,12,12,12,3],
+            [3,12,3,3,3,12,3,3,3,12,3,12,3,12,3,3,3],
+            [3,12,3,12,12,12,3,12,12,12,3,12,12,12,3,7,3],
+            [3,12,3,3,3,3,3,12,3,3,3,12,3,12,3,12,3],
+            [3,25,12,12,12,12,12,20,3,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 2, y: 13 },
+        exits: [
+            { x: 1, y: 13, targetArea: 'forest', targetSpawn: { x: 1, y: 12 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'light_prism', instanceId: 'fd_m1', x: 15, y: 12 },
+            { monsterId: 'light_prism', instanceId: 'fd_m2', x: 9, y: 13 },
+            { monsterId: 'range_crystal', instanceId: 'fd_m3', x: 15, y: 8 },
+            { monsterId: 'range_crystal', instanceId: 'fd_m4', x: 13, y: 10 },
+            { monsterId: 'std_wisp', instanceId: 'fd_m5', x: 15, y: 4 },
+            { monsterId: 'iqr_revenant', instanceId: 'fd_m6', x: 13, y: 6 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_forest', x: 15, y: 13 },
+        ],
+    },
+
+    plains_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,12,3,12,3,3,7,3,7,12,12,12,12,12,12,12,3],
+            [3,12,3,12,3,3,12,3,3,3,3,3,3,12,12,12,3],
+            [3,12,3,12,12,3,26,3,12,12,12,12,12,12,3,12,3],
+            [3,12,3,12,12,12,12,12,3,12,12,12,12,12,3,12,3],
+            [3,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,12,3,12,3,12,3,3,3,3,12,12,3],
+            [3,12,12,12,12,12,3,12,3,12,12,12,3,12,12,12,3],
+            [3,12,3,12,3,12,3,12,3,3,3,12,3,3,3,3,3],
+            [3,12,3,12,3,12,3,12,12,12,12,12,12,12,12,12,3],
+            [3,12,3,12,3,12,3,12,3,3,3,12,3,3,3,12,3],
+            [3,12,3,12,12,12,3,12,12,12,3,12,12,12,3,12,3],
+            [3,12,3,3,3,12,3,12,3,12,3,3,12,3,3,12,3],
+            [3,12,12,12,12,12,12,12,3,12,12,12,12,12,12,25,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 14, y: 13 },
+        exits: [
+            { x: 15, y: 13, targetArea: 'plains', targetSpawn: { x: 15, y: 12 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'fire_salamander', instanceId: 'pd_m1', x: 1, y: 1 },
+            { monsterId: 'fire_salamander', instanceId: 'pd_m2', x: 9, y: 1 },
+            { monsterId: 'bayes_harpy', instanceId: 'pd_m3', x: 1, y: 7 },
+            { monsterId: 'bayes_harpy', instanceId: 'pd_m4', x: 15, y: 1 },
+            { monsterId: 'prob_imp', instanceId: 'pd_m5', x: 3, y: 3 },
+            { monsterId: 'conditional_chimera', instanceId: 'pd_m6', x: 15, y: 7 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_plains', x: 1, y: 2 },
+        ],
+    },
+
+    mountains_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,12,12,12,3,12,12,12,12,12,12,12,12,12,7,12,3],
+            [3,12,3,12,3,12,3,12,3,3,3,3,3,3,3,12,3],
+            [3,12,3,12,3,12,3,12,12,12,12,12,12,12,12,12,3],
+            [3,12,3,12,3,12,3,3,12,12,12,12,3,3,3,12,3],
+            [3,12,12,2,3,3,3,12,12,12,12,12,12,2,3,12,3],
+            [3,12,3,12,3,7,3,2,3,12,12,12,3,12,3,12,3],
+            [3,12,12,12,3,12,3,12,12,12,3,12,3,12,12,12,3],
+            [3,12,3,3,3,26,3,12,3,2,3,3,3,12,3,3,3],
+            [3,12,12,12,12,12,3,2,12,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,12,3,12,12,12,12,12,3,3,3,12,3],
+            [3,25,12,12,12,12,3,12,12,12,12,12,12,12,3,12,3],
+            [3,12,3,12,3,12,3,12,3,3,3,3,12,12,3,12,3],
+            [3,12,3,12,12,12,12,12,3,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 2, y: 11 },
+        exits: [
+            { x: 1, y: 11, targetArea: 'mountains', targetSpawn: { x: 1, y: 11 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'water_leviathan', instanceId: 'mod_m1', x: 13, y: 1 },
+            { monsterId: 'water_leviathan', instanceId: 'mod_m2', x: 5, y: 4 },
+            { monsterId: 'poisson_jellyfish', instanceId: 'mod_m3', x: 7, y: 8 },
+            { monsterId: 'poisson_jellyfish', instanceId: 'mod_m4', x: 9, y: 1 },
+            { monsterId: 'binomial_crab', instanceId: 'mod_m5', x: 8, y: 5 },
+            { monsterId: 'clt_kraken', instanceId: 'mod_m6', x: 11, y: 7 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_mountains', x: 12, y: 1 },
+        ],
+    },
+
+    dungeon_depths: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,12,12,12,12,12,3,12,12,12,12,12,12,25,12,12,3],
+            [3,3,3,3,3,12,3,1,3,3,3,3,3,3,3,12,3],
+            [3,12,12,12,12,12,3,12,3,12,12,12,12,12,12,12,3],
+            [3,12,3,12,3,3,3,3,3,12,3,3,3,3,3,12,3],
+            [3,1,12,12,1,12,20,12,3,12,12,12,12,12,3,12,3],
+            [3,12,3,3,3,12,3,1,3,12,3,3,3,12,3,3,3],
+            [3,12,3,12,12,12,12,12,12,12,12,12,3,12,12,12,3],
+            [3,12,12,12,12,12,12,12,3,3,3,12,3,1,3,1,3],
+            [3,12,12,12,12,12,12,12,3,3,3,12,12,12,12,12,3],
+            [3,3,12,12,1,12,12,12,3,7,3,3,3,3,3,12,3],
+            [3,12,12,12,12,1,3,12,3,12,3,12,12,7,3,12,3],
+            [3,12,3,12,3,12,3,12,3,26,3,12,3,3,3,12,3],
+            [3,12,12,12,12,12,1,12,12,12,3,12,12,12,12,1,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 14, y: 1 },
+        exits: [
+            { x: 13, y: 1, targetArea: 'dungeon', targetSpawn: { x: 13, y: 1 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'shadow_lich', instanceId: 'dd_m1', x: 12, y: 11 },
+            { monsterId: 'shadow_lich', instanceId: 'dd_m2', x: 1, y: 1 },
+            { monsterId: 'alpha_vampire', instanceId: 'dd_m3', x: 1, y: 13 },
+            { monsterId: 'alpha_vampire', instanceId: 'dd_m4', x: 5, y: 1 },
+            { monsterId: 'type_ii_shade', instanceId: 'dd_m5', x: 14, y: 13 },
+            { monsterId: 'power_wraith', instanceId: 'dd_m6', x: 1, y: 6 },
+            { monsterId: 'power_wraith', instanceId: 'dd_m7', x: 2, y: 10 },
+        ],
+        scrolls: [
+            { scrollId: 'scroll_depths_dungeon', x: 11, y: 11 },
+        ],
+    },
+
 };

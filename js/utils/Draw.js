@@ -246,6 +246,48 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_plant', S, S);
 
+    // HOLE (tile 24) — transparent overlay: dark pit with rocky rim and a rope.
+    // Entrance to each area's underground level.
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.35); g.fillEllipse(16, 18, 28, 18);   // soft shadow
+        g.fillStyle(0x1a140c);       g.fillEllipse(16, 16, 24, 15);   // outer rim
+        g.fillStyle(0x060402);       g.fillEllipse(16, 16, 19, 11);   // the void
+        // Rocky rim highlights
+        g.fillStyle(0x3d2f1c); g.fillRect(6, 10, 4, 2); g.fillRect(21, 9, 5, 2);
+        g.fillRect(4, 16, 3, 2); g.fillRect(24, 17, 4, 2); g.fillRect(10, 22, 5, 2);
+        // Rope tied outside, descending into the dark
+        g.fillStyle(0x9a7040); g.fillRect(14, 4, 2, 4);
+        g.fillStyle(0x7a5830); g.fillRect(15, 8, 2, 6);
+        g.fillStyle(0x4a3418, 0.8); g.fillRect(16, 13, 1, 4);
+    });
+    g.generateTexture('tile_hole', S, S);
+
+    // LADDER UP (tile 25) — transparent overlay: wooden ladder against light shaft
+    tile(g, g => {
+        g.fillStyle(0xfff6cc, 0.10); g.fillRect(8, 0, 16, S);          // faint light from above
+        g.fillStyle(0xfff6cc, 0.06); g.fillRect(5, 0, 22, S);
+        const wood = 0x8b5c2e, dark = 0x5c3a1e;
+        g.fillStyle(dark); g.fillRect(10, 2, 3, 28); g.fillRect(19, 2, 3, 28);  // rails
+        g.fillStyle(wood); g.fillRect(10, 2, 2, 28); g.fillRect(19, 2, 2, 28);
+        for (let y = 5; y <= 26; y += 5) {                              // rungs
+            g.fillStyle(dark); g.fillRect(12, y, 8, 3);
+            g.fillStyle(wood); g.fillRect(12, y, 8, 2);
+        }
+    });
+    g.generateTexture('tile_ladder_up', S, S);
+
+    // SECRET WALL (tile 26) — identical bricks with a *subtle* diagonal crack.
+    // Observant players notice it; SPACE opens the passage.
+    tile(g, g => {
+        drawWallBase(g);
+        g.fillStyle(0x2e2e2e, 0.85);
+        g.fillRect(20, 4, 2, 3); g.fillRect(18, 7, 2, 4); g.fillRect(16, 11, 2, 4);
+        g.fillRect(14, 15, 2, 4); g.fillRect(12, 19, 2, 4); g.fillRect(10, 23, 2, 5);
+        // A whisper of draft: darker mortar near the crack
+        g.fillStyle(0x222222, 0.5); g.fillRect(15, 8, 1, 14);
+    });
+    g.generateTexture('tile_secret_wall', S, S);
+
     // DOOR EXIT (tile 23) — arched passage back to overworld
     tile(g, g => {
         g.fillStyle(0x555566); g.fillRect(0, 0, S, S);           // wall
@@ -746,6 +788,26 @@ export function generateTextures(scene) {
     g.generateTexture('tile_rug', S, S);
 
     g.destroy();
+
+    // ─── RADIAL LIGHTS (canvas textures — used to erase the underground
+    //     darkness around the player and near exits) ────────────────────────
+    makeRadialLight(scene, 'light_radial', 256);
+    makeRadialLight(scene, 'light_radial_small', 96);
+}
+
+function makeRadialLight(scene, key, size) {
+    if (scene.textures.exists(key)) return;
+    const canvas = scene.textures.createCanvas(key, size, size);
+    const ctx = canvas.getContext();
+    const half = size / 2;
+    const grd = ctx.createRadialGradient(half, half, size * 0.12, half, half, half);
+    grd.addColorStop(0,    'rgba(255,255,255,1)');
+    grd.addColorStop(0.55, 'rgba(255,255,255,0.85)');
+    grd.addColorStop(0.8,  'rgba(255,255,255,0.35)');
+    grd.addColorStop(1,    'rgba(255,255,255,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, size, size);
+    canvas.refresh();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1538,11 +1600,14 @@ export const TILE_TEXTURE_MAP = {
     21: 'tile_bed',
     22: 'tile_plant',
     23: 'tile_door_exit',
+    24: 'tile_hole',
+    25: 'tile_ladder_up',
+    26: 'tile_secret_wall',
 };
 
 // Tiles drawn as transparent overlays: MapManager renders the area's ground
 // texture underneath so they blend with any terrain (grass, sand, snow, ...).
-export const TILE_OVERLAYS = new Set([4, 6, 7, 10, 16, 18, 21, 22]);
+export const TILE_OVERLAYS = new Set([4, 6, 7, 10, 16, 18, 21, 22, 24, 25]);
 
 // Alternate textures for large uniform terrains, picked deterministically
 // per-tile to break up visible tiling repetition.

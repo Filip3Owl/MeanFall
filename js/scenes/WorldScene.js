@@ -1,4 +1,4 @@
-import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, AREA_BOSS, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS, NPC_NAMES } from '../constants.js';
+import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, AREA_BOSS, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS, NPC_NAMES, parentArea } from '../constants.js';
 import { MapManager } from '../systems/MapManager.js';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
@@ -33,6 +33,7 @@ export class WorldScene extends Phaser.Scene {
         if (!this._playerData.openedChests) this._playerData.openedChests = {};
         if (!this._playerData.inventory) this._playerData.inventory = [];
         if (!this._playerData.upgrades) this._playerData.upgrades = {};
+        if (!this._playerData.secretsFound) this._playerData.secretsFound = {};
         if (!this._playerData.equipment) this._playerData.equipment = {};
         if (this._playerData.equipment.relic === undefined) this._playerData.equipment.relic = null;
         
@@ -121,7 +122,7 @@ export class WorldScene extends Phaser.Scene {
         this._npcs = [];
         if (this._player) this._player.destroy();
 
-        this._mapManager.load(areaId);
+        this._mapManager.load(areaId, this._playerData);
         this._playerData.currentArea = areaId;
 
         const pos = this._playerData.position;
@@ -159,8 +160,43 @@ export class WorldScene extends Phaser.Scene {
         cam.setZoom(1);
         cam.setScroll(0, 0);
 
-        const musicKey = areaId.includes('house') ? 'home' : areaId;
-        Music.play(musicKey);
+        this._setupDarkness(areaId);
+        Music.play(this._musicKeyFor(areaId));
+    }
+
+    _musicKeyFor(areaId) {
+        if (areaId.includes('house')) return 'home';
+        if (areaId.endsWith('_depths')) return 'underground';
+        return areaId;
+    }
+
+    // ── Underground darkness: black overlay with a light circle following
+    //    the player (Tibia-style limited vision) ──────────────────────────────
+
+    _setupDarkness(areaId) {
+        this._darkness?.destroy();
+        this._darkness = null;
+        if (!areaId.endsWith('_depths')) return;
+        this._darkness = this.add.renderTexture(0, 0, 544, 480)
+            .setOrigin(0, 0).setDepth(40);
+        this._exitLights = (this._mapManager.mapData?.exits || []).map(e => ({
+            x: e.x * TILE_SIZE + TILE_SIZE / 2,
+            y: e.y * TILE_SIZE + TILE_SIZE / 2,
+        }));
+        this._updateDarkness(0);
+    }
+
+    _updateDarkness(time) {
+        if (!this._darkness || !this._player?.sprite) return;
+        const rt = this._darkness;
+        // Flicker like torchlight
+        const flicker = 0.02 * Math.sin(time * 0.004) + 0.015 * Math.sin(time * 0.013);
+        rt.clear();
+        rt.fill(0x000005, 0.92 + flicker);
+        rt.erase('light_radial', this._player.sprite.x - 128, this._player.sprite.y - 128);
+        for (const l of this._exitLights || []) {
+            rt.erase('light_radial_small', l.x - 48, l.y - 48);
+        }
     }
 
     // ── Update loop ───────────────────────────────────────────────────────────
@@ -181,6 +217,7 @@ export class WorldScene extends Phaser.Scene {
         for (const m of this._monsters) m.update(delta, this._mapManager);
 
         this._syncAuraPosition();
+        this._updateDarkness(time);
 
         if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteract();
         if (Phaser.Input.Keyboard.JustDown(this._iKey)) this._openOverlay('Inventory');
@@ -341,8 +378,9 @@ export class WorldScene extends Phaser.Scene {
         // Play door sound for house entries
         if (isHouse) Sound.door();
 
-        // Back portals and House interiors bypass all lock/boss checks
-        if (!exit.isBack && !isHouse) {
+        // Back portals, house interiors and holes bypass all lock/boss checks —
+        // the depths are open to anyone brave (or careless) enough to descend
+        if (!exit.isBack && !isHouse && !exit.isHole) {
             const unlock = AREA_UNLOCK[nextArea];
             if (unlock) {
                 const player  = this._playerData;
@@ -487,8 +525,16 @@ export class WorldScene extends Phaser.Scene {
             Sound.door();
         }
 
-        this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
-        Sound.portal();
+        if (exit.isHole) {
+            this._chat(`Você desce pela escuridão rumo a {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
+            Sound.fall();
+        } else if (this._playerData.currentArea.endsWith('_depths')) {
+            this._chat(`Você sobe de volta à luz de {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
+            Sound.door();
+        } else {
+            this._chat(`Viajando para {{accent:${AREA_INFO[nextArea]?.displayName}}}...`, 'portal');
+            Sound.portal();
+        }
 
         const px = this._player.sprite.x;
         const py = this._player.sprite.y;
@@ -724,7 +770,7 @@ export class WorldScene extends Phaser.Scene {
         }
 
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
-        Music.play(this._playerData.currentArea);
+        Music.play(this._musicKeyFor(this._playerData.currentArea));
     }
 
     _onLevelUp() {
@@ -766,14 +812,29 @@ export class WorldScene extends Phaser.Scene {
                 this._interactChest(pos.x, pos.y);
                 return;
             }
-            
+
             // Check for scroll sprites
             const scroll = this._mapManager.getScrollAt(pos.x, pos.y);
             if (scroll) {
                 this._interactScroll(scroll);
                 return;
             }
+
+            // Secret walls (tile 26): pushing them opens a hidden passage
+            if (this._mapManager.getTileId(pos.x, pos.y) === 26) {
+                this._revealSecret(pos.x, pos.y);
+                return;
+            }
         }
+    }
+
+    _revealSecret(x, y) {
+        if (!this._mapManager.revealSecret(x, y)) return;
+        this._playerData.secretsFound[`${this._playerData.currentArea}:${x}:${y}`] = true;
+        Sound.secret();
+        this.cameras.main.shake(250, 0.008);
+        this._chat('{{accent:A parede cede...}} Você encontrou uma {{level:passagem secreta}}!', 'levelup');
+        SaveSystem.autoSave(this._playerData);
     }
 
     _interactScroll(scroll) {
@@ -836,8 +897,10 @@ export class WorldScene extends Phaser.Scene {
             return;
         }
 
-        // 30% chance of being a mimic in dungeon, 10% elsewhere
-        const mimicChance = this._playerData.currentArea === 'dungeon' ? 0.3 : 0.1;
+        // 30% de mímico no dungeon, 20% nas profundezas, 10% no resto
+        const areaNow = this._playerData.currentArea;
+        const mimicChance = areaNow.startsWith('dungeon') ? 0.3
+            : areaNow.endsWith('_depths') ? 0.2 : 0.1;
         const isActuallyMimic = Math.random() < mimicChance;
 
         this._paused = true;
@@ -866,22 +929,26 @@ export class WorldScene extends Phaser.Scene {
             village: 'normal', meadows: 'earth', forest: 'ice',
             plains: 'fire', mountains: 'water', dungeon: 'shadow',
         };
-        const area = this._playerData.currentArea;
-        const [base, spread] = CHEST_GOLD[area] || [15, 20];
+        const area   = this._playerData.currentArea;
+        const parent = parentArea(area);
+        const isDepths = area.endsWith('_depths');
+        // Baús das profundezas pagam 1.8× o da superfície correspondente
+        let [base, spread] = CHEST_GOLD[parent] || [15, 20];
+        if (isDepths) { base = Math.floor(base * 1.8); spread = Math.floor(spread * 1.8); }
         const gold = base + Math.floor(Math.random() * spread);
         this._playerData.gold += gold;
 
         const extras = [];
         // 45% de chance de material do elemento da área
         if (Math.random() < 0.45) {
-            const matId = `essence_${AREA_ELEMENT[area] || 'normal'}`;
+            const matId = `essence_${AREA_ELEMENT[parent] || 'normal'}`;
             if (CombatSystem.addToInventory(this._playerData, matId)) {
                 extras.push(`{{loot:${ITEMS[matId]?.name || 'Material'}}}`);
             }
         }
         // 12% de chance de consumível
         if (Math.random() < 0.12) {
-            const consumableId = ['plains', 'mountains', 'dungeon'].includes(area)
+            const consumableId = ['plains', 'mountains', 'dungeon'].includes(parent)
                 ? 'greater_health_potion' : 'health_potion';
             if (CombatSystem.addToInventory(this._playerData, consumableId)) {
                 extras.push(`{{loot:${ITEMS[consumableId]?.name}}}`);
@@ -904,7 +971,7 @@ export class WorldScene extends Phaser.Scene {
             mountains: { name: 'Mímico Abissal',     maxHp: 220, attackDamage:  68, defense: 6, xpReward: 260, goldReward: 180, questionTopic: 'distributions',   questionDifficulty: ['medium', 'hard'] },
             dungeon:   { name: 'Mímico das Trevas',  maxHp: 320, attackDamage: 100, defense: 9, xpReward: 420, goldReward: 300, questionTopic: 'inference',        questionDifficulty: ['hard']           },
         };
-        const template = MIMIC_TABLE[this._playerData.currentArea] || MIMIC_TABLE.village;
+        const template = MIMIC_TABLE[parentArea(this._playerData.currentArea)] || MIMIC_TABLE.village;
         const mimicDef = {
             id: 'mimic',
             level: this._playerData.level + 1,

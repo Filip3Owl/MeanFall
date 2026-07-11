@@ -23,12 +23,35 @@ export class MapManager {
         this._decos = [];
     }
 
-    load(areaId) {
+    load(areaId, playerData = null) {
         this.areaId  = areaId;
         this.mapData = MAP_DATA[areaId];
+        // Working copy of the tile grid — secrets and runtime changes never
+        // touch the shared MAP_DATA definition.
+        this._grid = this.mapData.tiles.map(row => [...row]);
+
+        // Apply already-discovered secret walls from the save
+        const secrets = playerData?.secretsFound || {};
+        for (const key of Object.keys(secrets)) {
+            const [area, x, y] = key.split(':');
+            if (area === areaId && this._grid[+y]?.[+x] === 26) {
+                this._grid[+y][+x] = 12; // cave floor
+            }
+        }
+
         this._buildTiles();
         const info = AREA_INFO[areaId];
         if (info) this.scene.cameras.main.setBackgroundColor(info.bgColor);
+    }
+
+    // Opens a secret wall at (col,row): grid becomes cave floor and the tile
+    // image is swapped in place. Persistence is the caller's responsibility.
+    revealSecret(col, row) {
+        if (this._grid?.[row]?.[col] !== 26) return false;
+        this._grid[row][col] = 12;
+        const img = this.tiles[row]?.[col];
+        if (img) img.setTexture('tile_cave');
+        return true;
     }
 
     _buildTiles() {
@@ -41,9 +64,10 @@ export class MapManager {
         this._decos = [];
         this._scrollSprites = [];
 
-        const groundTex = AREA_GROUND[this.areaId] || 'tile_stone';
+        const groundTex = AREA_GROUND[this.areaId]
+            || (this.areaId?.endsWith('_depths') ? 'tile_cave' : 'tile_stone');
 
-        const rows = this.mapData.tiles;
+        const rows = this._grid;
         for (let row = 0; row < rows.length; row++) {
             this.tiles[row] = [];
             for (let col = 0; col < rows[row].length; col++) {
@@ -73,7 +97,7 @@ export class MapManager {
                 this.tiles[row][col] = img;
 
                 // Wall shadows
-                if (row > 0 && this.mapData.tiles[row - 1][col] === 3 && tileId !== 3) {
+                if (row > 0 && (rows[row - 1][col] === 3 || rows[row - 1][col] === 26) && tileId !== 3 && tileId !== 26) {
                     const shadow = this.scene.add.image(x, y - TILE_SIZE / 2, 'tile_wall_shadow').setOrigin(0.5, 0).setDepth(0.5);
                     this._decos.push(shadow);
                 }
@@ -134,13 +158,13 @@ export class MapManager {
     }
 
     isWalkable(col, row) {
-        const rows = this.mapData?.tiles;
+        const rows = this._grid;
         if (!rows || row < 0 || col < 0 || row >= rows.length || col >= rows[row].length) return false;
         return TILE_WALKABLE[rows[row][col]] ?? false;
     }
 
     getTileId(col, row) {
-        return this.mapData?.tiles?.[row]?.[col] ?? -1;
+        return this._grid?.[row]?.[col] ?? -1;
     }
 
     getExit(col, row) {
@@ -149,7 +173,7 @@ export class MapManager {
 
     drawMinimap(canvas, playerData) {
         const ctx = canvas.getContext('2d');
-        const rows = this.mapData?.tiles;
+        const rows = this._grid;
         if (!rows) return;
         const areaId = playerData.currentArea;
         const discovered = (playerData.discoveredTiles || {})[areaId] || {};
@@ -173,7 +197,7 @@ export class MapManager {
     }
 
     drawMinimapPlayer(canvas, col, row) {
-        const rows = this.mapData?.tiles;
+        const rows = this._grid;
         if (!rows) return;
         const COLS = rows[0].length;
         const ROWS = rows.length;
@@ -192,6 +216,7 @@ function miniColor(tileId) {
         8: '#d4a647', 9: '#2a5d34', 10: '#666677', 11: '#ddddee', 12: '#2a2233',
         13: '#882211', 14: '#ffee88', 15: '#5c3a1e', 16: '#4a2d18',
         17: '#cc2222', 18: '#7a4c2a', 19: '#882222',
+        24: '#0a0a14', 25: '#8b6914', 26: '#555555',
     };
     return MAP[tileId] ?? '#111111';
 }

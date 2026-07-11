@@ -4,7 +4,7 @@ import { awardXP, awardElementalXP }           from '../systems/XPSystem.js';
 import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
-import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT }     from '../constants.js';
+import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT, parentArea } from '../constants.js';
 import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
 import EventBus                          from '../utils/EventBus.js';
 import { Sound }                         from '../utils/SoundSystem.js';
@@ -495,14 +495,22 @@ export class CombatScene extends Phaser.Scene {
         this.scene.launch('Scratchpad', { parent: this });
     }
 
+    // Combat in the depths counts toward the parent surface area's mastery
+    _masteryRef() {
+        const area = parentArea(this._player.currentArea);
+        if (!this._player.mastery[area]) {
+            this._player.mastery[area] = { attempted: 0, correct: 0, wrongIds: [] };
+        }
+        return this._player.mastery[area];
+    }
+
     // ─── QUESTION FLOW ────────────────────────────────────────────────────────
 
     _nextQuestion() {
         StatusEffectSystem.tick(this._player);
         this._updateStatusDisplay();
 
-        const area    = this._player.currentArea;
-        const mastery = this._player.mastery[area] || { attempted: 0, correct: 0, wrongIds: [] };
+        const mastery = this._masteryRef();
         const q = QuestionEngine.getQuestion(
             this._monsterDef.questionTopic,
             this._monsterDef.questionDifficulty,
@@ -642,8 +650,7 @@ export class CombatScene extends Phaser.Scene {
             ? { ...q, tolerance: 0 }
             : q;
         const correct = QuestionEngine.checkAnswer(qForCheck, userAnswer);
-        const area    = this._player.currentArea;
-        const mastery = this._player.mastery[area];
+        const mastery = this._masteryRef();
         mastery.attempted++;
 
         if (correct) {

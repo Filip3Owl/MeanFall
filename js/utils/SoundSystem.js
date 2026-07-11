@@ -437,6 +437,29 @@ class SoundEngine {
         });
     }
 
+    // Falling into a hole — descending whoosh ending in a muffled thud
+    fall() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 700, 'sine', t, 0.55, 0.16, 90);   // descending whistle
+            this._noise(ctx, dest, t + 0.05, 0.45, 500, 0.08);       // air rush
+            this._tone(ctx, dest, 60, 'sine', t + 0.55, 0.18, 0.28, 40); // thud
+            this._noise(ctx, dest, t + 0.55, 0.12, 300, 0.14);
+        });
+    }
+
+    // Secret passage revealed — low stone rumble + mysterious rising chime
+    secret() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._noise(ctx, dest, t, 0.5, 200, 0.16);               // stone grinding
+            this._tone(ctx, dest, 55, 'sawtooth', t, 0.45, 0.10, 45);
+            this._tone(ctx, dest, 523, 'sine', t + 0.35, 0.16, 0.10);
+            this._tone(ctx, dest, 740, 'sine', t + 0.48, 0.16, 0.12);
+            this._tone(ctx, dest, 988, 'sine', t + 0.62, 0.30, 0.14);
+        });
+    }
+
     // ── Settings ──────────────────────────────────────────────────────────────
 
     toggle() {

@@ -29,6 +29,9 @@ export const TILES = {
     BED:        21,
     PLANT:      22,
     DOOR_EXIT:  23,
+    HOLE:        24,
+    LADDER_UP:   25,
+    SECRET_WALL: 26,
 };
 
 export const TILE_WALKABLE = {
@@ -56,7 +59,16 @@ export const TILE_WALKABLE = {
     21: false,// bed
     22: false,// plant
     23: true, // door exit
+    24: true, // hole (descends to the depths)
+    25: true, // ladder up (returns to the surface)
+    26: false,// secret wall (revealed via interaction — becomes cave floor)
 };
+
+// Underground areas ('<area>_depths') share mastery/mimic tables with their
+// parent surface area.
+export function parentArea(areaId) {
+    return areaId?.endsWith('_depths') ? areaId.slice(0, -7) : areaId;
+}
 
 export const AREAS = {
     VILLAGE:   'village',
@@ -77,6 +89,12 @@ export const AREA_INFO = {
     village_house_elder:    { displayName: 'Casa da Anciã',    topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_scholar:  { displayName: 'Casa do Estudioso', topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_merchant: { displayName: 'Casa do Mercador',  topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
+    village_depths:   { displayName: 'Porão Esquecido',        topic: 'Profundezas — Tipos de Dados',   bgColor: 0x050308 },
+    meadows_depths:   { displayName: 'Grutas dos Prados',      topic: 'Profundezas — Tendência Central', bgColor: 0x050308 },
+    forest_depths:    { displayName: 'Toca Congelada',         topic: 'Profundezas — Dispersão',        bgColor: 0x050308 },
+    plains_depths:    { displayName: 'Fornalha Soterrada',     topic: 'Profundezas — Probabilidade',    bgColor: 0x050308 },
+    mountains_depths: { displayName: 'Abismo Alagado',         topic: 'Profundezas — Distribuições',    bgColor: 0x050308 },
+    dungeon_depths:   { displayName: 'Cripta do Grão-Mestre',  topic: 'Profundezas — Inferência',       bgColor: 0x030205 },
 };
 
 export const AREA_UNLOCK = {

@@ -79,7 +79,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
         ├── questions.js   207 questões (6 tópicos, 3 dificuldades, 3 tipos)
         ├── monsters.js    30 monstros (24 elementais + 6 chefes/especiais), 4 por área
         ├── items.js       55 itens (consumíveis, equipamentos por slot, scrolls, 6 materiais de forja, Incenso do Caos)
-        ├── maps.js        6 mapas tile-based completos
+        ├── maps.js        15 mapas tile-based (6 superfícies + 3 casas + 6 profundezas)
         ├── quests.js      7 missões principais com objetivos e recompensas
         ├── skills.js      13 habilidades passivas na árvore de habilidades
         ├── books.js       18 tomos com lore e bônus permanentes
@@ -101,6 +101,18 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
 | Plains     | Probabilidade             | Fogo     | 8              | —                        |
 | Mountains  | Distribuições             | Água     | 12             | —                        |
 | Dungeon    | Testes de Hipótese        | Trevas   | 15             | 70% mastery em 3 áreas   |
+
+### Profundezas (subsolo)
+
+Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um **buraco semi-escondido** (tile 24) no mapa; a volta é pela **escada** (tile 25). Sem requisito de desbloqueio — os monstros mais fortes são o gate natural.
+
+- **Escuridão estilo Tibia**: visão limitada a um círculo de luz ao redor do jogador (RenderTexture + erase de `light_radial`, com flicker); saídas têm luz fraca própria
+- **Paredes secretas** (tile 26): visual de parede com rachadura sutil; SPACE adjacente abre a passagem (persistido em `playerData.secretsFound`, aplicado pelo MapManager na carga)
+- Cada profundeza tem: 1 sala secreta murada com baú, 1 baú comum, 1 pergaminho críptico (`scroll_depths_*` em lore.js) com dica velada do segredo, e 6-7 monstros dos tiers mais altos da área
+- Baús das profundezas pagam 1.8× o ouro da superfície
+- Combate no subsolo conta para a maestria da **área-pai** (`parentArea()` em constants.js)
+- Música própria (`underground`, dissonante) + ambiência de goteiras
+- Os mapas foram gerados/validados por script (BFS de conectividade); bolsões secretos são inalcançáveis sem abrir a parede
 
 ---
 
