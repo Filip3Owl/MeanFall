@@ -32,6 +32,7 @@ export class WorldScene extends Phaser.Scene {
         }
         if (!this._playerData.openedChests) this._playerData.openedChests = {};
         if (!this._playerData.inventory) this._playerData.inventory = [];
+        if (!this._playerData.upgrades) this._playerData.upgrades = {};
         if (!this._playerData.equipment) this._playerData.equipment = {};
         if (this._playerData.equipment.relic === undefined) this._playerData.equipment.relic = null;
         
@@ -793,7 +794,7 @@ export class WorldScene extends Phaser.Scene {
         // Build dialog lines (cycle through their full lore script)
         const lines = [...(npc.dialog || [])];
 
-        // Action follow-up info (shop/quest) included as final lore-flavored line
+        // Action follow-up info (shop/quest/gamble) included as final lore-flavored line
         let action = null;
         if (npc.role === 'shop') {
             lines.push('Examine minhas mercadorias quando estiver pronto, viajante.');
@@ -805,6 +806,11 @@ export class WorldScene extends Phaser.Scene {
             for (const o of newOnes)   lines.push(`Tarefa proposta: {{accent:${o.quest.name}}}.`);
             for (const o of completes) lines.push(`Você completou: {{good:${o.quest.name}}}! Reivindique sua recompensa.`);
             if (completes.length > 0) action = { label: 'VER MISSÕES', kind: 'quest' };
+        }
+        // Vex oferece seu jogo de dados quando não há recompensa de missão pendente
+        if (npc.npcId === 'gambler' && !action) {
+            lines.push('Sente o cheiro da sorte? Meus dados estão sempre na mesa. Sabe calcular suas chances?');
+            action = { label: 'JOGAR DADOS', kind: 'gamble' };
         }
 
         Sound.interact();
@@ -822,8 +828,11 @@ export class WorldScene extends Phaser.Scene {
 
     _interactChest(x, y) {
         const instanceId = `chest_${this._playerData.currentArea}_${x}_${y}`;
-        if (this._playerData.openedChests[instanceId]) {
-            this._chat('Este baú já está vazio.', 'system');
+        // Chests reset daily: openedChests stores the date it was last opened.
+        // Legacy saves stored `true`, which never matches a date — reopens once.
+        const today = new Date().toISOString().slice(0, 10);
+        if (this._playerData.openedChests[instanceId] === today) {
+            this._chat('Este baú já foi aberto hoje. Volte amanhã!', 'system');
             return;
         }
 
@@ -847,16 +856,40 @@ export class WorldScene extends Phaser.Scene {
     }
 
     _openChest(x, y, instanceId) {
-        this._playerData.openedChests[instanceId] = true;
+        this._playerData.openedChests[instanceId] = new Date().toISOString().slice(0, 10);
         Sound.chest();
         const CHEST_GOLD = {
             village: [15, 20], meadows:   [30, 30], forest:  [55, 40],
             plains:  [80, 50], mountains: [120, 70], dungeon: [180, 100],
         };
-        const [base, spread] = CHEST_GOLD[this._playerData.currentArea] || [15, 20];
+        const AREA_ELEMENT = {
+            village: 'normal', meadows: 'earth', forest: 'ice',
+            plains: 'fire', mountains: 'water', dungeon: 'shadow',
+        };
+        const area = this._playerData.currentArea;
+        const [base, spread] = CHEST_GOLD[area] || [15, 20];
         const gold = base + Math.floor(Math.random() * spread);
         this._playerData.gold += gold;
-        this._chat(`Você abriu o baú e encontrou {{gold:${gold} moedas de ouro}}!`, 'loot');
+
+        const extras = [];
+        // 45% de chance de material do elemento da área
+        if (Math.random() < 0.45) {
+            const matId = `essence_${AREA_ELEMENT[area] || 'normal'}`;
+            if (CombatSystem.addToInventory(this._playerData, matId)) {
+                extras.push(`{{loot:${ITEMS[matId]?.name || 'Material'}}}`);
+            }
+        }
+        // 12% de chance de consumível
+        if (Math.random() < 0.12) {
+            const consumableId = ['plains', 'mountains', 'dungeon'].includes(area)
+                ? 'greater_health_potion' : 'health_potion';
+            if (CombatSystem.addToInventory(this._playerData, consumableId)) {
+                extras.push(`{{loot:${ITEMS[consumableId]?.name}}}`);
+            }
+        }
+
+        const extraTxt = extras.length ? ` e ${extras.join(', ')}` : '';
+        this._chat(`Você abriu o baú e encontrou {{gold:${gold} moedas de ouro}}${extraTxt}!`, 'loot');
         EventBus.emit('player-stats-changed', { player: this._playerData });
         SaveSystem.autoSave(this._playerData);
     }
@@ -890,6 +923,8 @@ export class WorldScene extends Phaser.Scene {
             if (shop) { this.scene.launch('Shop', { shopId: shop.id }); launched = true; }
         } else if (kind === 'quest') {
             this.scene.launch('Quest'); launched = true;
+        } else if (kind === 'gamble') {
+            this.scene.launch('Gamble'); launched = true;
         }
         // Safety: if nothing opened, unpause immediately to prevent permanent freeze
         if (!launched) this._paused = false;

@@ -57,12 +57,13 @@ export class CombatScene extends Phaser.Scene {
     _buildUI() {
         const W = 544, H = 480;
         const isBoss  = !!this._monsterDef.isBoss;
-        const isElite = isBoss || this._monsterDef.name.startsWith('Elite');
+        const isShiny = !!this._monsterDef.isShiny;
+        const isElite = isBoss || isShiny || !!this._monsterDef.isElite || this._monsterDef.name.startsWith('Elite');
         const elem     = ELEMENTS[this._monsterDef.element] || ELEMENTS.normal;
-        const eColor   = isBoss ? 0xff4400 : isElite ? 0xffd700 : elem.color;
-        const eDark    = isBoss ? 0x1a0800 : isElite ? 0x2a1a00 : elem.dark;
+        const eColor   = isBoss ? 0xff4400 : isShiny ? 0xfff2aa : isElite ? 0xffd700 : elem.color;
+        const eDark    = isBoss ? 0x1a0800 : isShiny ? 0x2a2410 : isElite ? 0x2a1a00 : elem.dark;
         const eHex     = '#' + eColor.toString(16).padStart(6, '0');
-        const eAccent  = isBoss ? 0xff8844 : isElite ? 0xffd700 : elem.accent;
+        const eAccent  = isBoss ? 0xff8844 : isShiny ? 0xfff2aa : isElite ? 0xffd700 : elem.accent;
         const eTextHex = '#' + eAccent.toString(16).padStart(6, '0');
 
         // ── Deep void background ─────────────────────────────────────────
@@ -85,9 +86,11 @@ export class CombatScene extends Phaser.Scene {
 
         const titleStr = isBoss
             ? `☠  CHEFE DE ÁREA  ·  ${elem.topicLabel.toUpperCase()}  ☠`
-            : isElite
-                ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
-                : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
+            : isShiny
+                ? `✦  CRIATURA CINTILANTE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
+                : isElite
+                    ? `✦  ENCONTRO ELITE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
+                    : `[ ${elem.symbol} ]  COMBATE  ·  ${elem.topicLabel.toUpperCase()}`;
         this.add.text(W / 2, 16, titleStr, {
             fontSize: '13px', color: eTextHex, fontFamily: 'Courier New', fontStyle: 'bold', letterSpacing: 1,
             stroke: '#000000', strokeThickness: 2,
@@ -1075,7 +1078,9 @@ export class CombatScene extends Phaser.Scene {
         let bookIds = [];
 
         if (outcome === 'win') {
-            const isElite = this._monsterDef.name.startsWith('Elite');
+            const isElite = !!this._monsterDef.isElite || this._monsterDef.name.startsWith('Elite');
+            const isShiny = !!this._monsterDef.isShiny;
+            const feverReached = this._maxStreak >= 5;
             let baseXpReward = this._relicEffect?.type === 'xp_multiplier'
                 ? Math.floor(this._monsterDef.xpReward * this._relicEffect.value)
                 : this._monsterDef.xpReward;
@@ -1113,12 +1118,25 @@ export class CombatScene extends Phaser.Scene {
 
             this._player.gold = (this._player.gold || 0) + goldGained;
 
-            // Roll loot multiple times for Elites (2x rolls)
-            const rolls = isElite ? 2 : 1;
+            // Loot rolls: Elites/Cintilantes roll twice; Fever Mode grants +1 roll
+            const rolls = (isElite || isShiny ? 2 : 1) + (feverReached ? 1 : 0);
             for (let i = 0; i < rolls; i++) {
                 const batch = CombatSystem.rollDrops(this._monsterDef);
                 lootIds.push(...batch);
             }
+
+            // Forge material drop, tied to the monster's element.
+            // Base 25%, +1%/nível de maestria do elemento (cap +15%), dobrado em Fervura.
+            // Elite garante 1; Cintilante garante 2.
+            const elemId = ELEMENTS[this._monsterDef.element] ? this._monsterDef.element : 'normal';
+            const masteryLvl = this._player.elementalMastery?.[elemId]?.level || 1;
+            let matChance = 0.25 + Math.min(0.15, 0.01 * (masteryLvl - 1));
+            if (feverReached) matChance *= 2;
+            let matQty = 0;
+            if (isShiny)      matQty = 2;
+            else if (isElite) matQty = 1 + (Math.random() < matChance ? 1 : 0);
+            else if (Math.random() < matChance) matQty = 1;
+            for (let i = 0; i < matQty; i++) lootIds.push(`essence_${elemId}`);
 
             const RARITY_TAG = { legendary: 'legend', epic: 'epic', rare: 'rare', uncommon: 'loot', common: 'mute' };
             for (const itemId of lootIds) {
@@ -1162,7 +1180,7 @@ export class CombatScene extends Phaser.Scene {
             maxStreak:    this._maxStreak,
             allCorrect:   this._wrongCount === 0,
             feverReached: this._maxStreak >= 5,
-            isElite:      this._monsterDef.name.startsWith('Elite'),
+            isElite:      !!this._monsterDef.isElite || this._monsterDef.name.startsWith('Elite'),
             isMimic:      this._monsterDef.id === 'mimic',
         });
     }

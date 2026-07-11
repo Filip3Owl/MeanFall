@@ -1,4 +1,5 @@
 import { ShopSystem }              from '../systems/ShopSystem.js';
+import { CombatSystem }            from '../systems/CombatSystem.js';
 import { ITEMS, RARITY_COLORS }    from '../data/items.js';
 import { SHOPS }                   from '../data/shops.js';
 import { UI_COLORS, RARITIES }     from '../constants.js';
@@ -53,9 +54,12 @@ export class ShopScene extends Phaser.Scene {
         // Gold display
         this._goldTxt = this.add.text(W - 30, 60, '', { fontSize: '15px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(1, 0);
 
-        // Tabs
+        // Tabs — a forja é exclusiva do Ferreiro Brom
         this._buyTab  = this._makeTab(20,  78, 'COMPRAR', () => this._switchTab('buy'));
         this._sellTab = this._makeTab(124, 78, 'VENDER',  () => this._switchTab('sell'));
+        this._forgeTab = this._shop.npcId === 'smith'
+            ? this._makeTab(228, 78, 'FORJAR', () => this._switchTab('forge'))
+            : null;
 
         // List + detail
         this.add.rectangle(14, 110, 280, 326, 0x080604, 1).setOrigin(0, 0);
@@ -105,12 +109,26 @@ export class ShopScene extends Phaser.Scene {
         this._goldTxt.setText(`Ouro: ${this._player.gold || 0}`);
     }
 
+    // Equipment the player owns (inventory + equipped) — candidates for forging
+    _forgeList() {
+        const ids = new Set();
+        for (const s of (this._player.inventory || [])) {
+            if (s.qty > 0 && ITEMS[s.itemId]?.type === 'equipment') ids.add(s.itemId);
+        }
+        for (const id of Object.values(this._player.equipment || {})) {
+            if (id && ITEMS[id]) ids.add(id);
+        }
+        return [...ids].map(itemId => ({ itemId, qty: 1 }));
+    }
+
     _render() {
         // tab visuals
-        this._buyTab.bg.setFillStyle(this._tab === 'buy' ? 0x3a3a55 : 0x1a1a2a);
-        this._sellTab.bg.setFillStyle(this._tab === 'sell' ? 0x3a3a55 : 0x1a1a2a);
-        this._buyTab.tx.setColor(this._tab === 'buy' ? '#ffffff' : '#aaaaff');
-        this._sellTab.tx.setColor(this._tab === 'sell' ? '#ffffff' : '#aaaaff');
+        const tabs = [['buy', this._buyTab], ['sell', this._sellTab], ['forge', this._forgeTab]];
+        for (const [key, tab] of tabs) {
+            if (!tab) continue;
+            tab.bg.setFillStyle(this._tab === key ? 0x3a3a55 : 0x1a1a2a);
+            tab.tx.setColor(this._tab === key ? '#ffffff' : '#aaaaff');
+        }
 
         // clear old rows
         if (this._rows) this._rows.forEach(r => { r.bg.destroy(); r.tx.destroy(); r.priceTx.destroy(); if (r.icon) r.icon.destroy(); });
@@ -118,10 +136,15 @@ export class ShopScene extends Phaser.Scene {
 
         const list = this._tab === 'buy'
             ? this._shop.stock.map(id => ({ itemId: id, qty: 1 }))
-            : (this._player.inventory || []).filter(s => s.qty > 0);
+            : this._tab === 'forge'
+                ? this._forgeList()
+                : (this._player.inventory || []).filter(s => s.qty > 0);
 
         if (list.length === 0) {
-            const empty = this.add.text(154, 270, this._tab === 'buy' ? 'Nada à venda' : 'Você não tem itens', {
+            const emptyMsg = this._tab === 'buy' ? 'Nada à venda'
+                : this._tab === 'forge' ? 'Nenhum equipamento para forjar'
+                : 'Você não tem itens';
+            const empty = this.add.text(154, 270, emptyMsg, {
                 fontSize: '17px', color: '#444444', fontFamily: 'Courier New',
             }).setOrigin(0.5, 0.5);
             this._rows.push({ bg: empty, tx: empty, priceTx: empty });
@@ -134,7 +157,6 @@ export class ShopScene extends Phaser.Scene {
             if (!item) continue;
             const color = RARITY_COLORS[item.rarity] || '#cccccc';
             const y     = 134 + i * 22;
-            const price = this._tab === 'buy' ? ShopSystem.buyPrice(itemId) : ShopSystem.sellPrice(itemId);
 
             const bg = this.add.rectangle(18, y, 272, 20, 0x111111, 1).setOrigin(0, 0).setInteractive()
                 .on('pointerover', () => { if (this._selected !== i) { bg.setFillStyle(0x1a1a22); Sound.hover(); } })
@@ -142,12 +164,24 @@ export class ShopScene extends Phaser.Scene {
                 .on('pointerdown', () => { Sound.select(); this._selectIdx(i); });
 
             const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65);
-            const tx = this.add.text(44, y + 10, qty > 1 ? `${item.name} ×${qty}` : item.name, {
+
+            let nameStr, rightStr;
+            if (this._tab === 'forge') {
+                const lvl = CombatSystem.upgradeLevel(this._player, itemId);
+                nameStr  = lvl ? `${item.name} +${lvl}` : item.name;
+                rightStr = lvl >= 3 ? 'MAX' : `→ +${lvl + 1}`;
+            } else {
+                nameStr  = qty > 1 ? `${item.name} ×${qty}` : item.name;
+                const price = this._tab === 'buy' ? ShopSystem.buyPrice(itemId) : ShopSystem.sellPrice(itemId);
+                rightStr = `${price}g`;
+            }
+
+            const tx = this.add.text(44, y + 10, nameStr, {
                 fontSize: '16px', color, fontFamily: 'Courier New',
             }).setOrigin(0, 0.5);
 
-            const priceTx = this.add.text(284, y + 10, `${price}g`, {
-                fontSize: '16px', color: '#ffcc44', fontFamily: 'Courier New',
+            const priceTx = this.add.text(284, y + 10, rightStr, {
+                fontSize: '16px', color: this._tab === 'forge' ? '#88ccff' : '#ffcc44', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
             this._rows.push({ bg, tx, icon, priceTx, idx: i, itemId });
@@ -166,12 +200,40 @@ export class ShopScene extends Phaser.Scene {
         const rColor = RARITY_COLORS[item.rarity] || '#aaaaaa';
         const rName  = (RARITIES[item.rarity] || RARITIES.common).name;
 
-        this._detName.setText(item.name).setColor(rColor);
+        const upLvl = CombatSystem.upgradeLevel(this._player, itemId);
+        this._detName.setText(item.name + (upLvl ? ` +${upLvl}` : '')).setColor(rColor);
         this._detTier.setText(rName.toUpperCase()).setColor(rColor);
-        this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equipamento — ${item.slot}`);
-        this._detDesc.setText(item.description || '');
+        this._detType.setText(
+            item.type === 'consumable' ? 'Consumível'
+            : item.type === 'material' ? 'Material de forja'
+            : `Equipamento — ${item.slot}`
+        );
         this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
 
+        if (this._tab === 'forge') {
+            if (upLvl >= 3) {
+                this._detDesc.setText('Este item já está no nível máximo de aprimoramento (+3).');
+                this._detPrice.setText('');
+                this._actionBg.setVisible(false);
+                this._actionTx.setVisible(false);
+            } else {
+                const cost  = CombatSystem.upgradeCost(item, upLvl);
+                const matId = `essence_${cost.element}`;
+                const owned = CombatSystem.countItem(this._player, matId);
+                const matName = ITEMS[matId]?.name || cost.element;
+                this._detDesc.setText(
+                    `Aprimorar para +${upLvl + 1}: bônus do item +${(upLvl + 1) * 25}%.\n\n` +
+                    `Requer:\n· ${cost.gold} ouro\n· ${cost.qty}× ${matName} (você tem ${owned})`
+                );
+                this._detPrice.setText(`Forja: ${cost.gold} ouro + ${cost.qty}× ${matName}`);
+                this._actionBg.setVisible(true);
+                this._actionTx.setVisible(true).setText(`FORJAR +${upLvl + 1}`);
+            }
+            this._actionMsg.setText('');
+            return;
+        }
+
+        this._detDesc.setText(item.description || '');
         const price = this._tab === 'buy' ? ShopSystem.buyPrice(itemId) : ShopSystem.sellPrice(itemId);
         this._detPrice.setText(`${this._tab === 'buy' ? 'Custa' : 'Vende por'}: ${price} ouro`);
 
@@ -183,6 +245,29 @@ export class ShopScene extends Phaser.Scene {
     _doAction() {
         if (this._selected === null) return;
         const itemId = this._rows[this._selected].itemId;
+
+        if (this._tab === 'forge') {
+            const result = CombatSystem.upgradeItem(this._player, itemId, ITEMS);
+            if (result.ok) {
+                Sound.equip();
+                this._actionMsg.setColor('#88ff88').setText(`${ITEMS[itemId].name} agora é +${result.level}!`);
+                EventBus.emit('chat', {
+                    msg: `O Ferreiro forjou {{loot:${ITEMS[itemId].name} +${result.level}}}!`,
+                    type: 'loot',
+                });
+                EventBus.emit('player-stats-changed', { player: this._player });
+                EventBus.emit('player-hp-change', { player: this._player });
+                this.registry.set('player', this._player);
+                this._refreshGold();
+                this._render();
+                this._clearDetail();
+            } else {
+                Sound.denied();
+                this._actionMsg.setColor('#ff4444').setText(result.reason || 'Erro');
+            }
+            return;
+        }
+
         const result = this._tab === 'buy'
             ? ShopSystem.buy(this._player, itemId)
             : ShopSystem.sell(this._player, itemId);

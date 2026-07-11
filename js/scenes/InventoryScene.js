@@ -59,9 +59,10 @@ export class InventoryScene extends Phaser.Scene {
 
     _buildFilterTabs() {
         const tabs = [
-            { label: 'Todos',       key: 'all'       },
-            { label: 'Consumíveis', key: 'consumable' },
-            { label: 'Equipamentos',key: 'equipment'  },
+            { label: 'Todos',   key: 'all'        },
+            { label: 'Consum.', key: 'consumable' },
+            { label: 'Equip.',  key: 'equipment'  },
+            { label: 'Mater.',  key: 'material'   },
         ];
         const tabW = Math.floor(LIST_W / tabs.length);
 
@@ -210,7 +211,8 @@ export class InventoryScene extends Phaser.Scene {
                 const icon = this.add.image(LIST_X + 14, y + ROW_H / 2, item.icon || 'item_potion_red')
                     .setScale(0.65).setOrigin(0.5, 0.5);
 
-                const tx = this.add.text(LIST_X + 27, y + ROW_H / 2, item.name, {
+                const upLvl = this._player.upgrades?.[itemId] || 0;
+                const tx = this.add.text(LIST_X + 27, y + ROW_H / 2, item.name + (upLvl ? ` +${upLvl}` : ''), {
                     fontSize: '14px', color, fontFamily: 'Courier New',
                 }).setOrigin(0, 0.5);
 
@@ -301,9 +303,14 @@ export class InventoryScene extends Phaser.Scene {
         if (!item) return;
 
         const rarityColor = RARITY_COLORS[item.rarity] || '#aaaaaa';
-        this._detName.setText(item.name).setColor(rarityColor);
+        const upgradeLvl  = this._player.upgrades?.[itemId] || 0;
+        this._detName.setText(item.name + (upgradeLvl ? ` +${upgradeLvl}` : '')).setColor(rarityColor);
         this._detRarity.setText((item.rarity || 'common').toUpperCase()).setColor(rarityColor);
-        this._detType.setText(item.type === 'consumable' ? 'Consumível' : `Equip · ${item.slot || ''}`).setColor('#666666');
+        this._detType.setText(
+            item.type === 'consumable' ? 'Consumível'
+            : item.type === 'material' ? 'Material de forja'
+            : `Equip · ${item.slot || ''}`
+        ).setColor('#666666');
         this._detDesc.setText(item.description || '');
         this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
 
@@ -445,6 +452,12 @@ export class InventoryScene extends Phaser.Scene {
         if (ok) {
             Sound.useItem();
             this._flash('#88ff88', 'Item usado!');
+            if (ITEMS[invItem.itemId]?.effect?.incense) {
+                EventBus.emit('chat', {
+                    msg: `{{accent:Incenso do Caos}} aceso — os próximos ${this._player.incenseCharges} monstros serão {{level:Elite}}!`,
+                    type: 'system',
+                });
+            }
             EventBus.emit('player-hp-change', { player: this._player });
             this.registry.set('player', this._player);
             SaveSystem.autoSave(this._player);

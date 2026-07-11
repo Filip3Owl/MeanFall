@@ -1,11 +1,25 @@
 import { BOUNTY_POOLS, DAILY_BOUNTY_COUNT } from '../data/bounties.js';
-import { AREA_UNLOCK } from '../constants.js';
+import { AREA_UNLOCK, ELEMENTS } from '../constants.js';
 import { awardXP } from './XPSystem.js';
+import { CombatSystem } from './CombatSystem.js';
 import EventBus from '../utils/EventBus.js';
 
 function todayStr() {
     return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 }
+
+// Monday of the current week — identifies the weekly contract cycle
+function weekStr() {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+}
+
+// Element farmed in each area (matches monster population)
+const AREA_ELEMENT = {
+    village: 'normal', meadows: 'earth', forest: 'ice',
+    plains: 'fire', mountains: 'water', dungeon: 'shadow',
+};
 
 const AREA_ORDER = ['village', 'meadows', 'forest', 'plains', 'mountains', 'dungeon'];
 
@@ -35,9 +49,51 @@ export const BountySystem = {
     },
 
     refreshIfNewDay(player) {
-        if (player.bountyLog.date === todayStr()) return;
-        player.bountyLog.date  = todayStr();
-        player.bountyLog.slots = this._generate(player);
+        const week = weekStr();
+        if (player.bountyLog.date !== todayStr()) {
+            // New day: regenerate dailies, keep the weekly contract if same week
+            const weekly = player.bountyLog.week === week
+                ? (player.bountyLog.slots || []).find(s => s.weekly)
+                : null;
+            player.bountyLog.date  = todayStr();
+            player.bountyLog.slots = this._generate(player);
+            player.bountyLog.slots.push(weekly || this._makeWeekly(player));
+            player.bountyLog.week  = week;
+        } else if (player.bountyLog.week !== week || !(player.bountyLog.slots || []).some(s => s.weekly)) {
+            // Same day but week rolled over (or old save without weekly)
+            player.bountyLog.slots = (player.bountyLog.slots || []).filter(s => !s.weekly);
+            player.bountyLog.slots.push(this._makeWeekly(player));
+            player.bountyLog.week  = week;
+        }
+    },
+
+    // Big weekly contract: kill monsters of the highest unlocked area's element.
+    // Reward scales with progression and includes forge materials.
+    _makeWeekly(player) {
+        const unlocked  = AREA_ORDER.filter(a => isAreaUnlocked(player, a));
+        const area      = unlocked[unlocked.length - 1] || 'village';
+        const tier      = AREA_ORDER.indexOf(area) + 1; // 1..6
+        const element   = AREA_ELEMENT[area];
+        const elemName  = ELEMENTS[element]?.name || element;
+        return {
+            templateId: `weekly_${element}`,
+            weekly:     true,
+            area,
+            type:       'kill_element',
+            label:      '⭐ CONTRATO DA SEMANA',
+            desc:       `Derrote 25 criaturas de ${elemName} até domingo.`,
+            element,
+            monsterId:  null,
+            objectiveArea: null,
+            count:      25,
+            progress:   0,
+            status:     'active',
+            reward: {
+                xp:   150 * tier,
+                gold: 120 * tier,
+                materials: { element, qty: 5 },
+            },
+        };
     },
 
     _generate(player) {
@@ -115,6 +171,12 @@ export const BountySystem = {
 
         if (slot.reward.xp)   awardXP(player, slot.reward.xp);
         if (slot.reward.gold) player.gold = (player.gold || 0) + slot.reward.gold;
+        if (slot.reward.materials) {
+            const { element, qty } = slot.reward.materials;
+            for (let i = 0; i < qty; i++) {
+                CombatSystem.addToInventory(player, `essence_${element}`);
+            }
+        }
 
         slot.status = 'claimed';
         EventBus.emit('bounty-claimed', { slot, player });

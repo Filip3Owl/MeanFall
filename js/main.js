@@ -24,6 +24,7 @@ import { CharacterCreationScene } from './scenes/CharacterCreationScene.js';
 import { CompendiumScene }     from './scenes/CompendiumScene.js';
 import { ScratchpadScene }     from './scenes/ScratchpadScene.js';
 import { GameOverScene }       from './scenes/GameOverScene.js';
+import { GambleScene }         from './scenes/GambleScene.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './constants.js';
 
 const config = {
@@ -35,6 +36,7 @@ const config = {
         WorldScene, UIScene, CombatScene,
         InventoryScene, CharacterScene, ShopScene, QuestScene, BookScene, SkillScene,
         DialogScene, InferenceScene, CompendiumScene, ScratchpadScene, GameOverScene,
+        GambleScene,
     ],
     scale: {
         mode: Phaser.Scale.NONE,

@@ -1,5 +1,6 @@
 import { TILE_SIZE, ELEMENTS, DIFFICULTIES } from '../constants.js';
 import { MONSTERS } from '../data/monsters.js';
+import EventBus from '../utils/EventBus.js';
 
 export class Monster {
     constructor(scene, instanceData) {
@@ -14,13 +15,36 @@ export class Monster {
 
         const def   = MONSTERS[this.monsterId];
         this.def    = { ...def };
-        
-        // Elite Chance (15% chance to be an Elite monster)
-        this.isElite = Math.random() < 0.15;
+
+        // Elite: 15% base chance; Incenso do Caos forces the next spawns.
+        // Bosses are never elite/shiny.
+        this.isElite = false;
+        this.isShiny = false;
+        if (!this.def.isBoss) {
+            if ((pData?.incenseCharges || 0) > 0) {
+                this.isElite = true;
+                pData.incenseCharges--;
+                EventBus.emit('chat', {
+                    msg: `O {{accent:Incenso do Caos}} atraiu um Elite! (${pData.incenseCharges} cargas restantes)`,
+                    type: 'system',
+                });
+            } else {
+                this.isElite = Math.random() < 0.15;
+            }
+            // Cintilante: rare golden variant (2%), exclusive with Elite
+            this.isShiny = !this.isElite && Math.random() < 0.02;
+        }
+
         if (this.isElite) {
             this.def.name = `Elite ${this.def.name}`;
             this.def.xpReward = Math.floor(this.def.xpReward * 2.5);
             this.def.goldReward = Math.floor(this.def.goldReward * 3);
+            this.def.isElite = true;
+        } else if (this.isShiny) {
+            this.def.name = `✦ ${this.def.name} Cintilante`;
+            this.def.xpReward = Math.floor(this.def.xpReward * 3);
+            this.def.goldReward = Math.floor(this.def.goldReward * 5);
+            this.def.isShiny = true;
         }
 
         const scaledHp = Math.floor(this.def.maxHp * diffDef.monsterHp * (this.isElite ? 2.0 : 1.0));
@@ -38,7 +62,7 @@ export class Monster {
         if (this.isElite) {
             this.sprite.setScale(1.3);
             this.sprite.setTint(0xffaa22); // More vibrant orange-gold tint
-            
+
             // Pulsating Aura
             const auraColor = ELEMENTS[this.def.element]?.color || 0xffd700;
             this.aura = scene.add.circle(px, py, 16, auraColor, 0.25).setDepth(3);
@@ -60,6 +84,16 @@ export class Monster {
                 repeat: -1,
                 ease: 'Sine.easeInOut'
             });
+        } else if (this.isShiny) {
+            // Cintilante: bright golden-white glow, faster shimmer
+            this.sprite.setTint(0xfff2aa);
+            this.aura = scene.add.circle(px, py, 14, 0xfff6cc, 0.35).setDepth(3);
+            scene.tweens.add({
+                targets: this.aura,
+                alpha: 0.1, scale: 1.6,
+                duration: 600, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut',
+            });
         }
 
         // Patrol state
@@ -71,7 +105,9 @@ export class Monster {
 
         // Name label above HP bar
         const elem = ELEMENTS[this.def.element] || ELEMENTS.normal;
-        const elemHex = this.isElite ? '#ffd700' : ('#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0'));
+        const elemHex = this.isElite ? '#ffd700'
+            : this.isShiny ? '#fff2aa'
+            : ('#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0'));
         this._nameLabel = scene.add.text(0, 0, `${this.def.name} Lv.${this.def.level}`, {
             fontSize: this.isElite ? '9px' : '8px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold',
             backgroundColor: '#000000bb', padding: { x: 2, y: 1 },

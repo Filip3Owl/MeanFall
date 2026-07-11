@@ -304,6 +304,47 @@ export const ITEMS = {
         flavor: 'A coroa do Rei das Sombras, forjada com XP de almas consumidas.',
         icon: 'item_ring',
     },
+
+    // ─── MATERIAIS DE FORJA ───────────────────────────────────────────────────
+    // Dropados por monstros do elemento correspondente. Usados pelo Ferreiro
+    // Brom (Prados) para aprimorar equipamentos (+1 / +2 / +3).
+    essence_fire: {
+        id: 'essence_fire', name: 'Essência de Fogo', type: 'material', rarity: 'uncommon',
+        element: 'fire', value: 30, icon: 'item_essence_fire',
+        description: 'Fragmento incandescente deixado por criaturas de Fogo. Usado na forja.',
+    },
+    essence_earth: {
+        id: 'essence_earth', name: 'Fragmento de Terra', type: 'material', rarity: 'uncommon',
+        element: 'earth', value: 30, icon: 'item_essence_earth',
+        description: 'Pedra densa e estável deixada por criaturas de Terra. Usada na forja.',
+    },
+    essence_water: {
+        id: 'essence_water', name: 'Gota Abissal', type: 'material', rarity: 'uncommon',
+        element: 'water', value: 30, icon: 'item_essence_water',
+        description: 'Gota que nunca evapora, deixada por criaturas de Água. Usada na forja.',
+    },
+    essence_ice: {
+        id: 'essence_ice', name: 'Cristal de Gelo', type: 'material', rarity: 'uncommon',
+        element: 'ice', value: 30, icon: 'item_essence_ice',
+        description: 'Cristal que nunca derrete, deixado por criaturas de Gelo. Usado na forja.',
+    },
+    essence_shadow: {
+        id: 'essence_shadow', name: 'Névoa das Trevas', type: 'material', rarity: 'uncommon',
+        element: 'shadow', value: 30, icon: 'item_essence_shadow',
+        description: 'Névoa engarrafada de criaturas das Trevas. Usada na forja.',
+    },
+    essence_normal: {
+        id: 'essence_normal', name: 'Poeira de Dados', type: 'material', rarity: 'uncommon',
+        element: 'normal', value: 30, icon: 'item_essence_normal',
+        description: 'Resíduo cintilante de criaturas Normais. Usado na forja.',
+    },
+
+    // ─── CAÇA ─────────────────────────────────────────────────────────────────
+    chaos_incense: {
+        id: 'chaos_incense', name: 'Incenso do Caos', type: 'consumable', rarity: 'rare',
+        effect: { incense: 3 }, value: 150, icon: 'item_scroll',
+        description: 'Os próximos 3 monstros que surgirem serão Elite (2× HP, 3× ouro, loot extra).',
+    },
 };
 
 export const RARITY_COLORS = {

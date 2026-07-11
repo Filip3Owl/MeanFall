@@ -69,15 +69,16 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── CompendiumScene.js     Codex elemental com informações de monstros
     │   ├── InferenceScene.js      Mini-jogo de teste de hipótese para Mimics
     │   ├── DialogScene.js         Diálogos com NPCs: typewriter effect, retrato, paginação automática, branching choices
+    │   ├── GambleScene.js         Os Dados do Vex: apostas com probabilidade e valor esperado exibidos (gold sink pedagógico)
     │   └── ScratchpadScene.js     Calculadora + bloco de notas arrastáveis (persistem entre sessões)
     ├── entities/
-    │   ├── Player.js      Sprite, movimento, vitals
-    │   ├── Monster.js     Sprite, patrulha/chase, barra de HP, aura elemental, variantes Elite
+    │   ├── Player.js      Sprite, movimento, vitals, passos por terreno
+    │   ├── Monster.js     Sprite, patrulha/chase, barra de HP, aura elemental, variantes Elite (15%) e Cintilante (2%, 5× ouro)
     │   └── NPC.js         Sprite, ciclo de diálogos, interação
     └── data/
         ├── questions.js   207 questões (6 tópicos, 3 dificuldades, 3 tipos)
         ├── monsters.js    30 monstros (24 elementais + 6 chefes/especiais), 4 por área
-        ├── items.js       48 itens (consumíveis, equipamentos por slot, scrolls)
+        ├── items.js       55 itens (consumíveis, equipamentos por slot, scrolls, 6 materiais de forja, Incenso do Caos)
         ├── maps.js        6 mapas tile-based completos
         ├── quests.js      7 missões principais com objetivos e recompensas
         ├── skills.js      13 habilidades passivas na árvore de habilidades
@@ -114,8 +115,21 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
   - `enraizado` (terra) — tolerância numérica = 0
   - `encharcado` (água) — próximo erro +40% dano e tolerância = 0
   - `maldito` (trevas) — próximo erro causa dano dobrado
-- **Variantes Elite**: 15% de chance de spawn; 2× HP, 3× ouro, aura visual única
+- **Variantes Elite**: 15% de chance de spawn; 2× HP, 3× ouro, aura visual única; o consumível Incenso do Caos força os próximos 3 spawns como Elite
+- **Cintilante (shiny)**: 2% de chance; 5× ouro, 3× XP, 2 materiais garantidos, tint dourado
 - **Mimics** (Dungeon): ativam `InferenceScene` — jogador faz um teste de hipótese (p-valor) antes do combate
+- **Maestria elemental no dano**: +2% de dano por nível de maestria do elemento da arma (cap +30%)
+
+---
+
+## Loop de Farm
+
+- **Materiais de forja**: monstros dropam `essence_<elemento>` (base 25%, +1%/nível de maestria do elemento, dobrado em Fever Mode; Elite garante 1, Cintilante garante 2)
+- **Forja** (aba FORJAR na loja do Ferreiro Brom, Prados): aprimora equipamento até +3; cada nível custa ouro + materiais do elemento do item (`CombatSystem.forgeElement`) e escala os bônus em +25%/nível; nível salvo em `playerData.upgrades[itemId]`
+- **Baús diários**: `openedChests[id]` guarda a data (YYYY-MM-DD) — reabrem todo dia com ouro + 45% de material do elemento da área + 12% de consumível
+- **Bounty semanal**: Contrato da Semana (25 kills do elemento da área mais avançada) persiste pela semana ISO em `bountyLog.week`; recompensa inclui materiais
+- **Fever Mode no loot**: streak 5+ concede +1 roll de loot e dobra a chance de material
+- **Cassino do Vex** (Planícies): apostas de dados com P e valor esperado exibidos; compara saldo real × teórico da sessão
 
 ---
 

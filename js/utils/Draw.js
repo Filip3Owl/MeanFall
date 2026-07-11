@@ -1,4 +1,4 @@
-import { COLORS, TILE_SIZE } from '../constants.js';
+import { COLORS, TILE_SIZE, ELEMENTS } from '../constants.js';
 
 const S = TILE_SIZE;
 
@@ -560,6 +560,38 @@ export function generateTextures(scene) {
     px(g, 0x33ccff, 10, 12, 4, 6); // pendant
     px(g, 0xffffff, 11, 13, 2, 2); // sparkle
     g.generateTexture('item_amulet', 24, 24);
+
+    // Forge essences — one crystal shard per element, tinted by ELEMENTS colors
+    for (const [id, elem] of Object.entries(ELEMENTS)) {
+        g.clear();
+        const dark = elem.dark, light = elem.accent;
+        px(g, dark,        9,  4, 6, 16);  // core column
+        px(g, elem.color, 10,  5, 4, 14);
+        px(g, dark,        6,  8, 12, 8);  // horizontal bulge
+        px(g, elem.color,  7,  9, 10, 6);
+        px(g, light,      10,  6, 2, 5);   // inner gleam
+        px(g, 0xffffff,   11,  7, 1, 2);   // sparkle
+        px(g, light,       5, 11, 1, 2);   // side glints
+        px(g, light,      18, 11, 1, 2);
+        g.generateTexture(`item_essence_${id}`, 24, 24);
+    }
+
+    // Dice faces 1-6 (24×24) — used by the Gamble minigame
+    for (let face = 1; face <= 6; face++) {
+        g.clear();
+        g.fillStyle(0xd8d8e2); g.fillRect(2, 2, 20, 20);       // body
+        g.fillStyle(0xffffff); g.fillRect(3, 3, 18, 8);        // top light
+        g.fillStyle(0x9a9aa8); g.fillRect(3, 19, 18, 2);       // bottom shade
+        g.fillStyle(0x555560); g.fillRect(2, 2, 20, 1); g.fillRect(2, 21, 20, 1);
+        g.fillRect(2, 2, 1, 20); g.fillRect(21, 2, 1, 20);     // border
+        const pip = (x, y) => { g.fillStyle(0x222230); g.fillRect(x - 1, y - 1, 4, 4); };
+        const C = 12, L = 7, R = 17, T = 7, B = 17;
+        if (face % 2 === 1) pip(C, C);
+        if (face >= 2) { pip(L, T); pip(R, B); }
+        if (face >= 4) { pip(R, T); pip(L, B); }
+        if (face === 6) { pip(L, C); pip(R, C); }
+        g.generateTexture(`dice_${face}`, 24, 24);
+    }
 
     // ─── MAP DECORATIONS (32×32) ───────────────────────────────────────────
     

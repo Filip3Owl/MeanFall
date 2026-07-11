@@ -336,7 +336,9 @@ export class QuestScene extends Phaser.Scene {
         }).setOrigin(0, 0.5);
 
         // Reward row
-        const rewTx = this.add.text(CX + 9, y + 70, `+${slot.reward.xp} XP   +${slot.reward.gold} ouro`, {
+        let rewStr = `+${slot.reward.xp} XP   +${slot.reward.gold} ouro`;
+        if (slot.reward.materials) rewStr += `   +${slot.reward.materials.qty}× material`;
+        const rewTx = this.add.text(CX + 9, y + 70, rewStr, {
             fontSize: '11px', color: dim ? '#242432' : '#485578', fontFamily: 'Courier New',
         }).setOrigin(0);
 

@@ -21,6 +21,7 @@ export const SHOPS = {
             'copper_ring',
             'supreme_health_potion',
             'full_focus_elixir',
+            'chaos_incense',
         ],
     },
 
@@ -42,6 +43,7 @@ export const SHOPS = {
             'shield_of_inference',
             'greaves_of_wind',
             'boots_of_swiftness',
+            'chaos_incense',
         ],
     },
 
@@ -69,6 +71,7 @@ export const SHOPS = {
             'staff_of_the_oracle',
             'legendary_robe',
             'arcane_talisman',
+            'chaos_incense',
         ],
     },
 };
