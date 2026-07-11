@@ -1,4 +1,4 @@
-import { TILE_SIZE } from '../constants.js';
+import { TILE_SIZE, NPC_NAMES } from '../constants.js';
 
 export class NPC {
     constructor(scene, data) {
@@ -22,22 +22,25 @@ export class NPC {
         
         this.sprite  = scene.add.image(px, py, texKey).setDepth(4);
 
-        // Role badge above name
-        const badge  = this.role === 'shop' ? '$' : this.role === 'quest' ? '!' : '·';
-        const badgeColor = this.role === 'shop' ? '#ffcc44' : '#ffaa44';
-        this._badge  = scene.add.text(px, py - 28, badge, {
-            fontSize: '10px', color: badgeColor, fontFamily: 'Courier New', fontStyle: 'bold',
-            stroke: '#000000', strokeThickness: 2,
-        }).setOrigin(0.5).setDepth(7);
+        // Role badge above name — shops only; quest NPCs get the dynamic
+        // '!' / '?' indicator from WorldScene instead (avoids double icons)
+        if (this.role === 'shop') {
+            this._badge = scene.add.text(px, py - 28, '$', {
+                fontSize: '10px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold',
+                stroke: '#000000', strokeThickness: 2,
+            }).setOrigin(0.5).setDepth(7);
+        }
 
-        this._label = scene.add.text(px, py - 18, data.npcId, {
+        this._label = scene.add.text(px, py - 18, NPC_NAMES[data.npcId] || data.npcId, {
             fontSize: '8px', color: '#ffd700', backgroundColor: '#00000088',
         }).setOrigin(0.5).setDepth(6);
 
         // Subtle floating animation
-        scene.tweens.add({
-            targets: [this._badge], y: py - 32, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-        });
+        if (this._badge) {
+            scene.tweens.add({
+                targets: [this._badge], y: py - 32, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+            });
+        }
     }
 
     isAdjacentTo(col, row) {

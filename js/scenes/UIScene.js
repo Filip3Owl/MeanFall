@@ -59,7 +59,7 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('element-xp-change',    ({ player }) => this._updateElementalMastery(player));
         EventBus.on('player-level-up',      ({ player }) => {
             this._updateAll(player);
-            this.addMsg(`NIVEL ACIMA! Agora és nível ${player.level}!`, 'levelup');
+            this.addMsg(`SUBIU DE NÍVEL! Agora você é nível ${player.level}!`, 'levelup');
             if (player.availableStatPoints > 0) this._showStatPointPopup(player);
         });
         EventBus.on('player-stats-changed', ({ player }) => this._updateStats(player));
@@ -374,7 +374,7 @@ export class UIScene extends Phaser.Scene {
             document.body.appendChild(popup);
         }
 
-        popup.innerHTML = `<h3>NÍVEL ACIMA! Distribua 1 ponto de atributo</h3>`;
+        popup.innerHTML = `<h3>SUBIU DE NÍVEL! Distribua 1 ponto de atributo</h3>`;
         const stats = [
             ['strength', 'Força (dano)'],
             ['intelligence', 'Inteligência (XP bônus)'],

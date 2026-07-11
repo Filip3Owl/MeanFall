@@ -1,4 +1,4 @@
-import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, AREA_BOSS, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS } from '../constants.js';
+import { TILE_SIZE, AREA_INFO, AREA_UNLOCK, AREA_BOSS, PLAYER_DEFAULTS, RESPAWN_TIME, REGEN_INTERVAL_MS, REGEN_HP_PER_TICK, REGEN_FOCUS_PER_TICK, ELEMENTS, NPC_NAMES } from '../constants.js';
 import { MapManager } from '../systems/MapManager.js';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
@@ -140,12 +140,12 @@ export class WorldScene extends Phaser.Scene {
             const npc = new NPC(this, nd);
             this._npcs.push(npc);
 
-            // Quest indicator icon
-            const icon = this.add.text(npc.sprite.x, npc.sprite.y - 14, '!', {
-                fontSize: '12px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
-                stroke: '#000', strokeThickness: 2
+            // Quest indicator icon (above the name label)
+            const icon = this.add.text(npc.sprite.x, npc.sprite.y - 30, '!', {
+                fontSize: '13px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5, 0.5).setDepth(100).setVisible(false);
-            icon.npcId = nd.id;
+            icon.npcId = nd.npcId;
             this._npcIcons.add(icon);
         }
         this._updateQuestIcons();
@@ -908,13 +908,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     _displayName(npcId) {
-        const map = {
-            elder: 'Anciã da Vila', scholar: 'Estudioso',
-            merchant: 'Mercador', smith: 'Ferreiro', trader: 'Comerciante',
-            sage: 'Sábio', hermit: 'Eremita', gambler: 'Apostador',
-            astronomer: 'Astrônomo', oracle: 'Oráculo',
-        };
-        return map[npcId] || npcId;
+        return NPC_NAMES[npcId] || npcId;
     }
 
     _autoSync() {

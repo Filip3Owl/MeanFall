@@ -1,6 +1,17 @@
 import { TILE_SIZE, TILE_WALKABLE, AREA_INFO } from '../constants.js';
 import { MAP_DATA } from '../data/maps.js';
-import { TILE_TEXTURE_MAP } from '../utils/Draw.js';
+import { TILE_TEXTURE_MAP, TILE_OVERLAYS, TILE_VARIANTS } from '../utils/Draw.js';
+
+// Ground texture drawn beneath overlay tiles (trees, portals, chests, fences,
+// furniture) so they blend with each area's terrain. Interiors use stone floor.
+const AREA_GROUND = {
+    village:   'tile_grass',
+    meadows:   'tile_grass',
+    forest:    'tile_dark_grass',
+    plains:    'tile_sand',
+    mountains: 'tile_snow',
+    dungeon:   'tile_cave',
+};
 
 export class MapManager {
     constructor(scene) {
@@ -30,15 +41,34 @@ export class MapManager {
         this._decos = [];
         this._scrollSprites = [];
 
+        const groundTex = AREA_GROUND[this.areaId] || 'tile_stone';
+
         const rows = this.mapData.tiles;
         for (let row = 0; row < rows.length; row++) {
             this.tiles[row] = [];
             for (let col = 0; col < rows[row].length; col++) {
                 const tileId  = rows[row][col];
-                const texKey  = TILE_TEXTURE_MAP[tileId] ?? 'tile_grass';
+                let texKey    = TILE_TEXTURE_MAP[tileId] ?? 'tile_grass';
                 const x = col * TILE_SIZE + TILE_SIZE / 2;
                 const y = row * TILE_SIZE + TILE_SIZE / 2;
-                
+
+                // Deterministic pseudo-random per-tile noise
+                const seed = row * 13 + col * 37 + (this.areaId?.length || 0);
+                const noise = Math.sin(seed);
+                const chance = (noise + 1) / 2;
+
+                // Overlay tiles (trees, portals, chests, ...) are transparent:
+                // draw the area's ground underneath so they blend with terrain
+                if (TILE_OVERLAYS.has(tileId)) {
+                    const under = this.scene.add.image(x, y, groundTex).setDepth(0);
+                    this._decos.push(under);
+                } else if (TILE_VARIANTS[tileId]) {
+                    // Alternate terrain variant to break visible tiling
+                    const variants = TILE_VARIANTS[tileId];
+                    const vNoise = (Math.sin(seed * 1.73 + 4.2) + 1) / 2;
+                    texKey = variants[Math.floor(vNoise * variants.length) % variants.length];
+                }
+
                 const img = this.scene.add.image(x, y, texKey).setDepth(0);
                 this.tiles[row][col] = img;
 
@@ -47,11 +77,6 @@ export class MapManager {
                     const shadow = this.scene.add.image(x, y - TILE_SIZE / 2, 'tile_wall_shadow').setOrigin(0.5, 0).setDepth(0.5);
                     this._decos.push(shadow);
                 }
-
-                // Deterministic pseudo-random decoration
-                const seed = row * 13 + col * 37 + (this.areaId?.length || 0);
-                const noise = Math.sin(seed); 
-                const chance = (noise + 1) / 2;
 
                 const isIndoor = this.areaId?.includes('_house_') || this.areaId?.includes('_inn') || this.areaId?.includes('_shop');
                 if (!isIndoor && chance > 0.75) {
@@ -70,11 +95,11 @@ export class MapManager {
                     } else if (tileId === 11) { // Snow
                         if (chance > 0.93) decoTex = 'deco_ice_crystal';
                         else decoTex = 'deco_snow_mound';
-                    } else if (tileId === 10) { // Mountain
-                        decoTex = (chance > 0.90) ? 'deco_rock_large' : 'deco_rock_small';
-                    } else if (tileId === 12 || tileId === 3) { // Cave
+                    } else if (tileId === 12) { // Cave floor
                         if (chance > 0.97) decoTex = 'deco_bones';
                         else if (chance > 0.88) decoTex = 'deco_rock_small';
+                    } else if (tileId === 3 && chance > 0.94) { // Wall — cracks only
+                        decoTex = 'deco_cracks';
                     }
 
                     if (decoTex) {

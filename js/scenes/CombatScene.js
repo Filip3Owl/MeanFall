@@ -621,7 +621,7 @@ export class CombatScene extends Phaser.Scene {
             this._numericValue += ch;
         }
         this._numDisp.setText(this._numericValue);
-        this._numCursor.setX(14 + this._numDisp.width + 2);
+        this._numCursor.setX(22 + this._numDisp.width + 2);
     }
 
     _submitNumeric() {
@@ -968,7 +968,7 @@ export class CombatScene extends Phaser.Scene {
         const pct = Math.max(0, this._monsterHp / this._monsterDef.maxHp);
         const g   = this._mHpGfx;
         g.clear();
-        this._drawBar(g, 108, 98, 148, 11, pct, 0xee3333, 0xff0000);
+        this._drawBar(g, 116, 98, 144, 11, pct, 0xee3333, 0xff0000);
         this._mHpTxt.setText(`${this._monsterHp} / ${this._monsterDef.maxHp}`);
         // Pulse danger when low
         if (pct < 0.3 && this._monsterSprite && !this._dangerPulse) {

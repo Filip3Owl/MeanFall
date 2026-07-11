@@ -268,6 +268,14 @@ export const REGEN_FOCUS_PER_TICK = 2;
 // Penalty for fleeing combat (fraction of current XP lost).
 export const FLEE_XP_PENALTY = 0.20;
 
+// Display names (PT) for NPC ids — used on world labels and dialog headers.
+export const NPC_NAMES = {
+    elder: 'Anciã da Vila', scholar: 'Estudioso',
+    merchant: 'Mercador', smith: 'Ferreiro', trader: 'Comerciante',
+    sage: 'Sábia', hermit: 'Eremita', gambler: 'Apostador',
+    astronomer: 'Astrônoma', oracle: 'Oráculo',
+};
+
 // UI semantic colors for highlighting keywords inside chat / text.
 export const UI_COLORS = {
     damage:    '#ff5555',

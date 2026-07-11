@@ -11,21 +11,38 @@ export function generateTextures(scene) {
     const g = scene.make.graphics({ x: 0, y: 0, add: false });
 
     // ─── TILES ──────────────────────────────────────────────────────────────
-    // Grass — layered greens with grass blades
+    // Grass — layered greens with grass blades (flowers live in deco layer,
+    // never baked in: baked details repeat in an obvious grid pattern)
     tile(g, g => {
-        g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
-        // Grass blades (lighter)
+        g.fillStyle(0x3a7d44); g.fillRect(0, 0, S, S);
+        // Soft edge shading (low alpha so tiles don't band into stripes)
+        g.fillStyle(0x2d6a35, 0.35); g.fillRect(0, 0, S, 3); g.fillRect(0, S - 3, S, 3);
         g.fillStyle(0x5aab64);
         g.fillRect(3, 8, 1, 4); g.fillRect(7, 14, 1, 5); g.fillRect(13, 6, 1, 4);
         g.fillRect(19, 12, 1, 5); g.fillRect(24, 8, 1, 4); g.fillRect(28, 18, 1, 4);
-        // Tiny flowers
-        g.fillStyle(0xffee44); g.fillRect(10, 10, 2, 2); g.fillRect(22, 22, 2, 2);
+        g.fillStyle(0x4a9152, 0.7);
+        g.fillRect(10, 22, 1, 4); g.fillRect(16, 18, 1, 4); g.fillRect(26, 24, 1, 4);
         // Darker patches
         g.fillStyle(0x265c2c, 0.5);
         g.fillRect(5, 20, 6, 3); g.fillRect(20, 4, 5, 3);
     });
     g.generateTexture('tile_grass', S, S);
+
+    // Grass variant — different blade layout + light dapple
+    tile(g, g => {
+        g.fillStyle(0x3a7d44); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x2d6a35, 0.35); g.fillRect(0, 0, S, 3); g.fillRect(0, S - 3, S, 3);
+        g.fillStyle(0x5aab64);
+        g.fillRect(5, 12, 1, 5); g.fillRect(11, 20, 1, 4); g.fillRect(17, 8, 1, 5);
+        g.fillRect(22, 16, 1, 4); g.fillRect(27, 10, 1, 5); g.fillRect(8, 26, 1, 3);
+        g.fillStyle(0x4a9152, 0.7);
+        g.fillRect(14, 14, 1, 4); g.fillRect(25, 22, 1, 4); g.fillRect(3, 18, 1, 3);
+        g.fillStyle(0x448a4d, 0.4);
+        g.fillRect(18, 22, 7, 4); g.fillRect(4, 5, 6, 3);
+        g.fillStyle(0x265c2c, 0.5);
+        g.fillRect(12, 27, 7, 3); g.fillRect(24, 3, 5, 3);
+    });
+    g.generateTexture('tile_grass_v2', S, S);
 
     // Stone path — more detailed brick pattern
     tile(g, g => {
@@ -46,7 +63,7 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_stone', S, S);
 
-    // Water — animated-looking with ripples and depth
+    // Water — ripples and depth
     tile(g, g => {
         g.fillStyle(0x12477f); g.fillRect(0, 0, S, S);
         g.fillStyle(0x1a5fa8); g.fillRect(0, 2, S, S - 4);
@@ -61,8 +78,21 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_water', S, S);
 
-    // Improved Wall: More variety and highlights
+    // Water variant — offset ripples so pools don't tile visibly
     tile(g, g => {
+        g.fillStyle(0x12477f); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x1a5fa8); g.fillRect(0, 2, S, S - 4);
+        g.fillStyle(0x2a7fc8); g.fillRect(0, 6, S, S - 12);
+        g.fillStyle(0x88c5f0, 0.7);
+        g.fillRect(8, 4, 7, 1); g.fillRect(20, 9, 8, 1); g.fillRect(4, 13, 6, 1);
+        g.fillRect(16, 16, 9, 1); g.fillRect(6, 23, 8, 1); g.fillRect(21, 27, 6, 1);
+        g.fillStyle(0xeeffff, 0.85);
+        g.fillRect(23, 10, 2, 1); g.fillRect(9, 14, 1, 1); g.fillRect(18, 24, 2, 1);
+    });
+    g.generateTexture('tile_water_v2', S, S);
+
+    // Wall: staggered bricks with highlights
+    const drawWallBase = (g) => {
         g.fillStyle(0x666666); g.fillRect(0, 0, S, S);
         for (let row = 0; row < 4; row++) {
             const off = (row % 2) * 8;
@@ -73,29 +103,30 @@ export function generateTextures(scene) {
                 g.fillStyle(0x777777, 0.4); g.fillRect(bx, by, 14, 1); // top highlight
             }
         }
-        // Random grit
+        // Grit
         g.fillStyle(0x333333, 0.3);
         g.fillRect(5, 5, 2, 2); g.fillRect(20, 20, 2, 2);
-    });
+    };
+    tile(g, drawWallBase);
     g.generateTexture('tile_wall', S, S);
 
+    // Tree — transparent overlay: MapManager draws the area's ground beneath,
+    // so the same texture sits correctly on grass, dark grass, sand or snow.
     tile(g, g => {
-        // Grass background
-        g.fillStyle(0x2d6a35); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x3a7d44); g.fillRect(0, 4, S, S - 8);
-        // Trunk shadow on ground
-        g.fillStyle(0x1a3d20, 0.4); g.fillRect(8, 24, 16, 6);
+        // Contact shadow on the ground
+        g.fillStyle(0x000000, 0.28); g.fillEllipse(16, 27, 22, 8);
         // Trunk
-        g.fillStyle(0x4a2d18); g.fillRect(13, 18, 6, 12);
-        g.fillStyle(0x5c3a1e); g.fillRect(14, 18, 4, 12);
-        g.fillStyle(0x6b4520, 0.6); g.fillRect(15, 19, 1, 10);
-        // Canopy — layered
-        g.fillStyle(0x1f4a22); g.fillRect(3, 5, 26, 16);
-        g.fillStyle(0x2d6a2d); g.fillRect(5, 4, 22, 16);
-        g.fillStyle(0x3d8b3d); g.fillRect(7, 6, 18, 12);
-        g.fillStyle(0x4ea84e, 0.7); g.fillRect(9, 7, 6, 5); g.fillRect(18, 9, 6, 4);
-        // Highlights
-        g.fillStyle(0x6cc66c, 0.5); g.fillRect(10, 8, 3, 2); g.fillRect(20, 10, 3, 2);
+        g.fillStyle(0x3d2510); g.fillRect(12, 18, 8, 12);
+        g.fillStyle(0x5c3a1e); g.fillRect(13, 18, 6, 12);
+        g.fillStyle(0x7a4c28, 0.7); g.fillRect(14, 19, 2, 10);
+        // Canopy — layered, rounded silhouette
+        g.fillStyle(0x1f4a22); g.fillRect(5, 7, 22, 13); g.fillRect(8, 3, 16, 18);
+        g.fillStyle(0x2d6a2d); g.fillRect(6, 6, 20, 12); g.fillRect(9, 4, 14, 15);
+        g.fillStyle(0x3d8b3d); g.fillRect(8, 6, 16, 9);
+        g.fillStyle(0x4ea84e, 0.85); g.fillRect(10, 6, 9, 5);
+        g.fillStyle(0x6cc66c, 0.6); g.fillRect(11, 7, 4, 2); g.fillRect(19, 9, 3, 2);
+        // Dark under-canopy above trunk
+        g.fillStyle(0x16351b, 0.7); g.fillRect(9, 17, 14, 3);
     });
     g.generateTexture('tile_tree', S, S);
 
@@ -138,23 +169,38 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_window', S, S);
 
-    // SIGN: Wooden board
+    // SIGN: hanging wooden board on a wall (signs are embedded in facades,
+    // so the wall bricks are baked in behind the board)
     tile(g, g => {
-        g.fillStyle(0x5c3a1e); g.fillRect(2, 6, S-4, 16); // board
-        g.fillStyle(0x4a2d18); g.fillRect(2, 6, S-4, 2); // shadow
-        // Symbols (placeholder gold dots)
-        g.fillStyle(0xd4af37); g.fillRect(8, 12, 4, 4); g.fillRect(20, 12, 4, 4);
+        drawWallBase(g);
+        // Hanging chains
+        g.fillStyle(0x999999); g.fillRect(6, 2, 2, 5); g.fillRect(24, 2, 2, 5);
+        // Board with frame
+        g.fillStyle(0x3d2510); g.fillRect(2, 7, S - 4, 18);
+        g.fillStyle(0x5c3a1e); g.fillRect(3, 8, S - 6, 16);
+        g.fillStyle(0x7a4c28, 0.5); g.fillRect(3, 8, S - 6, 2); // top bevel
+        // Plank seams
+        g.fillStyle(0x4a2d18, 0.7); g.fillRect(3, 13, S - 6, 1); g.fillRect(3, 19, S - 6, 1);
+        // Gold emblem (shop mark)
+        g.fillStyle(0xd4af37); g.fillRect(12, 12, 8, 8);
+        g.fillStyle(0xffe27a); g.fillRect(13, 13, 3, 3);
+        g.fillStyle(0xa87d00); g.fillRect(16, 16, 3, 3);
     });
     g.generateTexture('tile_sign', S, S);
 
-    // FENCE: Post and rail
+    // FENCE: transparent overlay — posts with caps and two rails
     tile(g, g => {
-        g.clear(); // Transparent background
-        g.fillStyle(0x5c3a1e);
-        g.fillRect(6, 0, 4, S); // Left post
-        g.fillRect(22, 0, 4, S); // Right post
-        g.fillRect(0, 8, S, 3); // Top rail
-        g.fillRect(0, 20, S, 3); // Bottom rail
+        const wood = 0x5c3a1e, darkW = 0x3d2510, lightW = 0x7a4c28;
+        // Posts
+        g.fillStyle(darkW);  g.fillRect(6, 2, 4, 28); g.fillRect(22, 2, 4, 28);
+        g.fillStyle(wood);   g.fillRect(6, 2, 3, 28); g.fillRect(22, 2, 3, 28);
+        g.fillStyle(lightW); g.fillRect(6, 2, 1, 28); g.fillRect(22, 2, 1, 28);
+        // Post caps
+        g.fillStyle(lightW); g.fillRect(5, 1, 6, 2); g.fillRect(21, 1, 6, 2);
+        // Rails
+        g.fillStyle(darkW);  g.fillRect(0, 9, S, 4); g.fillRect(0, 20, S, 4);
+        g.fillStyle(wood);   g.fillRect(0, 9, S, 3); g.fillRect(0, 20, S, 3);
+        g.fillStyle(lightW); g.fillRect(0, 9, S, 1); g.fillRect(0, 20, S, 1);
     });
     g.generateTexture('tile_fence', S, S);
 
@@ -212,22 +258,38 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_door_exit', S, S);
 
+    // Portal — transparent overlay (sits on any ground) with layered glow
     tile(g, g => {
-        g.fillStyle(COLORS.GRASS); g.fillRect(0, 0, S, S);
-        g.fillStyle(COLORS.PORTAL);
-        g.fillRect(8, 2, 16, 28);
-        g.fillRect(2, 8, 28, 16);
-        g.fillStyle(0xcc88ff, 0.7);
-        g.fillRect(10, 4, 12, 24); g.fillRect(4, 10, 24, 12);
-        g.fillStyle(0xffffff, 0.4); g.fillRect(13, 7, 6, 18);
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(16, 28, 20, 6); // ground shadow
+        g.fillStyle(0x5a1e99); g.fillRect(8, 2, 16, 26); g.fillRect(4, 6, 24, 18);
+        g.fillStyle(0x9944ff); g.fillRect(10, 4, 12, 22); g.fillRect(6, 8, 20, 14);
+        g.fillStyle(0xcc88ff, 0.85); g.fillRect(12, 6, 8, 18); g.fillRect(8, 10, 16, 10);
+        g.fillStyle(0xffffff, 0.7); g.fillRect(14, 9, 4, 12);
+        // Sparkles
+        g.fillStyle(0xffffff, 0.9);
+        g.fillRect(9, 5, 1, 1); g.fillRect(22, 8, 1, 1);
+        g.fillRect(11, 24, 1, 1); g.fillRect(21, 21, 1, 1);
     });
     g.generateTexture('tile_portal', S, S);
 
+    // Chest — transparent overlay with lid, metal bands and gold lock
     tile(g, g => {
-        g.fillStyle(COLORS.CHEST); g.fillRect(4, 10, 24, 18);
-        g.fillStyle(0x5a4008); g.fillRect(4, 10, 24, 4);
-        g.fillStyle(0xffd700); g.fillRect(13, 16, 6, 6);
-        g.fillStyle(0x8b6914, 0.5); g.fillRect(4, 10, 24, 1);
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(16, 28, 24, 6);
+        // Body
+        g.fillStyle(0x5a3c10); g.fillRect(4, 12, 24, 16);
+        g.fillStyle(0x8b6914); g.fillRect(5, 13, 22, 14);
+        // Lid
+        g.fillStyle(0x6b4f10); g.fillRect(4, 7, 24, 6);
+        g.fillStyle(0x9a7a20); g.fillRect(5, 8, 22, 4);
+        g.fillStyle(0xb8952e, 0.8); g.fillRect(6, 8, 20, 1);
+        // Metal bands
+        g.fillStyle(0x3a3a44); g.fillRect(4, 13, 24, 2);
+        g.fillStyle(0x3a3a44); g.fillRect(7, 7, 2, 21); g.fillRect(23, 7, 2, 21);
+        g.fillStyle(0x55555f, 0.8); g.fillRect(7, 7, 1, 21); g.fillRect(23, 7, 1, 21);
+        // Gold lock
+        g.fillStyle(0xffd700); g.fillRect(13, 12, 6, 7);
+        g.fillStyle(0xa87d00); g.fillRect(14, 15, 4, 3);
+        g.fillStyle(0xfff2aa); g.fillRect(14, 13, 2, 1);
     });
     g.generateTexture('tile_chest', S, S);
 
@@ -236,24 +298,55 @@ export function generateTextures(scene) {
         g.fillStyle(0xc49040, 0.4);
         g.fillRect(3, 5, 5, 3); g.fillRect(14, 15, 6, 3); g.fillRect(22, 7, 4, 5);
         g.fillStyle(0xe8c060, 0.3); g.fillRect(8, 20, 8, 3);
+        // Wind-blown ridges
+        g.fillStyle(0xc49040, 0.5); g.fillRect(4, 26, 10, 1); g.fillRect(18, 11, 9, 1);
     });
     g.generateTexture('tile_sand', S, S);
+
+    // Sand variant — dune lines shifted
+    tile(g, g => {
+        g.fillStyle(COLORS.SAND); g.fillRect(0, 0, S, S);
+        g.fillStyle(0xc49040, 0.4);
+        g.fillRect(9, 3, 6, 3); g.fillRect(20, 19, 5, 3); g.fillRect(4, 14, 4, 4);
+        g.fillStyle(0xe8c060, 0.3); g.fillRect(16, 25, 9, 3);
+        g.fillStyle(0xc49040, 0.5); g.fillRect(12, 8, 11, 1); g.fillRect(2, 21, 8, 1);
+        g.fillStyle(0xb8843a, 0.6); g.fillRect(24, 5, 2, 2); g.fillRect(7, 28, 2, 1);
+    });
+    g.generateTexture('tile_sand_v2', S, S);
 
     tile(g, g => {
         g.fillStyle(COLORS.DARK_GRASS); g.fillRect(0, 0, S, S);
         g.fillStyle(0x1a4a22, 0.6);
         g.fillRect(4, 8, 5, 3); g.fillRect(16, 18, 4, 5); g.fillRect(22, 6, 6, 3);
         g.fillStyle(0x3d7040, 0.3); g.fillRect(10, 25, 5, 3);
+        g.fillStyle(0x3d7040, 0.6);
+        g.fillRect(7, 14, 1, 4); g.fillRect(20, 22, 1, 4); g.fillRect(27, 15, 1, 3);
     });
     g.generateTexture('tile_dark_grass', S, S);
 
+    // Dark grass variant
     tile(g, g => {
-        g.fillStyle(COLORS.MOUNTAIN); g.fillRect(0, 0, S, S);
-        g.fillStyle(0x888899, 0.5);
-        g.fillRect(0, 20, S, S - 20);
-        g.fillStyle(0x444455);
-        g.fillTriangle(16, 2, 2, 28, 30, 28);
-        g.fillStyle(0xaaaacc, 0.4); g.fillRect(14, 4, 6, 8);
+        g.fillStyle(COLORS.DARK_GRASS); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x1a4a22, 0.6);
+        g.fillRect(12, 4, 6, 3); g.fillRect(5, 20, 5, 4); g.fillRect(24, 24, 5, 3);
+        g.fillStyle(0x3d7040, 0.3); g.fillRect(19, 12, 6, 3);
+        g.fillStyle(0x3d7040, 0.6);
+        g.fillRect(3, 10, 1, 4); g.fillRect(15, 26, 1, 4); g.fillRect(26, 7, 1, 4);
+        g.fillRect(10, 15, 1, 3);
+    });
+    g.generateTexture('tile_dark_grass_v2', S, S);
+
+    // Mountain — transparent overlay: rock peak with shaded face and snow cap,
+    // drawn over the area's ground (snow) so it blends with the field around it
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.25); g.fillEllipse(16, 28, 28, 7);
+        g.fillStyle(0x555566); g.fillTriangle(16, 2, 1, 29, 31, 29);
+        g.fillStyle(0x3d3d4d); g.fillTriangle(16, 2, 16, 29, 31, 29); // shaded face
+        // Rock cracks
+        g.fillStyle(0x2e2e3a, 0.7); g.fillRect(13, 14, 1, 6); g.fillRect(18, 18, 1, 7);
+        // Snow cap
+        g.fillStyle(0xddddee); g.fillTriangle(16, 2, 10, 12, 22, 12);
+        g.fillStyle(0xffffff, 0.7); g.fillTriangle(16, 2, 12, 9, 16, 9);
     });
     g.generateTexture('tile_mountain', S, S);
 
@@ -262,8 +355,19 @@ export function generateTextures(scene) {
         g.fillStyle(0xccccdd, 0.6);
         g.fillRect(4, 8, 8, 4); g.fillRect(18, 16, 6, 6); g.fillRect(10, 24, 10, 4);
         g.fillStyle(0xffffff, 0.3); g.fillRect(2, 2, S - 4, 4);
+        g.fillStyle(0xffffff, 0.8); g.fillRect(8, 14, 1, 1); g.fillRect(24, 9, 1, 1);
     });
     g.generateTexture('tile_snow', S, S);
+
+    // Snow variant — drifts shifted + sparkles
+    tile(g, g => {
+        g.fillStyle(COLORS.SNOW); g.fillRect(0, 0, S, S);
+        g.fillStyle(0xccccdd, 0.6);
+        g.fillRect(14, 5, 9, 4); g.fillRect(3, 18, 7, 5); g.fillRect(20, 25, 8, 4);
+        g.fillStyle(0xffffff, 0.3); g.fillRect(6, 10, 20, 3);
+        g.fillStyle(0xffffff, 0.8); g.fillRect(16, 15, 1, 1); g.fillRect(5, 27, 1, 1); g.fillRect(27, 13, 1, 1);
+    });
+    g.generateTexture('tile_snow_v2', S, S);
 
     tile(g, g => {
         g.fillStyle(COLORS.CAVE); g.fillRect(0, 0, S, S);
@@ -271,8 +375,22 @@ export function generateTextures(scene) {
         g.fillRect(2, 2, S - 4, S - 4);
         g.fillStyle(0x1a1122, 0.4);
         g.fillRect(4, 12, 10, 8); g.fillRect(18, 5, 8, 10);
+        // Pebbles
+        g.fillStyle(0x4a4256, 0.8); g.fillRect(8, 24, 3, 2); g.fillRect(22, 20, 2, 2);
     });
     g.generateTexture('tile_cave', S, S);
+
+    // Cave variant — stains and pebbles shifted
+    tile(g, g => {
+        g.fillStyle(COLORS.CAVE); g.fillRect(0, 0, S, S);
+        g.fillStyle(0x3a3344, 0.5);
+        g.fillRect(2, 2, S - 4, S - 4);
+        g.fillStyle(0x1a1122, 0.4);
+        g.fillRect(14, 16, 11, 9); g.fillRect(4, 3, 9, 8);
+        g.fillStyle(0x4a4256, 0.8); g.fillRect(17, 7, 3, 2); g.fillRect(6, 26, 2, 2);
+        g.fillStyle(0x241c30, 0.6); g.fillRect(26, 12, 3, 1); g.fillRect(10, 14, 1, 3);
+    });
+    g.generateTexture('tile_cave_v2', S, S);
 
     // Wall Shadow
     tile(g, g => {
@@ -543,14 +661,15 @@ export function generateTextures(scene) {
         g.fillStyle(highlight, 0.3); g.fillRect(2, 4, 1, 24); g.fillRect(S-3, 6, 1, 22);
         
         const colors = [0xcc2222, 0x2266ff, 0x228822, 0xdddddd, 0xffaa00, 0x777777];
+        const heights = [6, 8, 5, 7, 6, 8]; // fixed pattern — deterministic across reloads
         for (let row = 0; row < 2; row++) {
             const by = 4 + row * 13;
             g.fillStyle(darkWood); g.fillRect(2, by, S-4, 9); // Shelf niche
             // Shelf shadow
             g.fillStyle(0x000000, 0.3); g.fillRect(2, by, S-4, 2);
             for (let i = 0; i < 6; i++) {
-                const h = 5 + Math.random() * 3;
-                g.fillStyle(colors[Math.floor(Math.random()*colors.length)]);
+                const h = heights[(i + row * 3) % heights.length];
+                g.fillStyle(colors[(i + row * 2) % colors.length]);
                 g.fillRect(4 + i * 4, by + (9 - h), 3, h);
                 // Book spine highlight
                 g.fillStyle(0xffffff, 0.15); g.fillRect(4 + i * 4, by + (9 - h), 1, h);
@@ -1387,4 +1506,19 @@ export const TILE_TEXTURE_MAP = {
     21: 'tile_bed',
     22: 'tile_plant',
     23: 'tile_door_exit',
+};
+
+// Tiles drawn as transparent overlays: MapManager renders the area's ground
+// texture underneath so they blend with any terrain (grass, sand, snow, ...).
+export const TILE_OVERLAYS = new Set([4, 6, 7, 10, 16, 18, 21, 22]);
+
+// Alternate textures for large uniform terrains, picked deterministically
+// per-tile to break up visible tiling repetition.
+export const TILE_VARIANTS = {
+    0:  ['tile_grass',      'tile_grass_v2'],
+    2:  ['tile_water',      'tile_water_v2'],
+    8:  ['tile_sand',       'tile_sand_v2'],
+    9:  ['tile_dark_grass', 'tile_dark_grass_v2'],
+    11: ['tile_snow',       'tile_snow_v2'],
+    12: ['tile_cave',       'tile_cave_v2'],
 };
