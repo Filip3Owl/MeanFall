@@ -264,7 +264,7 @@ export const GENERATORS = {
         const vals = [m - d2, m - d1, m, m + d1, m + d2];
         const v = (2 * d1 * d1 + 2 * d2 * d2) / 5;
         return {
-            questionText: `Os tempos de cast (em segundos) de 5 magias foram: [${vals.join(', ')}]. Média = ${m}. Calcule o DESVIO PADRÃO POPULACIONAL.`,
+            questionText: `Os tempos de conjuração (em segundos) de 5 magias foram: [${vals.join(', ')}]. Média = ${m}. Calcule o DESVIO PADRÃO POPULACIONAL.`,
             correctAnswer: r2(Math.sqrt(v)),
             tolerance: 0.05,
         };
@@ -367,13 +367,15 @@ export const GENERATORS = {
     },
 
     // P(A∪B) = P(A) + P(B) - P(A∩B)
+    // Aritmética em % inteiros: 0.3 * 100 em ponto flutuante viraria
+    // "30.000000000000004%" no texto exibido ao jogador.
     prob_006: () => {
-        const pA   = ri(2, 5) / 10;      // 0.2 – 0.5
-        const pB   = ri(2, 5) / 10;
-        const pAB  = r2(ri(0, Math.floor(Math.min(pA, pB) * 10)) / 10); // ≤ min(pA,pB)
-        const pUnion = r2(pA + pB - pAB);
+        const a  = ri(2, 5) * 10;                      // 20% – 50%
+        const b  = ri(2, 5) * 10;
+        const ab = ri(0, Math.min(a, b) / 10) * 10;    // múltiplo de 10, ≤ min(a,b)
+        const pUnion = r2((a + b - ab) / 100);
         return {
-            questionText: `O dragão tem ${pA * 100}% de chance de cuspir fogo (A) e ${pB * 100}% de bater asas (B). Há ${pAB * 100}% de fazer AMBOS. Qual P(A∪B)?`,
+            questionText: `O dragão tem ${a}% de chance de cuspir fogo (A) e ${b}% de bater asas (B). Há ${ab}% de fazer AMBOS. Qual P(A∪B)?`,
             correctAnswer: pUnion,
             tolerance: 0.01,
         };

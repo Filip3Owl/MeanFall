@@ -449,6 +449,42 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '11px', color: '#99bbdd', fontFamily: 'Courier New',
             wordWrap: { width: W - 32 }, fontStyle: 'italic',
         }).setOrigin(0, 0);
+
+        // Continue prompt — shown after a wrong answer so the player can read
+        // the explanation calmly before the next question. Sits over the FUGIR
+        // slot in the bottom bar so it never covers the explanation text.
+        this._awaitContinue = false;
+        this._continueBg = this.add.rectangle(456, 458, 172, 30, 0x1a1400, 1)
+            .setStrokeStyle(1, 0xd4af37, 0.8).setDepth(60).setVisible(false)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerover', () => this._continueBg.setFillStyle(0x2a2000))
+            .on('pointerout',  () => this._continueBg.setFillStyle(0x1a1400))
+            .on('pointerdown', () => this._continueAfterAnswer());
+        this._continueTx = this.add.text(456, 458, '▶ CONTINUAR [ESPAÇO]', {
+            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0.5).setDepth(61).setVisible(false);
+        this._continueTween = null;
+    }
+
+    _showContinuePrompt() {
+        this._awaitContinue = true;
+        this._continueBg.setVisible(true);
+        this._continueTx.setVisible(true).setAlpha(1);
+        this._continueTween = this.tweens.add({
+            targets: this._continueTx, alpha: 0.45,
+            duration: 550, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+        });
+    }
+
+    _continueAfterAnswer() {
+        if (!this._awaitContinue) return;
+        this._awaitContinue = false;
+        this._continueTween?.stop();
+        this._continueTween = null;
+        this._continueBg.setVisible(false);
+        this._continueTx.setVisible(false);
+        Sound.click();
+        this._nextQuestion();
     }
 
     _buildBottomBar(eColor, eHex, isElite) {
@@ -527,7 +563,7 @@ export class CombatScene extends Phaser.Scene {
         this._answerLock   = false;
         this._numericValue = '';
         this._feedbackTxt.setVisible(false);
-        this._explTxt.setText('');
+        this._explTxt.setFontSize(11).setText('');
 
         this._renderQuestion();
     }
@@ -614,6 +650,10 @@ export class CombatScene extends Phaser.Scene {
 
     _onKeyDown(event) {
         if (this.scene.isActive('Scratchpad')) return;
+        if (this._awaitContinue && (event.key === ' ' || event.key === 'Enter')) {
+            this._continueAfterAnswer();
+            return;
+        }
         if (!this._currentQ || this._answerLock) return;
 
         if (this._currentQ.type !== 'fill_numeric' && /^[1234]$/.test(event.key)) {
@@ -642,7 +682,7 @@ export class CombatScene extends Phaser.Scene {
     // ─── ANSWER HANDLING ──────────────────────────────────────────────────────
 
     _onAnswer(userAnswer, btnBg) {
-        if (this._answerLock) return;
+        if (this._answerLock || this._awaitContinue) return;
         this._answerLock = true;
 
         const q = this._currentQ;
@@ -725,6 +765,10 @@ export class CombatScene extends Phaser.Scene {
                 this.time.delayedCall(1500, () => this._endCombat('win'));
                 return;
             }
+
+            // Acertos mantêm o ritmo: avança sozinho
+            this.time.delayedCall(1900, () => this._nextQuestion());
+            return;
         } else {
             this._streak = 0;
             this._wrongCount++;
@@ -798,15 +842,23 @@ export class CombatScene extends Phaser.Scene {
             }
             if (btnBg) btnBg.setFillStyle(0x330000);
 
-            if (q.explanation) this._explTxt.setText(`Explicação: ${q.explanation}`);
+            const ans = typeof q.correctAnswer === 'number'
+                ? String(q.correctAnswer).replace('.', ',')
+                : q.correctAnswer;
+            let correction = `Resposta correta: ${ans}.`;
+            if (q.explanation) correction += ` ${q.explanation}`;
+            this._explTxt.setFontSize(11).setText(correction);
+            // Explanation area ends where the bottom bar begins (y=438)
+            if (this._explTxt.y + this._explTxt.height > 436) this._explTxt.setFontSize(10);
 
             if (this._player.hp <= 0) {
                 this.time.delayedCall(1500, () => this._endCombat('loss'));
                 return;
             }
-        }
 
-        this.time.delayedCall(1900, () => this._nextQuestion());
+            // Erros pausam: o jogador confirma quando terminar de ler a explicação
+            this._showContinuePrompt();
+        }
     }
 
     _spawnDamageNumber(center, value, color, big) {

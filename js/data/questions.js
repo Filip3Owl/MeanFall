@@ -558,14 +558,14 @@ export const QUESTIONS = {
         {
             id: 'mmm_006', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'multiple_choice',
-            questionText: 'O grupo lootou 100 gemas em média e a mediana é 50. O que isso indica?',
+            questionText: 'O grupo saqueou em média 100 gemas por batalha, e a mediana é 50. O que isso indica?',
             options: [
                 'Distribuição simétrica',
-                'Cauda longa à direita (assimetria positiva, alguns lotes muito altos)',
+                'Cauda longa à direita (assimetria positiva, alguns saques muito altos)',
                 'Cauda longa à esquerda (assimetria negativa)',
                 'Não há outliers',
             ],
-            correctAnswer: 'Cauda longa à direita (assimetria positiva, alguns lotes muito altos)',
+            correctAnswer: 'Cauda longa à direita (assimetria positiva, alguns saques muito altos)',
             explanation: 'Quando média > mediana, valores extremos altos puxam a média.',
             hint: 'Média maior que mediana?',
             conceptTags: ['assimetria'],
@@ -749,7 +749,7 @@ export const QUESTIONS = {
         {
             id: 'mmm_025', topic: 'mean_median_mode', area: 'meadows', difficulty: 'medium',
             type: 'multiple_choice',
-            questionText: 'Se o centro da distribution de HP dos monstros está deslocado para a DIREITA (assimetria positiva), o que é verdade?',
+            questionText: 'Se o centro da distribuição de HP dos monstros está deslocado para a DIREITA (assimetria positiva), o que é verdade?',
             options: ['Média > Mediana', 'Mediana > Média', 'Média = Mediana', 'Moda > Média'],
             correctAnswer: 'Média > Mediana',
             explanation: 'Na assimetria positiva, a cauda longa à direita puxa a média para cima da mediana.',
@@ -864,8 +864,8 @@ export const QUESTIONS = {
         {
             id: 'mmm_036', topic: 'mean_median_mode', area: 'meadows', difficulty: 'hard',
             type: 'fill_numeric',
-            questionText: 'A Guilda avalia heróis com pesos por tipo de missão: Diária (peso 1), Guilda (peso 2), Dungeon (peso 3).',
-            context: 'Suas pontuações: Diária=80, Guilda=70, Dungeon=90. Calcule a MÉDIA PONDERADA.',
+            questionText: 'A Guilda avalia heróis com pesos por tipo de missão: Diária (peso 1), Guilda (peso 2), Calabouço (peso 3).',
+            context: 'Suas pontuações: Diária=80, Guilda=70, Calabouço=90. Calcule a MÉDIA PONDERADA.',
             correctAnswer: 81.67, tolerance: 0.05,
             explanation: 'Média ponderada = (80×1 + 70×2 + 90×3) / (1+2+3) = (80+140+270)/6 = 490/6 ≈ 81,67.',
             hint: 'Multiplique cada nota pelo seu peso, some tudo e divida pela soma dos pesos.',
@@ -1080,7 +1080,7 @@ export const QUESTIONS = {
         {
             id: 'spr_011', topic: 'spread', area: 'forest', difficulty: 'hard',
             type: 'fill_numeric',
-            questionText: 'Os tempos de cast (em segundos) de 5 magias foram: [2, 3, 5, 7, 8]. Média = 5. Calcule o DESVIO PADRÃO POPULACIONAL.',
+            questionText: 'Os tempos de conjuração (em segundos) de 5 magias foram: [2, 3, 5, 7, 8]. Média = 5. Calcule o DESVIO PADRÃO POPULACIONAL.',
             correctAnswer: 2.28, tolerance: 0.05,
             explanation: 'Variância = ((−3)²+(−2)²+0+2²+3²)/5 = 26/5 = 5,2. Desvio = √5,2 ≈ 2,28.',
             hint: 'Quadrados dos desvios, divide por N, raiz.',
@@ -1099,7 +1099,7 @@ export const QUESTIONS = {
         {
             id: 'spr_013', topic: 'spread', area: 'forest', difficulty: 'medium',
             type: 'multiple_choice',
-            questionText: 'A Floresta Dispersa recompensa quem identifica outliers. Qual regra IQR detecta um outlier superior?',
+            questionText: 'A Floresta da Dispersão recompensa quem identifica outliers. Qual regra IQR detecta um outlier superior?',
             options: ['x > Q3 + 1,5·IQR', 'x > Q1 + IQR', 'x > média + 2σ', 'x > Q2 + IQR'],
             correctAnswer: 'x > Q3 + 1,5·IQR',
             explanation: 'Critério clássico de Tukey usa Q3 + 1,5·IQR como limite superior.',
@@ -1172,7 +1172,7 @@ export const QUESTIONS = {
         {
             id: 'spr_021', topic: 'spread', area: 'forest', difficulty: 'easy',
             type: 'multiple_choice',
-            questionText: 'A Variância fragmentou a Floresta. Se dois monstros têm o mesmo HP médio, mas o Monstro A tem maior desvio padrão que o Monstro B, o que isso significa?',
+            questionText: 'A Distorção fragmentou a Floresta. Se dois monstros têm o mesmo HP médio, mas o Monstro A tem maior desvio padrão que o Monstro B, o que isso significa?',
             options: [
                 'Monstro A é mais forte',
                 'O HP do Monstro A é mais instável/variável',
@@ -1255,8 +1255,8 @@ export const QUESTIONS = {
             id: 'spr_029', topic: 'spread', area: 'forest', difficulty: 'medium',
             type: 'fill_numeric',
             questionText: 'Os danos de 4 ataques foram: [2, 4, 4, 8]. Calcule a VARIÂNCIA POPULACIONAL.',
-            correctAnswer: 4, tolerance: 0.1,
-            explanation: 'Média = 4,5. Desvios²: (2,5)²+(0,5)²+(0,5)²+(3,5)² = 6,25+0,25+0,25+12,25 = 19. Variância = 19/4 ≈ 4,75. Mas com dados [2,4,4,8] a média é 18/4=4,5, var=[(−2,5)²+(−0,5)²+(−0,5)²+(3,5)²]/4=[6,25+0,25+0,25+12,25]/4=19/4=4,75.',
+            correctAnswer: 4.75, tolerance: 0.1,
+            explanation: 'Média = 18/4 = 4,5. Desvios ao quadrado: (−2,5)² + (−0,5)² + (−0,5)² + (3,5)² = 6,25 + 0,25 + 0,25 + 12,25 = 19. Variância = 19/4 = 4,75.',
             hint: 'Calcule a média, subtraia de cada valor, eleve ao quadrado, tire a média dos quadrados.',
             conceptTags: ['variância'],
         },
@@ -1288,7 +1288,7 @@ export const QUESTIONS = {
         {
             id: 'spr_032', topic: 'spread', area: 'forest', difficulty: 'hard',
             type: 'multiple_choice',
-            questionText: 'O IQR (Interquartil Range) de uma distribuição é 20. Um valor é considerado outlier leve se está além de:',
+            questionText: 'O IQR (intervalo interquartil) de uma distribuição é 20. Um valor é considerado outlier leve se está além de:',
             options: ['Q1 − 1,5×IQR ou Q3 + 1,5×IQR', 'Média ± σ', 'Q1 − 20 ou Q3 + 20', 'Média ± 2σ'],
             correctAnswer: 'Q1 − 1,5×IQR ou Q3 + 1,5×IQR',
             explanation: 'Regra de Tukey: outlier leve está a mais de 1,5×IQR do primeiro ou terceiro quartil.',
@@ -1483,7 +1483,7 @@ export const QUESTIONS = {
         {
             id: 'prob_011', topic: 'probability', area: 'plains', difficulty: 'hard',
             type: 'fill_numeric',
-            questionText: 'A chance de loot raro é 5% por monstro. Você derrota 10 monstros independentemente. Qual a chance de PELO MENOS 1 raro? (Use 1 − P(nenhum))',
+            questionText: 'A chance de saque raro é 5% por monstro. Você derrota 10 monstros independentemente. Qual a chance de PELO MENOS 1 raro? (Use 1 − P(nenhum))',
             correctAnswer: 0.401, tolerance: 0.01,
             explanation: '1 − 0,95^10 ≈ 1 − 0,5987 = 0,4013.',
             hint: 'Complemento de "nenhum raro".',
@@ -1526,7 +1526,7 @@ export const QUESTIONS = {
             id: 'prob_015', topic: 'probability', area: 'plains', difficulty: 'hard',
             type: 'multiple_choice',
             questionText: 'A Distorção fez P(crítico) saltar para 0,9. Pelo Teorema de Bayes, se P(boss morto | crítico) = 0,8 e P(boss morto) = 0,5, então P(crítico | boss morto) é APROXIMADAMENTE:',
-            options: ['0,8 × 0,9 / 0,5 = 1,44 (impossível)', '0,8 × 0,9 / 0,5 = 1,44 → cap 1,0', 'Não pode ser calculado com esses dados', '0,5'],
+            options: ['0,8 × 0,9 / 0,5 = 1,44 (impossível)', '0,8 × 0,9 / 0,5 = 1,44, truncado para 1,0', 'Não pode ser calculado com esses dados', '0,5'],
             correctAnswer: 'Não pode ser calculado com esses dados',
             explanation: 'Os números fornecidos violariam axiomas (P>1). Indica que a Distorção corrompeu os dados — em estatística real, todas as probabilidades estão entre 0 e 1.',
             hint: 'Confira se P > 1 é possível.',
@@ -1554,7 +1554,7 @@ export const QUESTIONS = {
         {
             id: 'prob_018', topic: 'probability', area: 'plains', difficulty: 'medium',
             type: 'fill_numeric',
-            questionText: 'O boss tem 70% de chance de usar magia em cada batalha, independentemente. Você enfrenta-o 3 vezes. Qual P(magia nas 3 batalhas)?',
+            questionText: 'O boss tem 70% de chance de usar magia em cada batalha, independentemente. Você o enfrenta 3 vezes. Qual P(magia nas 3 batalhas)?',
             correctAnswer: 0.343, tolerance: 0.01,
             explanation: '0,7³ = 0,343. P(A∩B∩C) = P(A)×P(B)×P(C) para eventos independentes.',
             hint: 'Multiplique probabilidades independentes.',
@@ -1593,7 +1593,7 @@ export const QUESTIONS = {
             type: 'fill_numeric',
             questionText: 'Você tem 2 pergaminhos mágicos. A chance do primeiro funcionar é 0,5 e do segundo é 0,4. Se eles são independentes, qual a chance de AMBOS funcionarem?',
             correctAnswer: 0.2, tolerance: 0,
-            explanation: '0,5 * 0,4 = 0,2.',
+            explanation: '0,5 × 0,4 = 0,2.',
             hint: 'Para eventos independentes, multiplique as probabilidades.',
             conceptTags: ['independência', 'lore'],
         },
@@ -1602,7 +1602,7 @@ export const QUESTIONS = {
             type: 'fill_numeric',
             questionText: 'Um monstro Fênix renasce com 30% de chance se for atingido por Fogo. Se você atingir 2 Fênix, qual a chance de PELO MENOS UMA renascer?',
             correctAnswer: 0.51, tolerance: 0,
-            explanation: '1 - P(nenhuma renascer) = 1 - (0,7 * 0,7) = 1 - 0,49 = 0,51.',
+            explanation: '1 − P(nenhuma renascer) = 1 − (0,7 × 0,7) = 1 − 0,49 = 0,51.',
             hint: 'É mais fácil calcular a chance de NENHUMA renascer e subtrair de 1.',
             conceptTags: ['complemento', 'independência', 'lore'],
         },
@@ -1626,7 +1626,7 @@ export const QUESTIONS = {
             type: 'fill_numeric',
             questionText: 'Em um baralho de 10 cartas mágicas, 4 são de Fogo e 6 são de Água. Se você tirar 2 cartas SEM reposição, qual a chance de ambas serem de Fogo?',
             correctAnswer: 0.133, tolerance: 0.01,
-            explanation: '(4/10) * (3/9) = 12/90 ≈ 0,133.',
+            explanation: '(4/10) × (3/9) = 12/90 ≈ 0,133.',
             hint: 'Na segunda retirada, há uma carta de fogo a menos e o total também diminuiu.',
             conceptTags: ['condicional', 'sem reposição', 'lore'],
         },
@@ -1635,8 +1635,8 @@ export const QUESTIONS = {
             type: 'fill_numeric',
             questionText: 'O Oráculo previu: 60% das vezes que chove mana, um dragão aparece. A chance de chover mana é 10%. Se um dragão apareceu, e a chance total de dragões é 15%, qual a chance de que tenha chovido mana? (Bayes)',
             correctAnswer: 0.4, tolerance: 0,
-            explanation: 'P(M|D) = P(D|M) * P(M) / P(D) = (0,6 * 0,1) / 0,15 = 0,06 / 0,15 = 0,4.',
-            hint: 'Use o Teorema de Bayes: P(A|B) = P(B|A) * P(A) / P(B).',
+            explanation: 'P(M|D) = P(D|M) × P(M) / P(D) = (0,6 × 0,1) / 0,15 = 0,06 / 0,15 = 0,4.',
+            hint: 'Use o Teorema de Bayes: P(A|B) = P(B|A) × P(A) / P(B).',
             conceptTags: ['Bayes', 'lore'],
         },
         {
@@ -1750,7 +1750,7 @@ export const QUESTIONS = {
             options: ['Binomial', 'Geométrica', 'Normal', 'Uniforme discreta'],
             correctAnswer: 'Geométrica',
             explanation: 'A distribuição Geométrica modela o número de tentativas até o primeiro sucesso em ensaios independentes com probabilidade constante p. Binomial contaria sucessos em n tentativas fixas.',
-            hint: 'Binomial fixa o número de tentativas. Qual distribução modela "tentativas até o primeiro sucesso"?',
+            hint: 'Binomial fixa o número de tentativas. Qual distribuição modela "tentativas até o primeiro sucesso"?',
             conceptTags: ['geométrica', 'distribuição', 'primeiro sucesso'],
         },
         {
@@ -1924,7 +1924,7 @@ export const QUESTIONS = {
         {
             id: 'dist_010', topic: 'distributions', area: 'mountains', difficulty: 'easy',
             type: 'fill_numeric',
-            questionText: 'O Astrônomo das Montanhas afirma: "%~68% dos exércitos têm força entre μ−σ e μ+σ". Se μ=100 e σ=10, qual a força MÁXIMA dentro deste intervalo?',
+            questionText: 'O Astrônomo das Montanhas afirma: "Cerca de 68% dos exércitos têm força entre μ−σ e μ+σ". Se μ=100 e σ=10, qual a força MÁXIMA dentro deste intervalo?',
             correctAnswer: 110, tolerance: 0.01,
             explanation: 'μ + σ = 100 + 10 = 110.',
             hint: 'Some μ + σ.',
@@ -2007,7 +2007,7 @@ export const QUESTIONS = {
         {
             id: 'dist_021', topic: 'distributions', area: 'mountains', difficulty: 'easy',
             type: 'true_false',
-            questionText: 'V ou F: Nas Montanhas Tortas, se a distribution de força dos Yeti for uma Normal Perfeita, então a Média e a Mediana de força são IGUAIS.',
+            questionText: 'V ou F: Nas Montanhas Tortas, se a distribuição de força dos Yetis for uma Normal perfeita, então a Média e a Mediana de força são IGUAIS.',
             options: ['Verdadeiro', 'Falso'],
             correctAnswer: 'Verdadeiro',
             explanation: 'Uma distribuição normal é perfeitamente simétrica.',
@@ -2026,7 +2026,7 @@ export const QUESTIONS = {
         {
             id: 'dist_023', topic: 'distributions', area: 'mountains', difficulty: 'hard',
             type: 'multiple_choice',
-            questionText: 'Segundo a Regra Empírica (68-95-99.7), se a Mana dos Cristais das Montanhas segue uma Normal, qual a chance de um cristal ter Mana entre μ - 3σ e μ + 3σ?',
+            questionText: 'Segundo a Regra Empírica (68-95-99,7), se a Mana dos Cristais das Montanhas segue uma Normal, qual a chance de um cristal ter Mana entre μ - 3σ e μ + 3σ?',
             options: ['68%', '95%', '99,7%', '50%'],
             correctAnswer: '99,7%',
             explanation: 'Três desvios padrões para cada lado abrangem quase toda a distribuição normal.',
@@ -2453,11 +2453,11 @@ export const QUESTIONS = {
             questionText: 'Você suspeita que uma sala do calabouço está amaldiçoada (H₁: chance de armadilha > 10%). A Hipótese Nula (H₀) seria:',
             options: [
                 'A sala é segura',
-                'A chance de armadilha é <= 10%',
+                'A chance de armadilha é ≤ 10%',
                 'A chance de armadilha é 100%',
                 'Não existem armadilhas'
             ],
-            correctAnswer: 'A chance de armadilha é <= 10%',
+            correctAnswer: 'A chance de armadilha é ≤ 10%',
             explanation: 'A hipótese nula é geralmente o oposto da alternativa ou o "status quo".',
             hint: 'H0 é a negação do efeito que você quer provar.',
             conceptTags: ['H0', 'lore'],
@@ -2530,7 +2530,7 @@ export const QUESTIONS = {
         {
             id: 'inf_028', topic: 'inference', area: 'dungeon', difficulty: 'easy',
             type: 'multiple_choice',
-            questionText: 'A hipótese ALTERNATIVA (H₁) no Dungeon do Oráculo afirma que a poção de cura funciona. Qual é a hipótese NULA (H₀)?',
+            questionText: 'A hipótese ALTERNATIVA (H₁) no Calabouço do Oráculo afirma que a poção de cura funciona. Qual é a hipótese NULA (H₀)?',
             options: [
                 'A poção funciona melhor que o esperado',
                 'A poção não tem efeito (efeito = 0)',
@@ -2650,7 +2650,7 @@ export const QUESTIONS = {
         {
             id: 'inf_038', topic: 'inference', area: 'dungeon', difficulty: 'hard',
             type: 'fill_numeric',
-            questionText: 'A Ordem quer estimar o HP médio dos monstros da Dungeon com margem de erro E=4, σ=20 conhecido. Use z*=2 (aprox. 95%).',
+            questionText: 'A Ordem quer estimar o HP médio dos monstros do Calabouço com margem de erro E=4, σ=20 conhecido. Use z*=2 (aprox. 95%).',
             context: 'Calcule o tamanho MÍNIMO de amostra: n = (z* × σ / E)²',
             correctAnswer: 100, tolerance: 0,
             explanation: 'n = (2 × 20 / 4)² = (40/4)² = 10² = 100. Sempre arredonde para CIMA para garantir a margem desejada.',
@@ -2660,7 +2660,7 @@ export const QUESTIONS = {
         {
             id: 'inf_039', topic: 'inference', area: 'dungeon', difficulty: 'hard',
             type: 'fill_numeric',
-            questionText: 'O z-test de um experimento resultou em z=2,0 (teste BILATERAL). Sabe-se que P(Z > 2,0) = 0,0228.',
+            questionText: 'O teste z de um experimento resultou em z=2,0 (teste BILATERAL). Sabe-se que P(Z > 2,0) = 0,0228.',
             context: 'Calcule o p-valor bilateral deste teste.',
             correctAnswer: 0.0456, tolerance: 0.001,
             explanation: 'Em um teste bilateral, o p-valor = 2 × P(Z > |z|) = 2 × 0,0228 = 0,0456. Como p < 0,05, rejeitamos H₀.',

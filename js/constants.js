@@ -81,11 +81,11 @@ export const AREAS = {
 
 export const AREA_INFO = {
     village:   { displayName: 'Vila dos Dados',             topic: 'Tipos de Dados',         bgColor: 0x1a2e10 },
-    meadows:   { displayName: 'Prados das Medidas',         topic: 'Media, Mediana e Moda',   bgColor: 0x1a2e10 },
-    forest:    { displayName: 'Floresta da Dispersao',      topic: 'Variancia e Desvio Padrao', bgColor: 0x0e1e0e },
-    plains:    { displayName: 'Planicies da Probabilidade', topic: 'Probabilidade Basica',    bgColor: 0x2e2010 },
-    mountains: { displayName: 'Montanhas da Distribuicao',  topic: 'Distribuicao Normal',     bgColor: 0x1a1a1e },
-    dungeon:   { displayName: 'Calabouco da Inferencia',    topic: 'Testes de Hipotese',      bgColor: 0x0e0a0a },
+    meadows:   { displayName: 'Prados das Medidas',         topic: 'Média, Mediana e Moda',   bgColor: 0x1a2e10 },
+    forest:    { displayName: 'Floresta da Dispersão',      topic: 'Variância e Desvio Padrão', bgColor: 0x0e1e0e },
+    plains:    { displayName: 'Planícies da Probabilidade', topic: 'Probabilidade Básica',    bgColor: 0x2e2010 },
+    mountains: { displayName: 'Montanhas da Distribuição',  topic: 'Distribuição Normal',     bgColor: 0x1a1a1e },
+    dungeon:   { displayName: 'Calabouço da Inferência',    topic: 'Testes de Hipótese',      bgColor: 0x0e0a0a },
     village_house_elder:    { displayName: 'Casa da Anciã',    topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_scholar:  { displayName: 'Casa do Estudioso', topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_merchant: { displayName: 'Casa do Mercador',  topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
