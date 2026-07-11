@@ -295,6 +295,148 @@ class SoundEngine {
         });
     }
 
+    // Footstep — timbre varies by terrain tile so each area "feels" different.
+    // Very short and quiet: it plays on every tile moved.
+    step(terrain = 'grass') {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            const alt = (this._stepAlt = !this._stepAlt); // alternate L/R feel
+            const v = alt ? 1 : 0.92;
+            switch (terrain) {
+                case 'stone': // hard click
+                    this._noise(ctx, dest, t, 0.045, 2600, 0.055 * v);
+                    this._tone(ctx, dest, 190 * v, 'triangle', t, 0.04, 0.05, 120);
+                    break;
+                case 'sand': // soft shuffle
+                    this._noise(ctx, dest, t, 0.09, 900, 0.045 * v);
+                    break;
+                case 'snow': // muffled crunch
+                    this._noise(ctx, dest, t, 0.07, 1600, 0.06 * v);
+                    this._noise(ctx, dest, t + 0.025, 0.05, 700, 0.035);
+                    break;
+                case 'cave': // echoing tap
+                    this._noise(ctx, dest, t, 0.04, 1800, 0.05 * v);
+                    this._tone(ctx, dest, 150, 'sine', t + 0.05, 0.10, 0.02, 90);
+                    break;
+                default: // grass — soft thud
+                    this._noise(ctx, dest, t, 0.05, 500, 0.05 * v);
+                    this._tone(ctx, dest, 110 * v, 'sine', t, 0.045, 0.035, 70);
+            }
+        });
+    }
+
+    // Bumping into a wall/obstacle — dull knock
+    bump() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 95, 'triangle', t, 0.07, 0.12, 70);
+            this._noise(ctx, dest, t, 0.05, 350, 0.06);
+        });
+    }
+
+    // Overlay/menu opened — quick upward whoosh
+    menuOpen() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 420, 'sine', t, 0.09, 0.09, 660);
+            this._tone(ctx, dest, 840, 'sine', t + 0.06, 0.07, 0.06);
+        });
+    }
+
+    // Overlay/menu closed — mirrored downward whoosh
+    menuClose() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 660, 'sine', t, 0.09, 0.08, 420);
+            this._tone(ctx, dest, 330, 'sine', t + 0.06, 0.07, 0.05);
+        });
+    }
+
+    // Action denied (locked portal, not enough gold/focus) — two flat buzzes
+    denied() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 160, 'square', t,        0.09, 0.10);
+            this._tone(ctx, dest, 140, 'square', t + 0.11, 0.13, 0.12);
+        });
+    }
+
+    // Quest accepted — short heroic two-note call
+    questAccept() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 392, 'triangle', t,        0.14, 0.16);
+            this._tone(ctx, dest, 587, 'triangle', t + 0.12, 0.26, 0.18);
+        });
+    }
+
+    // Quest objective complete — resolved cadence
+    questComplete() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 523, 'triangle', t,        0.12, 0.16);
+            this._tone(ctx, dest, 659, 'triangle', t + 0.10, 0.12, 0.16);
+            this._tone(ctx, dest, 880, 'sine',     t + 0.20, 0.30, 0.20);
+        });
+    }
+
+    // Achievement unlocked — sparkling fanfare (distinct from levelUp)
+    achievement() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 784,  'sine', t,        0.10, 0.14);
+            this._tone(ctx, dest, 988,  'sine', t + 0.08, 0.10, 0.14);
+            this._tone(ctx, dest, 1175, 'sine', t + 0.16, 0.10, 0.16);
+            this._tone(ctx, dest, 1568, 'sine', t + 0.24, 0.34, 0.18);
+            this._tone(ctx, dest, 392,  'triangle', t + 0.24, 0.34, 0.10); // low support
+        });
+    }
+
+    // Manual save — single soft confirmation
+    save() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 660, 'sine', t,        0.08, 0.09);
+            this._tone(ctx, dest, 990, 'sine', t + 0.07, 0.14, 0.10);
+        });
+    }
+
+    // Fever mode ignition — rising sweep + shimmer
+    fever() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 220, 'sawtooth', t, 0.35, 0.14, 880);
+            this._tone(ctx, dest, 1046, 'sine', t + 0.28, 0.12, 0.16);
+            this._tone(ctx, dest, 1318, 'sine', t + 0.36, 0.20, 0.18);
+        });
+    }
+
+    // Monster respawn — reverse "pop-in" blip
+    respawn() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            this._tone(ctx, dest, 900, 'sine', t, 0.16, 0.07, 300);
+            this._tone(ctx, dest, 450, 'triangle', t + 0.12, 0.08, 0.08);
+        });
+    }
+
+    // Shop purchase — coins + confirmation
+    buy() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            [1046, 1318].forEach((f, i) => this._tone(ctx, dest, f, 'sine', t + i * 0.06, 0.10, 0.13));
+            this._tone(ctx, dest, 660, 'triangle', t + 0.14, 0.16, 0.12);
+        });
+    }
+
+    // Shop sale — coins leaving (descending)
+    sell() {
+        this._play((ctx, dest) => {
+            const t = ctx.currentTime;
+            [1318, 1046, 784].forEach((f, i) => this._tone(ctx, dest, f, 'sine', t + i * 0.06, 0.10, 0.11));
+        });
+    }
+
     // ── Settings ──────────────────────────────────────────────────────────────
 
     toggle() {
@@ -320,3 +462,8 @@ EventBus.on('combat-end', ({ outcome }) => {
     if (outcome === 'win')  Sound.victory();
     if (outcome === 'loss') Sound.defeat();
 });
+EventBus.on('quest-accepted',  () => Sound.questAccept());
+EventBus.on('quest-complete',  () => Sound.questComplete());
+EventBus.on('quest-claimed',   () => Sound.coins());
+EventBus.on('bounty-complete', () => Sound.questComplete());
+EventBus.on('achievement-unlocked', () => Sound.achievement());

@@ -191,6 +191,7 @@ export class WorldScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this._nKey)) this._openOverlay('Scratchpad');
         if (Phaser.Input.Keyboard.JustDown(this._f5Key)) {
             SaveSystem.autoSave(this._playerData);
+            Sound.save();
             EventBus.emit('autosave');
         }
 
@@ -198,6 +199,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     _openOverlay(sceneKey) {
+        Sound.menuOpen();
         this.scene.launch(sceneKey);
         this._paused = true;
     }
@@ -217,6 +219,7 @@ export class WorldScene extends Phaser.Scene {
 
     _spawnRespawnEffect(monster) {
         // Visual fanfare when a creature reappears: pulsing rings + sprite fade-in
+        Sound.respawn();
         const cx = monster.tileX * TILE_SIZE + TILE_SIZE / 2;
         const cy = monster.tileY * TILE_SIZE + TILE_SIZE / 2;
         const elemColor = monster.def.color || 0xffffff;
@@ -350,6 +353,7 @@ export class WorldScene extends Phaser.Scene {
                     const reasons = [];
                     if (!levelOk) reasons.push(`{{level:nível ${unlock.minLevel}}}`);
                     if (!mastOk)  reasons.push(`{{accent:${unlock.masteryPct}% de maestria}} em {{accent:${AREA_INFO[unlock.masteryArea]?.displayName}}}`);
+                    Sound.denied();
                     this._chat(`{{bad:Portal bloqueado!}} Você precisa de: ${reasons.join(' e ')}.`, 'error');
                     this._playerData.position.y -= 1;
                     this._player.syncSprite();
@@ -927,8 +931,12 @@ export class WorldScene extends Phaser.Scene {
 
     _chat(msg, type) { EventBus.emit('chat', { msg, type }); }
 
-    pauseForOverlay() { this._paused = true; }
+    pauseForOverlay() {
+        Sound.menuOpen();
+        this._paused = true;
+    }
     resumeFromOverlay() {
+        Sound.menuClose();
         this._paused = false;
         const updated = this.registry.get('player');
         if (updated) {

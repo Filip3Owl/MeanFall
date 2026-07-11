@@ -109,6 +109,7 @@ export class UIScene extends Phaser.Scene {
             const player = this.registry.get('player');
             if (player) {
                 SaveSystem.autoSave(player);
+                Sound.save();
                 this.addMsg('Jogo salvo!', 'system');
             }
         });
@@ -124,6 +125,21 @@ export class UIScene extends Phaser.Scene {
                 btnSound.classList.toggle('muted', !on);
                 if (on) Sound.click();
             });
+        }
+
+        // Volume slider — controls SFX + music, persisted via Sound.setVolume
+        const volSlider = document.getElementById('vol-slider');
+        if (volSlider) {
+            const saved = parseFloat(localStorage.getItem('meanfall_vol') || '0.35');
+            volSlider.value = Math.round(saved * 100);
+            Music.setVolume(saved);
+            volSlider.addEventListener('input', () => {
+                const v = volSlider.value / 100;
+                Sound.setVolume(v);
+                Music.setVolume(v);
+            });
+            // Audible reference blip when the user releases the slider
+            volSlider.addEventListener('change', () => Sound.click());
         }
     }
 
@@ -162,8 +178,6 @@ export class UIScene extends Phaser.Scene {
     }
 
     _showAchievementBanner(ach) {
-        Sound.levelUp?.();
-
         // Queue banners so they don't stack
         if (!this._achQueue) this._achQueue = [];
         this._achQueue.push(ach);

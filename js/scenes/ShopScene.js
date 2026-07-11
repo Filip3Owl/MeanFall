@@ -3,6 +3,7 @@ import { ITEMS, RARITY_COLORS }    from '../data/items.js';
 import { SHOPS }                   from '../data/shops.js';
 import { UI_COLORS, RARITIES }     from '../constants.js';
 import EventBus                    from '../utils/EventBus.js';
+import { Sound }                   from '../utils/SoundSystem.js';
 
 /**
  * Modal shop UI. Launched with { shopId } in scene data.
@@ -93,6 +94,7 @@ export class ShopScene extends Phaser.Scene {
     }
 
     _switchTab(tab) {
+        if (this._tab !== tab) Sound.click();
         this._tab = tab;
         this._selected = null;
         this._render();
@@ -135,9 +137,9 @@ export class ShopScene extends Phaser.Scene {
             const price = this._tab === 'buy' ? ShopSystem.buyPrice(itemId) : ShopSystem.sellPrice(itemId);
 
             const bg = this.add.rectangle(18, y, 272, 20, 0x111111, 1).setOrigin(0, 0).setInteractive()
-                .on('pointerover', () => { if (this._selected !== i) bg.setFillStyle(0x1a1a22); })
+                .on('pointerover', () => { if (this._selected !== i) { bg.setFillStyle(0x1a1a22); Sound.hover(); } })
                 .on('pointerout',  () => { if (this._selected !== i) bg.setFillStyle(0x111111); })
-                .on('pointerdown', () => this._selectIdx(i));
+                .on('pointerdown', () => { Sound.select(); this._selectIdx(i); });
 
             const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65);
             const tx = this.add.text(44, y + 10, qty > 1 ? `${item.name} ×${qty}` : item.name, {
@@ -186,6 +188,7 @@ export class ShopScene extends Phaser.Scene {
             : ShopSystem.sell(this._player, itemId);
 
         if (result.ok) {
+            if (this._tab === 'buy') Sound.buy(); else Sound.sell();
             this._actionMsg.setColor('#88ff88').setText(`OK — ${this._tab === 'buy' ? '−' : '+'}${result.price} ouro`);
             EventBus.emit('player-stats-changed', { player: this._player });
             this.registry.set('player', this._player);
@@ -193,6 +196,7 @@ export class ShopScene extends Phaser.Scene {
             this._render();
             this._clearDetail();
         } else {
+            Sound.denied();
             this._actionMsg.setColor('#ff4444').setText(result.reason || 'Erro');
         }
     }

@@ -888,7 +888,7 @@ export class CombatScene extends Phaser.Scene {
         this._feverFrame.clear();
 
         if (active) {
-            Sound.critical();
+            Sound.fever();
             Music.setFever(true);
             this.cameras.main.flash(400, 255, 215, 0, 0.2);
             this._renderFeverFrame();

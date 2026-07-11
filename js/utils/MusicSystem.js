@@ -8,6 +8,8 @@ function midiToHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 // bass:   MIDI notes for bass line (sine, every 2 melody beats)
 // melody: MIDI notes for lead melody (plays every beat, loops)
 // bpm:    tempo — controls melody/bass note spacing
+// ambience: optional procedural ambient layer per area —
+// 'birds' | 'crickets' | 'wind' | 'drips' | 'fire'
 const TRACKS = {
     menu: {
         bpm: 78,
@@ -19,6 +21,7 @@ const TRACKS = {
     },
     village: {
         bpm: 100,
+        ambience:  'birds',
         pad:       [48, 52, 55, 60],                          // C major: C3 E3 G3 C4
         bass:      [36, 43, 36, 43],                          // C2 G2
         melody:    [72, 76, 79, 81, 79, 76, 74, 72],          // C5 E5 G5 A5 G5 E5 D5 C5
@@ -27,6 +30,7 @@ const TRACKS = {
     },
     meadows: {
         bpm: 88,
+        ambience:  'birds',
         pad:       [55, 59, 62, 67],                          // G major: G3 B3 D4 G4
         bass:      [43, 50, 43, 50],                          // G2 D3
         melody:    [67, 69, 71, 74, 71, 69, 67, 64],          // G4 A4 B4 D5 B4 A4 G4 E4
@@ -35,6 +39,7 @@ const TRACKS = {
     },
     forest: {
         bpm: 68,
+        ambience:  'crickets',
         pad:       [50, 53, 57, 60],                          // Dm7: D3 F3 A3 C4
         bass:      [38, 45, 38, 45],                          // D2 A2
         melody:    [62, 65, 69, 72, 69, 67, 65, 62],          // D4 F4 A4 C5 A4 G4 F4 D4
@@ -43,6 +48,7 @@ const TRACKS = {
     },
     plains: {
         bpm: 108,
+        ambience:  'wind',
         pad:       [53, 57, 60, 65],                          // F major: F3 A3 C4 F4
         bass:      [41, 48, 41, 48],                          // F2 C3
         melody:    [65, 67, 69, 72, 69, 67, 65, 67],          // F4 G4 A4 C5 A4 G4 F4 G4
@@ -51,6 +57,7 @@ const TRACKS = {
     },
     mountains: {
         bpm: 80,
+        ambience:  'wind',
         pad:       [52, 55, 59, 62],                          // Em7: E3 G3 B3 D4
         bass:      [40, 47, 40, 47],                          // E2 B2
         melody:    [64, 67, 71, 74, 71, 67, 64, 62],          // E4 G4 B4 D5 B4 G4 E4 D4
@@ -59,6 +66,7 @@ const TRACKS = {
     },
     dungeon: {
         bpm: 58,
+        ambience:  'drips',
         pad:       [47, 50, 53, 56],                          // Bdim7: B2 D3 F3 Ab3
         bass:      [35, 42, 35, 39],                          // B1 F#2 B1 Eb2
         melody:    [59, 62, 65, 68, 65, 62, 59, 56],          // B3 D4 F4 Ab4 F4 D4 B3 Ab3
@@ -90,6 +98,7 @@ const TRACKS = {
     // ── Interior / Home: soft, slow, safe ──────────────────────────────────────
     home: {
         bpm: 70,
+        ambience:  'fire',
         pad:       [53, 57, 60, 64],                          // Fmaj7: F3 A3 C4 E4
         bass:      [41, 48, 41, 48],                          // F2 C3
         melody:    [72, 72, 71, 69, 67, 65, 67, 64],          // C5 C5 B4 A4 G4 F4 G4 E4
@@ -156,6 +165,15 @@ class MusicEngine {
         this._nextTime = ctx.currentTime + 0.08;
         this._startPad(ctx, track);
         this._schedId = setInterval(() => this._tick(), 80);
+        this._startAmbience(track.ambience);
+    }
+
+    // Master music volume, 0..1 from the UI slider (scaled internally).
+    setVolume(v) {
+        this._volume = Math.max(0, Math.min(1, v)) * 0.55;
+        if (this._master && this._ctx && !this._feverOrigBpm) {
+            this._master.gain.setTargetAtTime(this._volume, this._ctx.currentTime, 0.1);
+        }
     }
 
     stop() {
@@ -181,7 +199,7 @@ class MusicEngine {
         if (!this._ctx || !this._master) return;
         const now = this._ctx.currentTime;
         if (active) {
-            this._master.gain.setTargetAtTime(0.38, now, 0.35);
+            this._master.gain.setTargetAtTime(Math.min(0.5, this._volume * 1.9), now, 0.35);
             if (this._track && !this._feverOrigBpm) {
                 this._feverOrigBpm = this._track.bpm;
                 this._track = { ...this._track, bpm: Math.round(this._track.bpm * 1.22) };
@@ -199,6 +217,7 @@ class MusicEngine {
 
     _halt(fade) {
         if (this._schedId) { clearInterval(this._schedId); this._schedId = null; }
+        if (this._ambId)   { clearInterval(this._ambId);   this._ambId   = null; }
         const now = this._ctx ? this._ctx.currentTime : 0;
         for (const { osc, gain } of this._padNodes) {
             if (gain && fade) {
@@ -291,6 +310,116 @@ class MusicEngine {
             }
             this._beat++;
             this._nextTime += beatLen;
+        }
+    }
+
+    // ── Internal: procedural ambience layer (per-area soundscape) ─────────────
+    // Sparse, randomized events so each area has its own atmosphere:
+    // birds (village/meadows), crickets (forest), wind (plains/mountains),
+    // water drips (dungeon), fire crackle (interiors).
+
+    _startAmbience(kind) {
+        if (!kind) return;
+        this._ambId = setInterval(() => this._ambEvent(kind), 700);
+    }
+
+    _ambEvent(kind) {
+        const ctx = this._ctx;
+        if (!ctx || ctx.state !== 'running') return;
+        const t = ctx.currentTime + 0.05;
+        switch (kind) {
+            case 'birds':    if (Math.random() < 0.22) this._ambBird(t);    break;
+            case 'crickets': if (Math.random() < 0.30) this._ambCricket(t); break;
+            case 'wind':     if (Math.random() < 0.16) this._ambWind(t);    break;
+            case 'drips':    if (Math.random() < 0.20) this._ambDrip(t);    break;
+            case 'fire':     if (Math.random() < 0.55) this._ambCrackle(t); break;
+        }
+    }
+
+    _ambNote(freq, type, start, dur, peak, bendTo = null) {
+        const ctx  = this._ctx;
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        if (bendTo !== null) osc.frequency.linearRampToValueAtTime(bendTo, start + dur);
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(peak, start + dur * 0.2);
+        gain.gain.linearRampToValueAtTime(0, start + dur);
+        osc.connect(gain);
+        gain.connect(this._master);
+        osc.start(start);
+        osc.stop(start + dur + 0.05);
+    }
+
+    _ambBird(t) {
+        // 2-4 quick chirps with upward bends, random base pitch
+        const base = 2200 + Math.random() * 1200;
+        const n    = 2 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++) {
+            const at = t + i * (0.09 + Math.random() * 0.05);
+            this._ambNote(base * (0.9 + Math.random() * 0.2), 'sine', at, 0.07, 0.035, base * 1.3);
+        }
+    }
+
+    _ambCricket(t) {
+        // Rapid high trill — several tiny pulses
+        const f = 3800 + Math.random() * 600;
+        for (let i = 0; i < 6; i++) {
+            this._ambNote(f, 'sine', t + i * 0.045, 0.03, 0.018);
+        }
+    }
+
+    _ambWind(t) {
+        // Long filtered-noise gust with slow swell
+        const ctx = this._ctx;
+        const dur = 1.8 + Math.random() * 1.6;
+        const size = Math.ceil(ctx.sampleRate * dur);
+        const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < size; i++) d[i] = Math.random() * 2 - 1;
+        const src  = ctx.createBufferSource();
+        src.buffer = buf;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.setValueAtTime(300, t);
+        filt.frequency.linearRampToValueAtTime(550 + Math.random() * 250, t + dur * 0.5);
+        filt.frequency.linearRampToValueAtTime(250, t + dur);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.05 + Math.random() * 0.03, t + dur * 0.4);
+        gain.gain.linearRampToValueAtTime(0, t + dur);
+        src.connect(filt); filt.connect(gain); gain.connect(this._master);
+        src.start(t);
+    }
+
+    _ambDrip(t) {
+        // Water drip: descending plink + faint echo
+        const f = 900 + Math.random() * 500;
+        this._ambNote(f, 'sine', t, 0.12, 0.045, f * 0.55);
+        this._ambNote(f, 'sine', t + 0.28, 0.10, 0.018, f * 0.55);
+    }
+
+    _ambCrackle(t) {
+        // Fireplace: 1-3 tiny low-passed noise pops
+        const ctx = this._ctx;
+        const n = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++) {
+            const at  = t + i * (0.05 + Math.random() * 0.09);
+            const dur = 0.02 + Math.random() * 0.03;
+            const size = Math.ceil(ctx.sampleRate * dur);
+            const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let j = 0; j < size; j++) d[j] = (Math.random() * 2 - 1) * (1 - j / size);
+            const src  = ctx.createBufferSource();
+            src.buffer = buf;
+            const filt = ctx.createBiquadFilter();
+            filt.type = 'lowpass';
+            filt.frequency.value = 900 + Math.random() * 1500;
+            const gain = ctx.createGain();
+            gain.gain.value = 0.03 + Math.random() * 0.03;
+            src.connect(filt); filt.connect(gain); gain.connect(this._master);
+            src.start(at);
         }
     }
 

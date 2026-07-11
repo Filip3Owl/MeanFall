@@ -22,7 +22,10 @@
             <div id="header-info">
                 <span id="header-area">Vila dos Dados</span>
                 <span id="header-keys">WASD · Espaço &nbsp;|&nbsp; I · C · Q · B · K · L · N · F5</span>
-                <button id="btn-sound" class="sound-btn" title="Ligar/desligar som">🔊</button>
+                <div class="volume-group" title="Volume do jogo">
+                    <button id="btn-sound" class="sound-btn" title="Ligar/desligar som" aria-label="Ligar ou desligar som">🔊</button>
+                    <input type="range" id="vol-slider" min="0" max="100" value="35" aria-label="Volume do jogo">
+                </div>
             </div>
         </header>
 
