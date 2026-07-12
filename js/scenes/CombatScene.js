@@ -10,6 +10,7 @@ import { CompanionSystem }               from '../systems/CompanionSystem.js';
 import EventBus                          from '../utils/EventBus.js';
 import { Sound }                         from '../utils/SoundSystem.js';
 import { Music }                         from '../utils/MusicSystem.js';
+import { attachRarityGlow }              from '../utils/Draw.js';
 
 export class CombatScene extends Phaser.Scene {
     constructor() { super('Combat'); }
@@ -211,6 +212,11 @@ export class CombatScene extends Phaser.Scene {
 
         // Sprite
         if (this.textures.exists('sprite_player')) {
+            // Rim de prestígio pela maior raridade equipada — atrás do halo
+            // verde padrão do combate, só aparece em raro+ (ver InventoryScene)
+            const rarity = CombatSystem.highestEquippedRarity(this._player, ITEMS);
+            attachRarityGlow(this, PX + PW - 50, PY + 64, 36, rarity);
+
             const aura = this.add.circle(PX + PW - 50, PY + 64, 30, 0x44ff88, 0.08);
             this.tweens.add({ targets: aura, alpha: 0.2, scale: 1.1, duration: 1300, yoyo: true, repeat: -1 });
             this.add.image(PX + PW - 50, PY + 64, 'sprite_player').setScale(1.5).setDepth(1);
@@ -1506,6 +1512,7 @@ export class CombatScene extends Phaser.Scene {
                 const bg = this.add.rectangle(0, 0, panelW - 40, 18, 0x111111, 1).setOrigin(0, 0);
                 if (isRare) bg.setStrokeStyle(1, parseInt(colorHex.replace('#',''), 16), 0.5);
 
+                const glow = attachRarityGlow(this, 12, 9, 9, item.rarity);
                 const icon = this.add.image(12, 9, item.icon || 'item_potion_red').setScale(0.6);
                 const name = this.add.text(26, 9, item.name, {
                     fontSize: '12px', color: colorHex, fontFamily: 'Courier New', fontStyle: isRare ? 'bold' : 'normal'
@@ -1514,7 +1521,7 @@ export class CombatScene extends Phaser.Scene {
                     fontSize: '10px', color: '#666666', fontFamily: 'Courier New'
                 }).setOrigin(1, 0.5);
 
-                container.add([bg, icon, name, rarityTxt]);
+                container.add([bg, ...(glow ? [glow] : []), icon, name, rarityTxt]);
 
                 // JACKPOT EFFECT for Rare Items
                 if (isRare) {

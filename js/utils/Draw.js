@@ -1667,6 +1667,62 @@ function drawShadowSprite(g, w, h, key, color, variant) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Rarity glow — halo (opcional pulso + sparkles) atrás de um ícone de item,
+// para raro/épico/lendário. Comum/incomum retornam null (sem poluição
+// visual). Chame ANTES de criar o Image do ícone em displays soltos na cena
+// (a ordem de inserção decide a profundidade); dentro de um Container,
+// inclua o glow ANTES do ícone no array passado a `container.add([...])`,
+// pois containers não reordenam por depth.
+//
+// Retorna um Container com `.destroyGlow()` — sempre use esse método (não
+// `.destroy()`) para também parar os tweens/contadores do brilho.
+// ─────────────────────────────────────────────────────────────────────────
+const RARITY_GLOW_TIERS = {
+    rare:      { color: 0x4488ff, pulse: false, sparkle: false, alphaFrom: 0.22, alphaTo: 0.22 },
+    epic:      { color: 0xbb44ff, pulse: true,  sparkle: false, alphaFrom: 0.20, alphaTo: 0.42 },
+    legendary: { color: 0xffaa22, pulse: true,  sparkle: true,  alphaFrom: 0.26, alphaTo: 0.50 },
+};
+
+export function attachRarityGlow(scene, x, y, radius, rarity, opts = {}) {
+    const cfg = RARITY_GLOW_TIERS[rarity];
+    if (!cfg) return null; // common / uncommon: sem glow
+
+    const sparkle   = opts.sparkle ?? cfg.sparkle;
+    const alphaMult = opts.alphaMult ?? 1; // reforça contraste em fundos claros/movimentados
+    const container = scene.add.container(x, y);
+    const tweens = [];
+
+    const glow = scene.add.circle(0, 0, radius, cfg.color, cfg.alphaFrom * alphaMult).setBlendMode('ADD');
+    container.add(glow);
+    if (cfg.pulse) {
+        tweens.push(scene.tweens.add({
+            targets: glow, alpha: cfg.alphaTo * alphaMult, scale: 1.18,
+            duration: 750, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+        }));
+    }
+
+    if (sparkle) {
+        const n = 3;
+        for (let i = 0; i < n; i++) {
+            const s = scene.add.image(0, 0, 'particle_dot').setScale(0.8).setBlendMode('ADD').setTint(cfg.color);
+            container.add(s);
+            const baseAngle = (i / n) * Math.PI * 2;
+            tweens.push(scene.tweens.addCounter({
+                from: 0, to: 360, duration: 2200, repeat: -1,
+                onUpdate: (tw) => {
+                    const a = baseAngle + Phaser.Math.DegToRad(tw.getValue());
+                    s.setPosition(Math.cos(a) * radius * 0.9, Math.sin(a) * radius * 0.9);
+                },
+            }));
+        }
+    }
+
+    container.setDepth(0);
+    container.destroyGlow = () => { tweens.forEach(t => t.stop()); container.destroy(); };
+    return container;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Customizable player sprite. Regenerates 'sprite_player' from a config.
 // gender: 'male' | 'female' (changes silhouette)
 // skin/hair/robe: ids from data/appearance.js

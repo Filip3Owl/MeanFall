@@ -5,6 +5,7 @@ import { SHOPS }                   from '../data/shops.js';
 import { UI_COLORS, RARITIES }     from '../constants.js';
 import EventBus                    from '../utils/EventBus.js';
 import { Sound }                   from '../utils/SoundSystem.js';
+import { attachRarityGlow }        from '../utils/Draw.js';
 
 /**
  * Modal shop UI. Launched with { shopId } in scene data.
@@ -74,7 +75,8 @@ export class ShopScene extends Phaser.Scene {
         this._detType  = this.add.text(308, 168, '', { fontSize: '16px', color: '#888888', fontFamily: 'Courier New' }).setOrigin(0, 0);
         this._detDesc  = this.add.text(308, 184, '', { fontSize: '17px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: 216 }, lineSpacing: 3 }).setOrigin(0, 0);
         this._detPrice = this.add.text(308, 280, '', { fontSize: '15px', color: '#ffcc44', fontFamily: 'Courier New', fontStyle: 'bold' }).setOrigin(0, 0);
-        this._detIcon  = this.add.image(490, 150, '').setScale(2.5).setVisible(false);
+        this._detIcon  = this.add.image(490, 150, '').setScale(2.5).setVisible(false).setDepth(1);
+        this._detGlow  = null; // recriado por raridade em _selectIdx
 
         this._actionBg = this.add.rectangle(308, 360, 216, 32, 0x1a3a1a, 1).setOrigin(0, 0).setInteractive()
             .on('pointerover', () => this._actionBg.setFillStyle(0x2a5a2a))
@@ -131,7 +133,10 @@ export class ShopScene extends Phaser.Scene {
         }
 
         // clear old rows
-        if (this._rows) this._rows.forEach(r => { r.bg.destroy(); r.tx.destroy(); r.priceTx.destroy(); if (r.icon) r.icon.destroy(); });
+        if (this._rows) this._rows.forEach(r => {
+            r.glow?.destroyGlow();
+            r.bg.destroy(); r.tx.destroy(); r.priceTx.destroy(); if (r.icon) r.icon.destroy();
+        });
         this._rows = [];
 
         const list = this._tab === 'buy'
@@ -163,7 +168,8 @@ export class ShopScene extends Phaser.Scene {
                 .on('pointerout',  () => { if (this._selected !== i) bg.setFillStyle(0x111111); })
                 .on('pointerdown', () => { Sound.select(); this._selectIdx(i); });
 
-            const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65);
+            const glow = attachRarityGlow(this, 30, y + 10, 10, item.rarity);
+            const icon = this.add.image(30, y + 10, item.icon || 'item_potion_red').setScale(0.65).setDepth(1);
 
             let nameStr, rightStr;
             if (this._tab === 'forge') {
@@ -184,7 +190,7 @@ export class ShopScene extends Phaser.Scene {
                 fontSize: '16px', color: this._tab === 'forge' ? '#88ccff' : '#ffcc44', fontFamily: 'Courier New',
             }).setOrigin(1, 0.5);
 
-            this._rows.push({ bg, tx, icon, priceTx, idx: i, itemId });
+            this._rows.push({ bg, tx, icon, glow, priceTx, idx: i, itemId });
         }
     }
 
@@ -209,6 +215,8 @@ export class ShopScene extends Phaser.Scene {
             : `Equipamento — ${item.slot}`
         );
         this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
+        this._detGlow?.destroyGlow();
+        this._detGlow = attachRarityGlow(this, this._detIcon.x, this._detIcon.y, 34, item.rarity);
 
         if (this._tab === 'forge') {
             if (upLvl >= 3) {
@@ -294,6 +302,8 @@ export class ShopScene extends Phaser.Scene {
         this._detDesc.setText('');
         this._detPrice.setText('');
         this._detIcon.setVisible(false);
+        this._detGlow?.destroyGlow();
+        this._detGlow = null;
         this._actionBg.setVisible(false);
         this._actionTx.setVisible(false);
     }

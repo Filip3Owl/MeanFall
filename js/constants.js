@@ -282,6 +282,14 @@ export const RARITIES = {
     legendary: { id: 'legendary', name: 'Lendário',  color: 0xffaa22, hex: '#ffaa22', valueMult: 16.0, statMult: 3.5  },
 };
 
+// Ranking numérico das raridades — usado para comparar tiers (destaque
+// visual de ícones, aura de brilho do equipamento, etc.)
+export const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+export function rarityRank(rarityId) {
+    const i = RARITY_ORDER.indexOf(rarityId);
+    return i === -1 ? 0 : i;
+}
+
 // Respawn timing for monsters once defeated (ms).
 export const RESPAWN_TIME = 20_000; // 20 seconds
 

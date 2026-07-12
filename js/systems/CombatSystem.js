@@ -1,4 +1,4 @@
-import { ELEMENT_MATRIX, RARITIES, DIFFICULTIES } from '../constants.js';
+import { ELEMENT_MATRIX, RARITIES, DIFFICULTIES, rarityRank } from '../constants.js';
 
 export const CombatSystem = {
 
@@ -275,6 +275,18 @@ export const CombatSystem = {
     refreshWeaponElement(player, ITEMS) {
         const id = player.equipment?.rightHand || player.equipment?.leftHand;
         player._weaponElement = (id && ITEMS[id]?.element) || 'normal';
+    },
+
+    // Maior raridade entre os itens equipados — usada para a aura de brilho
+    // do personagem no mundo/combate. Retorna null se nada estiver equipado.
+    highestEquippedRarity(player, ITEMS) {
+        let best = null;
+        for (const itemId of Object.values(player.equipment || {})) {
+            if (!itemId) continue;
+            const r = ITEMS[itemId]?.rarity;
+            if (r && (!best || rarityRank(r) > rarityRank(best))) best = r;
+        }
+        return best;
     },
 };
 

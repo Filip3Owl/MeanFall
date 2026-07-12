@@ -18,7 +18,7 @@ import { MONSTERS, SANCTUM_GAUNTLET } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { NPC_REACTIONS } from '../data/npcReactions.js';
 import { CompanionSystem } from '../systems/CompanionSystem.js';
-import { buildPlayerSprite } from '../utils/Draw.js';
+import { buildPlayerSprite, attachRarityGlow } from '../utils/Draw.js';
 import { DayNight } from '../utils/DayNight.js';
 import EventBus from '../utils/EventBus.js';
 import { Sound } from '../utils/SoundSystem.js';
@@ -92,6 +92,7 @@ export class WorldScene extends Phaser.Scene {
         this._onLevelUpBound = this._onLevelUp.bind(this);
         this._onElementXpChangeBound = () => this._updateElementalAura();
         this._onQuestUpdateBound = () => this._updateQuestIcons();
+        this._onGearChangeBound = () => this._updateGearGlow();
         this._onBountyCompleteBound = ({ slot }) => {
             this._chat(`{{accent:BÔNUS COMPLETO:}} ${slot.label} — abra o diário (Q) para coletar!`, 'xp');
             AchievementSystem.recordBounty(this._playerData);
@@ -103,12 +104,14 @@ export class WorldScene extends Phaser.Scene {
         EventBus.on('element-xp-change', this._onElementXpChangeBound);
         EventBus.on('quest-update',     this._onQuestUpdateBound);
         EventBus.on('bounty-complete',  this._onBountyCompleteBound);
+        EventBus.on('player-stats-changed', this._onGearChangeBound);
 
         this._syncTimer      = this.time.addEvent({ delay: 5000,   loop: true, callback: this._autoSync,     callbackScope: this });
         this._regenTimer     = this.time.addEvent({ delay: REGEN_INTERVAL_MS, loop: true, callback: this._regenTick, callbackScope: this });
         this._periodicSaveTimer = this.time.addEvent({ delay: 180000, loop: true, callback: this._periodicSave, callbackScope: this });
 
         this._updateElementalAura();
+        this._updateGearGlow();
         EventBus.emit('area-changed', { areaId: this._playerData.currentArea });
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
 
@@ -1756,6 +1759,28 @@ export class WorldScene extends Phaser.Scene {
         if (this._playerAura && this._player?.sprite) {
             this._playerAura.setPosition(this._player.sprite.x, this._player.sprite.y + 4);
         }
+        if (this._gearGlow && this._player?.sprite) {
+            this._gearGlow.setPosition(this._player.sprite.x, this._player.sprite.y + 9);
+        }
+    }
+
+    // Halo de prestígio ao pé do personagem, pela maior raridade equipada
+    // (raro/épico/lendário — comum/incomum não mostram nada). Visualmente
+    // distinto da aura elemental (que orbita o meio do corpo): este é um
+    // brilho de chão, mais parecido com o "glow" de item raro do Tibia.
+    _updateGearGlow() {
+        this._gearGlow?.destroyGlow();
+        this._gearGlow = null;
+        if (!this._player?.sprite) return;
+
+        const rarity = CombatSystem.highestEquippedRarity(this._playerData, ITEMS);
+        if (!rarity) return;
+
+        const glow = attachRarityGlow(
+            this, this._player.sprite.x, this._player.sprite.y + 9, 20, rarity, { alphaMult: 1.6 });
+        if (!glow) return; // comum/incomum
+        glow.setDepth(this._player.sprite.depth - 2);
+        this._gearGlow = glow;
     }
 
     shutdown() {
@@ -1766,6 +1791,8 @@ export class WorldScene extends Phaser.Scene {
         EventBus.off('element-xp-change', this._onElementXpChangeBound);
         EventBus.off('quest-update',     this._onQuestUpdateBound);
         EventBus.off('bounty-complete',  this._onBountyCompleteBound);
+        EventBus.off('player-stats-changed', this._onGearChangeBound);
+        this._gearGlow?.destroyGlow();
         this._syncTimer?.remove();
         this._regenTimer?.remove();
         this._periodicSaveTimer?.remove();

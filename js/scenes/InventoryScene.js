@@ -3,6 +3,7 @@ import { ITEMS, RARITY_COLORS }    from '../data/items.js';
 import { SaveSystem }              from '../systems/SaveSystem.js';
 import EventBus                    from '../utils/EventBus.js';
 import { Sound }                   from '../utils/SoundSystem.js';
+import { attachRarityGlow }        from '../utils/Draw.js';
 
 const W = 544, H = 480;
 const LIST_X = 14,  LIST_W = 282;
@@ -101,7 +102,8 @@ export class InventoryScene extends Phaser.Scene {
         this._detDesc    = this.add.text(DET_X + 6, dy + 33,  '', { fontSize: '13px', color: '#cccccc', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
         this._detBonuses = this.add.text(DET_X + 6, dy + 72,  '', { fontSize: '13px', color: '#88ff88', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
         this._detCompare = this.add.text(DET_X + 6, dy + 112, '', { fontSize: '12px', color: '#88aaff', fontFamily: 'Courier New', wordWrap: { width: DET_W - 12 }, lineSpacing: 2 }).setOrigin(0, 0);
-        this._detIcon    = this.add.image(DET_X + DET_W - 18, BODY_Y + 30, '').setScale(2.2).setVisible(false).setAlpha(0.65);
+        this._detIcon    = this.add.image(DET_X + DET_W - 18, BODY_Y + 30, '').setScale(2.2).setVisible(false).setAlpha(0.65).setDepth(1);
+        this._detGlow    = null; // recriado por raridade em _showDetail
 
         // Action buttons
         const btnY = BODY_Y + 196;
@@ -149,7 +151,10 @@ export class InventoryScene extends Phaser.Scene {
     }
 
     _renderList() {
-        this._rows.forEach(r => [r.bg, r.tx, r.qty, r.icon].forEach(o => o?.destroy()));
+        this._rows.forEach(r => {
+            r.glow?.destroyGlow();
+            [r.bg, r.tx, r.qty, r.icon].forEach(o => o?.destroy());
+        });
         this._rows = [];
         this._listBg?.destroy();
         this._scrollUp?.destroy(); this._scrollUp = null;
@@ -208,8 +213,9 @@ export class InventoryScene extends Phaser.Scene {
                     })
                     .on('pointerdown', () => { Sound.select(); this._selectItem(filtIdx); });
 
+                const glow = attachRarityGlow(this, LIST_X + 14, y + ROW_H / 2, 10, item.rarity);
                 const icon = this.add.image(LIST_X + 14, y + ROW_H / 2, item.icon || 'item_potion_red')
-                    .setScale(0.65).setOrigin(0.5, 0.5);
+                    .setScale(0.65).setOrigin(0.5, 0.5).setDepth(1);
 
                 const upLvl = this._player.upgrades?.[itemId] || 0;
                 const tx = this.add.text(LIST_X + 27, y + ROW_H / 2, item.name + (upLvl ? ` +${upLvl}` : ''), {
@@ -221,7 +227,7 @@ export class InventoryScene extends Phaser.Scene {
                     fontSize: '13px', color: isEq ? '#8888ff' : '#666666', fontFamily: 'Courier New',
                 }).setOrigin(1, 0.5);
 
-                this._rows.push({ bg, tx, qty: qty2, icon, filtIdx });
+                this._rows.push({ bg, tx, qty: qty2, icon, glow, filtIdx });
             });
         }
 
@@ -315,6 +321,8 @@ export class InventoryScene extends Phaser.Scene {
         ).setColor('#666666');
         this._detDesc.setText(item.description || '');
         this._detIcon.setTexture(item.icon || 'item_potion_red').setVisible(true);
+        this._detGlow?.destroyGlow();
+        this._detGlow = attachRarityGlow(this, this._detIcon.x, this._detIcon.y, 30, item.rarity);
 
         // Bonuses
         if (item.bonuses && Object.keys(item.bonuses).length > 0) {
@@ -374,6 +382,8 @@ export class InventoryScene extends Phaser.Scene {
         this._detBonuses.setText('');
         this._detCompare.setText('');
         this._detIcon.setVisible(false);
+        this._detGlow?.destroyGlow();
+        this._detGlow = null;
         this._useBg.setVisible(false); this._useTx.setVisible(false);
         this._eqBg.setVisible(false);  this._eqTx.setVisible(false);
         this._actionMsg.setText('');
