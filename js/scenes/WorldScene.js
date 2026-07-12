@@ -15,7 +15,10 @@ import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { ITEMS } from '../data/items.js';
 import { MONSTERS } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
+import { NPC_REACTIONS } from '../data/npcReactions.js';
+import { CompanionSystem } from '../systems/CompanionSystem.js';
 import { buildPlayerSprite } from '../utils/Draw.js';
+import { DayNight } from '../utils/DayNight.js';
 import EventBus from '../utils/EventBus.js';
 import { Sound } from '../utils/SoundSystem.js';
 import { Music } from '../utils/MusicSystem.js';
@@ -52,6 +55,8 @@ export class WorldScene extends Phaser.Scene {
         this._spaceLock     = false;
         this._respawns      = [];
         this._transitioning = false;
+        this._nightWas      = DayNight.isNight();
+        if (!this._playerData.seenReactions) this._playerData.seenReactions = {};
 
         this._loadArea(this._playerData.currentArea);
         const _sp = this._playerData.position;
@@ -161,6 +166,10 @@ export class WorldScene extends Phaser.Scene {
         cam.setScroll(0, 0);
 
         this._setupDarkness(areaId);
+        this._setupNightOverlay(areaId);
+        this._setupWeather(areaId);
+        this._setupCompanion();
+        this._setupTrophies(areaId);
         Music.play(this._musicKeyFor(areaId));
     }
 
@@ -199,6 +208,210 @@ export class WorldScene extends Phaser.Scene {
         }
     }
 
+    // ── Dia/noite: overlay azulado nas superfícies; Noturnos somem ao amanhecer ──
+
+    _setupNightOverlay(areaId) {
+        this._nightOverlay?.destroy();
+        this._nightOverlay = null;
+        if (areaId.endsWith('_depths') || areaId.includes('house')) return;
+        this._nightOverlay = this.add.rectangle(0, 0, 544, 480, 0x0a1035, 1)
+            .setOrigin(0, 0).setDepth(39).setAlpha(0);
+    }
+
+    _updateDayNight() {
+        if (this._nightOverlay) this._nightOverlay.setAlpha(0.45 * DayNight.darkness());
+        if (this._fireflies) this._fireflies.emitting = DayNight.isNight();
+
+        const night = DayNight.isNight();
+        if (night === this._nightWas) return;
+        this._nightWas = night;
+        if (!this._nightOverlay) return; // interior/profundezas: sem anúncio
+        if (night) {
+            this._chat('{{accent:A noite cai sobre o mundo...}} Criaturas {{rarity:Noturnas}} despertam.', 'system');
+        } else {
+            this._chat('{{accent:O sol nasce.}} As criaturas noturnas recolhem-se às sombras.', 'system');
+            this._dismissNocturnals();
+        }
+    }
+
+    _dismissNocturnals() {
+        const gone = this._monsters.filter(m => m.isNocturnal);
+        if (!gone.length) return;
+        this._monsters = this._monsters.filter(m => !m.isNocturnal);
+        for (const m of gone) {
+            const parts = [m.sprite, m.shadow, m.aura, m._hpBar, m._nameLabel].filter(Boolean);
+            this.tweens.add({
+                targets: parts, alpha: 0, duration: 900, ease: 'Sine.easeIn',
+                onComplete: () => m.destroy(),
+            });
+            // A versão comum da criatura retorna em seguida
+            this._respawns.push({
+                instanceId: m.instanceId,
+                areaId: this._playerData.currentArea,
+                respawnAt: this.time.now + 4000,
+            });
+        }
+    }
+
+    // ── Clima: partículas ambientes por área de superfície ───────────────────
+
+    _setupWeather(areaId) {
+        this._weather?.destroy();
+        this._weather = null;
+        this._fireflies?.destroy();
+        this._fireflies = null;
+        if (areaId.endsWith('_depths') || areaId.includes('house')) return;
+
+        const fromSky = (tint, cfg = {}) => this.add.particles(0, 0, 'particle_dot', {
+            x: { min: 0, max: 544 }, y: -6,
+            lifespan: 12000, frequency: 240, quantity: 1, tint,
+            speedY: { min: 14, max: 32 }, speedX: { min: -10, max: 10 },
+            scale: { min: 0.5, max: 1 }, alpha: { start: 0.9, end: 0.15 },
+            ...cfg,
+        }).setDepth(38);
+
+        switch (areaId) {
+            case 'meadows': // pólen e folhas ao vento
+                this._weather = fromSky(0xbbdd66, { speedX: { min: 8, max: 30 }, frequency: 300 });
+                break;
+            case 'forest': // neve constante
+                this._weather = fromSky(0xffffff, { frequency: 170 });
+                break;
+            case 'plains': // brasas subindo do chão quente
+                this._weather = this.add.particles(0, 0, 'particle_dot', {
+                    x: { min: 0, max: 544 }, y: 486,
+                    lifespan: 6000, frequency: 210, quantity: 1, tint: 0xff8833,
+                    speedY: { min: -55, max: -22 }, speedX: { min: -12, max: 12 },
+                    scale: { start: 0.8, end: 0.2 }, alpha: { start: 1, end: 0 },
+                }).setDepth(38);
+                break;
+            case 'mountains': // chuva fina
+                this._weather = this.add.particles(0, 0, 'particle_streak', {
+                    x: { min: 0, max: 560 }, y: -10,
+                    lifespan: 1900, frequency: 45, quantity: 2, tint: 0x88aadd,
+                    speedY: { min: 250, max: 330 }, speedX: { min: -25, max: -12 },
+                    alpha: { start: 0.55, end: 0.15 },
+                }).setDepth(38);
+                break;
+            case 'dungeon': // motas de sombra flutuando
+                this._weather = this.add.particles(0, 0, 'particle_dot', {
+                    x: { min: 0, max: 544 }, y: { min: 40, max: 460 },
+                    lifespan: 5000, frequency: 320, quantity: 1, tint: 0xaa66ff,
+                    speedY: { min: -14, max: -4 }, speedX: { min: -8, max: 8 },
+                    scale: { min: 0.4, max: 0.9 }, alpha: { start: 0, end: 0.7 },
+                }).setDepth(38);
+                break;
+            case 'village': // vagalumes — apenas à noite (ligados em _updateDayNight)
+                this._fireflies = this.add.particles(0, 0, 'particle_dot', {
+                    x: { min: 30, max: 514 }, y: { min: 60, max: 430 },
+                    lifespan: 1600, frequency: 380, quantity: 1, tint: 0xffee66,
+                    speedY: { min: -8, max: 8 }, speedX: { min: -8, max: 8 },
+                    scale: { min: 0.5, max: 0.8 }, alpha: { start: 1, end: 0 },
+                }).setDepth(41);
+                this._fireflies.emitting = DayNight.isNight();
+                break;
+        }
+    }
+
+    // ── Outlier: wisp companheiro que segue o jogador ─────────────────────────
+
+    _setupCompanion() {
+        this._companion?.destroy();
+        const p = this._playerData;
+        if (!p.companionStage) p.companionStage = CompanionSystem.stage(p);
+        const sx = this._player.sprite.x - 14;
+        const sy = this._player.sprite.y - 12;
+        this._companion = this.add.image(sx, sy, CompanionSystem.texKey(p.companionStage)).setDepth(5);
+        this._companionT = Math.random() * 1000;
+        if (!p.companionMet) {
+            p.companionMet = true;
+            this.time.delayedCall(1500, () =>
+                this._chat('Um pequeno wisp desgarrado começou a te seguir... {{accent:Outlier}} agora é seu companheiro.', 'dialog'));
+        }
+    }
+
+    _updateCompanion(delta) {
+        if (!this._companion || !this._player?.sprite) return;
+        this._companionT += delta;
+        const bob = Math.sin(this._companionT * 0.004) * 2.5;
+        const tx  = this._player.sprite.x - 14;
+        const ty  = this._player.sprite.y - 12 + bob;
+        const k   = Math.min(1, delta * 0.006);
+        this._companion.x += (tx - this._companion.x) * k;
+        this._companion.y += (ty - this._companion.y) * k;
+    }
+
+    _checkCompanionEvolution() {
+        const p     = this._playerData;
+        const stage = CompanionSystem.stage(p);
+        const prev  = p.companionStage || 1;
+        if (stage <= prev) return;
+        p.companionStage = stage;
+        this._setupCompanion();
+        Sound.secret();
+        const pct = Math.round(CompanionSystem.xpBonus(stage) * 100);
+        this._chat(`{{level:✦ ${CompanionSystem.label(stage)}!}} Seu companheiro evoluiu e agora concede {{xp:+${pct}% de XP}}.`, 'levelup');
+        if (this._companion) {
+            const ring = this.add.circle(this._companion.x, this._companion.y, 6, CompanionSystem.color(stage), 0)
+                .setStrokeStyle(2, CompanionSystem.color(stage), 1).setDepth(30);
+            this.tweens.add({
+                targets: ring, radius: 30, alpha: 0, duration: 800,
+                ease: 'Sine.easeOut', onComplete: () => ring.destroy(),
+            });
+        }
+    }
+
+    // ── Troféus: chefes derrotados viram placas na casa da Anciã ─────────────
+
+    _setupTrophies(areaId) {
+        this._trophies?.forEach(t => t.objs.forEach(o => o.destroy()));
+        this._trophies = [];
+        if (areaId !== 'village_house_elder') return;
+
+        const SLOTS = [
+            { instanceId: 'v_boss',  monsterId: 'boss_village',   x: 2  },
+            { instanceId: 'me_boss', monsterId: 'boss_meadows',   x: 4  },
+            { instanceId: 'fo_boss', monsterId: 'boss_forest',    x: 6  },
+            { instanceId: 'pl_boss', monsterId: 'boss_plains',    x: 10 },
+            { instanceId: 'mo_boss', monsterId: 'boss_mountains', x: 12 },
+            { instanceId: 'du_boss', monsterId: 'boss_dungeon',   x: 14 },
+        ];
+        const defeated = this._playerData.defeatedMonsters || {};
+        for (const slot of SLOTS) {
+            const def = MONSTERS[slot.monsterId];
+            if (!def) continue;
+            const won = !!defeated[slot.instanceId];
+            const cx  = slot.x * TILE_SIZE + TILE_SIZE / 2;
+            const cy  = TILE_SIZE + 12;
+            const objs = [];
+            const plaque = this.add.image(cx, cy, 'sprite_trophy').setDepth(6).setAlpha(won ? 1 : 0.18);
+            objs.push(plaque);
+            if (won) {
+                const gem = this.add.circle(cx, cy - 1, 4, def.color || 0xffffff, 1).setDepth(7);
+                this.tweens.add({
+                    targets: gem, alpha: 0.5, duration: 1400,
+                    yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+                });
+                objs.push(gem);
+            }
+            this._trophies.push({ tileX: slot.x, tileY: 1, def, won, objs });
+        }
+    }
+
+    _showTrophy(trophy) {
+        Sound.interact();
+        this._paused = true;
+        const lines = trophy.won
+            ? [`{{accent:${trophy.def.name}}} — guardião de nível ${trophy.def.level}, derrotado por você.`, trophy.def.flavor]
+            : ['Um suporte vazio. A Anciã reservou este lugar para o troféu de um guardião que ainda vive...'];
+        this.scene.launch('Dialog', {
+            speaker: 'Troféu de Caçada',
+            lines,
+            role: 'lore',
+            onClose: () => { this._paused = false; },
+        });
+    }
+
     // ── Update loop ───────────────────────────────────────────────────────────
 
     update(time, delta) {
@@ -218,6 +431,8 @@ export class WorldScene extends Phaser.Scene {
 
         this._syncAuraPosition();
         this._updateDarkness(time);
+        this._updateDayNight();
+        this._updateCompanion(delta);
 
         if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteract();
         if (Phaser.Input.Keyboard.JustDown(this._iKey)) this._openOverlay('Inventory');
@@ -705,6 +920,7 @@ export class WorldScene extends Phaser.Scene {
 
         AchievementSystem.recordCombat(this._playerData, { outcome, maxStreak, allCorrect, isElite, isMimic });
         AchievementSystem.check(this._playerData, { outcome, maxStreak, allCorrect, feverReached, isElite, isMimic });
+        this._checkCompanionEvolution();
 
         if (outcome === 'win') {
             const idx = this._monsters.findIndex(m => m.instanceId === instanceId);
@@ -801,6 +1017,14 @@ export class WorldScene extends Phaser.Scene {
             return;
         }
 
+        // Trophy plaques in the elder's house
+        const trophy = (this._trophies || []).find(t =>
+            Math.abs(t.tileX - col) + Math.abs(t.tileY - row) === 1);
+        if (trophy) {
+            this._showTrophy(trophy);
+            return;
+        }
+
         // Check for adjacent Chests (Tile 7)
         const adj = [
             { x: col, y: row - 1 }, { x: col, y: row + 1 },
@@ -854,6 +1078,17 @@ export class WorldScene extends Phaser.Scene {
     _interactNPC(npc) {
         // Build dialog lines (cycle through their full lore script)
         const lines = [...(npc.dialog || [])];
+
+        // Reações ao progresso do jogador — cada uma dispara só uma vez,
+        // antes das falas normais do NPC
+        const seen = this._playerData.seenReactions || (this._playerData.seenReactions = {});
+        const reactive = NPC_REACTIONS
+            .filter(r => r.npcId === npc.npcId && !seen[r.id] && r.when(this._playerData))
+            .slice(0, 2);
+        if (reactive.length) {
+            reactive.forEach(r => { seen[r.id] = true; });
+            lines.unshift(...reactive.map(r => r.line));
+        }
 
         // Action follow-up info (shop/quest/gamble) included as final lore-flavored line
         let action = null;

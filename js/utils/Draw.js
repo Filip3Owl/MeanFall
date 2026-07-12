@@ -793,6 +793,52 @@ export function generateTextures(scene) {
     //     darkness around the player and near exits) ────────────────────────
     makeRadialLight(scene, 'light_radial', 256);
     makeRadialLight(scene, 'light_radial_small', 96);
+
+    drawImmersionTextures(scene);
+}
+
+// ─── IMERSÃO: partículas de clima, companheiro Outlier e troféus ───────────
+function drawImmersionTextures(scene) {
+    const g = scene.add.graphics();
+
+    // Partícula genérica (neve, brasas, vagalumes, motas) — tint por emissor
+    g.fillStyle(0xffffff, 0.45); g.fillCircle(3, 3, 3);
+    g.fillStyle(0xffffff, 1);    g.fillCircle(3, 3, 1.5);
+    g.generateTexture('particle_dot', 6, 6);
+    g.clear();
+
+    // Risco de chuva
+    g.fillStyle(0xffffff, 0.8); g.fillRect(0, 0, 2, 9);
+    g.fillStyle(0xffffff, 1);   g.fillRect(0, 6, 2, 3);
+    g.generateTexture('particle_streak', 2, 9);
+    g.clear();
+
+    // Outlier — wisp companheiro em 3 estágios (cor e tamanho crescem)
+    const stages = [
+        { key: 'sprite_companion_1', color: 0x88ddff, r: 4 },
+        { key: 'sprite_companion_2', color: 0xffd166, r: 5 },
+        { key: 'sprite_companion_3', color: 0xbb88ff, r: 6 },
+    ];
+    for (const st of stages) {
+        const S = st.r * 2 + 6, c = S / 2;
+        g.fillStyle(st.color, 0.22); g.fillCircle(c, c, st.r + 3);   // halo
+        g.fillStyle(st.color, 0.9);  g.fillCircle(c, c, st.r);       // corpo
+        g.fillStyle(0xffffff, 0.85); g.fillCircle(c - 1, c - 2, st.r * 0.4); // brilho
+        g.fillStyle(0x223344, 1);                                    // olhos
+        g.fillRect(c - 2, c, 1, 2); g.fillRect(c + 1, c, 1, 2);
+        g.generateTexture(st.key, S, S);
+        g.clear();
+    }
+
+    // Placa de troféu de chefe (madeira; a gema colorida é adicionada na cena)
+    g.fillStyle(0x2a1808, 1); g.fillRect(0, 0, 20, 24);   // borda escura
+    g.fillStyle(0x5c3a1e, 1); g.fillRect(2, 2, 16, 20);   // madeira
+    g.fillStyle(0x7a4c2a, 0.6); g.fillRect(2, 2, 16, 2);  // bisel superior
+    g.fillStyle(0x3d2810, 0.6); g.fillRect(2, 20, 16, 2); // sombra inferior
+    g.fillStyle(0x1a1006, 1); g.fillCircle(10, 11, 6);    // fundo da gema
+    g.generateTexture('sprite_trophy', 20, 24);
+
+    g.destroy();
 }
 
 function makeRadialLight(scene, key, size) {

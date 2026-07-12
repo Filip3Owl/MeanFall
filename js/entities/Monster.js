@@ -1,6 +1,7 @@
 import { TILE_SIZE, ELEMENTS, DIFFICULTIES } from '../constants.js';
 import { MONSTERS } from '../data/monsters.js';
 import EventBus from '../utils/EventBus.js';
+import { DayNight } from '../utils/DayNight.js';
 
 export class Monster {
     constructor(scene, instanceData) {
@@ -20,6 +21,7 @@ export class Monster {
         // Bosses are never elite/shiny.
         this.isElite = false;
         this.isShiny = false;
+        this.isNocturnal = false;
         if (!this.def.isBoss) {
             if ((pData?.incenseCharges || 0) > 0) {
                 this.isElite = true;
@@ -33,6 +35,10 @@ export class Monster {
             }
             // Cintilante: rare golden variant (2%), exclusive with Elite
             this.isShiny = !this.isElite && Math.random() < 0.02;
+            // Noturno: só aparece de noite na superfície, exclusivo com os demais
+            const surface = !/_depths|house/.test(pData?.currentArea || '');
+            this.isNocturnal = !this.isElite && !this.isShiny && surface
+                && DayNight.isNight() && Math.random() < 0.18;
         }
 
         if (this.isElite) {
@@ -45,9 +51,15 @@ export class Monster {
             this.def.xpReward = Math.floor(this.def.xpReward * 3);
             this.def.goldReward = Math.floor(this.def.goldReward * 5);
             this.def.isShiny = true;
+        } else if (this.isNocturnal) {
+            this.def.name = `☾ ${this.def.name} Noturno`;
+            this.def.xpReward = Math.floor(this.def.xpReward * 2.5);
+            this.def.goldReward = Math.floor(this.def.goldReward * 2);
+            this.def.isNocturnal = true;
         }
 
-        const scaledHp = Math.floor(this.def.maxHp * diffDef.monsterHp * (this.isElite ? 2.0 : 1.0));
+        const hpMult = this.isElite ? 2.0 : this.isNocturnal ? 1.25 : 1.0;
+        const scaledHp = Math.floor(this.def.maxHp * diffDef.monsterHp * hpMult);
         this.hp     = scaledHp;
         this.maxHp  = scaledHp;
 
@@ -94,6 +106,16 @@ export class Monster {
                 duration: 600, yoyo: true, repeat: -1,
                 ease: 'Sine.easeInOut',
             });
+        } else if (this.isNocturnal) {
+            // Noturno: brilho violeta lento, como luar
+            this.sprite.setTint(0xbb99ff);
+            this.aura = scene.add.circle(px, py, 15, 0x7744cc, 0.3).setDepth(3);
+            scene.tweens.add({
+                targets: this.aura,
+                alpha: 0.08, scale: 1.4,
+                duration: 1600, yoyo: true, repeat: -1,
+                ease: 'Sine.easeInOut',
+            });
         }
 
         // Patrol state
@@ -107,6 +129,7 @@ export class Monster {
         const elem = ELEMENTS[this.def.element] || ELEMENTS.normal;
         const elemHex = this.isElite ? '#ffd700'
             : this.isShiny ? '#fff2aa'
+            : this.isNocturnal ? '#bb99ff'
             : ('#' + (elem?.color || 0xffffff).toString(16).padStart(6, '0'));
         this._nameLabel = scene.add.text(0, 0, `${this.def.name} Lv.${this.def.level}`, {
             fontSize: this.isElite ? '9px' : '8px', color: elemHex, fontFamily: 'Courier New', fontStyle: 'bold',

@@ -6,6 +6,7 @@ import { ITEMS, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
 import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT, parentArea } from '../constants.js';
 import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
+import { CompanionSystem }               from '../systems/CompanionSystem.js';
 import EventBus                          from '../utils/EventBus.js';
 import { Sound }                         from '../utils/SoundSystem.js';
 import { Music }                         from '../utils/MusicSystem.js';
@@ -208,6 +209,19 @@ export class CombatScene extends Phaser.Scene {
             const aura = this.add.circle(PX + PW - 50, PY + 64, 30, 0x44ff88, 0.08);
             this.tweens.add({ targets: aura, alpha: 0.2, scale: 1.1, duration: 1300, yoyo: true, repeat: -1 });
             this.add.image(PX + PW - 50, PY + 64, 'sprite_player').setScale(1.5).setDepth(1);
+        }
+
+        // Outlier — o companheiro assiste ao combate ao lado do jogador
+        const compStage = this._player.companionStage || CompanionSystem.stage(this._player);
+        const compKey   = CompanionSystem.texKey(compStage);
+        if (this.textures.exists(compKey)) {
+            this._companionHome = { x: PX + PW - 92, y: PY + 96 };
+            this._companion = this.add.image(this._companionHome.x, this._companionHome.y, compKey).setDepth(2);
+            // Pulso de alpha como idle — deixa o eixo Y livre para as reações
+            this.tweens.add({
+                targets: this._companion, alpha: 0.65,
+                duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+            });
         }
 
         // Info (left side of panel)
@@ -696,6 +710,7 @@ export class CombatScene extends Phaser.Scene {
         if (correct) {
             this._streak++;
             if (this._streak > this._maxStreak) this._maxStreak = this._streak;
+            this._companionReact(true);
             mastery.correct++;
             mastery.wrongIds = mastery.wrongIds.filter(id => id !== q.id);
 
@@ -772,6 +787,7 @@ export class CombatScene extends Phaser.Scene {
         } else {
             this._streak = 0;
             this._wrongCount++;
+            this._companionReact(false);
             this._streakTxt.setText('');
             this._updateFeverMode(false); // DEACTIVATE FEVER ON WRONG
             if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
@@ -858,6 +874,35 @@ export class CombatScene extends Phaser.Scene {
 
             // Erros pausam: o jogador confirma quando terminar de ler a explicação
             this._showContinuePrompt();
+        }
+    }
+
+    // Outlier comemora acertos e murcha nos erros
+    _companionReact(correct) {
+        if (!this._companion) return;
+        this._compTween?.stop();
+        this._companion.setPosition(this._companionHome.x, this._companionHome.y).setAngle(0);
+        if (correct) {
+            this._companion.setTintFill(0xffffff);
+            this.time.delayedCall(120, () => this._companion?.clearTint());
+            this._compTween = this.tweens.add({
+                targets: this._companion, y: this._companionHome.y - 12,
+                duration: 150, yoyo: true, ease: 'Quad.easeOut',
+            });
+        } else {
+            this._companion.setTint(0x667788);
+            this._compTween = this.tweens.add({
+                targets: this._companion, y: this._companionHome.y + 5, angle: -14,
+                duration: 260, ease: 'Quad.easeIn',
+            });
+            this.time.delayedCall(1200, () => {
+                if (!this._companion) return;
+                this._companion.clearTint();
+                this._compTween?.stop();
+                this._compTween = this.tweens.add({
+                    targets: this._companion, y: this._companionHome.y, angle: 0, duration: 300,
+                });
+            });
         }
     }
 
@@ -1148,6 +1193,11 @@ export class CombatScene extends Phaser.Scene {
             if (this._maxStreak >= 5) {
                 baseXpReward = Math.floor(baseXpReward * 1.5);
             }
+
+            // Bônus passivo do Outlier evoluído
+            const compBonus = CompanionSystem.xpBonus(
+                this._player.companionStage || CompanionSystem.stage(this._player));
+            if (compBonus > 0) baseXpReward = Math.floor(baseXpReward * (1 + compBonus));
 
             xpGained = awardXP(this._player, baseXpReward);
 

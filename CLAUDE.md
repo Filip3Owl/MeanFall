@@ -35,6 +35,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── Draw.js          Geração procedural de texturas (sprites, tiles, UI)
     │   ├── MusicSystem.js   Música procedural via Web Audio API (por área/estado)
     │   ├── SoundSystem.js   Efeitos sonoros procedurais (hit, levelup, dialogTick, etc.)
+    │   ├── DayNight.js      Ciclo dia/noite acelerado derivado do relógio real (12 min/ciclo)
     │   └── RichText.js      Renderização de texto colorido inline com markup {{tag:texto}}
     ├── systems/
     │   ├── CombatSystem.js        Cálculo de dano, itens, equipamentos, drops
@@ -50,6 +51,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── BookSystem.js          Biblioteca in-world com tomos que concedem bônus permanentes
     │   ├── InferenceSystem.js     Geração de testes de hipótese para Mimics (Dungeon)
     │   ├── StatusEffectSystem.js  Efeitos de status elementais aplicados em combate
+    │   ├── CompanionSystem.js     Outlier: estágio/bônus do wisp companheiro (por maestria média)
     │   └── TutorialSystem.js      Tutorial guiado para novos jogadores
     ├── scenes/
     │   ├── BootScene.js           Gera texturas, transita para MainMenu
@@ -86,7 +88,8 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
         ├── shops.js       3 mercadores com estoques por área
         ├── bounties.js    Pools de bounties diárias por área
         ├── lore.js        Lore expandido do mundo
-        └── appearance.js  Opções de aparência para criação de personagem
+        ├── appearance.js  Opções de aparência para criação de personagem
+        └── npcReactions.js  Linhas de diálogo reativas ao progresso (1× cada, playerData.seenReactions)
 ```
 
 ---
@@ -115,6 +118,15 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 - Os mapas foram gerados/validados por script (BFS de conectividade); bolsões secretos são inalcançáveis sem abrir a parede
 
 ---
+
+## Imersão (dia/noite, clima, companheiro, troféus)
+
+- **Ciclo dia/noite** (`utils/DayNight.js`): derivado do relógio real, ciclo de 12 min (~7 dia / 1,5 anoitecer / 3 noite / 0,5 amanhecer), sem estado salvo. Overlay azul (alpha até 0.45, depth 39) só nas superfícies; mensagens de chat nas transições
+- **Monstros Noturnos**: à noite, 18% de chance de spawn na superfície (exclusivo com Elite/Cintilante); 1.25× HP, 2.5× XP, 2× ouro, tint/aura violeta, nome `☾ ... Noturno`; ao amanhecer somem com fade e a versão comum respawna
+- **Clima por área** (partículas, depth 38): pólen (Prados), neve (Floresta), brasas subindo (Planícies), chuva (Montanhas), motas de sombra (Calabouço), vagalumes só à noite (Vila, depth 41). Texturas `particle_dot`/`particle_streak` em Draw.js
+- **Outlier, o companheiro** (`systems/CompanionSystem.js`): wisp que segue o jogador no mundo e assiste ao combate no painel; comemora acertos e murcha nos erros. Evolui pela maestria média das 6 áreas (estágio 2 ≥30%: +3% XP; estágio 3 ≥65%: +6% XP); estágio salvo em `playerData.companionStage`
+- **NPCs reativos** (`data/npcReactions.js`): falas condicionais ao progresso (chefes, segredos, maestria, ouro, forja) prependadas ao diálogo normal; cada uma dispara 1× (`playerData.seenReactions`)
+- **Troféus de chefes**: na casa da Anciã, 6 placas na parede (suportes vazios até derrotar cada chefe); gema pulsante na cor do chefe; SPACE adjacente mostra o flavor text
 
 ## Sistema de Combate
 
