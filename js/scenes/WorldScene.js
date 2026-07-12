@@ -974,7 +974,18 @@ export class WorldScene extends Phaser.Scene {
         this._paused = true;
         this._playerData.lastSafePosition = { ...this._playerData.position };
         this.registry.set('player', this._playerData);
-        TutorialSystem.trigger(this._playerData, this, 'first_monster');
+
+        // Tutorial do primeiro combate: o diálogo abre por cima de tudo, então
+        // o combate só começa quando ele fechar (antes, fechá-lo despausava o
+        // mundo com o combate já aberto e engolia os cliques do jogador)
+        const tipShown = TutorialSystem.trigger(this._playerData, this, 'first_monster',
+            () => this._beginCombat(monster));
+        if (tipShown) return;
+        this._beginCombat(monster);
+    }
+
+    _beginCombat(monster) {
+        this._paused = true; // resumeFromOverlay do tutorial despausa — repausa aqui
 
         // ── Combat Entry Animation ───────────────────────────────────────────
         

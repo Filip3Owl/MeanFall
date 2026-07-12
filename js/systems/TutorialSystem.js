@@ -7,8 +7,9 @@ export const TutorialSystem = {
         if (!player.seenTutorials) player.seenTutorials = {};
     },
 
-    /** Triggers a tutorial tip if not yet seen. Returns true if shown. */
-    trigger(player, scene, triggerKey) {
+    /** Triggers a tutorial tip if not yet seen. Returns true if shown.
+     *  `onDone` roda quando o jogador fecha o diálogo da dica. */
+    trigger(player, scene, triggerKey, onDone = null) {
         this.init(player);
         const tip = TUTORIAL_TIPS.find(t => t.trigger === triggerKey);
         if (!tip) return false;
@@ -22,6 +23,7 @@ export const TutorialSystem = {
             role: 'quest',
             onClose: () => {
                 if (scene.resumeFromOverlay) scene.resumeFromOverlay();
+                if (onDone) onDone();
             },
         });
         if (scene.pauseForOverlay) scene.pauseForOverlay();

@@ -465,16 +465,17 @@ export class CombatScene extends Phaser.Scene {
         }).setOrigin(0, 0);
 
         // Continue prompt — shown after a wrong answer so the player can read
-        // the explanation calmly before the next question. Sits over the FUGIR
-        // slot in the bottom bar so it never covers the explanation text.
+        // the explanation calmly before the next question. Sits over the DICA
+        // slot (useless during the pause) — never over FUGIR, which must stay
+        // clickable right after the player takes damage.
         this._awaitContinue = false;
-        this._continueBg = this.add.rectangle(456, 458, 172, 30, 0x1a1400, 1)
+        this._continueBg = this.add.rectangle(92, 458, 172, 30, 0x1a1400, 1)
             .setStrokeStyle(1, 0xd4af37, 0.8).setDepth(60).setVisible(false)
             .setInteractive({ useHandCursor: true })
             .on('pointerover', () => this._continueBg.setFillStyle(0x2a2000))
             .on('pointerout',  () => this._continueBg.setFillStyle(0x1a1400))
             .on('pointerdown', () => this._continueAfterAnswer());
-        this._continueTx = this.add.text(456, 458, '▶ CONTINUAR [ESPAÇO]', {
+        this._continueTx = this.add.text(92, 458, '▶ CONTINUAR [ESPAÇO]', {
             fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5).setDepth(61).setVisible(false);
         this._continueTween = null;
@@ -664,6 +665,7 @@ export class CombatScene extends Phaser.Scene {
 
     _onKeyDown(event) {
         if (this.scene.isActive('Scratchpad')) return;
+        if (this._fleeConfirmOpen) return; // diálogo de fuga tem os próprios controles
         if (this._awaitContinue && (event.key === ' ' || event.key === 'Enter')) {
             this._continueAfterAnswer();
             return;
@@ -1135,8 +1137,17 @@ export class CombatScene extends Phaser.Scene {
     _showFleeConfirm(lost, onConfirm) {
         const W = 544, H = 480;
         this._answerLock = true;
+        this._fleeConfirmOpen = true;
+        // Ao cancelar, restaura o estado anterior: se a fuga foi aberta durante
+        // a pausa da correção, o lock continua até o jogador confirmar a leitura
+        const closeCancel = () => {
+            this._fleeConfirmOpen = false;
+            this._answerLock = this._awaitContinue;
+            this.input.keyboard.off('keydown', escKey);
+        };
         const c = this.add.container(0, 0).setDepth(200);
-        c.add(this.add.rectangle(0, 0, W, H, 0x000000, 0.7).setOrigin(0, 0));
+        // Interativo para engolir cliques nos botões que ficam embaixo
+        c.add(this.add.rectangle(0, 0, W, H, 0x000000, 0.7).setOrigin(0, 0).setInteractive());
         const pw = 320, ph = 148;
         const px = (W - pw) / 2, py = (H - ph) / 2;
         c.add(this.add.rectangle(px, py, pw, ph, 0x180808, 1).setOrigin(0, 0).setStrokeStyle(2, 0xaa3322, 0.8));
@@ -1152,7 +1163,12 @@ export class CombatScene extends Phaser.Scene {
             .setOrigin(0, 0).setStrokeStyle(1, 0xcc4433, 0.7).setInteractive()
             .on('pointerover', () => yesBg.setFillStyle(0x3a1010))
             .on('pointerout',  () => yesBg.setFillStyle(0x2a0808))
-            .on('pointerdown', () => { c.destroy(); onConfirm(); });
+            .on('pointerdown', () => {
+                this._fleeConfirmOpen = false;
+                this.input.keyboard.off('keydown', escKey);
+                c.destroy();
+                onConfirm();
+            });
         c.add([yesBg, this.add.text(px + 84, py + 115, '⊗  FUGIR', {
             fontSize: '13px', color: '#ee5533', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5)]);
@@ -1160,12 +1176,12 @@ export class CombatScene extends Phaser.Scene {
             .setOrigin(0, 0).setStrokeStyle(1, 0x33aa55, 0.7).setInteractive()
             .on('pointerover', () => noBg.setFillStyle(0x102818))
             .on('pointerout',  () => noBg.setFillStyle(0x081808))
-            .on('pointerdown', () => { c.destroy(); this._answerLock = false; });
-        c.add([noBg, this.add.text(px + pw - 84, py + 115, '✓  CONTINUAR', {
-            fontSize: '13px', color: '#55cc77', fontFamily: 'Courier New', fontStyle: 'bold',
+            .on('pointerdown', () => { c.destroy(); closeCancel(); });
+        c.add([noBg, this.add.text(px + pw - 84, py + 115, '✗  FICAR E LUTAR', {
+            fontSize: '12px', color: '#55cc77', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5)]);
         const escKey = (e) => {
-            if (e.key === 'Escape') { c.destroy(); this._answerLock = false; this.input.keyboard.off('keydown', escKey); }
+            if (e.key === 'Escape') { c.destroy(); closeCancel(); }
         };
         this.input.keyboard.on('keydown', escKey);
     }
