@@ -78,7 +78,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── Monster.js     Sprite, patrulha/chase, barra de HP, aura elemental, variantes Elite (15%) e Cintilante (2%, 5× ouro)
     │   └── NPC.js         Sprite, ciclo de diálogos, interação
     └── data/
-        ├── questions.js   207 questões (6 tópicos, 3 dificuldades, 3 tipos)
+        ├── questions.js   243 questões (6 tópicos, 3 dificuldades, 3 tipos)
         ├── monsters.js    30 monstros (24 elementais + 6 chefes/especiais), 4 por área
         ├── items.js       55 itens (consumíveis, equipamentos por slot, scrolls, 6 materiais de forja, Incenso do Caos)
         ├── maps.js        15 mapas tile-based (6 superfícies + 3 casas + 6 profundezas)
@@ -163,7 +163,8 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 
 ## Sistema de Questões
 
-- **207 questões** em 6 tópicos: `data_types`, `mean_median_mode`, `spread`, `probability`, `distributions`, `inference`
+- **243 questões** em 6 tópicos: `data_types`, `mean_median_mode`, `spread`, `probability`, `distributions`, `inference`
+- **Geradores procedurais devem retornar `explanation` própria** — a da questão base cita os números originais e ficaria errada para o dataset gerado
 - **3 tipos**: múltipla escolha, verdadeiro/falso, resposta numérica (com tolerância decimal configurável)
 - **3 dificuldades**: easy, medium, hard — cada monstro filtra por dificuldade conforme seu nível
 - **Aprendizado adaptativo**: `QuestionEngine` prioriza tópicos com menor taxa de acerto do jogador (60% de viés para questões erradas anteriormente)
