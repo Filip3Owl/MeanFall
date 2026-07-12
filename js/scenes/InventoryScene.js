@@ -310,6 +310,7 @@ export class InventoryScene extends Phaser.Scene {
         this._detType.setText(
             item.type === 'consumable' ? 'Consumível'
             : item.type === 'material' ? 'Material de forja'
+            : item.type === 'tool' ? 'Ferramenta de exploração'
             : `Equip · ${item.slot || ''}`
         ).setColor('#666666');
         this._detDesc.setText(item.description || '');

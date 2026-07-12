@@ -381,6 +381,17 @@ export const ACHIEVEMENTS = {
         category: 'quests',
         check: p => (p.stats?.bountiesCompleted || 0) >= 20,
     },
+
+    // ── A CÂMARA DA HIPÓTESE NULA ─────────────────────────────────────────────
+    sanctum_judgement: {
+        id: 'sanctum_judgement',
+        name: 'Além do Alfa',
+        description: 'Vença o Julgamento da Câmara da Hipótese Nula.',
+        icon: '⚖',
+        category: 'combat',
+        xpReward: 500,
+        check: p => !!p.sanctumCleared,
+    },
 };
 
 export const ACHIEVEMENT_CATEGORIES = {

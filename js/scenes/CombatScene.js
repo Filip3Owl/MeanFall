@@ -26,6 +26,9 @@ export class CombatScene extends Phaser.Scene {
         this._answerLock   = false;
         this._numericValue = '';
         this._relicEffect  = null;
+        this._rules        = data.rules || {};      // ex.: { noItems: true } no Julgamento
+        this._gauntletInfo = data.gauntlet || null; // { index, total } quando em gauntlet
+        this._alphaUsed    = false;                 // Anel da Significância: 1 perdão/combate
     }
 
     create() {
@@ -85,7 +88,9 @@ export class CombatScene extends Phaser.Scene {
         this.add.text(8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(0, 0).setAlpha(0.7);
         this.add.text(W - 8, 6, '⟨ ⟩', { fontSize: '12px', color: eTextHex, fontFamily: 'Courier New' }).setOrigin(1, 0).setAlpha(0.7);
 
-        const titleStr = isBoss
+        const titleStr = this._gauntletInfo
+            ? `⚖  JULGAMENTO ${this._gauntletInfo.index + 1}/${this._gauntletInfo.total}  ·  ${elem.topicLabel.toUpperCase()}  ⚖`
+            : isBoss
             ? `☠  CHEFE DE ÁREA  ·  ${elem.topicLabel.toUpperCase()}  ☠`
             : isShiny
                 ? `✦  CRIATURA CINTILANTE  ·  ${elem.topicLabel.toUpperCase()}  ✦`
@@ -525,8 +530,10 @@ export class CombatScene extends Phaser.Scene {
         const hintBg = btnStyle(0x080818, 0x5555bb, '◈ DICA (−10 FOCO)', '#aaaaff', 8, 150);
         hintBg.on('pointerdown', () => this._useHint());
 
-        // ITEM (consumíveis)
-        const itemBg = btnStyle(0x0e1408, 0x55aa33, '✚ ITEM [E]', '#88dd66', 166, 110);
+        // ITEM (consumíveis) — selado durante o Julgamento
+        const itemBg = this._rules.noItems
+            ? btnStyle(0x141414, 0x444444, '✚ ITEM ⊘', '#666666', 166, 110)
+            : btnStyle(0x0e1408, 0x55aa33, '✚ ITEM [E]', '#88dd66', 166, 110);
         itemBg.on('pointerdown', () => this._toggleItemPanel());
 
         // NOTAS/CALC
@@ -555,6 +562,11 @@ export class CombatScene extends Phaser.Scene {
     // pausa da correção (o momento natural de curar). Custo: zera o streak.
 
     _toggleItemPanel() {
+        if (this._rules.noItems) {
+            Sound.denied();
+            EventBus.emit('chat', { msg: 'Sua mochila foi selada — o Julgamento não permite itens.', type: 'system' });
+            return;
+        }
         if (this._itemPanel) { this._closeItemPanel(); return; }
         if (this._fleeConfirmOpen) return;
         if (this._answerLock && !this._awaitContinue) return;
@@ -897,6 +909,30 @@ export class CombatScene extends Phaser.Scene {
             this.time.delayedCall(1900, () => this._nextQuestion());
             return;
         } else {
+            // Anel da Significância: o primeiro erro do combate fica dentro de
+            // α — sem dano, sem status, e a sequência de acertos sobrevive.
+            if (this._relicEffect?.type === 'first_error_forgiven' && !this._alphaUsed) {
+                this._alphaUsed = true;
+                this._wrongCount++;
+                if (!mastery.wrongIds.includes(q.id)) mastery.wrongIds.push(q.id);
+                Sound.dodge();
+                this._juiceWrong.setAlpha(0.15);
+                this.tweens.add({ targets: this._juiceWrong, alpha: 0, duration: 400 });
+                this._showFeedback('Errado — mas dentro da margem! O Anel da Significância perdoa seu primeiro deslize.', '#aaddff');
+                this._spawnDamageNumber(this._playerPanelCenter, 'α', '#aaddff', false);
+
+                const ansA = typeof q.correctAnswer === 'number'
+                    ? String(q.correctAnswer).replace('.', ',')
+                    : q.correctAnswer;
+                let corrA = `Resposta correta: ${ansA}.`;
+                if (q.explanation) corrA += ` ${q.explanation}`;
+                this._explTxt.setFontSize(11).setText(corrA);
+                if (this._explTxt.y + this._explTxt.height > 436) this._explTxt.setFontSize(10);
+
+                this._showContinuePrompt();
+                return;
+            }
+
             this._streak = 0;
             this._wrongCount++;
             this._companionReact(false);
@@ -1266,7 +1302,10 @@ export class CombatScene extends Phaser.Scene {
             fontSize: '15px', color: '#ee6644', fontFamily: 'Courier New', fontStyle: 'bold',
             stroke: '#000000', strokeThickness: 3,
         }).setOrigin(0.5, 0));
-        c.add(this.add.text(W / 2, py + 44, `Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual\n−${lost} XP serão perdidos`, {
+        const fleeWarn = this._gauntletInfo
+            ? `Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual (−${lost} XP)\ne ENCERRA O JULGAMENTO`
+            : `Fugir custa ${Math.round(FLEE_XP_PENALTY * 100)}% do XP atual\n−${lost} XP serão perdidos`;
+        c.add(this.add.text(W / 2, py + 44, fleeWarn, {
             fontSize: '12px', color: '#ccaa99', fontFamily: 'Courier New', align: 'center',
         }).setOrigin(0.5, 0));
         const yesBg = this.add.rectangle(px + 20, py + 100, 128, 30, 0x2a0808, 1)

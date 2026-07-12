@@ -14,7 +14,7 @@ import { TutorialSystem } from '../systems/TutorialSystem.js';
 import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { ITEMS } from '../data/items.js';
 import { MAP_DATA } from '../data/maps.js';
-import { MONSTERS } from '../data/monsters.js';
+import { MONSTERS, SANCTUM_GAUNTLET } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { NPC_REACTIONS } from '../data/npcReactions.js';
 import { CompanionSystem } from '../systems/CompanionSystem.js';
@@ -38,6 +38,7 @@ export class WorldScene extends Phaser.Scene {
         if (!this._playerData.inventory) this._playerData.inventory = [];
         if (!this._playerData.upgrades) this._playerData.upgrades = {};
         if (!this._playerData.secretsFound) this._playerData.secretsFound = {};
+        if (!this._playerData.dugSites) this._playerData.dugSites = {};
         if (!this._playerData.equipment) this._playerData.equipment = {};
         if (this._playerData.equipment.relic === undefined) this._playerData.equipment.relic = null;
         
@@ -1236,6 +1237,24 @@ export class WorldScene extends Phaser.Scene {
             return;
         }
 
+        // Julgamento: encadeia o próximo guardião, conclui, ou aborta na fuga
+        if (this._gauntlet) {
+            if (outcome === 'win') {
+                this._gauntlet.index++;
+                if (this._gauntlet.index < SANCTUM_GAUNTLET.length) {
+                    const next = MONSTERS[SANCTUM_GAUNTLET[this._gauntlet.index]];
+                    this._chat(`{{bad:O próximo juiz desperta:}} {{accent:${next.name}}} (${this._gauntlet.index + 1}/${SANCTUM_GAUNTLET.length})...`, 'combat-hit');
+                    this.time.delayedCall(1600, () => this._launchGauntletCombat());
+                    return; // segue em combate: não retoma a música da área
+                }
+                this._gauntlet = null;
+                this._completeSanctum();
+            } else {
+                this._gauntlet = null;
+                this._chat('{{bad:O Julgamento foi interrompido.}} Os guardiões retornam ao silêncio — o altar aguarda outra tentativa.', 'error');
+            }
+        }
+
         EventBus.emit('minimap-update', { mapMgr: this._mapManager, player: this._playerData });
         Music.play(this._musicKeyFor(this._playerData.currentArea));
     }
@@ -1300,7 +1319,57 @@ export class WorldScene extends Phaser.Scene {
                 this._revealSecret(pos.x, pos.y);
                 return;
             }
+
+            // Dig sites (tile 27): a shovel opens them into a hole
+            if (this._mapManager.getTileId(pos.x, pos.y) === 27) {
+                this._digSite(pos.x, pos.y);
+                return;
+            }
+
+            // Cracked boulders (tile 28): a pickaxe clears the passage
+            if (this._mapManager.getTileId(pos.x, pos.y) === 28) {
+                this._breakBoulder(pos.x, pos.y);
+                return;
+            }
+
+            // The Sanctum altar (tile 29): offers the judgement gauntlet
+            if (this._mapManager.getTileId(pos.x, pos.y) === 29) {
+                this._interactAltar();
+                return;
+            }
         }
+    }
+
+    _hasTool(itemId) {
+        return (this._playerData.inventory || []).some(s => s.itemId === itemId && s.qty > 0);
+    }
+
+    _digSite(x, y) {
+        if (!this._hasTool('shovel')) {
+            Sound.denied();
+            this._chat('O solo aqui foi revirado — algo está {{accent:enterrado}}. Você precisa de uma {{accent:Pá do Escavador}}.', 'system');
+            return;
+        }
+        if (!this._mapManager.digSite(x, y)) return;
+        this._playerData.dugSites[`${this._playerData.currentArea}:${x}:${y}`] = true;
+        Sound.secret();
+        this.cameras.main.shake(300, 0.01);
+        this._chat('{{accent:A pá afunda na terra solta...}} Você desenterrou um {{level:buraco escuro}}!', 'levelup');
+        SaveSystem.autoSave(this._playerData);
+    }
+
+    _breakBoulder(x, y) {
+        if (!this._hasTool('pickaxe')) {
+            Sound.denied();
+            this._chat('Uma rocha {{accent:rachada}} bloqueia a passagem. Uma {{accent:Picareta de Ferro}} daria conta dela.', 'system');
+            return;
+        }
+        if (!this._mapManager.breakBoulder(x, y)) return;
+        this._playerData.dugSites[`${this._playerData.currentArea}:${x}:${y}`] = true;
+        Sound.secret();
+        this.cameras.main.shake(300, 0.012);
+        this._chat('{{accent:A rocha se parte com um estalo!}} A passagem está livre.', 'levelup');
+        SaveSystem.autoSave(this._playerData);
     }
 
     _revealSecret(x, y) {
@@ -1309,6 +1378,92 @@ export class WorldScene extends Phaser.Scene {
         Sound.secret();
         this.cameras.main.shake(250, 0.008);
         this._chat('{{accent:A parede cede...}} Você encontrou uma {{level:passagem secreta}}!', 'levelup');
+        SaveSystem.autoSave(this._playerData);
+    }
+
+    // ── O Julgamento (gauntlet da Câmara da Hipótese Nula) ───────────────────
+
+    _interactAltar() {
+        if (this._gauntlet) return; // julgamento já em andamento (evita reabrir/duplicar)
+        Sound.interact();
+        this._paused = true;
+        const cleared = !!this._playerData.sanctumCleared;
+        const lines = cleared
+            ? [
+                'O altar está em silêncio. Os quatro guardiões reconhecem você — {{good:o Julgamento já foi vencido}}.',
+                'Mas a Câmara permanece aberta a quem deseja provar-se outra vez.',
+            ]
+            : [
+                'Uma voz sem corpo preenche a câmara: {{accent:"Aproxima-se um aprendiz. Que seja julgado."}}',
+                '{{bad:Quatro guardiões, um após o outro. Sem itens. Sem descanso entre as lutas. A fuga encerra tudo.}}',
+                'Apenas seu conhecimento entra na arena. Deseja ser julgado?',
+            ];
+        this.scene.launch('Dialog', {
+            speaker: 'O Altar do Julgamento',
+            lines,
+            role: 'lore',
+            choices: [
+                { label: cleared ? '⚔ DESAFIAR NOVAMENTE' : '⚔ ACEITAR O JULGAMENTO', onSelect: () => {
+                    this._paused = false;
+                    this._startGauntlet();
+                }},
+                { label: '↩ RECUAR', onSelect: () => { this._paused = false; } },
+            ],
+            onClose: () => { this._paused = false; },
+        });
+    }
+
+    _startGauntlet() {
+        this._gauntlet = { index: 0 };
+        this._chat('{{bad:O JULGAMENTO COMEÇA.}} Quatro guardiões aguardam — sua mochila foi selada.', 'combat-hit');
+        this.time.delayedCall(900, () => this._launchGauntletCombat());
+    }
+
+    _launchGauntletCombat() {
+        if (!this._gauntlet) return;
+        const i = this._gauntlet.index;
+        const def = MONSTERS[SANCTUM_GAUNTLET[i]];
+        if (!def) { this._gauntlet = null; return; }
+
+        this._paused = true;
+        this._playerData.lastSafePosition = { ...this._playerData.position };
+        this.registry.set('player', this._playerData);
+
+        this.cameras.main.shake(350, 0.012);
+        this.cameras.main.flash(350, 120, 60, 200);
+        this.time.delayedCall(400, () => {
+            Music.play(def.isBoss ? 'boss' : 'combat');
+            this.scene.launch('Combat', {
+                monster: def,
+                instanceId: `sanctum_g${i + 1}`,
+                rules: { noItems: true },
+                gauntlet: { index: i, total: SANCTUM_GAUNTLET.length },
+            });
+        });
+    }
+
+    _completeSanctum() {
+        const firstClear = !this._playerData.sanctumCleared;
+        this._playerData.sanctumCleared = true;
+        Sound.victory();
+        this._chat('{{level:H₀ REJEITADA — O JULGAMENTO FOI VENCIDO!}} Os quatro guardiões se curvam.', 'levelup');
+
+        if (firstClear) {
+            CombatSystem.addToInventory(this._playerData, 'ring_of_significance');
+            this._playerData.pendingItemAlert = true;
+            EventBus.emit('item-alert', { player: this._playerData });
+            this.time.delayedCall(700, () => {
+                Sound.achievement();
+                this._chat(`Você recebeu o {{legend:${ITEMS.ring_of_significance.name}}}! Equipe-o no espaço de relíquia (I).`, 'loot');
+            });
+        } else {
+            const bonus = 300;
+            this._playerData.gold += bonus;
+            this._chat(`Os guardiões honram sua persistência: {{gold:+${bonus} moedas de ouro}}.`, 'loot');
+        }
+
+        AchievementSystem.check(this._playerData);
+        EventBus.emit('player-stats-changed', { player: this._playerData });
         SaveSystem.autoSave(this._playerData);
     }
 

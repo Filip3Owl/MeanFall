@@ -22,6 +22,7 @@ export const SHOPS = {
             'supreme_health_potion',
             'full_focus_elixir',
             'chaos_incense',
+            'shovel',
         ],
     },
 
@@ -44,6 +45,8 @@ export const SHOPS = {
             'greaves_of_wind',
             'boots_of_swiftness',
             'chaos_incense',
+            'shovel',
+            'pickaxe',
         ],
     },
 

@@ -339,6 +339,31 @@ export const ITEMS = {
         description: 'Resíduo cintilante de criaturas Normais. Usado na forja.',
     },
 
+    // ─── FERRAMENTAS DE EXPLORAÇÃO ────────────────────────────────────────────
+    // Compradas nas lojas; nunca se gastam. Abrem pontos do mapa marcados com
+    // montes de terra (pá) e rochas rachadas (picareta).
+    shovel: {
+        id: 'shovel', name: 'Pá do Escavador', type: 'tool', rarity: 'uncommon',
+        value: 150, icon: 'item_shovel', sellable: false,
+        description: 'Escava montes de terra revirada. A Sociedade enterrou mais do que registros.',
+    },
+    pickaxe: {
+        id: 'pickaxe', name: 'Picareta de Ferro', type: 'tool', rarity: 'uncommon',
+        value: 250, icon: 'item_pickaxe', sellable: false,
+        description: 'Quebra rochas rachadas que bloqueiam passagens. Todo veio selado esconde algo.',
+    },
+
+    // ─── RECOMPENSA DO JULGAMENTO ─────────────────────────────────────────────
+    // Concedido uma única vez ao vencer os 4 guardiões da Câmara da Hipótese Nula.
+    ring_of_significance: {
+        id: 'ring_of_significance', name: 'Anel da Significância', type: 'equipment', slot: 'relic',
+        rarity: 'legendary', value: 0, sellable: false,
+        passiveEffect: { type: 'first_error_forgiven', value: 0.05 },
+        description: 'O primeiro erro de cada combate fica dentro da margem: sem dano e sua sequência continua.',
+        flavor: 'Forjado com α = 0,05. Todo julgamento honesto tolera um erro — o seu.',
+        icon: 'item_ring',
+    },
+
     // ─── CAÇA ─────────────────────────────────────────────────────────────────
     chaos_incense: {
         id: 'chaos_incense', name: 'Incenso do Caos', type: 'consumable', rarity: 'rare',

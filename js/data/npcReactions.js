@@ -106,4 +106,9 @@ export const NPC_REACTIONS = [
         when: p => p.defeatedMonsters?.du_boss,
         line: 'O Lich caiu. A crise de replicabilidade chegou ao fim... Você não rejeitou apenas a hipótese nula, aprendiz — rejeitou o próprio caos. A Ordem renasce.',
     },
+    {
+        id: 'oracle_sanctum', npcId: 'oracle',
+        when: p => !!p.sanctumCleared,
+        line: 'Esse anel no seu dedo... Você desenterrou a Câmara e sobreviveu ao Julgamento. Eu fui reprovado lá, há muitos anos. Foi o erro que me ensinou o que é α — carregue-o com respeito.',
+    },
 ];

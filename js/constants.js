@@ -32,6 +32,9 @@ export const TILES = {
     HOLE:        24,
     LADDER_UP:   25,
     SECRET_WALL: 26,
+    DIG_SITE:    27,
+    BOULDER:     28,
+    ALTAR:       29,
 };
 
 export const TILE_WALKABLE = {
@@ -62,6 +65,9 @@ export const TILE_WALKABLE = {
     24: true, // hole (descends to the depths)
     25: true, // ladder up (returns to the surface)
     26: false,// secret wall (revealed via interaction — becomes cave floor)
+    27: false,// dig site (mound of earth — a shovel turns it into a hole)
+    28: false,// cracked boulder (a pickaxe clears it into floor)
+    29: false,// altar (interactable — starts the Sanctum gauntlet)
 };
 
 // Underground areas ('<area>_depths') share mastery/mimic tables with their
@@ -95,6 +101,7 @@ export const AREA_INFO = {
     plains_depths:    { displayName: 'Fornalha Soterrada',     topic: 'Profundezas — Probabilidade',    bgColor: 0x050308 },
     mountains_depths: { displayName: 'Abismo Alagado',         topic: 'Profundezas — Distribuições',    bgColor: 0x050308 },
     dungeon_depths:   { displayName: 'Cripta do Grão-Mestre',  topic: 'Profundezas — Inferência',       bgColor: 0x030205 },
+    sanctum_depths:   { displayName: 'Câmara da Hipótese Nula', topic: 'O Julgamento Final',            bgColor: 0x020104 },
 };
 
 export const AREA_UNLOCK = {

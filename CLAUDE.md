@@ -79,9 +79,9 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   └── NPC.js         Sprite, ciclo de diálogos, interação
     └── data/
         ├── questions.js   243 questões (6 tópicos, 3 dificuldades, 3 tipos)
-        ├── monsters.js    30 monstros (24 elementais + 6 chefes/especiais), 4 por área
-        ├── items.js       55 itens (consumíveis, equipamentos por slot, scrolls, 6 materiais de forja, Incenso do Caos)
-        ├── maps.js        15 mapas tile-based (6 superfícies + 3 casas + 6 profundezas)
+        ├── monsters.js    34 monstros (24 elementais + 6 chefes/especiais + 4 guardiões do Julgamento)
+        ├── items.js       58 itens (consumíveis, equipamentos, scrolls, 6 materiais de forja, 2 ferramentas, Anel da Significância)
+        ├── maps.js        16 mapas tile-based (6 superfícies + 3 casas + 6 profundezas + Câmara da Hipótese Nula)
         ├── quests.js      7 missões principais com objetivos e recompensas
         ├── skills.js      13 habilidades passivas na árvore de habilidades
         ├── books.js       18 tomos com lore e bônus permanentes
@@ -116,6 +116,18 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 - Combate no subsolo conta para a maestria da **área-pai** (`parentArea()` em constants.js)
 - Música própria (`underground`, dissonante) + ambiência de goteiras
 - Os mapas foram gerados/validados por script (BFS de conectividade); bolsões secretos são inalcançáveis sem abrir a parede
+
+### Ferramentas de exploração (estilo Tibia)
+
+- **Pá do Escavador** (`shovel`, loja da Vila e do Ferreiro) abre **montes de terra** (tile 27 → vira buraco 24); **Picareta de Ferro** (`pickaxe`, loja do Ferreiro) quebra **rochas rachadas** (tile 28 → vira o chão da área). Itens `type: 'tool'`, nunca se gastam
+- Interação: SPACE adjacente, como paredes secretas; sem a ferramenta, o chat dá a dica do que é preciso. Persistência em `playerData.dugSites` (`area:x:y`), aplicada pelo MapManager na carga
+- 3 baús selados atrás de rochas: Grutas dos Prados (3,1), Fornalha Soterrada (3,1) e Abismo Alagado (15,1)
+
+### Câmara da Hipótese Nula (Julgamento — quest épica estilo Annihilator)
+
+- Entrada **enterrada** no canto sudeste do Calabouço (15,12; requer pá); dica na "Ata do Último Concílio" (scroll no Calabouço). Área `sanctum_depths`, sem monstros errantes
+- O **altar** (tile 29) oferece o **Julgamento**: 4 combates consecutivos (`SANCTUM_GAUNTLET` em monsters.js — Guardião da Mediana/terra, de Sigma/gelo, do Acaso/fogo e A Hipótese Nula/trevas, todos só questões hard), **sem itens** (`rules.noItems`), sem cura entre lutas; fuga aborta o gauntlet (encadeamento em `WorldScene._onCombatEnd`)
+- Recompensa única (`playerData.sanctumCleared`): **Anel da Significância** — relíquia `first_error_forgiven`: o 1º erro de cada combate não causa dano e preserva o streak (α = 0,05). Revanches pagam ouro. Conquista "Além do Alfa" + reação do Oráculo
 
 ---
 

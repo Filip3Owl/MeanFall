@@ -109,6 +109,16 @@ export const ANCIENT_SCROLLS = {
         title: 'Confissão Rasgada',
         text: 'Eu, Grão-Mestre, escondi nesta cripta a prova do meu erro. Atrás da {{bad:pedra que sangra rachaduras}}, ao sul, deixei o que restou. Se o Lich cair um dia, que encontrem — e que o p-valor me perdoe.'
     },
+
+    // ── A Câmara da Hipótese Nula ────────────────────────────────────────────
+    'scroll_null_chamber': {
+        title: 'Ata do Último Concílio',
+        text: 'Por decreto unânime, a {{accent:Câmara da Hipótese Nula}} foi selada e sua entrada {{hint:enterrada no canto sudeste}} deste salão. Que nenhum aprendiz desça sem uma {{accent:pá}} — e que nenhum desça despreparado. Lá embaixo, quatro guardiões julgam. Não há poções que valham diante deles, e o veredito é definitivo.'
+    },
+    'scroll_sanctum_altar': {
+        title: 'Inscrição na Pedra',
+        text: 'Aqui a Sociedade julgava seus mestres. {{bad:Quatro guardiões, um após o outro, sem descanso e sem itens}} — apenas o que você sabe. A mochila será selada; a fuga encerra o Julgamento. Aos aprovados, o {{legend:Anel da Significância}}: a tolerância de quem entende que todo julgamento honesto perdoa um erro. {{hint:Venha descansado. Venha inteiro.}}'
+    },
 };
 
 export const TUTORIAL_TIPS = [

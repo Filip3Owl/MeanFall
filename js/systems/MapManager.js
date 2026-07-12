@@ -43,6 +43,16 @@ export class MapManager {
             }
         }
 
+        // Apply dug sites / broken boulders from the save
+        const dug = playerData?.dugSites || {};
+        for (const key of Object.keys(dug)) {
+            const [area, x, y] = key.split(':');
+            if (area !== areaId) continue;
+            const t = this._grid[+y]?.[+x];
+            if (t === 27) this._grid[+y][+x] = 24;                       // dig site → hole
+            else if (t === 28) this._grid[+y][+x] = groundTileId(areaId); // boulder → floor
+        }
+
         this._buildTiles();
         const info = AREA_INFO[areaId];
         if (info) this.scene.cameras.main.setBackgroundColor(info.bgColor);
@@ -55,6 +65,26 @@ export class MapManager {
         this._grid[row][col] = 12;
         const img = this.tiles[row]?.[col];
         if (img) img.setTexture('tile_cave');
+        return true;
+    }
+
+    // Digs a mound at (col,row): it becomes a hole (tile 24), whose exit is
+    // already declared in the map data. Persistence is the caller's job.
+    digSite(col, row) {
+        if (this._grid?.[row]?.[col] !== 27) return false;
+        this._grid[row][col] = 24;
+        const img = this.tiles[row]?.[col];
+        if (img) img.setTexture('tile_hole');
+        return true;
+    }
+
+    // Breaks a boulder at (col,row) back into the area's walkable ground.
+    breakBoulder(col, row) {
+        if (this._grid?.[row]?.[col] !== 28) return false;
+        const groundId = groundTileId(this.areaId);
+        this._grid[row][col] = groundId;
+        const img = this.tiles[row]?.[col];
+        if (img) img.setTexture(TILE_TEXTURE_MAP[groundId] ?? 'tile_cave');
         return true;
     }
 
@@ -227,6 +257,16 @@ function miniColor(tileId) {
         13: '#882211', 14: '#ffee88', 15: '#5c3a1e', 16: '#4a2d18',
         17: '#cc2222', 18: '#7a4c2a', 19: '#882222',
         24: '#0a0a14', 25: '#8b6914', 26: '#555555',
+        27: '#5c4424', 28: '#5c5c68', 29: '#bb44ff',
     };
     return MAP[tileId] ?? '#111111';
+}
+
+// Walkable ground a broken boulder leaves behind, per area terrain.
+function groundTileId(areaId) {
+    if (!areaId || areaId.endsWith('_depths') || areaId.startsWith('dungeon')) return 12;
+    if (areaId.startsWith('forest'))    return 9;
+    if (areaId.startsWith('plains'))    return 8;
+    if (areaId.startsWith('mountains')) return 11;
+    return 0; // village / meadows grass
 }

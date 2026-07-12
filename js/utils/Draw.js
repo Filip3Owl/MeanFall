@@ -288,6 +288,59 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_secret_wall', S, S);
 
+    // DIG SITE (tile 27) — transparent overlay: mound of freshly-turned earth.
+    // A shovel opens it into a hole (tile 24).
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.25); g.fillEllipse(16, 20, 26, 14);   // soft shadow
+        g.fillStyle(0x4a3418);       g.fillEllipse(16, 17, 24, 14);   // mound base
+        g.fillStyle(0x5c4424);       g.fillEllipse(16, 15, 20, 11);   // mound body
+        g.fillStyle(0x6e5430);       g.fillEllipse(15, 13, 12, 6);    // top light
+        // Clumps of dug soil
+        g.fillStyle(0x3a2810); g.fillRect(7, 18, 3, 2); g.fillRect(20, 19, 4, 2);
+        g.fillRect(13, 21, 3, 2); g.fillRect(24, 14, 3, 2);
+        // Cracks hinting at a void underneath
+        g.fillStyle(0x1a1008, 0.9); g.fillRect(12, 14, 6, 1); g.fillRect(16, 15, 5, 1);
+        // A few pale pebbles
+        g.fillStyle(0x9a8a70, 0.8); g.fillRect(10, 12, 2, 1); g.fillRect(21, 16, 2, 1);
+    });
+    g.generateTexture('tile_dig_site', S, S);
+
+    // BOULDER (tile 28) — transparent overlay: cracked rock blocking a passage.
+    // A pickaxe clears it back into walkable ground.
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.3);  g.fillEllipse(16, 24, 28, 12);   // shadow
+        g.fillStyle(0x4a4a55);       g.fillEllipse(16, 16, 26, 22);   // rock base
+        g.fillStyle(0x5c5c68);       g.fillEllipse(15, 14, 22, 18);   // rock body
+        g.fillStyle(0x74747f);       g.fillEllipse(13, 11, 12, 9);    // top light
+        // Deep central crack — the pickaxe's invitation
+        g.fillStyle(0x1c1c22);
+        g.fillRect(15, 5, 2, 4); g.fillRect(16, 9, 2, 5); g.fillRect(15, 14, 2, 5);
+        g.fillRect(14, 19, 2, 4);
+        g.fillStyle(0x2c2c33, 0.8); g.fillRect(18, 12, 3, 1); g.fillRect(11, 16, 3, 1);
+        // Mineral glints
+        g.fillStyle(0x9a9aad, 0.7); g.fillRect(9, 9, 2, 1); g.fillRect(21, 17, 2, 1);
+    });
+    g.generateTexture('tile_boulder', S, S);
+
+    // ALTAR (tile 29) — transparent overlay: stone altar with a glowing sigil.
+    // Interacting with it offers the Sanctum's judgement gauntlet.
+    tile(g, g => {
+        g.fillStyle(0x000000, 0.3);  g.fillEllipse(16, 27, 26, 8);    // shadow
+        g.fillStyle(0x3a3a44); g.fillRect(6, 22, 20, 6);              // base slab
+        g.fillStyle(0x4a4a55); g.fillRect(9, 12, 14, 11);             // pillar
+        g.fillStyle(0x5c5c68); g.fillRect(5, 8, 22, 5);               // table top
+        g.fillStyle(0x74747f); g.fillRect(5, 8, 22, 2);               // top light
+        // Carved runes on the pillar
+        g.fillStyle(0x2a2a33); g.fillRect(11, 15, 2, 2); g.fillRect(15, 17, 2, 2);
+        g.fillRect(19, 15, 2, 2);
+        // Glowing sigil (H₀) floating above the table
+        g.fillStyle(0xbb44ff, 0.35); g.fillEllipse(16, 5, 14, 8);
+        g.fillStyle(0xdd88ff);
+        g.fillRect(12, 2, 2, 6); g.fillRect(18, 2, 2, 6); g.fillRect(13, 4, 6, 2);
+        g.fillStyle(0xffffff, 0.9); g.fillRect(12, 2, 1, 2);
+    });
+    g.generateTexture('tile_altar', S, S);
+
     // DOOR EXIT (tile 23) — arched passage back to overworld
     tile(g, g => {
         g.fillStyle(0x555566); g.fillRect(0, 0, S, S);           // wall
@@ -484,6 +537,12 @@ export function generateTextures(scene) {
     drawWaterSprite (g, 34, 30, 'sprite_clt_kraken',          0x0d3366, 'beast');
     drawShadowSprite(g, 30, 36, 'sprite_power_wraith',        0x220044, 'wraith');
 
+    // Guardiões da Câmara da Hipótese Nula (gauntlet do Santuário)
+    drawEarthSprite (g, 32, 36, 'sprite_guardian_median', 0x8a6a33, 'block');
+    drawLightSprite (g, 30, 36, 'sprite_guardian_sigma',  0x9adbe8, 'crystal');
+    drawFireSprite  (g, 32, 34, 'sprite_guardian_chance', 0xff5522, 'bird');
+    drawShadowSprite(g, 34, 40, 'sprite_guardian_null',   0x2a1144, 'lich');
+
     // ── Boss sprites (um por área) ───────────────────────────────────────────
     drawAirSprite   (g, 36, 40, 'sprite_boss_village',   0xddeeff, 'tall');
     drawEarthSprite (g, 38, 42, 'sprite_boss_meadows',   0x886633, 'block');
@@ -598,6 +657,26 @@ export function generateTextures(scene) {
     px(g, 0x33ccff, 10, 12, 4, 6); // pendant
     px(g, 0xffffff, 11, 13, 2, 2); // sparkle
     g.generateTexture('item_amulet', 24, 24);
+
+    // Shovel (exploration tool)
+    g.clear();
+    px(g, 0x5a3a1e, 11, 2, 2, 12);  // handle
+    px(g, 0x7a5230, 11, 2, 1, 12);  // handle light
+    px(g, 0x8b5c2e, 9, 1, 6, 2);    // grip
+    px(g, 0x999999, 9, 14, 6, 7);   // blade
+    px(g, 0xbbbbbb, 10, 15, 2, 5);  // blade light
+    px(g, 0x666666, 9, 20, 6, 1);   // blade edge
+    g.generateTexture('item_shovel', 24, 24);
+
+    // Pickaxe (exploration tool)
+    g.clear();
+    px(g, 0x5a3a1e, 11, 6, 2, 15);  // handle
+    px(g, 0x7a5230, 11, 6, 1, 15);  // handle light
+    px(g, 0x888888, 5, 4, 14, 3);   // head
+    px(g, 0xaaaaaa, 5, 4, 14, 1);   // head light
+    px(g, 0x777777, 3, 6, 3, 2);    // left point
+    px(g, 0x777777, 18, 6, 3, 2);   // right point
+    g.generateTexture('item_pickaxe', 24, 24);
 
     // Forge essences — one crystal shard per element, tinted by ELEMENTS colors
     for (const [id, elem] of Object.entries(ELEMENTS)) {
@@ -1702,11 +1781,14 @@ export const TILE_TEXTURE_MAP = {
     24: 'tile_hole',
     25: 'tile_ladder_up',
     26: 'tile_secret_wall',
+    27: 'tile_dig_site',
+    28: 'tile_boulder',
+    29: 'tile_altar',
 };
 
 // Tiles drawn as transparent overlays: MapManager renders the area's ground
 // texture underneath so they blend with any terrain (grass, sand, snow, ...).
-export const TILE_OVERLAYS = new Set([4, 6, 7, 10, 16, 18, 21, 22, 24, 25]);
+export const TILE_OVERLAYS = new Set([4, 6, 7, 10, 16, 18, 21, 22, 24, 25, 27, 28, 29]);
 
 // Alternate textures for large uniform terrains, picked deterministically
 // per-tile to break up visible tiling repetition.
