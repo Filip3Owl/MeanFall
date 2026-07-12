@@ -167,6 +167,8 @@ export class WorldScene extends Phaser.Scene {
 
         this._setupDarkness(areaId);
         this._setupNightOverlay(areaId);
+        this._setupLights(areaId);
+        this._setupVignette();
         this._setupWeather(areaId);
         this._setupCompanion();
         this._setupTrophies(areaId);
@@ -214,13 +216,83 @@ export class WorldScene extends Phaser.Scene {
         this._nightOverlay?.destroy();
         this._nightOverlay = null;
         if (areaId.endsWith('_depths') || areaId.includes('house')) return;
-        this._nightOverlay = this.add.rectangle(0, 0, 544, 480, 0x0a1035, 1)
-            .setOrigin(0, 0).setDepth(39).setAlpha(0);
+        // Luz ambiente: retângulo MULTIPLY cuja cor segue a hora do dia
+        // (branco de dia = sem efeito; âmbar no entardecer; azul à noite)
+        this._nightOverlay = this.add.rectangle(0, 0, 544, 480, 0xffffff, 1)
+            .setOrigin(0, 0).setDepth(39).setBlendMode(Phaser.BlendModes.MULTIPLY);
+    }
+
+    _setupVignette() {
+        this._vignette?.destroy();
+        this._vignette = this.add.image(0, 0, 'vignette')
+            .setOrigin(0, 0).setDepth(45).setAlpha(0.2);
+    }
+
+    // Luzes pontuais (blend ADD): acendem conforme escurece. Nas profundezas,
+    // a "tocha" âmbar do jogador fica acima da escuridão e é fixa.
+    _setupLights(areaId) {
+        (this._lights || []).forEach(l => l.destroy());
+        this._lights = [];
+        this._lantern?.destroy();
+        this._lantern = null;
+        if (areaId.includes('house')) return;
+
+        if (areaId.endsWith('_depths')) {
+            this._lantern = this.add.image(0, 0, 'light_radial_small')
+                .setBlendMode(Phaser.BlendModes.ADD).setTint(0xffaa55)
+                .setScale(1.6).setAlpha(0.3).setDepth(41);
+            this._lantern._fixed = true;
+            return;
+        }
+
+        const mk = (x, y, tint, scale, maxA) => {
+            const img = this.add.image(x, y, 'light_radial_small')
+                .setBlendMode(Phaser.BlendModes.ADD).setTint(tint)
+                .setScale(scale).setAlpha(0).setDepth(40);
+            img._maxA = maxA;
+            this.tweens.add({
+                targets: img, scale: scale * 1.12,
+                duration: 1400 + Math.random() * 600,
+                yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+            });
+            this._lights.push(img);
+        };
+
+        for (const e of this._mapManager.mapData?.exits || []) {
+            const x = e.x * TILE_SIZE + TILE_SIZE / 2;
+            const y = e.y * TILE_SIZE + TILE_SIZE / 2;
+            if (e.targetArea.includes('house')) mk(x, y - 6, 0xffcc88, 0.9, 0.55); // janela acesa
+            else if (e.isHole)                  mk(x, y, 0x8866ff, 0.7, 0.30);
+            else                                mk(x, y, 0xaaccff, 0.8, 0.35);
+        }
+        for (let r = 0; r < 15; r++) {
+            for (let c = 0; c < 17; c++) {
+                if (this._mapManager.getTileId(c, r) === 7) {
+                    mk(c * TILE_SIZE + 16, r * TILE_SIZE + 16, 0xffd777, 0.55, 0.35);
+                }
+            }
+        }
+        // Lanterna do jogador
+        this._lantern = this.add.image(0, 0, 'light_radial_small')
+            .setBlendMode(Phaser.BlendModes.ADD).setTint(0xffcc88)
+            .setScale(1.3).setAlpha(0).setDepth(40);
+        this._lantern._maxA = 0.4;
     }
 
     _updateDayNight() {
-        if (this._nightOverlay) this._nightOverlay.setAlpha(0.45 * DayNight.darkness());
+        const d = DayNight.darkness();
+        if (this._nightOverlay) this._nightOverlay.setFillStyle(DayNight.lightColor(), 1);
         if (this._fireflies) this._fireflies.emitting = DayNight.isNight();
+
+        const area = this._playerData.currentArea || '';
+        const indoor = area.endsWith('_depths') || area.includes('house');
+        if (this._vignette) this._vignette.setAlpha(indoor ? 0.3 : 0.15 + 0.25 * d);
+
+        for (const l of this._lights || []) l.setAlpha(l._maxA * d);
+        if (this._lantern && this._player?.sprite) {
+            this._lantern.setPosition(this._player.sprite.x, this._player.sprite.y);
+            if (!this._lantern._fixed) this._lantern.setAlpha(this._lantern._maxA * d);
+        }
 
         const night = DayNight.isNight();
         if (night === this._nightWas) return;
@@ -232,6 +304,28 @@ export class WorldScene extends Phaser.Scene {
             this._chat('{{accent:O sol nasce.}} As criaturas noturnas recolhem-se às sombras.', 'system');
             this._dismissNocturnals();
         }
+    }
+
+    // Sombras acompanham o sol: deslocadas/compridas de manhã e à tarde,
+    // curtas ao meio-dia, quase apagadas à noite. Interiores: neutras.
+    _updateShadows() {
+        const area = this._playerData.currentArea || '';
+        const indoor = area.endsWith('_depths') || area.includes('house');
+        const sp = indoor ? { ox: 0, sx: 1, alpha: 1 } : DayNight.shadowParams();
+        const apply = (ent) => {
+            const sh = ent?.shadow;
+            if (!sh || !ent.sprite) return;
+            if (sh._baseSX === undefined) {
+                sh._baseSX = sh.scaleX;
+                sh._baseA  = sh.alpha;
+            }
+            sh.x      = ent.sprite.x + sp.ox;
+            sh.scaleX = sh._baseSX * sp.sx;
+            sh.alpha  = sh._baseA * sp.alpha;
+        };
+        apply(this._player);
+        for (const m of this._monsters) apply(m);
+        for (const n of this._npcs) apply(n);
     }
 
     _dismissNocturnals() {
@@ -283,6 +377,7 @@ export class WorldScene extends Phaser.Scene {
                     lifespan: 6000, frequency: 210, quantity: 1, tint: 0xff8833,
                     speedY: { min: -55, max: -22 }, speedX: { min: -12, max: 12 },
                     scale: { start: 0.8, end: 0.2 }, alpha: { start: 1, end: 0 },
+                    blendMode: 'ADD',
                 }).setDepth(38);
                 break;
             case 'mountains': // chuva fina
@@ -299,6 +394,7 @@ export class WorldScene extends Phaser.Scene {
                     lifespan: 5000, frequency: 320, quantity: 1, tint: 0xaa66ff,
                     speedY: { min: -14, max: -4 }, speedX: { min: -8, max: 8 },
                     scale: { min: 0.4, max: 0.9 }, alpha: { start: 0, end: 0.7 },
+                    blendMode: 'ADD',
                 }).setDepth(38);
                 break;
             case 'village': // vagalumes — apenas à noite (ligados em _updateDayNight)
@@ -307,6 +403,7 @@ export class WorldScene extends Phaser.Scene {
                     lifespan: 1600, frequency: 380, quantity: 1, tint: 0xffee66,
                     speedY: { min: -8, max: 8 }, speedX: { min: -8, max: 8 },
                     scale: { min: 0.5, max: 0.8 }, alpha: { start: 1, end: 0 },
+                    blendMode: 'ADD',
                 }).setDepth(41);
                 this._fireflies.emitting = DayNight.isNight();
                 break;
@@ -432,6 +529,7 @@ export class WorldScene extends Phaser.Scene {
         this._syncAuraPosition();
         this._updateDarkness(time);
         this._updateDayNight();
+        this._updateShadows();
         this._updateCompanion(delta);
 
         if (Phaser.Input.Keyboard.JustDown(this._spaceKey) && !this._spaceLock) this._tryInteract();

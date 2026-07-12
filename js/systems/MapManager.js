@@ -13,6 +13,10 @@ const AREA_GROUND = {
     dungeon:   'tile_cave',
 };
 
+// Tiles altos que projetam sombra de contato no chão vizinho. O "sol" vem
+// do alto-esquerda: sombra no tile abaixo e no tile à direita do caster.
+const SHADOW_CASTERS = new Set([3, 4, 10, 13, 14, 17, 20, 26]);
+
 export class MapManager {
     constructor(scene) {
         this.scene = scene;
@@ -96,10 +100,16 @@ export class MapManager {
                 const img = this.scene.add.image(x, y, texKey).setDepth(0);
                 this.tiles[row][col] = img;
 
-                // Wall shadows
-                if (row > 0 && (rows[row - 1][col] === 3 || rows[row - 1][col] === 26) && tileId !== 3 && tileId !== 26) {
-                    const shadow = this.scene.add.image(x, y - TILE_SIZE / 2, 'tile_wall_shadow').setOrigin(0.5, 0).setDepth(0.5);
-                    this._decos.push(shadow);
+                // Sombras de contato suaves (ambient occlusion fake)
+                if (!SHADOW_CASTERS.has(tileId)) {
+                    if (row > 0 && SHADOW_CASTERS.has(rows[row - 1][col])) {
+                        this._decos.push(this.scene.add.image(x, y - TILE_SIZE / 2, 'shadow_soft_h')
+                            .setOrigin(0.5, 0).setDepth(0.5));
+                    }
+                    if (col > 0 && SHADOW_CASTERS.has(rows[row][col - 1])) {
+                        this._decos.push(this.scene.add.image(x - TILE_SIZE / 2, y, 'shadow_soft_v')
+                            .setOrigin(0, 0.5).setDepth(0.5));
+                    }
                 }
 
                 const isIndoor = this.areaId?.includes('_house_') || this.areaId?.includes('_inn') || this.areaId?.includes('_shop');

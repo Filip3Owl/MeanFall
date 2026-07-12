@@ -441,12 +441,8 @@ export function generateTextures(scene) {
     });
     g.generateTexture('tile_wall_shadow', S, S);
 
-    // Entity Shadow (Universal oval)
-    tile(g, g => {
-        g.fillStyle(0x000000, 0.35);
-        g.fillEllipse(S/2, S/2, S*0.8, S*0.4);
-    });
-    g.generateTexture('entity_shadow', S, S);
+    // Entity shadow agora é gerada com gradiente radial (penumbra suave)
+    // em makeLightingTextures().
 
     // ─── SPRITES ────────────────────────────────────────────────────────────
     // Default player sprite (24×32) — overridden later by buildPlayerSprite()
@@ -794,7 +790,64 @@ export function generateTextures(scene) {
     makeRadialLight(scene, 'light_radial', 256);
     makeRadialLight(scene, 'light_radial_small', 96);
 
+    makeLightingTextures(scene);
     drawImmersionTextures(scene);
+}
+
+// ─── ILUMINAÇÃO: sombras suaves (canvas gradients) e vinheta ────────────────
+function makeLightingTextures(scene) {
+    // Sombra de entidade: elipse com penumbra (substitui a elipse chapada)
+    if (!scene.textures.exists('entity_shadow')) {
+        const c = scene.textures.createCanvas('entity_shadow', 40, 20);
+        const ctx = c.getContext();
+        ctx.save();
+        ctx.translate(20, 10);
+        ctx.scale(1, 0.5);
+        const grd = ctx.createRadialGradient(0, 0, 2, 0, 0, 19);
+        grd.addColorStop(0,   'rgba(0,0,0,0.50)');
+        grd.addColorStop(0.6, 'rgba(0,0,0,0.28)');
+        grd.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(-20, -20, 40, 40);
+        ctx.restore();
+        c.refresh();
+    }
+
+    // Sombras de contato dos tiles: faixas de gradiente (horizontal/vertical)
+    if (!scene.textures.exists('shadow_soft_h')) {
+        const c = scene.textures.createCanvas('shadow_soft_h', 32, 12);
+        const ctx = c.getContext();
+        const grd = ctx.createLinearGradient(0, 0, 0, 12);
+        grd.addColorStop(0, 'rgba(0,0,0,0.38)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, 32, 12);
+        c.refresh();
+    }
+    if (!scene.textures.exists('shadow_soft_v')) {
+        const c = scene.textures.createCanvas('shadow_soft_v', 12, 32);
+        const ctx = c.getContext();
+        const grd = ctx.createLinearGradient(0, 0, 12, 0);
+        grd.addColorStop(0, 'rgba(0,0,0,0.38)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, 12, 32);
+        c.refresh();
+    }
+
+    // Vinheta: escurece as bordas da tela (alpha controlado pela cena)
+    if (!scene.textures.exists('vignette')) {
+        const W = 544, H = 480;
+        const c = scene.textures.createCanvas('vignette', W, H);
+        const ctx = c.getContext();
+        const grd = ctx.createRadialGradient(W / 2, H / 2, 150, W / 2, H / 2, 390);
+        grd.addColorStop(0,   'rgba(0,0,0,0)');
+        grd.addColorStop(0.7, 'rgba(0,0,0,0.18)');
+        grd.addColorStop(1,   'rgba(0,0,0,0.55)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, W, H);
+        c.refresh();
+    }
 }
 
 // ─── IMERSÃO: partículas de clima, companheiro Outlier e troféus ───────────

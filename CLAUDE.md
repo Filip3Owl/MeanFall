@@ -121,7 +121,11 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 
 ## Imersão (dia/noite, clima, companheiro, troféus)
 
-- **Ciclo dia/noite** (`utils/DayNight.js`): derivado do relógio real, ciclo de 12 min (~7 dia / 1,5 anoitecer / 3 noite / 0,5 amanhecer), sem estado salvo. Overlay azul (alpha até 0.45, depth 39) só nas superfícies; mensagens de chat nas transições
+- **Ciclo dia/noite** (`utils/DayNight.js`): derivado do relógio real, ciclo de 12 min (~7 dia / 1,5 anoitecer / 3 noite / 0,5 amanhecer), sem estado salvo. Mensagens de chat nas transições
+- **Iluminação global**: retângulo `MULTIPLY` (depth 39) com cor interpolada por `DayNight.lightColor()` — amanhecer dourado, dia neutro, entardecer âmbar, noite azul. Só nas superfícies
+- **Sombras suaves**: `entity_shadow` é gradiente radial (canvas); `WorldScene._updateShadows()` desloca/estica/apaga as sombras conforme o sol (`DayNight.shadowParams()`). Sombras de contato nos tiles: `SHADOW_CASTERS` no MapManager projeta `shadow_soft_h/v` no tile abaixo e à direita de tiles altos
+- **Luzes pontuais** (blend `ADD`, depth 40, alpha ∝ darkness): janelas de casas, portais, buracos, baús e lanterna do jogador; tocha âmbar fixa nas profundezas (depth 41, acima da escuridão). Brasas/motas/vagalumes usam ADD
+- **Vinheta** (`vignette`, depth 45): alpha 0.15 de dia → 0.4 à noite; 0.3 fixo em interiores/profundezas
 - **Monstros Noturnos**: à noite, 18% de chance de spawn na superfície (exclusivo com Elite/Cintilante); 1.25× HP, 2.5× XP, 2× ouro, tint/aura violeta, nome `☾ ... Noturno`; ao amanhecer somem com fade e a versão comum respawna
 - **Clima por área** (partículas, depth 38): pólen (Prados), neve (Floresta), brasas subindo (Planícies), chuva (Montanhas), motas de sombra (Calabouço), vagalumes só à noite (Vila, depth 41). Texturas `particle_dot`/`particle_streak` em Draw.js
 - **Outlier, o companheiro** (`systems/CompanionSystem.js`): wisp que segue o jogador no mundo e assiste ao combate no painel; comemora acertos e murcha nos erros. Evolui pela maestria média das 6 áreas (estágio 2 ≥30%: +3% XP; estágio 3 ≥65%: +6% XP); estágio salvo em `playerData.companionStage`
