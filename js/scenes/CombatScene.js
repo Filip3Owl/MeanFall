@@ -1406,8 +1406,9 @@ export class CombatScene extends Phaser.Scene {
         let continued = false;
         const safeContinue = () => { if (!continued) { continued = true; onContinue(); } };
 
+        // Largura acomoda o texto (18 chars × ~7,8px a 13px Courier ≈ 140px)
         const btnY = py2 + panelH - 36;
-        const btnBg = this.add.rectangle(W / 2 - 60, btnY, 120, 28, 0x1a3a1a, 1).setOrigin(0, 0).setDepth(102)
+        const btnBg = this.add.rectangle(W / 2 - 88, btnY, 176, 28, 0x1a3a1a, 1).setOrigin(0, 0).setDepth(102)
             .setAlpha(0).setInteractive()
             .on('pointerover', () => btnBg.setFillStyle(0x2a5a2a))
             .on('pointerout',  () => btnBg.setFillStyle(0x1a3a1a))

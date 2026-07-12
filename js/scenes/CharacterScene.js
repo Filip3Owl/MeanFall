@@ -196,12 +196,13 @@ export class CharacterScene extends Phaser.Scene {
         this._plusBtns    = {};
 
         STATS.forEach(([key, label], i) => {
-            const y = 110 + i * 24;
-            this.add.text(282, y, label, { fontSize: '17px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
+            const y = 108 + i * 22;
+            // 14px: "Inteligência" (12 chars ≈ 101px) termina antes do valor
+            this.add.text(282, y + 2, label, { fontSize: '14px', color: '#777777', fontFamily: 'Courier New' }).setOrigin(0, 0);
 
-            this._statValTxts[key] = this.add.text(404, y, String(p[key]), {
-                fontSize: '17px', color: '#ffffff', fontFamily: 'Courier New',
-            }).setOrigin(0.5, 0);
+            this._statValTxts[key] = this.add.text(418, y + 1, String(p[key]), {
+                fontSize: '16px', color: '#ffffff', fontFamily: 'Courier New',
+            }).setOrigin(1, 0);
 
             const btn = this.add.rectangle(426, y, 56, 18, 0x1a1a33, 1).setOrigin(0, 0)
                 .setInteractive()
@@ -212,8 +213,9 @@ export class CharacterScene extends Phaser.Scene {
             this._plusBtns[key] = btn;
         });
 
-        this._statPointsTxt = this.add.text(402, 208, '', {
-            fontSize: '16px', color: '#ffaa00', fontFamily: 'Courier New',
+        // Dentro do painel (86..208), abaixo da última linha (termina em 192)
+        this._statPointsTxt = this.add.text(402, 193, '', {
+            fontSize: '13px', color: '#ffaa00', fontFamily: 'Courier New',
         }).setOrigin(0.5, 0);
         this._refreshStatPoints();
     }
@@ -268,7 +270,8 @@ export class CharacterScene extends Phaser.Scene {
             const color = pct >= 70 ? '#00cc44' : pct >= 40 ? '#ffaa00' : '#777777';
             const short = info?.displayName?.split(' ')[0] || area;
 
-            this.add.text(x + 30, 400, short, { fontSize: '15px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
+            // 12px: nomes de 9 chars ("Planícies") cabem na coluna de 84px
+            this.add.text(x + 30, 402, short, { fontSize: '12px', color: '#555555', fontFamily: 'Courier New' }).setOrigin(0.5, 0);
 
             // Bar track
             this.add.rectangle(x, 414, 60, 7, 0x111111, 1).setOrigin(0, 0);

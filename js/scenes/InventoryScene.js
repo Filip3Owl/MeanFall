@@ -273,7 +273,8 @@ export class InventoryScene extends Phaser.Scene {
         const relicY   = py + 4 * SP + 4;
         const relicId  = this._player.equipment?.relic;
         const relicItem = relicId ? ITEMS[relicId] : null;
-        const relicName = relicItem ? relicItem.name : '—  Nenhuma relíquia equipada';
+        // Curto o bastante para uma linha (largura útil ≈ 148px a 11px)
+        const relicName = relicItem ? relicItem.name : '—  Nenhuma';
         const relicColor = relicItem ? (RARITY_COLORS[relicItem.rarity] || '#ffaa22') : '#333333';
         const relicFill  = relicId ? 0x1a1200 : 0x0a0a0a;
         const relicStroke = relicId ? 0xaa8800 : 0x222222;
