@@ -13,6 +13,7 @@ import { SkillSystem } from '../systems/SkillSystem.js';
 import { TutorialSystem } from '../systems/TutorialSystem.js';
 import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { ITEMS } from '../data/items.js';
+import { MAP_DATA } from '../data/maps.js';
 import { MONSTERS } from '../data/monsters.js';
 import { ANCIENT_SCROLLS } from '../data/lore.js';
 import { NPC_REACTIONS } from '../data/npcReactions.js';
@@ -78,6 +79,7 @@ export class WorldScene extends Phaser.Scene {
         this._lKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
         this._nKey      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
         this._f5Key     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F5);
+        this._escKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
         QuestSystem.init(this._playerData);
         BountySystem.init(this._playerData);
@@ -172,6 +174,7 @@ export class WorldScene extends Phaser.Scene {
         this._setupWeather(areaId);
         this._setupCompanion();
         this._setupTrophies(areaId);
+        this._setupWaygate(areaId);
         Music.play(this._musicKeyFor(areaId));
     }
 
@@ -545,6 +548,7 @@ export class WorldScene extends Phaser.Scene {
             Sound.save();
             EventBus.emit('autosave');
         }
+        if (Phaser.Input.Keyboard.JustDown(this._escKey)) this._openPauseMenu();
 
         this._processRespawns(time);
     }
@@ -553,6 +557,79 @@ export class WorldScene extends Phaser.Scene {
         Sound.menuOpen();
         this.scene.launch(sceneKey);
         this._paused = true;
+    }
+
+    // ── Menu de pausa (ESC) ───────────────────────────────────────────────────
+
+    _openPauseMenu() {
+        if (this._pauseMenu) return;
+        this._paused = true;
+        this._autoSync();
+        Sound.menuOpen();
+
+        const W = 544, H = 480;
+        const c = this.add.container(0, 0).setDepth(300);
+        this._pauseMenu = c;
+        c.add(this.add.rectangle(0, 0, W, H, 0x000000, 0.72).setOrigin(0, 0).setInteractive());
+
+        const pw = 260, ph = 236;
+        const px = (W - pw) / 2, py = (H - ph) / 2;
+        c.add(this.add.rectangle(px, py, pw, ph, 0x0d0a12, 1).setOrigin(0, 0)
+            .setStrokeStyle(2, 0xd4af37, 0.8));
+        c.add(this.add.rectangle(px, py, pw, 3, 0xd4af37, 0.9).setOrigin(0, 0));
+        c.add(this.add.text(W / 2, py + 16, 'PAUSA', {
+            fontSize: '20px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4,
+        }).setOrigin(0.5, 0));
+
+        const mkBtn = (y, label, color, borderColor, cb) => {
+            const bg = this.add.rectangle(W / 2 - 100, y, 200, 34, 0x141020, 1).setOrigin(0, 0)
+                .setStrokeStyle(1, borderColor, 0.7)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerover', () => bg.setFillStyle(0x201838))
+                .on('pointerout',  () => bg.setFillStyle(0x141020))
+                .on('pointerdown', cb);
+            const tx = this.add.text(W / 2, y + 17, label, {
+                fontSize: '13px', color, fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(0.5, 0.5);
+            c.add([bg, tx]);
+            return tx;
+        };
+
+        mkBtn(py + 56,  '▶  CONTINUAR', '#88ff88', 0x33aa55, () => this._closePauseMenu());
+        const saveTx = mkBtn(py + 100, '✦  SALVAR JOGO', '#88ccff', 0x3355aa, () => {
+            SaveSystem.autoSave(this._playerData);
+            Sound.save();
+            EventBus.emit('autosave');
+            saveTx.setText('✓  SALVO!').setColor('#44ff88');
+            this.time.delayedCall(1200, () => saveTx?.setText('✦  SALVAR JOGO').setColor('#88ccff'));
+        });
+        mkBtn(py + 144, '⌂  MENU PRINCIPAL', '#ffaa66', 0xaa6633, () => {
+            SaveSystem.autoSave(this._playerData);
+            this._closePauseMenu();
+            Music.stop();
+            this.scene.stop('UI');
+            this.scene.start('MainMenu');
+        });
+
+        c.add(this.add.text(W / 2, py + ph - 22, '[ESC] para continuar', {
+            fontSize: '10px', color: '#555555', fontFamily: 'Courier New',
+        }).setOrigin(0.5, 0));
+
+        this._pauseEsc = (e) => { if (e.key === 'Escape') this._closePauseMenu(); };
+        this.input.keyboard.on('keydown', this._pauseEsc);
+    }
+
+    _closePauseMenu() {
+        if (!this._pauseMenu) return;
+        this.input.keyboard.off('keydown', this._pauseEsc);
+        this._pauseMenu.destroy();
+        this._pauseMenu = null;
+        // O ESC que fechou ainda está como JustDown (update estava pausado);
+        // sem o reset, o próximo frame reabriria o menu imediatamente
+        this._escKey.reset();
+        this._paused = false;
+        Sound.menuClose();
     }
 
     // ── Regen tick ────────────────────────────────────────────────────────────
@@ -654,8 +731,73 @@ export class WorldScene extends Phaser.Scene {
         const exit = this._mapManager.getExit(col, row);
         if (exit) { this._tryPortal(exit); return; }
 
+        if (this._waygate && col === this._waygate.x && row === this._waygate.y) {
+            this._openWaygate();
+            return;
+        }
+
         const hit = this._monsters.find(m => m.isAt(col, row));
         if (hit) this._startCombat(hit);
+    }
+
+    // ── Viagem rápida: círculo de teletransporte na Vila ──────────────────────
+
+    _setupWaygate(areaId) {
+        this._waygateObjs?.forEach(o => o.destroy());
+        this._waygateObjs = [];
+        this._waygate = null;
+        if (areaId !== 'village') return;
+
+        this._waygate = { x: 9, y: 13 };
+        const cx = this._waygate.x * TILE_SIZE + TILE_SIZE / 2;
+        const cy = this._waygate.y * TILE_SIZE + TILE_SIZE / 2;
+
+        const ring = this.add.circle(cx, cy, 12, 0x66ccff, 0.12).setDepth(1)
+            .setStrokeStyle(2, 0x66ccff, 0.7);
+        this.tweens.add({
+            targets: ring, scale: 1.25, alpha: 0.5,
+            duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+        });
+        const core = this.add.circle(cx, cy, 4, 0xaaeeff, 0.8).setDepth(1);
+        this.tweens.add({ targets: core, alpha: 0.3, duration: 900, yoyo: true, repeat: -1 });
+        const lbl = this.add.text(cx, cy - 18, 'VIAGEM', {
+            fontSize: '8px', color: '#88ddff', backgroundColor: '#00000088',
+        }).setOrigin(0.5).setDepth(6);
+        this._waygateObjs = [ring, core, lbl];
+    }
+
+    _openWaygate() {
+        const p = this._playerData;
+        const SURFACES = ['meadows', 'forest', 'plains', 'mountains', 'dungeon'];
+        const visited = SURFACES.filter(a => Object.keys(p.discoveredTiles?.[a] || {}).length > 0);
+
+        Sound.interact();
+        this._paused = true;
+        if (!visited.length) {
+            this.scene.launch('Dialog', {
+                speaker: 'Círculo Rúnico', role: 'lore',
+                lines: ['O círculo pulsa fracamente... Ele só pode levá-lo a lugares que você já conhece. Explore o mundo e volte.'],
+                onClose: () => { this._paused = false; },
+            });
+            return;
+        }
+
+        const choices = visited.map(a => ({
+            label: AREA_INFO[a]?.displayName || a,
+            onSelect: () => {
+                this._paused = false;
+                this._doPortalTransition({ targetArea: a, targetSpawn: { ...MAP_DATA[a].spawn } });
+            },
+        }));
+        // ESC seleciona a última opção — mantenha "Cancelar" no fim
+        choices.push({ label: 'Cancelar', onSelect: () => { this._paused = false; } });
+
+        this.scene.launch('Dialog', {
+            speaker: 'Círculo Rúnico', role: 'lore',
+            lines: ['As runas da Sociedade reconhecem você. Para onde deseja viajar?'],
+            choices,
+            onClose: () => { this._paused = false; },
+        });
     }
 
     _updateQuestIcons() {

@@ -132,6 +132,13 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 - **NPCs reativos** (`data/npcReactions.js`): falas condicionais ao progresso (chefes, segredos, maestria, ouro, forja) prependadas ao diálogo normal; cada uma dispara 1× (`playerData.seenReactions`)
 - **Troféus de chefes**: na casa da Anciã, 6 placas na parede (suportes vazios até derrotar cada chefe); gema pulsante na cor do chefe; SPACE adjacente mostra o flavor text
 
+## UX (itens em combate, tracker, viagem rápida, pausa)
+
+- **Itens em combate**: botão `✚ ITEM [E]` na barra inferior abre painel de consumíveis (usa `CombatSystem.useItem`); disponível fora do turno de resposta e durante a pausa da correção; usar item **zera o streak**
+- **Rastreador de missão**: `#quest-tracker` no HUD DOM (painel esquerdo) mostra a missão ativa e progresso via `questProgress/questTarget`; completa → verde com "fale com <NPC>"
+- **Viagem rápida**: Círculo Rúnico na Vila (tile 9,13); pisar abre Dialog com choices das áreas de superfície já visitadas (`discoveredTiles`); teleporta via `_doPortalTransition`
+- **Menu de pausa**: ESC no mundo → Continuar / Salvar / Menu Principal; ao fechar, `_escKey.reset()` evita reabrir no mesmo pressionamento
+
 ## Sistema de Combate
 
 - **Dano do jogador**: `floor(10 + level×1.5 + INT×0.5 + STR×0.3 + min(streak×2, 20)) × elemental × crítico − defesa`

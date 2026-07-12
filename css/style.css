@@ -553,6 +553,15 @@ input[type="range"]:focus-visible,
 }
 #area-topic { font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; }
 
+#quest-tracker {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.55;
+}
+#quest-tracker b { color: #c8b880; font-size: 11px; }
+#quest-tracker.quest-done b { color: #44ff88; }
+#quest-tracker.quest-done { color: #88cc99; }
+
 /* ─── CHAT LOG ────────────────────────────────────────────────────────── */
 #chat-log {
     height: 110px;

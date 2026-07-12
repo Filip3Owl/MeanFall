@@ -469,14 +469,14 @@ export class CombatScene extends Phaser.Scene {
         // slot (useless during the pause) — never over FUGIR, which must stay
         // clickable right after the player takes damage.
         this._awaitContinue = false;
-        this._continueBg = this.add.rectangle(92, 458, 172, 30, 0x1a1400, 1)
+        this._continueBg = this.add.rectangle(83, 458, 146, 30, 0x1a1400, 1)
             .setStrokeStyle(1, 0xd4af37, 0.8).setDepth(60).setVisible(false)
             .setInteractive({ useHandCursor: true })
             .on('pointerover', () => this._continueBg.setFillStyle(0x2a2000))
             .on('pointerout',  () => this._continueBg.setFillStyle(0x1a1400))
             .on('pointerdown', () => this._continueAfterAnswer());
-        this._continueTx = this.add.text(92, 458, '▶ CONTINUAR [ESPAÇO]', {
-            fontSize: '11px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
+        this._continueTx = this.add.text(83, 458, '▶ CONTINUAR [ESPAÇO]', {
+            fontSize: '10px', color: '#ffd700', fontFamily: 'Courier New', fontStyle: 'bold',
         }).setOrigin(0.5, 0.5).setDepth(61).setVisible(false);
         this._continueTween = null;
     }
@@ -522,21 +522,25 @@ export class CombatScene extends Phaser.Scene {
         };
 
         // DICA
-        const hintBg = btnStyle(0x080818, 0x5555bb, '◈  DICA  (−10 FOCO)', '#aaaaff', 8, 168);
+        const hintBg = btnStyle(0x080818, 0x5555bb, '◈ DICA (−10 FOCO)', '#aaaaff', 8, 150);
         hintBg.on('pointerdown', () => this._useHint());
 
+        // ITEM (consumíveis)
+        const itemBg = btnStyle(0x0e1408, 0x55aa33, '✚ ITEM [E]', '#88dd66', 166, 110);
+        itemBg.on('pointerdown', () => this._toggleItemPanel());
+
         // NOTAS/CALC
-        const calcBg = btnStyle(0x060e06, 0x338833, '✦  NOTAS / CALC  [N]', '#55cc66', 184, 176);
+        const calcBg = btnStyle(0x060e06, 0x338833, '✦ NOTAS/CALC [N]', '#55cc66', 284, 150);
         calcBg.on('pointerdown', () => this._openScratchpad());
 
         // FUGIR
-        const fleeBg = btnStyle(0x180808, 0xaa3322, '⊗  FUGIR', '#ee6644', 368, 100);
+        const fleeBg = btnStyle(0x180808, 0xaa3322, '⊗ FUGIR', '#ee6644', 442, 94);
         fleeBg.on('pointerdown', () => this._flee());
 
         // Extra separator before Fugir
         const sepGfx = this.add.graphics();
         sepGfx.lineStyle(1, 0x331100, 0.8);
-        sepGfx.lineBetween(362, BY + 6, 362, BY + 34);
+        sepGfx.lineBetween(436, BY + 6, 436, BY + 34);
 
         this.input.keyboard.on('keydown-N', () => this._openScratchpad());
     }
@@ -544,6 +548,107 @@ export class CombatScene extends Phaser.Scene {
     _openScratchpad() {
         if (this.scene.isActive('Scratchpad')) return;
         this.scene.launch('Scratchpad', { parent: this });
+    }
+
+    // ─── ITENS EM COMBATE ─────────────────────────────────────────────────────
+    // Consumíveis podem ser usados fora do turno de resposta ou durante a
+    // pausa da correção (o momento natural de curar). Custo: zera o streak.
+
+    _toggleItemPanel() {
+        if (this._itemPanel) { this._closeItemPanel(); return; }
+        if (this._fleeConfirmOpen) return;
+        if (this._answerLock && !this._awaitContinue) return;
+
+        const consumables = (this._player.inventory || [])
+            .filter(s => ITEMS[s.itemId]?.type === 'consumable');
+        if (!consumables.length) {
+            Sound.denied();
+            EventBus.emit('chat', { msg: 'Você não tem consumíveis na mochila.', type: 'system' });
+            return;
+        }
+
+        Sound.menuOpen();
+        const W = 544;
+        const rows = Math.min(consumables.length, 6);
+        const pw = 330, ph = 66 + rows * 26;
+        const px = (W - pw) / 2;
+        const py = 430 - ph;
+
+        const c = this.add.container(0, 0).setDepth(190);
+        this._itemPanel = c;
+        // Dim interativo: clicar fora fecha o painel
+        c.add(this.add.rectangle(0, 0, 544, 480, 0x000000, 0.5).setOrigin(0, 0)
+            .setInteractive().on('pointerdown', () => this._closeItemPanel()));
+
+        c.add(this.add.rectangle(px, py, pw, ph, 0x0a1206, 1).setOrigin(0, 0)
+            .setStrokeStyle(2, 0x55aa33, 0.8));
+        c.add(this.add.text(W / 2, py + 10, '✚  USAR ITEM', {
+            fontSize: '14px', color: '#88dd66', fontFamily: 'Courier New', fontStyle: 'bold',
+        }).setOrigin(0.5, 0));
+        c.add(this.add.text(W / 2, py + 28, 'Usar um item zera sua sequência de acertos', {
+            fontSize: '10px', color: '#997', fontFamily: 'Courier New', fontStyle: 'italic',
+        }).setOrigin(0.5, 0));
+
+        consumables.slice(0, 6).forEach((slot, i) => {
+            const item = ITEMS[slot.itemId];
+            const y = py + 46 + i * 26;
+            const bg = this.add.rectangle(px + 12, y, pw - 24, 22, 0x101a0a, 1).setOrigin(0, 0)
+                .setStrokeStyle(1, 0x22401a, 1)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerover', () => bg.setFillStyle(0x1c3012))
+                .on('pointerout',  () => bg.setFillStyle(0x101a0a))
+                .on('pointerdown', () => this._useCombatItem(slot.itemId));
+            const e = item.effect || {};
+            const effTxt = e.hp ? `+${e.hp} HP` : e.focus ? `+${e.focus} FOCO`
+                : e.incense ? `${e.incense}× ELITE` : '';
+            c.add(bg);
+            c.add(this.add.text(px + 20, y + 11, `${item.name}  ×${slot.qty}`, {
+                fontSize: '11px', color: '#e8e0d0', fontFamily: 'Courier New',
+            }).setOrigin(0, 0.5));
+            c.add(this.add.text(px + pw - 20, y + 11, effTxt, {
+                fontSize: '11px', color: '#88dd66', fontFamily: 'Courier New', fontStyle: 'bold',
+            }).setOrigin(1, 0.5));
+        });
+    }
+
+    _closeItemPanel() {
+        if (!this._itemPanel) return;
+        this._itemPanel.destroy();
+        this._itemPanel = null;
+    }
+
+    _useCombatItem(itemId) {
+        const item = ITEMS[itemId];
+        const ok = CombatSystem.useItem(this._player, itemId, ITEMS);
+        this._closeItemPanel();
+        if (!ok || !item) { Sound.denied(); return; }
+
+        Sound.useItem();
+        if (this._streak > 0) {
+            this._streak = 0;
+            this._streakTxt.setText('');
+            this._updateFeverMode(false);
+            EventBus.emit('chat', { msg: 'A pausa para usar o item quebrou sua sequência.', type: 'system' });
+        }
+        this._updatePlayerBars();
+        this.registry.set('player', this._player);
+        EventBus.emit('player-hp-change', { player: this._player });
+
+        const e = item.effect || {};
+        const gains = [];
+        if (e.hp)    gains.push(`{{heal:+${e.hp} HP}}`);
+        if (e.focus) gains.push(`{{hint:+${e.focus} Foco}}`);
+        EventBus.emit('chat', {
+            msg: `Você usou {{accent:${item.name}}}${gains.length ? ' — ' + gains.join(', ') : ''}.`,
+            type: 'heal',
+        });
+        if (e.incense) {
+            EventBus.emit('chat', {
+                msg: `{{accent:Incenso do Caos}} aceso — os próximos ${this._player.incenseCharges} monstros serão {{level:Elite}}!`,
+                type: 'system',
+            });
+        }
+        this._spawnDamageNumber(this._playerPanelCenter, e.hp ? `+${e.hp}` : '✚', '#55ff88', false);
     }
 
     // Combat in the depths counts toward the parent surface area's mastery
@@ -666,6 +771,11 @@ export class CombatScene extends Phaser.Scene {
     _onKeyDown(event) {
         if (this.scene.isActive('Scratchpad')) return;
         if (this._fleeConfirmOpen) return; // diálogo de fuga tem os próprios controles
+        if (this._itemPanel) {
+            if (event.key === 'Escape' || event.key === 'e' || event.key === 'E') this._closeItemPanel();
+            return;
+        }
+        if (event.key === 'e' || event.key === 'E') { this._toggleItemPanel(); return; }
         if (this._awaitContinue && (event.key === ' ' || event.key === 'Enter')) {
             this._continueAfterAnswer();
             return;

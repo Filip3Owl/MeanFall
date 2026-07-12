@@ -1,5 +1,6 @@
 import EventBus from '../utils/EventBus.js';
-import { AREA_INFO, ELEMENTS } from '../constants.js';
+import { AREA_INFO, ELEMENTS, NPC_NAMES } from '../constants.js';
+import { QUESTS, questProgress, questTarget } from '../data/quests.js';
 import { ACHIEVEMENT_CATEGORIES } from '../data/achievements.js';
 import { Sound } from '../utils/SoundSystem.js';
 import { Music } from '../utils/MusicSystem.js';
@@ -37,6 +38,7 @@ export class UIScene extends Phaser.Scene {
             statGold:   document.getElementById('stat-gold'),
             areaName:   document.getElementById('area-name'),
             areaTopic:  document.getElementById('area-topic'),
+            questTracker: document.getElementById('quest-tracker'),
             headerArea: document.getElementById('header-area'),
             masterList: document.getElementById('mastery-list'),
             elementalList: document.getElementById('elemental-mastery-list'),
@@ -67,12 +69,49 @@ export class UIScene extends Phaser.Scene {
         EventBus.on('chat',                 ({ msg, type }) => this.addMsg(msg, type));
         EventBus.on('minimap-update',       ({ mapMgr, player }) => this._updateMinimap(mapMgr, player));
 
+        // Rastreador de missão no HUD — objetivo atual sempre visível
+        const updTracker = () => this._updateQuestTracker();
+        EventBus.on('quest-accepted', updTracker);
+        EventBus.on('quest-complete', updTracker);
+        EventBus.on('quest-claimed',  updTracker);
+        EventBus.on('combat-end',     updTracker);
+        EventBus.on('area-changed',   updTracker);
+
         // Action button alerts
         EventBus.on('item-alert',  () => this._setAlert('btnInv', true));
         EventBus.on('skill-alert', () => this._setAlert('btnSkill', true));
         EventBus.on('quest-complete', () => this._setAlert('btnQuest', true));
         EventBus.on('achievement-unlocked', ({ achievement }) => this._showAchievementBanner(achievement));
         EventBus.on('autosave', () => this._showAutosaveIndicator());
+
+        this._updateQuestTracker();
+    }
+
+    _updateQuestTracker() {
+        const el = this._els.questTracker;
+        if (!el) return;
+        const p = this.registry.get('player');
+        const entries = Object.entries(p?.questLog || {})
+            .filter(([, s]) => s === 'active' || s === 'complete');
+        el.classList.remove('quest-done');
+        if (!entries.length) {
+            el.textContent = 'Nenhuma missão ativa';
+            return;
+        }
+        // Prioriza missão completa (para lembrar de entregar); senão a 1ª ativa
+        const [id, status] = entries.find(([, s]) => s === 'complete') || entries[0];
+        const quest = QUESTS[id];
+        if (!quest) { el.textContent = 'Nenhuma missão ativa'; return; }
+
+        if (status === 'complete') {
+            el.classList.add('quest-done');
+            el.innerHTML = `<b>${quest.name}</b><br>✓ Completa — fale com ${NPC_NAMES[quest.giver] || quest.giver}`;
+        } else {
+            const cur = questProgress(p, quest);
+            const tgt = questTarget(quest);
+            const pct = quest.objective?.type === 'mastery' ? '%' : '';
+            el.innerHTML = `<b>${quest.name}</b><br>${cur}${pct} / ${tgt}${pct}`;
+        }
     }
 
     _bindButtons() {
