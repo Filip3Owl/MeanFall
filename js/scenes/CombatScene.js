@@ -475,7 +475,7 @@ export class CombatScene extends Phaser.Scene {
             wordWrap: { width: W - 32 }, fontStyle: 'italic',
         }).setOrigin(0, 0);
 
-        // Continue prompt — shown after a wrong answer so the player can read
+        // Continue prompt — shown after an answer so the player can read
         // the explanation calmly before the next question. Sits over the DICA
         // slot (useless during the pause) — never over FUGIR, which must stay
         // clickable right after the player takes damage.
@@ -911,8 +911,8 @@ export class CombatScene extends Phaser.Scene {
                 return;
             }
 
-            // Acertos mantêm o ritmo: avança sozinho
-            this.time.delayedCall(1900, () => this._nextQuestion());
+            // Acertos também pausam: o jogador confirma quando terminar de ler a explicação
+            this._showContinuePrompt();
             return;
         } else {
             // Anel da Significância: o primeiro erro do combate fica dentro de
