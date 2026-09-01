@@ -291,12 +291,13 @@ export const MAP_DATA = {
             [3,12,3,12,12,1,12,12,12,12,12,1,12,12,3,12,3],
             [3,12,12,12,12,1,1,1,12,1,1,1,12,12,12,12,3],
             [3,12,3,3,12,12,12,12,12,12,12,12,3,3,12,27,3],
-            [3,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,12,12,12,12,12,12,12,12,12,12,6,12,12,12,12,3],
             [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
         ],
         spawn: { x: 8, y: 1 },
         exits: [
             { x: 1, y: 1, targetArea: 'mountains', targetSpawn: { x: 8, y: 12 }, isBack: true },
+            { x: 11, y: 13, targetArea: 'codex', targetSpawn: { x: 2, y: 1 } },
             { x: 14, y: 1, targetArea: 'dungeon_depths', targetSpawn: { x: 14, y: 1 }, isHole: true },
             { x: 15, y: 12, targetArea: 'sanctum_depths', targetSpawn: { x: 8, y: 13 }, isHole: true },
         ],
@@ -324,6 +325,61 @@ export const MAP_DATA = {
         ],
         scrolls: [
             { scrollId: 'scroll_null_chamber', x: 1, y: 12 },
+            { scrollId: 'scroll_codex_entrance', x: 13, y: 13 },
+        ],
+    },
+
+    // Cripta do Interpretador — última área, acessível pelo portal ao sul do
+    // Calabouço (nível 18 + 60% de maestria em Inferência). Aqui os monstros
+    // pedem código Python executável em vez de múltipla escolha.
+    codex: {
+        tiles: [
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+            [3,6,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,12,3,12,17,17,17,12,12,12,17,17,17,12,3,12,3],
+            [3,12,3,12,12,12,12,12,18,12,12,12,12,12,3,12,3],
+            [3,12,12,12,1,1,1,1,1,1,1,1,1,12,12,12,3],
+            [3,12,3,12,1,12,12,12,12,12,12,12,1,12,3,12,3],
+            [3,12,3,12,1,12,3,12,12,12,3,12,1,12,3,12,3],
+            [3,12,12,12,1,12,12,12,7,12,12,12,1,12,12,12,3],
+            [3,12,3,12,1,12,3,12,12,12,3,12,1,12,3,12,3],
+            [3,12,3,12,1,12,12,12,12,12,12,12,1,12,3,12,3],
+            [3,12,12,12,1,1,1,1,1,1,1,1,1,12,12,12,3],
+            [3,12,3,12,12,12,12,12,12,12,12,12,12,12,3,12,3],
+            [3,12,3,12,17,17,12,12,18,12,12,17,17,12,3,12,3],
+            [3,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,3],
+            [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        ],
+        spawn: { x: 2, y: 1 },
+        exits: [
+            { x: 1, y: 1, targetArea: 'dungeon', targetSpawn: { x: 11, y: 12 }, isBack: true },
+        ],
+        monsters: [
+            { monsterId: 'syntax_larva',        instanceId: 'cx_m1',    x: 5,  y: 1  },
+            { monsterId: 'syntax_larva',        instanceId: 'cx_m2',    x: 13, y: 3  },
+            { monsterId: 'loop_specter',        instanceId: 'cx_m3',    x: 15, y: 6  },
+            { monsterId: 'sigma_daemon',        instanceId: 'cx_m4',    x: 1,  y: 7  },
+            { monsterId: 'numpy_golem',         instanceId: 'cx_m5',    x: 15, y: 11 },
+            { monsterId: 'pandas_serpent',      instanceId: 'cx_m6',    x: 6,  y: 11 },
+            { monsterId: 'hashmap_hydra',       instanceId: 'cx_m7',    x: 10, y: 5  },
+            { monsterId: 'variance_revenant',   instanceId: 'cx_m8',    x: 3,  y: 13 },
+            { monsterId: 'groupby_treant',      instanceId: 'cx_hard1', x: 13, y: 13 },
+            { monsterId: 'broadcast_leviathan', instanceId: 'cx_hard2', x: 1,  y: 11 },
+            { monsterId: 'pointer_wraith',      instanceId: 'cx_hard3', x: 15, y: 1  },
+            { monsterId: 'metric_phoenix',      instanceId: 'cx_hard4', x: 10, y: 3  },
+            { monsterId: 'boss_codex',          instanceId: 'cx_boss',  x: 8,  y: 11 },
+        ],
+        npcs: [
+            { npcId: 'archivist', role: 'quest', x: 3, y: 3, dialog: [
+                'Baixe a espada. Aqui embaixo ela não conta dano — conta linha.',
+                'Fui arquivista da Ordem. Catalogava os feitiços que os estatísticos escreviam para não precisar refazer as contas à mão. Chamávamos de scripts. Eram bons tempos: o feitiço rodava, o número saía, ninguém perguntava o resto.',
+                'Quando a Distorção veio, ela não corrompeu os números — corrompeu {{bad:o código que produzia os números}}. Um índice trocado aqui, uma média calculada no conjunto de teste ali. Os resultados continuaram lindos. Foi esse o horror: continuaram lindos.',
+                'Por isso o Intérprete acordou. Ele não aceita que você diga a resposta certa. Ele exige que você {{accent:escreva a função e a execute na frente dele}} — e roda os próprios crivos, inclusive os que você não vê.',
+                'Escreva devagar. Rode os exemplos quantas vezes quiser: isso não custa nada. O que custa é {{bad:enviar}} — aí os crivos ocultos entram, e o veredito vira dano.',
+            ]},
+        ],
+        scrolls: [
+            { scrollId: 'scroll_codex_interpreter', x: 8, y: 8 },
         ],
     },
 

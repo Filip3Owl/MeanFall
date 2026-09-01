@@ -83,6 +83,7 @@ export const AREAS = {
     PLAINS:    'plains',
     MOUNTAINS: 'mountains',
     DUNGEON:   'dungeon',
+    CODEX:     'codex',
 };
 
 export const AREA_INFO = {
@@ -92,6 +93,7 @@ export const AREA_INFO = {
     plains:    { displayName: 'Planícies da Probabilidade', topic: 'Probabilidade Básica',    bgColor: 0x2e2010 },
     mountains: { displayName: 'Montanhas da Distribuição',  topic: 'Distribuição Normal',     bgColor: 0x1a1a1e },
     dungeon:   { displayName: 'Calabouço da Inferência',    topic: 'Testes de Hipótese',      bgColor: 0x0e0a0a },
+    codex:     { displayName: 'Cripta do Interpretador',    topic: 'Python e Ciência de Dados', bgColor: 0x050a08 },
     village_house_elder:    { displayName: 'Casa da Anciã',    topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_scholar:  { displayName: 'Casa do Estudioso', topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
     village_house_merchant: { displayName: 'Casa do Mercador',  topic: 'Ambiente Seguro', bgColor: 0x1a0a03 },
@@ -110,6 +112,7 @@ export const AREA_UNLOCK = {
     plains:    { minLevel: 1,  masteryArea: 'forest',    masteryPct: 60 },
     mountains: { minLevel: 1,  masteryArea: 'plains',    masteryPct: 60 },
     dungeon:   { minLevel: 15, masteryArea: 'mountains', masteryPct: 70 },
+    codex:     { minLevel: 18, masteryArea: 'dungeon',   masteryPct: 60 },
 };
 
 // Boss that must be defeated before leaving each area.
@@ -202,6 +205,7 @@ export const PLAYER_DEFAULTS = {
         plains:    { attempted: 0, correct: 0, wrongIds: [] },
         mountains: { attempted: 0, correct: 0, wrongIds: [] },
         dungeon:   { attempted: 0, correct: 0, wrongIds: [] },
+        codex:     { attempted: 0, correct: 0, wrongIds: [] },
     },
     elementalMastery: {
         fire:   { level: 1, xp: 0, totalCorrect: 0 },
@@ -231,7 +235,7 @@ export const XP_TABLE = Array.from({ length: 50 }, (_, i) =>
 
 export const VERSION = {
     label: 'BETA',
-    number: '0.9.0',
+    number: '0.10.0',
     author: 'Filipe Rangel',
 };
 
@@ -261,6 +265,24 @@ export const TOPIC_TO_ELEMENT = {
     distributions:     'water',
     inference:         'shadow',
 };
+
+// Desafios de código (Cripta do Interpretador). Reaproveitam os seis
+// elementos existentes — o matchup elemental e a maestria continuam valendo,
+// só a pergunta muda de múltipla escolha para "escreva a função".
+export const CODE_TOPIC_TO_ELEMENT = {
+    py_basics:     'normal',
+    py_structures: 'shadow',
+    py_stats:      'ice',
+    py_numpy:      'water',
+    py_pandas:     'earth',
+    py_ml:         'fire',
+};
+
+export const CODE_AREAS = ['codex'];
+
+export function isCodeArea(areaId) {
+    return CODE_AREAS.includes(parentArea(areaId));
+}
 
 // Damage multiplier matrix: ELEMENT_MATRIX[attacker][defender] = multiplier.
 // 1.5 = strong against, 0.75 = weak against, 1.0 = neutral.
@@ -307,6 +329,7 @@ export const NPC_NAMES = {
     merchant: 'Mercador', smith: 'Ferreiro', trader: 'Comerciante',
     sage: 'Sábia', hermit: 'Eremita', gambler: 'Apostador',
     astronomer: 'Astrônoma', oracle: 'Oráculo',
+    archivist: 'Arquivista do Interpretador',
 };
 
 // UI semantic colors for highlighting keywords inside chat / text.

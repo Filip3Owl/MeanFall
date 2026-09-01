@@ -1,10 +1,13 @@
 import { CombatSystem }                from '../systems/CombatSystem.js';
 import { QuestionEngine }                from '../systems/QuestionEngine.js';
+import { CodeChallengeEngine }           from '../systems/CodeChallengeEngine.js';
+import { PythonRuntime }                 from '../systems/PythonRuntime.js';
+import { CodeEditor }                    from '../utils/CodeEditor.js';
 import { awardXP, awardElementalXP }           from '../systems/XPSystem.js';
 import { BookSystem }                    from '../systems/BookSystem.js';
 import { ITEMS, RARITY_COLORS } from '../data/items.js';
 import { BOOKS, BOOK_IMPORTANCE }        from '../data/books.js';
-import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT, parentArea } from '../constants.js';
+import { ELEMENTS, FLEE_XP_PENALTY, TOPIC_TO_ELEMENT, CODE_TOPIC_TO_ELEMENT, parentArea } from '../constants.js';
 import { StatusEffectSystem, STATUS_DEFS }                  from '../systems/StatusEffectSystem.js';
 import { CompanionSystem }               from '../systems/CompanionSystem.js';
 import EventBus                          from '../utils/EventBus.js';
@@ -30,6 +33,7 @@ export class CombatScene extends Phaser.Scene {
         this._rules        = data.rules || {};      // ex.: { noItems: true } no Julgamento
         this._gauntletInfo = data.gauntlet || null; // { index, total } quando em gauntlet
         this._alphaUsed    = false;                 // Anel da Significância: 1 perdão/combate
+        this._codeReport   = null;                  // último envio de código do turno
     }
 
     create() {
@@ -493,6 +497,12 @@ export class CombatScene extends Phaser.Scene {
     }
 
     _showContinuePrompt() {
+        // Com o editor aberto, quem oferece o "Continuar" é ele — o prompt do
+        // canvas está escondido atrás do overlay.
+        if (this._currentQ?.type === 'code' && CodeEditor.isOpen()) {
+            this._concludeCodeTurn(null);
+            return;
+        }
         this._awaitContinue = true;
         this._continueBg.setVisible(true);
         this._continueTx.setVisible(true).setAlpha(1);
@@ -685,16 +695,19 @@ export class CombatScene extends Phaser.Scene {
         this._updateStatusDisplay();
 
         const mastery = this._masteryRef();
-        const q = QuestionEngine.getQuestion(
-            this._monsterDef.questionTopic,
-            this._monsterDef.questionDifficulty,
-            mastery,
-            this._recentIds
-        );
+        const q = this._isCodeMonster()
+            ? this._pickCodeChallenge(mastery)
+            : QuestionEngine.getQuestion(
+                this._monsterDef.questionTopic,
+                this._monsterDef.questionDifficulty,
+                mastery,
+                this._recentIds
+            );
 
         if (!q) { this._endCombat('flee'); return; }
 
-        this._currentQ = QuestionEngine.shuffleOptions(q);
+        this._codeReport = null;
+        this._currentQ = q.type === 'code' ? q : QuestionEngine.shuffleOptions(q);
         this._recentIds.push(q.id);
         if (this._recentIds.length > 6) this._recentIds.shift();
 
@@ -709,6 +722,11 @@ export class CombatScene extends Phaser.Scene {
     _renderQuestion() {
         const q = this._currentQ;
         let y = 186;
+
+        if (q.type === 'code') {
+            this._renderCodeChallenge(q);
+            return;
+        }
 
         if (q.context) {
             this._ctxTxt.setY(y).setText(`Contexto: ${q.context}`).setVisible(true);
@@ -788,6 +806,12 @@ export class CombatScene extends Phaser.Scene {
 
     _onKeyDown(event) {
         if (this.scene.isActive('Scratchpad')) return;
+        if (CodeEditor.isOpen()) return;
+        if (this._currentQ?.type === 'code' && !this._answerLock
+            && (event.key === ' ' || event.key === 'Enter')) {
+            this._openCodeEditor();
+            return;
+        }
         if (this._fleeConfirmOpen) return; // diálogo de fuga tem os próprios controles
         if (this._itemPanel) {
             if (event.key === 'Escape' || event.key === 'e' || event.key === 'E') this._closeItemPanel();
@@ -823,6 +847,135 @@ export class CombatScene extends Phaser.Scene {
         if (!this._answerLock && this._numericValue) this._onAnswer(this._numericValue, null);
     }
 
+    // ─── DESAFIOS DE CÓDIGO ───────────────────────────────────────────────────
+    // A criatura pede uma função Python em vez de uma alternativa. O editor é
+    // DOM (o canvas de 544×480 não comporta digitação), então o turno acontece
+    // fora da tela do Phaser e volta pelo mesmo _onAnswer das demais questões.
+
+    _isCodeMonster() {
+        return this._monsterDef?.questionKind === 'code';
+    }
+
+    _pickCodeChallenge(mastery) {
+        // Sem interpretador (offline, navegador antigo, CDN fora do ar) a
+        // criatura recorre à teoria do próprio elemento em vez de travar.
+        if (PythonRuntime.status === 'failed') {
+            const elem  = CODE_TOPIC_TO_ELEMENT[this._monsterDef.questionTopic] || this._monsterDef.element;
+            const topic = ELEMENTS[elem]?.topic || 'data_types';
+            EventBus.emit('chat', {
+                msg: 'O interpretador não respondeu — a criatura recorre à teoria.',
+                type: 'system',
+            });
+            return QuestionEngine.getQuestion(topic, this._monsterDef.questionDifficulty, mastery, this._recentIds);
+        }
+        return CodeChallengeEngine.getChallenge(
+            this._monsterDef.questionTopic,
+            this._monsterDef.questionDifficulty,
+            mastery,
+            this._recentIds,
+        );
+    }
+
+    _renderCodeChallenge(q) {
+        this._hideChoiceBtns();
+        this._hideNumericInput();
+        this._ctxTxt.setVisible(false);
+        this._qTxt.setY(200).setText(
+            `⌨  DESAFIO DE CÓDIGO\n\n${q.title}\n\nO editor abre por cima da tela.\nSe ele fechar, pressione ESPAÇO para reabrir.`
+        );
+        this._openCodeEditor();
+    }
+
+    _codeCombatState() {
+        return {
+            monsterName:  this._monsterDef.name,
+            monsterHp:    this._monsterHp,
+            monsterMaxHp: this._monsterDef.maxHp,
+            playerHp:     this._player.hp,
+            playerMaxHp:  this._player.maxHp,
+            focus:        this._player.focus,
+            maxFocus:     this._player.maxFocus,
+            streak:       this._streak,
+        };
+    }
+
+    _openCodeEditor() {
+        if (CodeEditor.isOpen() || this._answerLock) return;
+        // O Phaser escuta o teclado na window: sem desligar, cada letra
+        // digitada viraria atalho de combate.
+        if (this.input?.keyboard) this.input.keyboard.enabled = false;
+        const world = this.scene.get('World');
+        if (world?.input?.keyboard) world.input.keyboard.enabled = false;
+
+        CodeEditor.open({
+            challenge: this._currentQ,
+            combat:    this._codeCombatState(),
+            onSubmit:  (report) => this._onCodeSubmit(report),
+            onGiveUp:  () => this._onCodeSubmit({
+                allPassed: false, passed: 0, gaveUp: true,
+                total: (this._currentQ.cases || []).length, results: [],
+            }),
+            onHint:    () => this._codeHint(),
+        });
+    }
+
+    _restoreKeyboard() {
+        if (this.input?.keyboard) this.input.keyboard.enabled = true;
+        const world = this.scene.get('World');
+        if (world?.input?.keyboard) world.input.keyboard.enabled = true;
+    }
+
+    /** Mesma economia de Foco da dica normal, devolvendo o texto ao editor. */
+    _codeHint() {
+        if (StatusEffectSystem.isHintBlocked(this._player)) {
+            EventBus.emit('chat', { msg: '❄ Congelado! A dica está bloqueada neste turno.', type: 'system' });
+            return null;
+        }
+        if (!this._currentQ?.hint) return null;
+        const custo = this._relicEffect?.type === 'free_hints' ? 0 : 10;
+        if (this._player.focus < custo) {
+            EventBus.emit('chat', { msg: 'Foco insuficiente para a dica (custa 10).', type: 'system' });
+            return null;
+        }
+        this._player.focus -= custo;
+        this._updatePlayerBars();
+        EventBus.emit('player-hp-change', { player: this._player });
+        Sound.hint();
+        CodeEditor.updateVitals(this._codeCombatState());
+        return `${this._currentQ.hint}${custo === 0 ? ' [Prisma da Clareza]' : ''}`;
+    }
+
+    _onCodeSubmit(report) {
+        this._codeReport = report;
+        this._onAnswer(report, null);
+        CodeEditor.updateVitals(this._codeCombatState());
+    }
+
+    /** Fecha o turno dentro do editor: veredito, explicação e gabarito. */
+    _concludeCodeTurn(outcome) {
+        const q   = this._currentQ;
+        const rep = this._codeReport || {};
+        const passou = !!rep.allPassed;
+        const headline = passou
+            ? '✓ Código aceito — o golpe acerta em cheio!'
+            : rep.gaveUp
+                ? '✗ Você desistiu deste desafio'
+                : `✗ ${rep.passed || 0} de ${rep.total || 0} testes passaram`;
+
+        CodeEditor.conclude({
+            passed:   passou,
+            headline,
+            detail:   q?.explanation,
+            solution: passou ? null : q?.solution,
+            onContinue: () => {
+                this._restoreKeyboard();
+                if (outcome) this._endCombat(outcome);
+                else         this._nextQuestion();
+            },
+        });
+        CodeEditor.updateVitals(this._codeCombatState());
+    }
+
     // ─── ANSWER HANDLING ──────────────────────────────────────────────────────
 
     _onAnswer(userAnswer, btnBg) {
@@ -833,7 +986,11 @@ export class CombatScene extends Phaser.Scene {
         const qForCheck = StatusEffectSystem.isToleranceZero(this._player) && q.type === 'fill_numeric'
             ? { ...q, tolerance: 0 }
             : q;
-        const correct = QuestionEngine.checkAnswer(qForCheck, userAnswer);
+        // No desafio de código quem decide são os testes, não a comparação
+        // de texto: só passa quem passa em todos, inclusive nos ocultos.
+        const correct = q.type === 'code'
+            ? CodeChallengeEngine.checkAnswer(q, userAnswer)
+            : QuestionEngine.checkAnswer(qForCheck, userAnswer);
         const mastery = this._masteryRef();
         mastery.attempted++;
 
@@ -849,7 +1006,7 @@ export class CombatScene extends Phaser.Scene {
             this.tweens.add({ targets: this._juiceCorrect, alpha: 0, duration: 400 });
 
             // Award Elemental XP based on topic
-            const elementId = TOPIC_TO_ELEMENT[q.topic] || 'normal';
+            const elementId = TOPIC_TO_ELEMENT[q.topic] || CODE_TOPIC_TO_ELEMENT[q.topic] || 'normal';
             awardElementalXP(this._player, elementId, 15);
 
             // Resolve weapon element from equipped item (live lookup)
@@ -954,6 +1111,28 @@ export class CombatScene extends Phaser.Scene {
             const result = CombatSystem.calcMonsterDamage(this._monsterDef, this._player);
 
             let finalDamage = result.damage;
+
+            // Desafio de código resolvido pela metade ainda vale alguma coisa:
+            // os testes que passaram arranham o monstro e amortecem o troco.
+            const codeRatio = (q.type === 'code' && userAnswer?.total)
+                ? (userAnswer.passed || 0) / userAnswer.total
+                : 0;
+            if (codeRatio > 0) {
+                finalDamage = Math.max(1, Math.round(finalDamage * (1 - codeRatio * 0.5)));
+
+                const weaponId   = this._player.equipment?.rightHand || this._player.equipment?.leftHand;
+                const weaponInfo = ITEMS[weaponId] || null;
+                this._player._weaponElement = weaponInfo?.element || 'normal';
+                const base    = CombatSystem.calcPlayerDamage(this._player, this._monsterDef, 0, weaponInfo).damage;
+                const parcial = Math.max(1, Math.floor(base * codeRatio * 0.4));
+                this._monsterHp = Math.max(0, this._monsterHp - parcial);
+                this._updateMonsterBar();
+                this._spawnDamageNumber(this._monsterPanelCenter, parcial, '#ffaa66', false);
+                EventBus.emit('chat', {
+                    msg: `${userAnswer.passed}/${userAnswer.total} testes passaram — golpe de raspão: {{damage:${parcial}}}.`,
+                    type: 'combat-hit',
+                });
+            }
             let statusLabel = null;
             let relicBlocked = false;
             if (!result.dodged) {
@@ -1015,14 +1194,23 @@ export class CombatScene extends Phaser.Scene {
             const ans = typeof q.correctAnswer === 'number'
                 ? String(q.correctAnswer).replace('.', ',')
                 : q.correctAnswer;
-            let correction = `Resposta correta: ${ans}.`;
-            if (q.explanation) correction += ` ${q.explanation}`;
+            // Em código a "resposta certa" é a solução inteira — ela vai para o
+            // editor em _concludeCodeTurn, não cabe nesta caixa.
+            let correction = q.type === 'code' ? '' : `Resposta correta: ${ans}.`;
+            if (q.explanation) correction += `${correction ? ' ' : ''}${q.explanation}`;
             this._explTxt.setFontSize(11).setText(correction);
             // Explanation area ends where the bottom bar begins (y=438)
             if (this._explTxt.y + this._explTxt.height > 436) this._explTxt.setFontSize(10);
 
             if (this._player.hp <= 0) {
                 this.time.delayedCall(1500, () => this._endCombat('loss'));
+                return;
+            }
+
+            // O dano de raspão pode ter derrubado o monstro mesmo com a
+            // resposta errada — a vitória vale igual.
+            if (this._monsterHp <= 0) {
+                this.time.delayedCall(1200, () => this._endCombat('win'));
                 return;
             }
 
@@ -1344,6 +1532,12 @@ export class CombatScene extends Phaser.Scene {
     // ─── COMBAT END ───────────────────────────────────────────────────────────
 
     _endCombat(outcome) {
+        // Vitória ou derrota no meio de um desafio: o jogador ainda precisa ver
+        // o veredito e o gabarito antes de o combate encerrar.
+        if (CodeEditor.isOpen()) {
+            this._concludeCodeTurn(outcome);
+            return;
+        }
         Music.setFever(false);
         StatusEffectSystem.clear(this._player);
         let xpGained = 0;
@@ -1590,6 +1784,8 @@ export class CombatScene extends Phaser.Scene {
     }
 
     shutdown() {
+        if (CodeEditor.isOpen()) CodeEditor.close();
+        this._restoreKeyboard();
         this.input.keyboard.removeAllListeners();
     }
 }

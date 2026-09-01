@@ -404,6 +404,15 @@ export class WorldScene extends Phaser.Scene {
                     blendMode: 'ADD',
                 }).setDepth(38);
                 break;
+            case 'codex': // glifos verdes subindo, como saída de terminal
+                this._weather = this.add.particles(0, 0, 'particle_dot', {
+                    x: { min: 0, max: 544 }, y: 486,
+                    lifespan: 7000, frequency: 260, quantity: 1, tint: 0x55ffaa,
+                    speedY: { min: -40, max: -16 }, speedX: { min: -4, max: 4 },
+                    scale: { min: 0.4, max: 0.9 }, alpha: { start: 0.8, end: 0 },
+                    blendMode: 'ADD',
+                }).setDepth(38);
+                break;
             case 'village': // vagalumes — apenas à noite (ligados em _updateDayNight)
                 this._fireflies = this.add.particles(0, 0, 'particle_dot', {
                     x: { min: 30, max: 514 }, y: { min: 60, max: 430 },

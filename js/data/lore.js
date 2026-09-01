@@ -115,6 +115,15 @@ export const ANCIENT_SCROLLS = {
         title: 'Ata do Último Concílio',
         text: 'Por decreto unânime, a {{accent:Câmara da Hipótese Nula}} foi selada e sua entrada {{hint:enterrada no canto sudeste}} deste salão. Que nenhum aprendiz desça sem uma {{accent:pá}} — e que nenhum desça despreparado. Lá embaixo, quatro guardiões julgam. Não há poções que valham diante deles, e o veredito é definitivo.'
     },
+    // ── A Cripta do Interpretador ────────────────────────────────────────────
+    'scroll_codex_entrance': {
+        title: 'Bilhete Preso na Grade',
+        text: 'Descobri o que há atrás da grade sul do Calabouço: uma {{accent:cripta que não pergunta}}. As criaturas de lá não querem que você escolha entre quatro alternativas — querem que você {{hint:escreva o feitiço e o execute na frente delas}}. Errar a sintaxe dói igual a errar a conta. Traga paciência.'
+    },
+    'scroll_codex_interpreter': {
+        title: 'Fragmento de um Manual',
+        text: 'O Intérprete não julga intenção, só resultado: ele {{bad:roda o que você escreveu}}, não o que você quis escrever. Um teste que passa por acidente ainda é um teste que passa — por isso metade dos crivos permanece {{accent:oculta}} até o envio. Rode os exemplos à vontade; o veredito vem depois.'
+    },
     'scroll_sanctum_altar': {
         title: 'Inscrição na Pedra',
         text: 'Aqui a Sociedade julgava seus mestres. {{bad:Quatro guardiões, um após o outro, sem descanso e sem itens}} — apenas o que você sabe. A mochila será selada; a fuga encerra o Julgamento. Aos aprovados, o {{legend:Anel da Significância}}: a tolerância de quem entende que todo julgamento honesto perdoa um erro. {{hint:Venha descansado. Venha inteiro.}}'
