@@ -19,9 +19,10 @@ function weekStr() {
 const AREA_ELEMENT = {
     village: 'normal', meadows: 'earth', forest: 'ice',
     plains: 'fire', mountains: 'water', dungeon: 'shadow',
+    codex: 'shadow',
 };
 
-const AREA_ORDER = ['village', 'meadows', 'forest', 'plains', 'mountains', 'dungeon'];
+const AREA_ORDER = ['village', 'meadows', 'forest', 'plains', 'mountains', 'dungeon', 'codex'];
 
 function masteryPct(player, areaKey) {
     const m = player.mastery?.[areaKey];

@@ -108,6 +108,18 @@ const TRACKS = {
         bassPeak:   0.10,
         melodyDur:  1.1,
     },
+    // ── Cripta do Interpretador: máquina antiga ainda executando ──────────────
+    codex: {
+        bpm: 84,
+        ambience:  'drips',
+        pad:       [40, 47, 52, 55],                          // E2 B2 E3 G3 — quinta oca
+        bass:      [28, 28, 33, 31],                          // E1 E1 A1 G1 — pulso de clock
+        melody:    [64, 67, 71, 67, 64, 62, 64, 59],          // padrão que retorna ao início: loop
+        padWave:    'square',
+        melodyWave: 'square',
+        melodyPeak: 0.030,
+        melodyDur:  0.35,
+    },
     // ── Interior / Home: soft, slow, safe ──────────────────────────────────────
     home: {
         bpm: 70,

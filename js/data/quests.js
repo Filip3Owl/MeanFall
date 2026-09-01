@@ -85,6 +85,40 @@ export const QUESTS = {
         reward: { xp: 1500, gold: 1000, items: [{ itemId: 'crown_of_insight', qty: 1 }, { itemId: 'stats_amulet', qty: 1 }] },
         prerequisite: 'q_normal',
     },
+
+    // ── CRIPTA DO INTERPRETADOR ───────────────────────────────────────────────
+    q_codex_first: {
+        id: 'q_codex_first',
+        name: 'Compile ou Pereça',
+        giver: 'archivist',
+        area: 'codex',
+        description: 'Derrote 4 criaturas da Cripta resolvendo os desafios de código que elas exigem.',
+        objective: { type: 'kill_area', area: 'codex', count: 4 },
+        reward: { xp: 2000, gold: 800, items: [{ itemId: 'supreme_health_potion', qty: 3 }] },
+        prerequisite: 'q_inference',
+    },
+
+    q_codex_mastery: {
+        id: 'q_codex_mastery',
+        name: 'Revisão de Código',
+        giver: 'archivist',
+        area: 'codex',
+        description: 'Alcance 60% de acerto nos desafios de código da Cripta.',
+        objective: { type: 'mastery', area: 'codex', percent: 60 },
+        reward: { xp: 2500, gold: 1000, items: [{ itemId: 'amulet_of_clarity', qty: 1 }] },
+        prerequisite: 'q_codex_first',
+    },
+
+    q_codex_boss: {
+        id: 'q_codex_boss',
+        name: 'O Intérprete Primordial',
+        giver: 'archivist',
+        area: 'codex',
+        description: 'Derrote O Intérprete Primordial — ele roda o que você escreveu, não o que você quis escrever.',
+        objective: { type: 'kill', monsterId: 'boss_codex', count: 1 },
+        reward: { xp: 5000, gold: 2500, items: [{ itemId: 'crown_of_archmage', qty: 1 }, { itemId: 'talisman_of_legends', qty: 1 }] },
+        prerequisite: 'q_codex_first',
+    },
 };
 
 // Quest log status per quest:

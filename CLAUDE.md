@@ -2,6 +2,8 @@
 
 RPG educacional estilo Tibia para ensinar estatística, feito com Phaser 3 + JavaScript vanilla. O jogador explora mapas tile-based, combate monstros respondendo questões de estatística e evolui desbloqueando novas áreas.
 
+Na última área — a **Cripta do Interpretador** — o combate muda de forma: os monstros exigem **código Python executável**, rodado de verdade no navegador via Pyodide.
+
 Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
 
 ---
@@ -12,6 +14,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
 - **JavaScript ES6 modules** — sem bundler, sem framework
 - **HTML5 / CSS3** — layout 3 colunas + HUD DOM
 - **Web Audio API** — música e efeitos sonoros procedurais (zero arquivos externos)
+- **Pyodide 0.27.7** (via CDN, sob demanda) — CPython no navegador para os desafios de código
 - **LocalStorage** — sistema de save (3 slots)
 
 ---
@@ -29,6 +32,8 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
 │   └── banner.svg
 └── js/
     ├── main.js              Entry point — inicializa Phaser com todas as cenas
+    ├── py/
+    │   └── pyodideWorker.js  Web Worker com o interpretador Python + harness de testes
     ├── constants.js         Config global, XP table, tile types, element matrix
     ├── utils/
     │   ├── EventBus.js      Pub/sub de eventos entre sistemas
@@ -36,11 +41,14 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   ├── MusicSystem.js   Música procedural via Web Audio API (por área/estado)
     │   ├── SoundSystem.js   Efeitos sonoros procedurais (hit, levelup, dialogTick, etc.)
     │   ├── DayNight.js      Ciclo dia/noite acelerado derivado do relógio real (12 min/ciclo)
-    │   └── RichText.js      Renderização de texto colorido inline com markup {{tag:texto}}
+    │   ├── RichText.js      Renderização de texto colorido inline com markup {{tag:texto}}
+    │   └── CodeEditor.js     Editor de código DOM (overlay dos desafios de Python)
     ├── systems/
     │   ├── CombatSystem.js        Cálculo de dano, itens, equipamentos, drops
     │   ├── QuestionEngine.js      Seleção adaptativa de questões, checagem de resposta
     │   ├── QuestionGenerator.js   Geração procedural de questões numéricas (média, var, etc.)
+    │   ├── PythonRuntime.js       Ponte com o worker do Pyodide (boot, pacotes, timeout, reboot)
+    │   ├── CodeChallengeEngine.js Seleção adaptativa e correção dos desafios de código
     │   ├── XPSystem.js            XP, level up, pontos de atributo, mastery por área
     │   ├── SaveSystem.js          Save/load LocalStorage (3 slots + autosave)
     │   ├── MapManager.js          Renderização de mapa, colisão, minimapa
@@ -79,10 +87,11 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
     │   └── NPC.js         Sprite, ciclo de diálogos, interação
     └── data/
         ├── questions.js   243 questões (6 tópicos, 3 dificuldades, 3 tipos)
-        ├── monsters.js    34 monstros (24 elementais + 6 chefes/especiais + 4 guardiões do Julgamento)
+        ├── pyChallenges.js 38 desafios de código Python (6 tópicos, 141 casos de teste)
+        ├── monsters.js    52 monstros (24 elementais + 6 chefes/especiais + 4 guardiões + 12 da Cripta + hard por área)
         ├── items.js       58 itens (consumíveis, equipamentos, scrolls, 6 materiais de forja, 2 ferramentas, Anel da Significância)
-        ├── maps.js        16 mapas tile-based (6 superfícies + 3 casas + 6 profundezas + Câmara da Hipótese Nula)
-        ├── quests.js      7 missões principais com objetivos e recompensas
+        ├── maps.js        17 mapas tile-based (6 superfícies + 3 casas + 6 profundezas + Câmara da Hipótese Nula + Cripta do Interpretador)
+        ├── quests.js      10 missões principais com objetivos e recompensas
         ├── skills.js      13 habilidades passivas na árvore de habilidades
         ├── books.js       18 tomos com lore e bônus permanentes
         ├── shops.js       3 mercadores com estoques por área
@@ -104,6 +113,7 @@ Jogo publicado em **[meanfall.pro](https://www.meanfall.pro)**.
 | Plains     | Probabilidade             | Fogo     | 8              | —                        |
 | Mountains  | Distribuições             | Água     | 12             | —                        |
 | Dungeon    | Testes de Hipótese        | Trevas   | 15             | 70% mastery em 3 áreas   |
+| Codex      | Python e Ciência de Dados | vários   | 18             | 60% mastery no Dungeon   |
 
 ### Profundezas (subsolo)
 
@@ -130,6 +140,39 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 - Recompensa única (`playerData.sanctumCleared`): **Anel da Significância** — relíquia `first_error_forgiven`: o 1º erro de cada combate não causa dano e preserva o streak (α = 0,05). Revanches pagam ouro. Conquista "Além do Alfa" + reação do Oráculo
 
 ---
+
+## Cripta do Interpretador — desafios de código
+
+Última área, ligada ao Calabouço por um portal em (11,13). Os monstros de lá têm
+`questionKind: 'code'`: em vez de múltipla escolha, pedem uma função Python que é
+**executada de verdade** contra casos de teste.
+
+- **Execução**: `js/py/pyodideWorker.js` é um Web Worker clássico que carrega o Pyodide
+  da CDN sob demanda — quem nunca entra na Cripta não paga o download. Rodar em worker
+  é o que permite matar um laço infinito do jogador (`worker.terminate()`) sem travar o jogo;
+  o timeout padrão de execução é 10s e o interpretador reboota sozinho depois.
+- **Correção**: o harness Python (constante `HARNESS` no worker) executa `setup` → código do
+  jogador → cada caso, com comparação tolerante ciente de float, numpy e pandas
+  (`assert_frame_equal`/`allclose`). Cada caso roda com uma cópia limpa do dataset.
+- **Testes ocultos**: casos com `hidden: true` não aparecem no enunciado e só rodam no envio —
+  é o que impede resolver por tentativa e erro contra os exemplos.
+- **Editor**: `js/utils/CodeEditor.js` é DOM em `position: fixed` sobre a página (o canvas de
+  544×480 escalado não comporta digitação). Tab/Shift+Tab indentam, Enter auto-indenta depois
+  de `:`, Ctrl+Enter roda os exemplos. O overlay **engole os eventos de teclado** e a CombatScene
+  desliga `input.keyboard` das cenas Combat e World — senão cada letra digitada viraria atalho.
+  Rascunhos ficam em `localStorage` por desafio (`meanfall_code_draft_<id>`).
+- **Dano**: todos os testes passando = acerto normal (dano cheio, streak, maestria). Passar
+  parte deles é **acerto parcial**: o jogador arranha o monstro (`base × ratio × 0.4`) e o
+  contra-ataque é amortecido em `ratio × 50%`, mas a sequência zera. Zero testes ou desistência
+  = erro cheio, com a solução de referência revelada no editor.
+- **Tópicos → elementos** (`CODE_TOPIC_TO_ELEMENT` em constants.js): `py_basics`→normal,
+  `py_structures`→trevas, `py_stats`→gelo, `py_numpy`→água, `py_pandas`→terra, `py_ml`→fogo.
+  Reaproveitar os seis elementos mantém matchup, maestria elemental, essências e forja valendo.
+- **Sem interpretador** (offline, navegador antigo, CDN fora do ar): a criatura recorre à
+  questão teórica do elemento dela — o combate nunca trava.
+- **Validação do banco**: `node tools/validate_py_challenges.mjs` roda todo desafio contra o
+  mesmo harness do jogo e falha se um gabarito não passar ou se o esqueleto já passar.
+  Requer `python3` com numpy e pandas. **Rode isso ao adicionar desafios.**
 
 ## Imersão (dia/noite, clima, companheiro, troféus)
 
@@ -183,6 +226,7 @@ Cada área de superfície tem um subterrâneo (`<area>_depths`) acessado por um 
 ## Sistema de Questões
 
 - **243 questões** em 6 tópicos: `data_types`, `mean_median_mode`, `spread`, `probability`, `distributions`, `inference`
+- **38 desafios de código** em 6 tópicos: `py_basics`, `py_structures`, `py_stats`, `py_numpy`, `py_pandas`, `py_ml` (ver Cripta do Interpretador acima)
 - **Geradores procedurais devem retornar `explanation` própria** — a da questão base cita os números originais e ficaria errada para o dataset gerado
 - **3 tipos**: múltipla escolha, verdadeiro/falso, resposta numérica (com tolerância decimal configurável)
 - **3 dificuldades**: easy, medium, hard — cada monstro filtra por dificuldade conforme seu nível
@@ -222,6 +266,7 @@ Todos os sistemas se comunicam via `EventBus`. Eventos principais:
 - Mensagens no chat usam classes CSS: `.system`, `.combat-hit`, `.combat-miss`, `.xp`, `.levelup`, `.portal`, `.dialog`
 - Idioma do jogo: **Português**
 - Questões ficam exclusivamente em `data/questions.js`; geração procedural em `systems/QuestionGenerator.js`
+- Desafios de código ficam em `data/pyChallenges.js`; todo desafio precisa de `solution` (é o gabarito mostrado ao errar e o que o validador executa)
 - Monstros derrotados são rastreados por `instanceId` em `playerData.defeatedMonsters`
 - Música muda por área via `MusicSystem` — cada area tem uma track definida em `TRACKS`
 
@@ -262,7 +307,7 @@ Todos os sistemas se comunicam via `EventBus`. Eventos principais:
 
 ## Status Atual do Projeto
 
-**~95% completo.** Todas as cenas, sistemas e dados estão implementados. O jogo está em produção em `meanfall.pro`.
+**~95% completo.** Modo código (Cripta do Interpretador) adicionado na v0.10.0. Todas as cenas, sistemas e dados estão implementados. O jogo está em produção em `meanfall.pro`.
 
 **Áreas de trabalho contínuo:**
 - Adição de novas questões (especialmente dificuldade hard em todas as áreas)

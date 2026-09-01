@@ -26,6 +26,29 @@ Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step
 | Planícies da Probabilidade | Probabilidade básica e condicional | Fogo | 8 |
 | Montanhas das Distribuições | Distribuição normal, z-scores | Água | 12 |
 | Masmorra da Inferência | Testes de hipótese, p-valores | Trevas | 15 |
+| Cripta do Interpretador | **Python e ciência de dados** (código executável) | vários | 18 |
+
+---
+
+## Modo Código — Cripta do Interpretador
+
+Na última área do jogo o combate muda de natureza: as criaturas não oferecem alternativas,
+elas **exigem código**. Um editor abre por cima da tela, você escreve uma função Python e
+ela é **executada de verdade** no navegador (CPython via Pyodide) contra casos de teste.
+
+- **38 desafios em 6 trilhas** — fundamentos de Python, estruturas e algoritmos estilo LeetCode
+  (two sum, Kadane, janela deslizante, anagramas, top-K, merge de intervalos), estatística
+  implementada na mão (variância amostral, z-score, IQR, Pearson), NumPy (eixos, máscaras,
+  broadcasting, one-hot), Pandas (groupby, merge, imputação, agregação nomeada) e métricas de
+  ML (acurácia, F1, RMSE, matriz de confusão, vazamento de dados).
+- **141 casos de teste**, parte deles **ocultos** — rodam só no envio, então não dá para
+  acertar por tentativa e erro contra os exemplos.
+- **Acerto parcial vira dano parcial**: passar 2 de 4 testes arranha o monstro e amortece o
+  contra-ataque. Errar tudo revela a solução de referência no próprio editor.
+- **Nada trava o jogo**: o interpretador roda num Web Worker, então um laço infinito é
+  interrompido em 10 segundos. Sem internet, a criatura recorre à questão teórica do elemento.
+- O download do Python só acontece quando você entra na Cripta — quem joga só a parte de
+  estatística não paga nada por isso.
 
 ---
 
@@ -95,8 +118,11 @@ Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você caus
 └── js/
     ├── main.js             Ponto de entrada do Phaser
     ├── constants.js        Configurações globais, XP table, matrix elemental
+    ├── py/
+    │   └── pyodideWorker.js  Interpretador Python + harness de testes (Web Worker)
     ├── data/
     │   ├── questions.js    207 questões em 6 tópicos e 3 dificuldades
+    │   ├── pyChallenges.js 38 desafios de código Python com casos de teste
     │   ├── monsters.js     30 monstros com stats, elemento e comportamento
     │   ├── items.js        48 itens (equipamentos e consumíveis)
     │   ├── maps.js         6 mapas tile-based

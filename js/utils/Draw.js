@@ -543,6 +543,20 @@ export function generateTextures(scene) {
     drawFireSprite  (g, 32, 34, 'sprite_guardian_chance', 0xff5522, 'bird');
     drawShadowSprite(g, 34, 40, 'sprite_guardian_null',   0x2a1144, 'lich');
 
+    // Cripta do Interpretador — criaturas dos desafios de código
+    drawAirSprite   (g, 24, 24, 'sprite_syntax_larva',        0x9fd8b0, 'small');
+    drawAirSprite   (g, 26, 30, 'sprite_loop_specter',        0xd8f0e4, 'tall');
+    drawShadowSprite(g, 28, 32, 'sprite_hashmap_hydra',       0x5a2f8f, 'wraith');
+    drawShadowSprite(g, 30, 36, 'sprite_pointer_wraith',      0x2a0a4a, 'lich');
+    drawLightSprite (g, 28, 30, 'sprite_sigma_daemon',        0x8fe6f2, 'small');
+    drawLightSprite (g, 30, 34, 'sprite_variance_revenant',   0x4f9ac8, 'crystal');
+    drawWaterSprite (g, 32, 32, 'sprite_numpy_golem',         0x2f7fe0, 'beast');
+    drawWaterSprite (g, 34, 32, 'sprite_broadcast_leviathan', 0x0e3f7a, 'beast');
+    drawWaterSprite (g, 32, 28, 'sprite_pandas_serpent',      0x9c7a3a, 'wave');
+    drawEarthSprite (g, 32, 36, 'sprite_groupby_treant',      0x357030, 'tree');
+    drawFireSprite  (g, 30, 32, 'sprite_metric_phoenix',      0xff7733, 'bird');
+    drawShadowSprite(g, 44, 48, 'sprite_boss_codex',          0x1e4a34, 'lich');
+
     // ── Boss sprites (um por área) ───────────────────────────────────────────
     drawAirSprite   (g, 36, 40, 'sprite_boss_village',   0xddeeff, 'tall');
     drawEarthSprite (g, 38, 42, 'sprite_boss_meadows',   0x886633, 'block');
@@ -1302,6 +1316,19 @@ function drawNPCSprites(g) {
     px(g, 0xffffff, 11, 26,  2,  2);  // center rune
     px(g, 0xdd99ff, 11, 27,  2,  1);
     g.generateTexture('sprite_npc_oracle', 24, 32);
+
+    // ── ARQUIVISTA — manto verde-terminal, tomo aberto com código brilhando
+    g.clear();
+    humanBase(g, 0xd9a06e, 0x1c1a26, 0x1d6b4a, 0x0e3a28, 0x66ffaa);
+    px(g, 0x0a1410,  6, 15, 12,  7);  // tomo aberto no colo
+    px(g, 0x123322,  7, 16, 10,  5);
+    px(g, 0x66ffaa,  8, 17,  4,  1);  // linhas de código
+    px(g, 0x66ffaa, 13, 17,  3,  1);
+    px(g, 0x44dd88,  8, 19,  6,  1);
+    px(g, 0x66ffaa,  8, 20,  2,  1);
+    px(g, 0x2a2438,  6,  2, 12,  2);  // capuz baixado sobre o cabelo
+    px(g, 0x9effc6, 11,  8,  2,  1);  // reflexo esverdeado no rosto
+    g.generateTexture('sprite_npc_archivist', 24, 32);
 
     // ── Legacy fallback textures (used when npcId has no dedicated sprite)
     g.clear();

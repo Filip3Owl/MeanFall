@@ -39,6 +39,12 @@ export const BOUNTY_POOLS = {
         { id: 'bd3', type: 'kill',         monsterId: 'shadow_specter',   count: 2, label: 'Espectros Apagados',   desc: 'Derrote 2 Espectros das Sombras.',             reward: { xp: 620, gold: 310 } },
         { id: 'bd4', type: 'kill',         monsterId: 'alpha_vampire',    count: 1, label: 'O Vampiro Alfa',       desc: 'Derrote o Vampiro Alfa do Erro Tipo I.',       reward: { xp: 700, gold: 350 } },
     ],
+    codex: [
+        { id: 'bcx1', type: 'kill_area',    objectiveArea: 'codex',        count: 3, label: 'Sessão de Depuração',  desc: 'Derrote 3 criaturas na Cripta do Interpretador.', reward: { xp: 1400, gold: 700 } },
+        { id: 'bcx2', type: 'kill',         monsterId: 'pandas_serpent',   count: 2, label: 'Índice Reiniciado',    desc: 'Derrote 2 Serpentes de Pandas.',                 reward: { xp: 1500, gold: 750 } },
+        { id: 'bcx3', type: 'kill',         monsterId: 'numpy_golem',      count: 2, label: 'Eixo Correto',         desc: 'Derrote 2 Golems de NumPy.',                     reward: { xp: 1500, gold: 750 } },
+        { id: 'bcx4', type: 'kill',         monsterId: 'hashmap_hydra',    count: 2, label: 'Colisão de Chaves',    desc: 'Derrote 2 Hidras de Hashmap.',                   reward: { xp: 1550, gold: 780 } },
+    ],
 };
 
 export const DAILY_BOUNTY_COUNT = 3;
