@@ -2,110 +2,112 @@
 
 ![MeanFall Banner](icon/banner.svg)
 
-> **RPG educacional de estatística — jogue em [meanfall.pro](https://www.meanfall.pro)**
+> **An educational statistics RPG. Play it at [meanfall.pro](https://www.meanfall.pro)**
 
-Um RPG top-down que ensina estatística através de exploração tile-based, combate por turnos e um sistema elemental completo. O jogador responde questões de estatística para causar dano, coleta loot elemental, completa missões e progride por seis regiões temáticas — cada uma ligada a um tópico diferente de estatística.
+A top-down RPG that teaches statistics through tile-based exploration, turn-based combat and a complete elemental system. The player answers statistics questions to deal damage, collects elemental loot, completes quests and progresses through six themed regions, each tied to a different statistics topic.
 
-Feito com JavaScript vanilla e Phaser 3. Single-page application, sem build step, sem bundler, sem dependências além do CDN do Phaser.
+Built with vanilla JavaScript and Phaser 3. A single-page application with no build step, no bundler and no dependencies other than the Phaser CDN.
+
+> The in-game content (questions, dialogue and lore) is in Brazilian Portuguese.
 
 ---
 
-## 🎮 Jogar Agora
+## 🎮 Play Now
 
 **[www.meanfall.pro](https://www.meanfall.pro)**
 
 ---
 
-## Regiões do Mundo
+## World Regions
 
-| Região | Tópico | Elemento | Nível Sugerido |
+| Region | Topic | Element | Suggested Level |
 |---|---|---|---|
-| Vila dos Dados | Tipos de dados (categórico, ordinal, contínuo) | Normal | 1 |
-| Pradarias das Medidas | Média, mediana, moda | Terra | 3 |
-| Floresta da Dispersão | Variância, desvio padrão, IQR | Gelo | 5 |
-| Planícies da Probabilidade | Probabilidade básica e condicional | Fogo | 8 |
-| Montanhas das Distribuições | Distribuição normal, z-scores | Água | 12 |
-| Masmorra da Inferência | Testes de hipótese, p-valores | Trevas | 15 |
-| Cripta do Interpretador | **Python e ciência de dados** (código executável) | vários | 18 |
+| Data Village (Vila dos Dados) | Data types (categorical, ordinal, continuous) | Normal | 1 |
+| Measures Meadows (Pradarias das Medidas) | Mean, median, mode | Earth | 3 |
+| Dispersion Forest (Floresta da Dispersão) | Variance, standard deviation, IQR | Ice | 5 |
+| Probability Plains (Planícies da Probabilidade) | Basic and conditional probability | Fire | 8 |
+| Distribution Mountains (Montanhas das Distribuições) | Normal distribution, z-scores | Water | 12 |
+| Inference Dungeon (Masmorra da Inferência) | Hypothesis testing, p-values | Darkness | 15 |
+| Interpreter's Crypt (Cripta do Interpretador) | **Python and data science** (executable code) | several | 18 |
 
 ---
 
-## Modo Código — Cripta do Interpretador
+## Code Mode: The Interpreter's Crypt
 
-Na última área do jogo o combate muda de natureza: as criaturas não oferecem alternativas,
-elas **exigem código**. Um editor abre por cima da tela, você escreve uma função Python e
-ela é **executada de verdade** no navegador (CPython via Pyodide) contra casos de teste.
+In the last area of the game, combat changes its nature: creatures no longer offer multiple choices,
+they **demand code**. An editor opens over the screen, you write a Python function and it is
+**actually executed** in the browser (CPython via Pyodide) against test cases.
 
-- **38 desafios em 6 trilhas** — fundamentos de Python, estruturas e algoritmos estilo LeetCode
-  (two sum, Kadane, janela deslizante, anagramas, top-K, merge de intervalos), estatística
-  implementada na mão (variância amostral, z-score, IQR, Pearson), NumPy (eixos, máscaras,
-  broadcasting, one-hot), Pandas (groupby, merge, imputação, agregação nomeada) e métricas de
-  ML (acurácia, F1, RMSE, matriz de confusão, vazamento de dados).
-- **141 casos de teste**, parte deles **ocultos** — rodam só no envio, então não dá para
-  acertar por tentativa e erro contra os exemplos.
-- **Acerto parcial vira dano parcial**: passar 2 de 4 testes arranha o monstro e amortece o
-  contra-ataque. Errar tudo revela a solução de referência no próprio editor.
-- **Nada trava o jogo**: o interpretador roda num Web Worker, então um laço infinito é
-  interrompido em 10 segundos. Sem internet, a criatura recorre à questão teórica do elemento.
-- O download do Python só acontece quando você entra na Cripta — quem joga só a parte de
-  estatística não paga nada por isso.
-
----
-
-## Funcionalidades
-
-- **207 questões de estatística** ambientadas no mundo do RPG (poções, monstros, loot, alquimia), balanceadas em fácil, médio e difícil.
-- **30 monstros únicos** com variantes **Elite** (15% de chance de spawn, 2× HP e 3× ouro, aura visual única).
-- **Três tipos de questão** — múltipla escolha, verdadeiro/falso e resposta numérica com tolerância decimal.
-- **Combate por turnos tático** onde o dano escala com seus atributos (INT, STR), streak bonus de acertos e matchups elementais.
-- **Fever Mode**: acertar 5 questões seguidas entra em Fever Mode — +40% de dano e música intensificada.
-- **Efeitos de Status Elementais**: cada elemento aplica um debuff único ao errar (queimadura, congelamento, maldição, etc.).
-- **Aprendizado Adaptativo** — o motor de perguntas prioriza tópicos onde o jogador tem menor taxa de acerto (60% de viés para erros).
-- **Sistema de RPG Completo**:
-    - **Inventário e Equipamentos**: 7 slots (cabeça, peito, pernas, pés, mãos, anel, amuleto) com 48 itens.
-    - **Árvore de Habilidades**: 13 habilidades passivas que melhoram eficiência em combate e bônus de ouro/XP.
-    - **Missões (Quests)**: 7 missões principais com rastreamento no diário (`Q`).
-    - **Bounties Diárias**: objetivos rotativos por área que renovam a cada dia.
-    - **Codex e Biblioteca**: 18 tomos in-world que concedem bônus permanentes e expandem o lore.
-    - **Economia**: 3 mercadores com catálogos por área.
-- **Mimics e Inferência**: na Dungeon, baús podem ser Mimics — ative o teste de hipótese (p-valor) antes de abrir.
-- **Utilitários In-Game**: Calculadora e Bloco de Notas arrastáveis (`N`) que persistem entre sessões.
-- **Exploração e Mundo**: mapa completamente visível, minimapa em tempo real, interiores de casas com música própria.
-- **Tecnologia**: salvamento automático em LocalStorage (3 slots) e **Texturas Procedurais** — todos os sprites, tiles e efeitos são gerados via código em runtime, resultando em carregamento instantâneo sem assets externos.
+- **38 challenges across 6 tracks:** Python fundamentals, LeetCode-style data structures and
+  algorithms (two sum, Kadane, sliding window, anagrams, top-K, merge intervals), statistics
+  implemented by hand (sample variance, z-score, IQR, Pearson), NumPy (axes, masks,
+  broadcasting, one-hot), Pandas (groupby, merge, imputation, named aggregation) and ML
+  metrics (accuracy, F1, RMSE, confusion matrix, data leakage).
+- **141 test cases**, some of them **hidden**: they only run on submission, so you cannot
+  pass by trial and error against the examples.
+- **Partial success means partial damage:** passing 2 of 4 tests scratches the monster and softens
+  its counterattack. Failing everything reveals the reference solution right in the editor.
+- **Nothing freezes the game:** the interpreter runs in a Web Worker, so an infinite loop is
+  interrupted after 10 seconds. Without internet, the creature falls back to the element's theory question.
+- Python is only downloaded when you enter the Crypt, so players who only play the
+  statistics part pay nothing for it.
 
 ---
 
-## Combate e Aprendizado
+## Features
 
-Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você causa não depende apenas da sua espada, mas da sua precisão estatística:
-
-- **Bônus de Streak**: Acertar sequências de perguntas aumenta exponencialmente o dano base.
-- **Matchup Elemental**: Use o elemento certo contra o monstro (ex: Fogo contra Terra) para um multiplicador de 1.5×.
-- **Dicas de Foco**: Gastar pontos de **Foco** permite visualizar uma dica teórica para a questão.
-- **Feedback Detalhado**: Errar uma pergunta mostra uma explicação contextualizada no lore do jogo (ex: por que o peso de um dragão é um dado contínuo e não discreto).
-
----
-
-## Interface de Combate
-
-- Painel do monstro com sprite procedural, aura elemental, barra de HP dinâmica e badges de elite.
-- Painel do jogador com monitoramento de HP, Foco e progresso de XP.
-- Caixa de diálogo estilo JRPG com **typewriter effect**, retrato do NPC, paginação automática de textos longos e suporte a **branching choices** (ramificações de diálogo).
-- Ferramentas de apoio integradas (Calculadora/Notas) para resolução de problemas complexos.
-
----
-
-## Stack Tecnológica
-
-- **Phaser 3.60.0** (Engine de jogo via CDN)
-- **JavaScript ES Modules** (Arquitetura moderna sem necessidade de build/npm)
-- **HTML5 Canvas** (Viewport e Minimapa)
-- **CSS3** (Interface UI com variáveis dinâmicas)
-- **LocalStorage** (Persistência de saves e notas)
+- **207 statistics questions** set in the RPG world (potions, monsters, loot, alchemy), balanced across easy, medium and hard.
+- **30 unique monsters** with **Elite** variants (15% spawn chance, 2× HP and 3× gold, unique visual aura).
+- **Three question types:** multiple choice, true/false and numeric answers with decimal tolerance.
+- **Tactical turn-based combat** where damage scales with your attributes (INT, STR), a streak bonus for correct answers and elemental matchups.
+- **Fever Mode:** answering 5 questions in a row triggers Fever Mode, with +40% damage and intensified music.
+- **Elemental Status Effects:** each element applies a unique debuff when you answer wrong (burn, freeze, curse, etc.).
+- **Adaptive Learning:** the question engine prioritizes topics where the player has the lowest accuracy (60% bias toward mistakes).
+- **Complete RPG System:**
+    - **Inventory and Equipment:** 7 slots (head, chest, legs, feet, hands, ring, amulet) with 48 items.
+    - **Skill Tree:** 13 passive skills that improve combat efficiency and gold/XP bonuses.
+    - **Quests:** 7 main quests tracked in the journal (`Q`).
+    - **Daily Bounties:** rotating objectives per area that refresh every day.
+    - **Codex and Library:** 18 in-world tomes that grant permanent bonuses and expand the lore.
+    - **Economy:** 3 merchants with area-specific catalogs.
+- **Mimics and Inference:** in the Dungeon, chests may be Mimics, so run a hypothesis test (p-value) before opening them.
+- **In-Game Utilities:** a draggable Calculator and Notepad (`N`) that persist across sessions.
+- **Exploration and World:** a fully visible map, a real-time minimap and house interiors with their own music.
+- **Technology:** automatic saving to LocalStorage (3 slots) and **Procedural Textures**. Every sprite, tile and effect is generated in code at runtime, resulting in instant loading with no external assets.
 
 ---
 
-## Estrutura do Projeto
+## Combat and Learning
+
+In **MeanFall**, knowledge is your most powerful weapon. The damage you deal depends not only on your sword, but on your statistical accuracy:
+
+- **Streak Bonus:** answering questions correctly in a row increases base damage exponentially.
+- **Elemental Matchup:** use the right element against the monster (e.g. Fire against Earth) for a 1.5× multiplier.
+- **Focus Hints:** spending **Focus** points reveals a theoretical hint for the question.
+- **Detailed Feedback:** a wrong answer shows an explanation set in the game's lore (e.g. why a dragon's weight is continuous data and not discrete).
+
+---
+
+## Combat Interface
+
+- Monster panel with a procedural sprite, elemental aura, dynamic HP bar and elite badges.
+- Player panel tracking HP, Focus and XP progress.
+- JRPG-style dialog box with a **typewriter effect**, NPC portrait, automatic pagination of long texts and support for **branching choices**.
+- Built-in support tools (Calculator/Notes) for solving complex problems.
+
+---
+
+## Tech Stack
+
+- **Phaser 3.60.0** (game engine via CDN)
+- **JavaScript ES Modules** (modern architecture with no build or npm required)
+- **HTML5 Canvas** (viewport and minimap)
+- **CSS3** (UI with dynamic variables)
+- **LocalStorage** (persistence for saves and notes)
+
+---
+
+## Project Structure
 
 ```
 .
@@ -114,123 +116,123 @@ Em **MeanFall**, o conhecimento é sua arma mais poderosa. O dano que você caus
 │   └── style.css
 ├── icon/
 │   ├── meanfallfav.png     Favicon
-│   └── banner.svg          Arte do banner (SVG)
+│   └── banner.svg          Banner art (SVG)
 └── js/
-    ├── main.js             Ponto de entrada do Phaser
-    ├── constants.js        Configurações globais, XP table, matrix elemental
+    ├── main.js             Phaser entry point
+    ├── constants.js        Global settings, XP table, elemental matrix
     ├── py/
-    │   └── pyodideWorker.js  Interpretador Python + harness de testes (Web Worker)
+    │   └── pyodideWorker.js  Python interpreter + test harness (Web Worker)
     ├── data/
-    │   ├── questions.js    207 questões em 6 tópicos e 3 dificuldades
-    │   ├── pyChallenges.js 38 desafios de código Python com casos de teste
-    │   ├── monsters.js     30 monstros com stats, elemento e comportamento
-    │   ├── items.js        48 itens (equipamentos e consumíveis)
-    │   ├── maps.js         6 mapas tile-based
-    │   ├── quests.js       7 missões principais
-    │   ├── skills.js       13 habilidades passivas
-    │   ├── books.js        18 tomos da biblioteca in-world
-    │   ├── shops.js        3 mercadores com estoques por área
-    │   ├── bounties.js     Pools de bounties diárias por área
-    │   ├── lore.js         Lore expandido do mundo
-    │   └── appearance.js   Aparências para criação de personagem
+    │   ├── questions.js    207 questions across 6 topics and 3 difficulty levels
+    │   ├── pyChallenges.js 38 Python coding challenges with test cases
+    │   ├── monsters.js     30 monsters with stats, element and behavior
+    │   ├── items.js        48 items (equipment and consumables)
+    │   ├── maps.js         6 tile-based maps
+    │   ├── quests.js       7 main quests
+    │   ├── skills.js       13 passive skills
+    │   ├── books.js        18 in-world library tomes
+    │   ├── shops.js        3 merchants with area-specific stock
+    │   ├── bounties.js     Daily bounty pools per area
+    │   ├── lore.js         Expanded world lore
+    │   └── appearance.js   Appearances for character creation
     ├── systems/
-    │   ├── CombatSystem.js       Dano, itens, drops
-    │   ├── QuestionEngine.js     Seleção adaptativa de questões
-    │   ├── QuestionGenerator.js  Geração procedural de questões numéricas
-    │   ├── XPSystem.js           Level up, atributos, mastery
+    │   ├── CombatSystem.js       Damage, items, drops
+    │   ├── QuestionEngine.js     Adaptive question selection
+    │   ├── QuestionGenerator.js  Procedural generation of numeric questions
+    │   ├── XPSystem.js           Level up, attributes, mastery
     │   ├── SaveSystem.js         Save/load (3 slots + autosave)
-    │   ├── MapManager.js         Renderização de mapa e minimapa
-    │   ├── QuestSystem.js        Rastreamento de missões
-    │   ├── BountySystem.js       Bounties diárias rotativas
-    │   ├── ShopSystem.js         Economia e mercadores
-    │   ├── SkillSystem.js        Árvore de habilidades
-    │   ├── BookSystem.js         Biblioteca e bônus permanentes
-    │   ├── InferenceSystem.js    Testes de hipótese para Mimics
-    │   ├── StatusEffectSystem.js Efeitos elementais em combate
-    │   └── TutorialSystem.js     Tutorial guiado
+    │   ├── MapManager.js         Map and minimap rendering
+    │   ├── QuestSystem.js        Quest tracking
+    │   ├── BountySystem.js       Rotating daily bounties
+    │   ├── ShopSystem.js         Economy and merchants
+    │   ├── SkillSystem.js        Skill tree
+    │   ├── BookSystem.js         Library and permanent bonuses
+    │   ├── InferenceSystem.js    Hypothesis tests for Mimics
+    │   ├── StatusEffectSystem.js Elemental effects in combat
+    │   └── TutorialSystem.js     Guided tutorial
     ├── scenes/
-    │   ├── BootScene.js          Gera texturas procedurais
-    │   ├── IntroScene.js         Intro com lore
-    │   ├── MainMenuScene.js      Menu e slots de save
-    │   ├── CharacterCreationScene.js  Criação de personagem
-    │   ├── WorldScene.js         Exploração, NPCs, portais
-    │   ├── UIScene.js            HUD DOM (HP, Focus, XP, chat)
-    │   ├── CombatScene.js        Combate por turnos + questões
-    │   ├── GameOverScene.js      Tela de morte com estatísticas
-    │   ├── InventoryScene.js     Inventário e equipamentos
-    │   ├── CharacterScene.js     Atributos e gasto de pontos
-    │   ├── QuestScene.js         Diário de missões
-    │   ├── SkillScene.js         Árvore de habilidades
-    │   ├── ShopScene.js          Loja de mercadores
-    │   ├── BookScene.js          Leitura de tomos
-    │   ├── CompendiumScene.js    Codex elemental
-    │   ├── InferenceScene.js     Mini-jogo de teste de hipótese
-    │   ├── DialogScene.js        Diálogos com NPCs — typewriter effect, retrato, paginação, branching choices
-    │   └── ScratchpadScene.js    Calculadora e notas (arrastáveis)
+    │   ├── BootScene.js          Generates procedural textures
+    │   ├── IntroScene.js         Intro with lore
+    │   ├── MainMenuScene.js      Menu and save slots
+    │   ├── CharacterCreationScene.js  Character creation
+    │   ├── WorldScene.js         Exploration, NPCs, portals
+    │   ├── UIScene.js            DOM HUD (HP, Focus, XP, chat)
+    │   ├── CombatScene.js        Turn-based combat + questions
+    │   ├── GameOverScene.js      Death screen with statistics
+    │   ├── InventoryScene.js     Inventory and equipment
+    │   ├── CharacterScene.js     Attributes and point spending
+    │   ├── QuestScene.js         Quest journal
+    │   ├── SkillScene.js         Skill tree
+    │   ├── ShopScene.js          Merchant shop
+    │   ├── BookScene.js          Reading tomes
+    │   ├── CompendiumScene.js    Elemental codex
+    │   ├── InferenceScene.js     Hypothesis testing mini-game
+    │   ├── DialogScene.js        NPC dialogue: typewriter effect, portrait, pagination, branching choices
+    │   └── ScratchpadScene.js    Calculator and notes (draggable)
     ├── entities/
-    │   ├── Player.js       Sprite, movimento, vitals
-    │   ├── Monster.js      Sprite, IA de patrulha/chase, Elite
-    │   └── NPC.js          Sprite, diálogos, interação
+    │   ├── Player.js       Sprite, movement, vitals
+    │   ├── Monster.js      Sprite, patrol/chase AI, Elite
+    │   └── NPC.js          Sprite, dialogue, interaction
     └── utils/
-        ├── Draw.js         Geração procedural de todas as texturas
-        ├── EventBus.js     Pub/sub de eventos entre sistemas
-        ├── MusicSystem.js  Música procedural via Web Audio API
-        ├── SoundSystem.js  Efeitos sonoros procedurais
-        └── RichText.js     Texto colorido inline em combate
+        ├── Draw.js         Procedural generation of every texture
+        ├── EventBus.js     Pub/sub events between systems
+        ├── MusicSystem.js  Procedural music via the Web Audio API
+        ├── SoundSystem.js  Procedural sound effects
+        └── RichText.js     Inline colored text in combat
 ```
 
 ---
 
-## Rodar Localmente
+## Running Locally
 
-O projeto usa ES modules e precisa ser servido via HTTP.
+The project uses ES modules and must be served over HTTP.
 
 ```bash
-# Com Python
+# With Python
 python3 -m http.server 8080
 
-# Com Node (servidor estático qualquer)
+# With Node (any static server)
 npx serve .
 ```
 
 ---
 
-## Controles
+## Controls
 
-| Tecla | Ação |
+| Key | Action |
 |---|---|
-| **WASD / Setas** | Mover jogador |
-| **Espaço** | Interagir / Conversar |
-| **I** | Abrir Inventário |
-| **C** | Atributos do Personagem |
-| **Q** | Diário de Missões |
-| **B** | Biblioteca de Livros |
-| **K** | Árvore de Habilidades |
-| **L** | Compêndio Elemental |
-| **N** | Calculadora + Notas (Combate) |
-| **F5** | Salvar Jogo |
-| **ESC** | Fechar Modais / Menu |
+| **WASD / Arrows** | Move the player |
+| **Space** | Interact / Talk |
+| **I** | Open Inventory |
+| **C** | Character Attributes |
+| **Q** | Quest Journal |
+| **B** | Book Library |
+| **K** | Skill Tree |
+| **L** | Elemental Compendium |
+| **N** | Calculator + Notes (Combat) |
+| **F5** | Save Game |
+| **ESC** | Close Modals / Menu |
 
 ---
 
-## Fórmulas de Dano
+## Damage Formulas
 
 ```
 Base              = floor(10 + level × 1.5 + INT × 0.5 + STR × 0.3 + min(streak × 2, 20))
-Elemento          = ELEMENT_MATRIX[arma][monstro]   (0.75 / 1.0 / 1.5)
-Crítico           = min(0.05 + AGI × 0.01, 0.30) → ×1.6 de dano
-Dano do jogador   = max(1, floor(Base × Elemento × Crítico) − defesa do monstro)
+Element           = ELEMENT_MATRIX[weapon][monster]   (0.75 / 1.0 / 1.5)
+Critical          = min(0.05 + AGI × 0.01, 0.30) → ×1.6 damage
+Player damage     = max(1, floor(Base × Element × Critical) − monster defense)
 ```
 
 ---
 
-## Créditos
+## Credits
 
-Desenvolvido por **Filipe Rangel**.
-Currículo de estatística e game design originais.
+Developed by **Filipe Rangel**.
+Original statistics curriculum and game design.
 
 ---
 
-## Licença
+## License
 
 MIT.
